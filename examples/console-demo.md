@@ -2,7 +2,6 @@
 exclude_showcase: true
 layout: console
 body_class: nds-full-width
-layout_class: nds-toEdge
 title: Admin Console Demo
 hero_title: Admin Console
 hero_description: A management console showcasing statistics, transaction records, team directory, and system notifications.
@@ -243,19 +242,27 @@ hideFeedback: true
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-export nds-btn-group">
-                            <button type="button" class="nds-btn nds-secondary-outline nds-md"
-                                    data-export="csv" data-export-target="#consoleTransactions">
-                                <span class="nds-label">CSV</span>
+                        <div class="nds-dropmenu">
+                            <button type="button" class="nds-btn nds-secondary-outline nds-md nds-dropmenu-trigger">
+                                <i class="hgi hgi-stroke hgi-download-04" aria-hidden="true"></i>
+                                <span class="nds-label">Export</span>
                             </button>
-                            <button type="button" class="nds-btn nds-secondary-outline nds-md"
-                                    data-export="xls" data-export-target="#consoleTransactions">
-                                <span class="nds-label">Excel</span>
-                            </button>
-                            <button type="button" class="nds-btn nds-secondary-outline nds-md"
-                                    data-export="pdf" data-export-target="#consoleTransactions">
-                                <span class="nds-label">PDF</span>
-                            </button>
+                            <div class="nds-dropmenu-menu" hidden>
+                                <div class="nds-dropmenu-scroll">
+                                    <button type="button" class="nds-btn nds-subtle nds-dropmenu-item"
+                                            data-export="csv" data-export-target="#consoleTransactions">
+                                        <span class="nds-label">CSV</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-dropmenu-item"
+                                            data-export="xls" data-export-target="#consoleTransactions">
+                                        <span class="nds-label">Excel</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-dropmenu-item"
+                                            data-export="pdf" data-export-target="#consoleTransactions">
+                                        <span class="nds-label">PDF</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -324,144 +331,146 @@ hideFeedback: true
                     </div>
                 </div>
             </div>
-            <div id="console_transactions_content">
-                <table id="consoleTransactions" class="nds-table nds-compact nds-sortable" data-export-name="transactions">
-                    <thead>
-                        <tr>
-                            <th>
-                                <div class="nds-form-container nds-check-container">
-                                    <div class="nds-form-control">
-                                        <input type="checkbox" class="nds-check" aria-label="Select all transactions">
-                                    </div>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Reference</span>
-                                    <div class="nds-col-actions">
-                                        <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by reference"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Service</span>
-                                    <div class="nds-col-actions">
-                                        <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by service"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Category</span>
-                                    <div class="nds-col-actions">
-                                        <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by category"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <th data-export-label="Amount (SAR)">
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Amount</span>
-                                    <div class="nds-col-actions">
-                                        <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by amount"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Date</span>
-                                    <div class="nds-col-actions">
-                                        <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by date"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Status</span>
-                                    <div class="nds-col-actions">
-                                        <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by status"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
-                                    </div>
-                                </div>
-                            </th>
-                            <th class="actions-column" data-export-skip>
-                                <div class="nds-col-header">
-                                    <span class="nds-label">Action</span>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionsTableBody" class="nds-paged-content" data-filter-items="tr" style="--per-page:10;">
-                        {% for txn in site.data.content.transactions %}
-                        <tr class="nds-page-item">
-                            <td>
-                                <div class="nds-form-container nds-check-container">
-                                    <div class="nds-form-control">
-                                        <input type="checkbox" class="nds-check" aria-label="Select transaction {{ txn.id }}">
-                                    </div>
-                                </div>
-                            </td>
-                            <td>{{ txn.id }}</td>
-                            <td>{{ txn.name }}</td>
-                            <td>
-                                <span class="nds-tag nds-gray nds-sm">
-                                    <span class="nds-label" data-filter="category">{{ txn.category }}</span>
-                                </span>
-                            </td>
-                            <td data-sort-value="{{ txn.amount }}">
-                                {% if txn.amount == 0 %}
-                                <span class="nds-number-format" data-currency="{{ txn.currency }}" data-free data-filter="amount" data-filter-value="0">Free</span>
-                                {% else %}
-                                <span class="nds-number-format" data-currency="{{ txn.currency }}" data-filter="amount" data-filter-value="{{ txn.amount }}">{{ txn.amount }}</span>
-                                {% endif %}
-                            </td>
-                            <td>{{ txn.date }}</td>
-                            <td data-sort-value="{% if txn.status == 'completed' %}1{% elsif txn.status == 'pending' %}2{% elsif txn.status == 'failed' %}3{% else %}9{% endif %}">
-                                {% if txn.status == "completed" %}
-                                <span class="nds-tag nds-sm" data-status="success">
-                                    <span class="nds-label" data-filter="status" data-filter-value="completed">Completed</span>
-                                </span>
-                                {% elsif txn.status == "pending" %}
-                                <span class="nds-tag nds-sm" data-status="warning">
-                                    <span class="nds-label" data-filter="status" data-filter-value="pending">Pending</span>
-                                </span>
-                                {% elsif txn.status == "failed" %}
-                                <span class="nds-tag nds-sm" data-status="error">
-                                    <span class="nds-label" data-filter="status" data-filter-value="failed">Failed</span>
-                                </span>
-                                {% endif %}
-                            </td>
-                            <td class="actions-column">
-                                <div class="nds-dropmenu" data-portal>
-                                    <button class="nds-btn nds-subtle nds-sm nds-icon-only nds-dropmenu-trigger" aria-label="Row actions">
-                                        <i class="hgi hgi-stroke hgi-edit-02"></i>
-                                    </button>
-                                    <div class="nds-dropmenu-menu" hidden>
-                                        <div class="nds-dropmenu-scroll">
-                                            <button class="nds-btn nds-subtle nds-dropmenu-item">
-                                                <i class="nds-icon nds-hgi-eye" aria-hidden="true"></i>
-                                                <span class="nds-label">View details</span>
-                                            </button>
-                                            <button class="nds-btn nds-subtle nds-dropmenu-item">
-                                                <i class="hgi hgi-stroke hgi-download-04"></i>
-                                                <span class="nds-label">Download receipt</span>
-                                            </button>
-                                            <button class="nds-btn nds-subtle nds-dropmenu-item">
-                                                <i class="nds-icon nds-hgi-copy-01"></i>
-                                                <span class="nds-label">Copy reference</span>
-                                            </button>
-                                            <hr class="nds-divider">
-                                            <button class="nds-btn nds-subtle nds-dropmenu-item nds-destructive">
-                                                <i class="hgi hgi-stroke hgi-delete-02"></i>
-                                                <span class="nds-label">Delete</span>
-                                            </button>
+            <div class="nds-block">
+                <div id="console_transactions_content">
+                    <table id="consoleTransactions" class="nds-table nds-compact nds-sortable" data-export-name="transactions">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="nds-form-container nds-check-container">
+                                        <div class="nds-form-control">
+                                            <input type="checkbox" class="nds-check" aria-label="Select all transactions">
                                         </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                </th>
+                                <th>
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Reference</span>
+                                        <div class="nds-col-actions">
+                                            <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by reference"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Service</span>
+                                        <div class="nds-col-actions">
+                                            <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by service"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Category</span>
+                                        <div class="nds-col-actions">
+                                            <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by category"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th data-export-label="Amount (SAR)">
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Amount</span>
+                                        <div class="nds-col-actions">
+                                            <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by amount"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Date</span>
+                                        <div class="nds-col-actions">
+                                            <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by date"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Status</span>
+                                        <div class="nds-col-actions">
+                                            <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by status"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                        </div>
+                                    </div>
+                                </th>
+                                <th class="actions-column" data-export-skip>
+                                    <div class="nds-col-header">
+                                        <span class="nds-label">Action</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody" class="nds-paged-content" data-filter-items="tr" style="--per-page:10;">
+                            {% for txn in site.data.content.transactions %}
+                            <tr class="nds-page-item">
+                                <td>
+                                    <div class="nds-form-container nds-check-container">
+                                        <div class="nds-form-control">
+                                            <input type="checkbox" class="nds-check" aria-label="Select transaction {{ txn.id }}">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ txn.id }}</td>
+                                <td>{{ txn.name }}</td>
+                                <td>
+                                    <span class="nds-tag nds-gray nds-sm">
+                                        <span class="nds-label" data-filter="category">{{ txn.category }}</span>
+                                    </span>
+                                </td>
+                                <td data-sort-value="{{ txn.amount }}">
+                                    {% if txn.amount == 0 %}
+                                    <span class="nds-number-format" data-currency="{{ txn.currency }}" data-free data-filter="amount" data-filter-value="0">Free</span>
+                                    {% else %}
+                                    <span class="nds-number-format" data-currency="{{ txn.currency }}" data-filter="amount" data-filter-value="{{ txn.amount }}">{{ txn.amount }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ txn.date }}</td>
+                                <td data-sort-value="{% if txn.status == 'completed' %}1{% elsif txn.status == 'pending' %}2{% elsif txn.status == 'failed' %}3{% else %}9{% endif %}">
+                                    {% if txn.status == "completed" %}
+                                    <span class="nds-tag nds-sm" data-status="success">
+                                        <span class="nds-label" data-filter="status" data-filter-value="completed">Completed</span>
+                                    </span>
+                                    {% elsif txn.status == "pending" %}
+                                    <span class="nds-tag nds-sm" data-status="warning">
+                                        <span class="nds-label" data-filter="status" data-filter-value="pending">Pending</span>
+                                    </span>
+                                    {% elsif txn.status == "failed" %}
+                                    <span class="nds-tag nds-sm" data-status="error">
+                                        <span class="nds-label" data-filter="status" data-filter-value="failed">Failed</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="actions-column">
+                                    <div class="nds-dropmenu" data-portal>
+                                        <button class="nds-btn nds-subtle nds-sm nds-icon-only nds-dropmenu-trigger" aria-label="Row actions">
+                                            <i class="hgi hgi-stroke hgi-edit-02"></i>
+                                        </button>
+                                        <div class="nds-dropmenu-menu" hidden>
+                                            <div class="nds-dropmenu-scroll">
+                                                <button class="nds-btn nds-subtle nds-dropmenu-item">
+                                                    <i class="nds-icon nds-hgi-eye" aria-hidden="true"></i>
+                                                    <span class="nds-label">View details</span>
+                                                </button>
+                                                <button class="nds-btn nds-subtle nds-dropmenu-item">
+                                                    <i class="hgi hgi-stroke hgi-download-04"></i>
+                                                    <span class="nds-label">Download receipt</span>
+                                                </button>
+                                                <button class="nds-btn nds-subtle nds-dropmenu-item">
+                                                    <i class="nds-icon nds-hgi-copy-01"></i>
+                                                    <span class="nds-label">Copy reference</span>
+                                                </button>
+                                                <hr class="nds-divider">
+                                                <button class="nds-btn nds-subtle nds-dropmenu-item nds-destructive">
+                                                    <i class="hgi hgi-stroke hgi-delete-02"></i>
+                                                    <span class="nds-label">Delete</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <nav class="nds-pagination" data-auto-pagination="transactionsTableBody" aria-label="Table pagination"></nav>
         </div>
@@ -574,12 +583,12 @@ hideFeedback: true
                                     </span>
                                 </div>
                             </div>
-                            <div class="nds-card-actions">
-                                <a href="mailto:{{ user.email }}" class="nds-btn nds-secondary-outline nds-lg nds-lead-icon">
-                                    <i class="nds-icon nds-hgi-mail-01" aria-hidden="true"></i>
-                                    <span class="nds-label">Contact</span>
-                                </a>
-                            </div>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="mailto:{{ user.email }}" class="nds-btn nds-secondary-outline nds-lg nds-lead-icon">
+                                <i class="nds-icon nds-hgi-mail-01" aria-hidden="true"></i>
+                                <span class="nds-label">Contact</span>
+                            </a>
                         </div>
                     </div>
                     {% endfor %}

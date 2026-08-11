@@ -6,7 +6,7 @@
 {%- assign body_cls = body_cls | strip -%}
 <body{% if body_cls != '' %} class="{{ body_cls }}"{% endif %}{% if page_bg %} style="--bg-img: url('{{ page_bg | relative_url }}'); --bg-opacity-top: {{ page.bg_opacity_top | default: '80%' }}; --bg-opacity-bottom: {{ page.bg_opacity_bottom | default: '80%' }};"{% endif %}>
     <main>
-        <div class="nds-content-layout nds-content-wrapper {{ page.layout_class }}">
+        <div class="nds-content-layout nds-content-wrapper{%- if page.layout_class and page.layout_class != '' %} {{ page.layout_class }}{%- endif %}">
             <div class="nds-main-content">
                 {{ content }}
             </div>
@@ -15,7 +15,7 @@
     <!-- Scripts -->
     <script defer src="{{ 'assets/js/nds-main.min.js' | relative_url }}?ver={{ site.asset_ver }}"></script>
     {%- unless page.exclude_showcase == true %}
-    <script defer src="{{ 'assets/js/nds-showcase.min.js' | relative_url }}?ver={{ site.asset_ver }}"></script>
+    <script defer src="{{ 'docs-assets/js/nds-showcase.min.js' | relative_url }}?ver={{ site.asset_ver }}"></script>
     {%- endunless %}
     {%- if page.custom_js %}
     {%- for js_file in page.custom_js %}

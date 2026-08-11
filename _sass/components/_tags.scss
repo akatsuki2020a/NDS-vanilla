@@ -19,6 +19,7 @@
   --_tag-fs: var(--tag-fs, var(--typo-text-md-FS));
   --_tag-padding-inline: var(--tag-padding-inline, var(--spacing-xl));
   --_tag-dot-size: var(--tag-dot-size, 10px);
+  --_tag-label-max: var(--tag-label-max, 160px);
 
   display: inline-flex;
   align-items: center;
@@ -28,7 +29,10 @@
   font-size: var(--_tag-fs);
   line-height: var(--_tag-height);
   height: var(--_tag-height);
-  min-width: fit-content;
+  // Shrink to the container before the label does, so a long tag ellipsizes
+  // instead of escaping the card or cell it sits in.
+  min-width: 0;
+  max-width: 100%;
   white-space: nowrap;
   border-radius: var(--radius-sm);
   position: relative;
@@ -37,9 +41,17 @@
   color: var(--_text);
   border: 1px solid var(--_border);
 
-  .nds-label{
-    display: flex;
-    align-items: center;
+  // Chip-style truncation, fixed at one line: a tag is nowrap at a fixed
+  // height, so it has no second line for a clamp to use — chips take the
+  // --truncate knob, a tag would only ignore it.
+  .nds-label {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    text-overflow: ellipsis;
+    max-width: var(--_tag-label-max);
   }
 
   // ==============================================

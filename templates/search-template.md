@@ -7,7 +7,6 @@ breadcrumb:
 - ["DGA Templates", "/templates"]
 hero_title: "Search Results"
 hero_description: "Find services matching your query"
-layout_class:
 sidemenu_mode: false
 exclude_showcase: false
 ---
@@ -111,11 +110,11 @@ exclude_showcase: false
                             </span>
                             {% endfor %}
                         </div>
-                        <div class="nds-card-actions">
-                            <a href="{{ item.url }}" class="nds-btn nds-primary">
-                                <span class="nds-label">Action</span>
-                            </a>
-                        </div>
+                    </div>
+                    <div class="nds-card-actions">
+                        <a href="{{ item.url }}" class="nds-btn nds-primary">
+                            <span class="nds-label">Action</span>
+                        </a>
                     </div>
                 </div>
                 {% endfor %}

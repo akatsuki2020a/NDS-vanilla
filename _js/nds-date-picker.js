@@ -1,3 +1,30 @@
+/* NDS.DatePicker — public surface
+ * Rides: nds-dropmenu (positioning, outside-click, portal — the input drives open/close)
+ *      · nds-forms (invalid-value status message under the field; soft)
+ * Methods:
+ *   NDS.DatePicker.init() / .reinit()          attach a calendar to every .nds-date-input
+ *   NDS.DatePicker.create(input, formControl)  build/return one instance — idempotent, null on
+ *                                              bad markup; formControl is optional
+ *   NDS.DatePicker.CalendarConfig              the gregorian + hijri engines
+ *                                              (parseDate / formatDate / conversion)
+ *   NDS.DatePicker.createHijriDate(d, m, y)    build the {day, month, year} hijri shape
+ *   NDS.DatePicker.DatePickerCalendar          the instance prototype (extension use)
+ * Events:
+ *   (none — a pick writes the input and dispatches a native `change`; listen on the input)
+ * Hooks:
+ *   on the .nds-form-container:  data-format (YYYY YY MM M DD D — also picks the calendar
+ *                                and the day/month/year mode) · data-clearable (automatic
+ *                                in range mode)
+ *   on the .nds-date-input:      data-min-date · data-max-date · data-lang
+ *                                data-year-before · data-year-after
+ *   written by the picker:       data-picker-mode (container) · data-converted-date (input)
+ * Gotchas:
+ *   - Range mode is the `dateRange` class on the container; its value reads "start - end".
+ *     Bounds are day-precision and use the picker's own format.
+ *   - Hijri and Gregorian: the picker stamps the OTHER calendar's value in
+ *     data-converted-date on the input.
+ *   - "Today" is Riyadh time (GMT+3), not the visitor's clock.
+ */
 (() => {
     'use strict';
 
@@ -6,9 +33,12 @@
      * Returns a Date object representing Saudi time
      */
     function getSaudiDateObject() {
-        // Get current date/time components in Saudi Arabia timezone
-        var now = new Date();
-        var saudiTimeStr = now.toLocaleString('en-US', {
+        // formatToParts with an explicit hourCycle, not a toLocaleString round-trip:
+        // hour12:false leaves the cycle to the engine, and one that picks h24 renders
+        // 00:00-00:59 as "24:mm" — parsed back, that rolls the date a day forward, so
+        // "today" is wrong for an hour every night. h23 pins it, and reading parts
+        // drops the "MM/DD/YYYY, HH:mm:ss" format assumption along with it.
+        var parts = new Intl.DateTimeFormat('en-US', {
             timeZone: 'Asia/Riyadh',
             year: 'numeric',
             month: '2-digit',
@@ -16,23 +46,13 @@
             hour: '2-digit',
             minute: '2-digit',
             second: '2-digit',
-            hour12: false
-        });
+            hourCycle: 'h23'
+        }).formatToParts(new Date());
 
-        // Parse the string to create a Date object
-        // Format: "MM/DD/YYYY, HH:mm:ss"
-        var parts = saudiTimeStr.split(/, /);
-        var dateParts = parts[0].split('/');
-        var timeParts = parts[1].split(':');
+        var p = {};
+        for (var i = 0; i < parts.length; i++) p[parts[i].type] = parts[i].value;
 
-        return new Date(
-            parseInt(dateParts[2]), // year
-            parseInt(dateParts[0]) - 1, // month (0-indexed)
-            parseInt(dateParts[1]), // day
-            parseInt(timeParts[0]), // hour
-            parseInt(timeParts[1]), // minute
-            parseInt(timeParts[2])  // second
-        );
+        return new Date(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
     }
 
     /**
@@ -61,6 +81,30 @@
             copy._hijriYear = date._hijriYear;
         }
         return copy;
+    }
+
+    // Write the Hijri trio onto a Gregorian Date and hand it back. This stamp is
+    // the file's data contract — formatDate, isSameCalendarDate, isDateInRange and
+    // getDisplayDayNumber all read it — so it lives in one place rather than in
+    // nine hand-written copies a future field would have to be grepped into.
+    function stampHijri(date, hYear, hMonth, hDay) {
+        date._hijriDay = hDay;
+        date._hijriMonth = hMonth;
+        date._hijriYear = hYear;
+        return date;
+    }
+
+    // The text of every cell / option button lives in a .nds-label span — that is
+    // what _date-picker.scss targets inside a cell, and it drifted once when the
+    // year grid set textContent on the button directly and fell out of the rule.
+    // Built imperatively so the value flows through .textContent and never reaches
+    // the HTML parser.
+    function appendCellLabel(btn, text, extraClass) {
+        var label = document.createElement('span');
+        label.className = extraClass ? 'nds-label ' + extraClass : 'nds-label';
+        label.textContent = text;
+        btn.appendChild(label);
+        return btn;
     }
 
     // Accurate "today" reference (from NDS.TimeDate) shared by every picker
@@ -345,7 +389,13 @@
                         // Continue to fallback
                     }
 
-                    // Final fallback to original mathematical conversion
+                    // Final fallback to the mathematical conversion. Deliberately
+                    // divergent from gregorianToHijri, which throws instead of
+                    // approximating: this runs per cell inside generateCalendarDates,
+                    // so throwing would blank the whole 42-cell grid. A day-level
+                    // error on an engine without Intl's islamic calendar is the
+                    // accepted trade — a rendered calendar that may be off by a day
+                    // beats no calendar at all.
                     if (!result) {
                         var jd = this.hijriToJulian(hYear, hMonth, hDay);
                         result = this.julianToGregorian(jd);
@@ -428,8 +478,12 @@
             },
 
             addDaysToHijriDate: function(hijriDate, days) {
-                if (days === 0) return hijriDate;
-                
+                // Always a copy. Callers mutate the result — setHijriDatePart writes a
+                // property straight onto it — and the input can be the module-shared
+                // accurate-today reference, which handing back would corrupt for every
+                // picker on the page.
+                if (days === 0) return createHijriDate(hijriDate.day, hijriDate.month, hijriDate.year);
+
                 var result = createHijriDate(hijriDate.day, hijriDate.month, hijriDate.year);
                 result.day += days;
                 
@@ -478,17 +532,14 @@
                 var year = date.getFullYear();
                 var month = date.getMonth() + 1;
                 var day = date.getDate();
-                
                 if (month < 3) {
                     year--;
                     month += 12;
                 }
-                
                 var a = Math.floor(year / 100);
                 var b = 2 - a + Math.floor(a / 4);
-                
-                return Math.floor(365.25 * (year + 4716)) + 
-                       Math.floor(30.6001 * (month + 1)) + 
+                return Math.floor(365.25 * (year + 4716)) +
+                       Math.floor(30.6001 * (month + 1)) +
                        day + b - 1524.5;
             },
 
@@ -529,9 +580,7 @@
                 var gregorianDate = this.hijriToGregorian(vals.year, vals.month, vals.day);
 
                 // Attach original input as Hijri metadata
-                gregorianDate._hijriDay = vals.day;
-                gregorianDate._hijriMonth = vals.month;
-                gregorianDate._hijriYear = vals.year;
+                stampHijri(gregorianDate, vals.year, vals.month, vals.day);
 
                 return gregorianDate;
             },
@@ -599,8 +648,10 @@
         };
 
         this.state = this.initializeState();
-        this.handlers = {};
         this.isDropdownCreated = false;
+        // Scopes listeners bound to elements the instance does not own (the
+        // consumer's formControl), so destroy() releases them in one abort.
+        this.instanceAbortController = new AbortController();
 
         // Bind events that need dropdown creation
         this.bindInitEvents();
@@ -658,22 +709,23 @@
                 self.dropmenuInstance.toggle();
             };
 
+            var signal = this.instanceAbortController.signal;
+
             // Bind to input click only (focus will trigger click anyway)
-            this.elements.input.addEventListener('click', ensureDropdownAndToggle);
+            this.elements.input.addEventListener('click', ensureDropdownAndToggle, { signal: signal });
 
             // Bind to toggle button if it exists
             if (this.elements.toggleBtn) {
-                this.elements.toggleBtn.addEventListener('click', ensureDropdownAndToggle);
+                this.elements.toggleBtn.addEventListener('click', ensureDropdownAndToggle, { signal: signal });
             }
-
-            this.handlers.ensureDropdownAndToggle = ensureDropdownAndToggle;
 
             // Fires for hand-typed edits AND picker commits (updateInput
             // dispatches 'change'). Attached on the input (target) so the
             // stamp lands before forms' document-level change delegation
             // reads validity.
-            this.handlers.inputChange = function () { self._validateInput(); };
-            this.elements.input.addEventListener('change', this.handlers.inputChange);
+            this.elements.input.addEventListener('change', function () {
+                self._validateInput();
+            }, { signal: signal });
         },
 
         // Adopt NDSDropmenu for the calendar's open/close/escape/outside-click
@@ -702,6 +754,12 @@
             // inner month/year sub-dropmenus' open/close events would otherwise
             // re-init or tear down the calendar every time the user picks a
             // month or year.
+            // Scoped to the instance controller: formControl is consumer-owned and
+            // outlives destroy(), so an un-torn-down listener here would keep `self`
+            // — and its detached dropdown — reachable, and would re-run
+            // initializeCalendar() against detached nodes after a destroy/create cycle.
+            var signal = this.instanceAbortController.signal;
+
             formControl.addEventListener('nds:dropmenu:opened', function (e) {
                 if (e.target !== formControl) return;
                 NDS.State.add(self.elements.container, 'open');
@@ -709,13 +767,13 @@
                 // Calendar grid was empty when applyPosition first ran; re-run
                 // after content is built so flip direction reflects real height.
                 self.dropmenuInstance.applyPosition();
-            });
+            }, { signal: signal });
 
             formControl.addEventListener('nds:dropmenu:closed', function (e) {
                 if (e.target !== formControl) return;
                 NDS.State.remove(self.elements.container, 'open');
                 self.cleanup();
-            });
+            }, { signal: signal });
         },
 
         // Create dropdown DOM structure
@@ -1121,6 +1179,9 @@
             return this.isSameDay(date, this._renderToday || getSaudiDateObject());
         },
 
+        // Read-only for callers: the returned object may BE the module-shared
+        // accurate-today reference, so mutating it corrupts every picker on the
+        // page. Need a mutable copy? createHijriDate(d.day, d.month, d.year).
         getTodaysHijriDate: function () {
             // Simple cache for today's Hijri date - API handles date validation internally
             if (!this._cachedTodaysHijriDate) {
@@ -1136,9 +1197,11 @@
                     // API failed, fallback handled below
                 });
 
-                // Return math fallback for initial render
+                // Seed from the shared accurate reference when another picker has
+                // already fetched it; the math fallback is only for the first one.
                 var today = getSaudiDateObject();
-                this._cachedTodaysHijriDate = CalendarConfig.hijri.gregorianToHijri(today);
+                this._cachedTodaysHijriDate = _accurateTodaysHijriDate
+                    || CalendarConfig.hijri.gregorianToHijri(today);
             }
 
             return this._cachedTodaysHijriDate;
@@ -1188,13 +1251,15 @@
         // Helper to store accurate Hijri data and set global reference
         storeAccurateHijriData: function(hijriData) {
             if (hijriData && hijriData.day && hijriData.month && hijriData.year) {
+                // Conversions memoised against the previous reference are now wrong,
+                // so the memo is invalidated here — where its input changes — rather
+                // than on every close.
+                CalendarConfig.hijri._hijriCache = {};
                 this._cachedTodaysHijriDate = hijriData;
                 _accurateTodaysHijriDate = hijriData;
                 _accurateTodaysGregorianDate = getSaudiDateObject();
 
-                this.state.currentDate._hijriDay = hijriData.day;
-                this.state.currentDate._hijriMonth = hijriData.month;
-                this.state.currentDate._hijriYear = hijriData.year;
+                stampHijri(this.state.currentDate, hijriData.year, hijriData.month, hijriData.day);
             }
         },
 
@@ -1216,19 +1281,13 @@
             this.updateNavArrows();
         },
 
-        // Cleanup on close - Clear all cache
+        // Panel teardown on close — instance state only; module-shared refs stay live.
         cleanup: function () {
-            // Remove event listeners for calendar-specific elements
-            var handlers = ['todayBtn', 'closeBtn', 'clearBtn', 'saveBtn', 'prevBtn', 'nextBtn', 'gridKeydown'];
-            var elements = ['todayBtn', 'closeBtn', 'clearBtn', 'saveBtn', 'prevBtn', 'nextBtn', 'datesContainer'];
-
-            for (var i = 0; i < handlers.length; i++) {
-                if (this.handlers[handlers[i]] && this.elements[elements[i]]) {
-                    var ev = handlers[i] === 'gridKeydown' ? 'keydown' : 'click';
-                    this.elements[elements[i]].removeEventListener(ev, this.handlers[handlers[i]]);
-                    delete this.handlers[handlers[i]];
-                }
-            }
+            // One abort releases every calendar-panel listener. This replaced two
+            // hand-maintained parallel arrays walked by a shared counter: inserting a
+            // handler into one shifted the pairing for every entry after it, silently
+            // removing the wrong listener from the wrong element.
+            if (this.panelAbortController) this.panelAbortController.abort();
 
             // Close dropmenu instances — keep alive, reused on next calendar open
             if (this.monthDropmenuInstance && this.monthDropmenuInstance.isOpen) {
@@ -1248,11 +1307,12 @@
                 this.elements.dropdown.style.cssText = '';
             }
 
-            // Clear ALL Hijri cache
-            CalendarConfig.hijri._hijriCache = {};
+            // Instance cache only. The module-scoped accurate-today refs and the
+            // conversion memo are shared by every picker on the page, and this runs
+            // on each close — dropping them here made closing one picker downgrade
+            // any other open picker to the math fallback. They are refreshed where
+            // they actually change instead (storeAccurateHijriData).
             this._cachedTodaysHijriDate = null;
-            _accurateTodaysHijriDate = null;
-            _accurateTodaysGregorianDate = null;
 
             // Reset states
             this.resetState();
@@ -1321,6 +1381,11 @@
 
         // Bind calendar-specific events
         bindCalendarEvents: function () {
+            // Panel-lifetime controller: the calendar is rebuilt on every open, so
+            // abort any prior generation's listeners before binding this one's.
+            // cleanup() aborts it on close.
+            if (this.panelAbortController) this.panelAbortController.abort();
+            this.panelAbortController = new AbortController();
             this.bindNavigationEvents();
             this.bindDropdownEvents();
             this.bindActionEvents();
@@ -1330,18 +1395,18 @@
         bindNavigationEvents: function () {
             var self = this;
 
+            var signal = this.panelAbortController.signal;
+
             if (this.elements.prevBtn) {
-                this.handlers.prevBtn = function () {
+                this.elements.prevBtn.addEventListener('click', function () {
                     self.navigate(-1);
-                };
-                this.elements.prevBtn.addEventListener('click', this.handlers.prevBtn);
+                }, { signal: signal });
             }
 
             if (this.elements.nextBtn) {
-                this.handlers.nextBtn = function () {
+                this.elements.nextBtn.addEventListener('click', function () {
                     self.navigate(1);
-                };
-                this.elements.nextBtn.addEventListener('click', this.handlers.nextBtn);
+                }, { signal: signal });
             }
 
             // 2D keyboard navigation for the day grid (WAI-ARIA Date Picker
@@ -1353,10 +1418,9 @@
             // that Save synthesizes from. Their few cells stay plain tab-order
             // buttons.
             if (this.elements.datesContainer && this.state.mode === 'day') {
-                this.handlers.gridKeydown = function (e) {
+                this.elements.datesContainer.addEventListener('keydown', function (e) {
                     self.handleGridKeydown(e);
-                };
-                this.elements.datesContainer.addEventListener('keydown', this.handlers.gridKeydown);
+                }, { signal: signal });
             }
         },
 
@@ -1506,10 +1570,7 @@
                 if (newYear < range.start || newYear > range.end) return false;
 
                 var calendar = this.getCurrentCalendar();
-                var newDate = calendar.hijriToGregorian(newYear, newMonth, 1);
-                newDate._hijriDay = 1;
-                newDate._hijriMonth = newMonth;
-                newDate._hijriYear = newYear;
+                var newDate = stampHijri(calendar.hijriToGregorian(newYear, newMonth, 1), newYear, newMonth, 1);
                 this.state.currentDate = newDate;
             } else {
                 var month = this.state.currentDate.getMonth() + direction;
@@ -1560,7 +1621,7 @@
                     // ran with an empty menu (width 0), so the inline width
                     // it wrote is wrong until we re-trigger positioning.
                     self.monthDropmenuInstance.applyPosition();
-                });
+                }, { signal: this.instanceAbortController.signal });
             }
 
             if (this.elements.yearDropmenu && !this.yearDropmenuInstance) {
@@ -1570,7 +1631,7 @@
                     self.renderYearOptions();
                     self.scrollToSelected(self.elements.yearDropdownMenu, '.nds-year-option');
                     self.yearDropmenuInstance.applyPosition();
-                });
+                }, { signal: this.instanceAbortController.signal });
             }
         },
 
@@ -1578,33 +1639,37 @@
         bindActionEvents: function () {
             var self = this;
 
+            var signal = this.panelAbortController.signal;
+
             if (this.elements.todayBtn) {
-                this.handlers.todayBtn = function () { self.selectToday(); };
-                this.elements.todayBtn.addEventListener('click', this.handlers.todayBtn);
+                this.elements.todayBtn.addEventListener('click', function () {
+                    self.selectToday();
+                }, { signal: signal });
             }
 
             if (this.elements.closeBtn) {
                 // Close = discard pending state and close the dropmenu. State
                 // resets on next open via parseInitialValue, so nothing to do
                 // here beyond closing — matches click-outside-to-cancel.
-                this.handlers.closeBtn = function () {
+                this.elements.closeBtn.addEventListener('click', function () {
                     if (self.dropmenuInstance && self.dropmenuInstance.isOpen) {
                         self.dropmenuInstance.close();
                     }
-                };
-                this.elements.closeBtn.addEventListener('click', this.handlers.closeBtn);
+                }, { signal: signal });
             }
 
             if (this.elements.clearBtn) {
                 // Clear = wipe committed value + pending state, then close.
                 // Opt-in via data-clearable on the container (auto-on for range).
-                this.handlers.clearBtn = function () { self.clearSelection(); };
-                this.elements.clearBtn.addEventListener('click', this.handlers.clearBtn);
+                this.elements.clearBtn.addEventListener('click', function () {
+                    self.clearSelection();
+                }, { signal: signal });
             }
 
             if (this.elements.saveBtn) {
-                this.handlers.saveBtn = function () { self.saveAndClose(); };
-                this.elements.saveBtn.addEventListener('click', this.handlers.saveBtn);
+                this.elements.saveBtn.addEventListener('click', function () {
+                    self.saveAndClose();
+                }, { signal: signal });
             }
         },
 
@@ -1753,10 +1818,7 @@
                 btn.type = 'button';
                 btn.className = 'nds-btn nds-subtle nds-date-cell';
                 btn.setAttribute('data-value', monthValue);
-                var monthLabel = document.createElement('span');
-                monthLabel.className = 'nds-label nds-truncate';
-                monthLabel.textContent = name;
-                btn.appendChild(monthLabel);
+                appendCellLabel(btn, name, 'nds-truncate');
 
                 if (monthValue === selectedMonth) {
                     NDS.State.add(btn, 'selected');
@@ -1797,7 +1859,7 @@
                 btn.type = 'button';
                 btn.className = 'nds-btn nds-subtle nds-date-cell';
                 btn.setAttribute('data-value', year);
-                btn.textContent = year;
+                appendCellLabel(btn, year);
 
                 if (year === selectedYear) {
                     NDS.State.add(btn, 'selected');
@@ -1824,10 +1886,7 @@
             if (isHijri) {
                 var year = unit === 'year' ? value : this.getCurrentYear();
                 var month = unit === 'month' ? value : (unit === 'year' ? 1 : this.getCurrentMonth());
-                var d = CalendarConfig.hijri.hijriToGregorian(year, month, 1);
-                d._hijriDay = 1;
-                d._hijriMonth = month;
-                d._hijriYear = year;
+                var d = stampHijri(CalendarConfig.hijri.hijriToGregorian(year, month, 1), year, month, 1);
                 this.state.currentDate = d;
                 this.state.selectedDate = copyDateWithHijri(d);
             } else {
@@ -1864,10 +1923,7 @@
                 var newYear = hijri.year + direction;
                 if (newYear < range.start || newYear > range.end) return;
                 var calendar = this.getCurrentCalendar();
-                var newDate = calendar.hijriToGregorian(newYear, hijri.month, 1);
-                newDate._hijriDay = 1;
-                newDate._hijriMonth = hijri.month;
-                newDate._hijriYear = newYear;
+                var newDate = stampHijri(calendar.hijriToGregorian(newYear, hijri.month, 1), newYear, hijri.month, 1);
                 this.state.currentDate = newDate;
             } else {
                 var newYearG = this.state.currentDate.getFullYear() + direction;
@@ -1919,10 +1975,7 @@
             // Date factory: creates a date with Hijri metadata if needed
             function makeDate(year, month, day) {
                 if (isHijri) {
-                    var d = calendar.hijriToGregorian(year, month, day);
-                    d._hijriDay = day;
-                    d._hijriMonth = month;
-                    d._hijriYear = year;
+                    var d = stampHijri(calendar.hijriToGregorian(year, month, day), year, month, day);
                     return d;
                 }
                 return new Date(year, month, day);
@@ -2007,10 +2060,7 @@
 
             // Day number display — built imperatively so the value flows through
             // .textContent (text-only) and never reaches the HTML parser.
-            var dayLabel = document.createElement('span');
-            dayLabel.className = 'nds-label';
-            dayLabel.textContent = this.getDisplayDayNumber(date);
-            btn.appendChild(dayLabel);
+            appendCellLabel(btn, this.getDisplayDayNumber(date));
 
             // Grid child is a slot wrapper: it paints the contiguous range
             // bar (slots tile with no column gap), the button keeps the circle.
@@ -2018,7 +2068,7 @@
             slot.className = 'nds-date-slot';
             slot.appendChild(btn);
 
-            // Add appropriate classes
+            // State tokens, not classes — NDS.State writes data-state.
             if (type === 'other-month') {
                 NDS.State.add(btn, 'other-month');
             }
@@ -2145,9 +2195,7 @@
             // For Hijri calendar, use accurate API data
             if (this.state.calendarType === 'hijri') {
                 var todaysHijriDate = this.getTodaysHijriDate(); // Use accurate cached data
-                today._hijriDay = todaysHijriDate.day;
-                today._hijriMonth = todaysHijriDate.month;
-                today._hijriYear = todaysHijriDate.year;
+                stampHijri(today, todaysHijriDate.year, todaysHijriDate.month, todaysHijriDate.day);
             }
 
             // In range mode, just navigate to today's month (preserve selection)
@@ -2158,10 +2206,9 @@
             // Navigate to today's month
             if (this.state.calendarType === 'hijri') {
                 var calendar = this.getCurrentCalendar();
-                var todaysGregorianEquivalent = calendar.hijriToGregorian(today._hijriYear, today._hijriMonth, 1);
-                todaysGregorianEquivalent._hijriDay = 1;
-                todaysGregorianEquivalent._hijriMonth = today._hijriMonth;
-                todaysGregorianEquivalent._hijriYear = today._hijriYear;
+                var todaysGregorianEquivalent = stampHijri(
+                    calendar.hijriToGregorian(today._hijriYear, today._hijriMonth, 1),
+                    today._hijriYear, today._hijriMonth, 1);
                 this.state.currentDate = todaysGregorianEquivalent;
             } else {
                 this.state.currentDate = new Date(today);
@@ -2280,12 +2327,7 @@
                 btn.className = 'nds-btn nds-subtle nds-dropmenu-item nds-month-option';
                 btn.setAttribute('role', 'menuitem');
                 btn.setAttribute('data-value', index);
-                // Month label — built imperatively so the value flows through
-                // .textContent (text-only) and never reaches the HTML parser.
-                var monthLabel = document.createElement('span');
-                monthLabel.className = 'nds-label';
-                monthLabel.textContent = monthName;
-                btn.appendChild(monthLabel);
+                appendCellLabel(btn, monthName);
 
                 var isSelected = isHijri ?
                     (index + 1) === self.getCurrentMonth() : // For Hijri: compare (0-based index + 1) with 1-based month
@@ -2365,13 +2407,7 @@
                 btn.className = 'nds-btn nds-subtle nds-dropmenu-item nds-year-option';
                 btn.setAttribute('role', 'menuitem');
                 btn.setAttribute('data-value', year);
-                // Year label — built imperatively to match the month-option /
-                // date-cell shape elsewhere in this file. `year` is a loop
-                // counter (numeric); textContent is purely cosmetic consistency.
-                var yearLabel = document.createElement('span');
-                yearLabel.className = 'nds-label';
-                yearLabel.textContent = year;
-                btn.appendChild(yearLabel);
+                appendCellLabel(btn, year);
 
                 if (year === currentYear) {
                     NDS.State.add(btn, 'selected');
@@ -2403,10 +2439,9 @@
             currentHijriDate[property] = value;
 
             var calendar = this.getCurrentCalendar();
-            var newDate = calendar.hijriToGregorian(currentHijriDate.year, currentHijriDate.month, currentHijriDate.day);
-            newDate._hijriDay = currentHijriDate.day;
-            newDate._hijriMonth = currentHijriDate.month;
-            newDate._hijriYear = currentHijriDate.year;
+            var newDate = stampHijri(
+                calendar.hijriToGregorian(currentHijriDate.year, currentHijriDate.month, currentHijriDate.day),
+                currentHijriDate.year, currentHijriDate.month, currentHijriDate.day);
 
             this.state.currentDate = newDate;
         },
@@ -2479,21 +2514,25 @@
                 this.dropmenuInstance = null;
             }
 
-            // Remove persistent event listeners
-            if (this.handlers.ensureDropdownAndToggle) {
-                this.elements.input.removeEventListener('click', this.handlers.ensureDropdownAndToggle);
-                if (this.elements.toggleBtn) {
-                    this.elements.toggleBtn.removeEventListener('click', this.handlers.ensureDropdownAndToggle);
-                }
-            }
-            if (this.handlers.inputChange) {
-                this.elements.input.removeEventListener('change', this.handlers.inputChange);
-            }
-
             // Release the lang-attr subscriber registered in setupLanguageObserver.
             // Lives across open/close cycles (cleanup() doesn't drop it), so the
             // release belongs in destroy() — instance-lifetime, not panel-lifetime.
             if (this._offLangChange) { this._offLangChange(); this._offLangChange = null; }
+
+            // Releases the dropmenu lifecycle listeners on the consumer's
+            // formControl (setupDropmenu). That element outlives the instance, so
+            // without this the handlers keep it — and the calendar — reachable.
+            this.instanceAbortController.abort();
+
+            // Un-stamp what setupDropmenu wrote onto the consumer's formControl, so
+            // a later NDS.Dropmenu.reinit() can't adopt it as a menu with no calendar.
+            var fc = this.elements.formControl;
+            if (fc) {
+                fc.classList.remove('nds-dropmenu');
+                fc.removeAttribute('data-dropmenu-no-click');
+                fc.removeAttribute('data-dropmenu-no-keys');
+                fc.removeAttribute('data-anchor-cursor');
+            }
 
             // Drop the back-ref on the input so the DatePickerCalendar can
             // be GC'd. Without this the input retains a chain to all the
@@ -2531,7 +2570,9 @@
         document.querySelectorAll('.nds-date-input').forEach((input) => createInstance(input));
     }
 
-    // CRITICAL: Expose global API immediately (called by unified init system)
+    // Assigned at module eval so the loader's lazy stub resolves; the loader then
+    // calls init() itself. Not the critical tier — this ships in nds-extras.min.js,
+    // injected after the reveal.
     if (typeof window !== 'undefined') {
         NDS.DatePicker = {
             DatePickerCalendar,

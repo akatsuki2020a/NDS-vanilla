@@ -222,10 +222,6 @@
         line-height: var(--typo-text-sm-LH);
         min-width: 200px;
     }
-
-    .nds-label+.nds-note {
-        color: var(--text-secondary-paragraph);
-    }
 }
 
 fieldset {
@@ -294,6 +290,18 @@ fieldset {
             // !important inset box-shadow and must still win over this.
             &:focus-visible {
                 box-shadow: none;
+            }
+        }
+
+        // Browser spinners are foreign chrome inside an NDS field; stepping is
+        // offered by the .nds-number-increment / -decrement action buttons.
+        &[type="number"] {
+            appearance: textfield;
+
+            &::-webkit-outer-spin-button,
+            &::-webkit-inner-spin-button {
+                -webkit-appearance: none;
+                margin: 0;
             }
         }
 
@@ -565,6 +573,10 @@ fieldset {
     display: flex;
     gap: var(--spacing-lg);
     margin-block-start: var(--actions-margin-top, var(--spacing-2xl));
+
+    &:first-child {
+        margin-block-start: 0;
+    }
 }
 
 .nds-form-group {

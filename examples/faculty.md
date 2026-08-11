@@ -14,7 +14,7 @@ sidemenu_mode: top
 <section id="facultyInfo" class="nds-content-section nds-user">
     <div class="nds-section-wrapper">
         <div class="nds-section-image faculty-avatar nds-avatar nds-3xl nds-image nds-image-border">
-            <img src="{{ 'assets/img/avatar3.webp' | relative_url }}" width="112" height="112"
+            <img src="{{ 'docs-assets/img/avatar3.webp' | relative_url }}" width="112" height="112"
                 alt="Faculty member photo" fetchpriority="high">
         </div>
         <div class="nds-section-head">
@@ -25,36 +25,38 @@ sidemenu_mode: top
         </div>
 
         <div class="nds-section-body">
-            <dl class="nds-definition-list nds-tableView-lg nds-divided" style="--max-col:4;--mid-col:2;--min-col:2;">
-                <div class="nds-definition-item">
-                    <dt>
-                        <i class="hgi hgi-stroke hgi-school"></i>
-                        <span class="nds-label">College</span>
-                    </dt>
-                    <dd>College of Computer and Information Sciences</dd>
-                </div>
-                <div class="nds-definition-item">
-                    <dt>
-                        <i class="hgi hgi-stroke hgi-building-02"></i>
-                        <span class="nds-label">Department</span>
-                    </dt>
-                    <dd>Department of Computer Science</dd>
-                </div>
-                <div class="nds-definition-item">
-                    <dt>
-                        <i class="hgi hgi-stroke hgi-book-open-02"></i>
-                        <span class="nds-label">General Specialization</span>
-                    </dt>
-                    <dd>Computer Science</dd>
-                </div>
-                <div class="nds-definition-item">
-                    <dt>
-                        <i class="hgi hgi-stroke hgi-book-02"></i>
-                        <span class="nds-label">Specific Specialization</span>
-                    </dt>
-                    <dd>Artificial Intelligence and Machine Learning</dd>
-                </div>
-            </dl>
+            <div class="nds-block">
+                <dl class="nds-definition-list nds-tableView-lg nds-divided" style="--max-col:4;--mid-col:2;--min-col:2;">
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="hgi hgi-stroke hgi-school"></i>
+                            <span class="nds-label">College</span>
+                        </dt>
+                        <dd>College of Computer and Information Sciences</dd>
+                    </div>
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="hgi hgi-stroke hgi-building-02"></i>
+                            <span class="nds-label">Department</span>
+                        </dt>
+                        <dd>Department of Computer Science</dd>
+                    </div>
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="hgi hgi-stroke hgi-book-open-02"></i>
+                            <span class="nds-label">General Specialization</span>
+                        </dt>
+                        <dd>Computer Science</dd>
+                    </div>
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="hgi hgi-stroke hgi-book-02"></i>
+                            <span class="nds-label">Specific Specialization</span>
+                        </dt>
+                        <dd>Artificial Intelligence and Machine Learning</dd>
+                    </div>
+                </dl>
+            </div>
         </div>
     </div>
 </section>
@@ -96,7 +98,7 @@ sidemenu_mode: top
                 <!-- Biography Tab -->
                 <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-cv" aria-labelledby="tab-cv"
                     tabindex="0">
-                    <div class="nds-block">
+                    <div class="nds-block nds-prose">
                         <h3 class="nds-block-title">Biography</h3>
                         <p>Dr. Mohammed Ahmed Al-Salem is an Associate Professor in the Department of Computer Science at the College of Computer and Information Sciences. He has over 15 years of academic and research experience in the fields of Artificial Intelligence and Machine Learning.</p>
                         <p>He has supervised more than 30 master's and doctoral theses and participated in numerous locally and internationally funded research projects. He also serves as Head of the Research and Innovation Unit in the department.</p>
@@ -105,7 +107,7 @@ sidemenu_mode: top
                 <!-- Research Interests Tab -->
                 <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-research"
                     aria-labelledby="tab-research" aria-hidden="true" tabindex="-1" hidden>
-                    <div class="nds-block">
+                    <div class="nds-block nds-prose">
                         <h3 class="nds-block-title">Research Interests</h3>
                         <ul>
                             <li>Deep Learning and Artificial Neural Networks</li>
@@ -120,7 +122,7 @@ sidemenu_mode: top
                 <!-- Publications Tab -->
                 <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-publications"
                     aria-labelledby="tab-publications" aria-hidden="true" tabindex="-1" hidden>
-                    <div class="nds-block">
+                    <div class="nds-block nds-prose">
                         <h3 class="nds-block-title">Publications</h3>
                         <ol>
                             <li>An Enhanced Deep Learning Model for Arabic Text Processing - IEEE Journal of Artificial Intelligence, 2024</li>
@@ -135,7 +137,7 @@ sidemenu_mode: top
                 <!-- Experience Tab -->
                 <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-experiences"
                     aria-labelledby="tab-experiences" aria-hidden="true" tabindex="-1" hidden>
-                    <div class="nds-block">
+                    <div class="nds-block nds-prose">
                         <h3 class="nds-block-title">Professional Experience</h3>
                         <ul>
                             <li>Associate Professor - Department of Computer Science, College of Computer and Information Sciences (2019 - Present)</li>

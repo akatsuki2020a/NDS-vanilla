@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.3.0"
-last_edit: "28/06/2026 - 01:27 PM"
+updated: "1.7.0"
+last_edit: "06/08/2026 - 09:45 PM"
 ---
 
 <!-- Single Switch -->
@@ -20,87 +20,88 @@ last_edit: "28/06/2026 - 01:27 PM"
     </div>
     <div class="nds-section-body">
       <div class="nds-showcase">
-        <div class="nds-demo-card">
-          <div class="demo-header">
-            <div class="demo-action">
-              <div class="nds-dropmenu demo-toggle-menu">
-                <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger">
-                  <span class="nds-label">MD</span>
-                </button>
-                <div class="nds-dropmenu-menu" hidden>
-                  <div class="nds-dropmenu-scroll">
-                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                      data-toggler='["nds-sm", ".nds-switch-container", "sizeToggle"]'>
-                      <span class="nds-label">SM</span>
-                    </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
-                      data-toggler='["", ".nds-switch-container", "sizeToggle"]'>
+        <div class="nds-block">
+            <div class="nds-demo-card">
+              <div class="demo-header">
+                <div class="demo-action">
+                  <div class="nds-dropmenu demo-toggle-menu">
+                    <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger">
                       <span class="nds-label">MD</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                      data-toggler='["nds-lg", ".nds-switch-container", "sizeToggle"]'>
-                      <span class="nds-label">LG</span>
-                    </button>
+                    <div class="nds-dropmenu-menu" hidden>
+                      <div class="nds-dropmenu-scroll">
+                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                          data-toggler='["nds-sm", ".nds-switch-container", "sizeToggle"]'>
+                          <span class="nds-label">SM</span>
+                        </button>
+                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
+                          data-toggler='["", ".nds-switch-container", "sizeToggle"]'>
+                          <span class="nds-label">MD</span>
+                        </button>
+                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                          data-toggler='["nds-lg", ".nds-switch-container", "sizeToggle"]'>
+                          <span class="nds-label">LG</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
+                  <button class="nds-btn nds-subtle demo-toggle-btn"
+                    data-toggler='["nds-neutral", ".nds-switch", "variantToggle"]'>
+                    <span class="nds-label">Neutral</span>
+                  </button>
+                  <button class="nds-btn nds-subtle demo-toggle-btn"
+                    data-toggler='["disabled", ".nds-switch-container", "disabledToggle", "data-state"]'>
+                    <span class="nds-label">Disabled</span>
+                  </button>
+                  <button class="nds-btn nds-subtle demo-toggle-btn"
+                    data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
+                    <span class="nds-label">Remove bg</span>
+                  </button>
                 </div>
               </div>
-              <button class="nds-btn nds-subtle demo-toggle-btn"
-                data-toggler='["nds-neutral", ".nds-switch", "variantToggle"]'>
-                <span class="nds-label">Neutral</span>
-              </button>
-              <button class="nds-btn nds-subtle demo-toggle-btn"
-                data-toggler='["disabled", ".nds-switch-container", "disabledToggle", "data-state"]'>
-                <span class="nds-label">Disabled</span>
-              </button>
-              <button class="nds-btn nds-subtle demo-toggle-btn"
-                data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
-                <span class="nds-label">Remove bg</span>
-              </button>
-            </div>
-          </div>
-          <div class="demo-container">
-            <div class="state-demo">
-              <div class="nds-form-container nds-switch-container">
-                <div class="nds-form-header" data-feedback-target>
-                  <label for="demo-switch-single">
-                    <span class="nds-label">Enable notifications</span>
-                    <span class="nds-info">Receive push notifications for important updates</span>
-                  </label>
-                </div>
-                <div class="nds-form-control">
-                  <div class="nds-switch">
-                    <input type="checkbox" id="demo-switch-single" name="notifications" value="enabled"
-                      class="nds-switch-input">
-                    <div class="nds-switch-track">
-                      <div class="nds-switch-thumb"></div>
+              <div class="demo-container">
+                <div class="state-demo">
+                  <div class="nds-form-container nds-switch-container">
+                    <div class="nds-form-header" data-feedback-target>
+                      <label for="demo-switch-single">
+                        <span class="nds-label">Enable notifications</span>
+                        <span class="nds-info">Receive push notifications for important updates</span>
+                      </label>
+                    </div>
+                    <div class="nds-form-control">
+                      <div class="nds-switch">
+                        <input type="checkbox" id="demo-switch-single" name="notifications" value="enabled"
+                          class="nds-switch-input">
+                        <div class="nds-switch-track">
+                          <div class="nds-switch-thumb"></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div class="demo-code">
-          <div class="nds-tabs nds-code nds-divided">
-            <div class="nds-tab-list-container nds-scroll-more">
-              <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
-                <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
-                  aria-controls="panel-switch-single-1" id="tab-switch-single-1">
-                  <span class="nds-tab-label">HTML</span>
-                </button>
-              </nav>
-              <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div class="nds-tab-content">
-              <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-switch-single-1"
-                aria-labelledby="tab-switch-single-1">
-                <div class="nds-code-action">
-                  <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
-                    <i class="nds-icon nds-hgi-copy-01"></i>
+              <div class="demo-code">
+              <div class="nds-tabs nds-code nds-divided">
+                <div class="nds-tab-list-container nds-scroll-more">
+                  <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                    <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                      aria-controls="panel-switch-single-1" id="tab-switch-single-1">
+                      <span class="nds-tab-label">HTML</span>
+                    </button>
+                  </nav>
+                  <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                   </button>
                 </div>
-                <div class="nds-expandable-content">
-                  <code class="lang-html code">
+                <div class="nds-tab-content">
+                  <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-switch-single-1"
+                    aria-labelledby="tab-switch-single-1">
+                    <div class="nds-code-action">
+                      <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                        <i class="nds-icon nds-hgi-copy-01"></i>
+                      </button>
+                    </div>
+                    <div class="nds-expandable-content">
+                      <code class="lang-html code">
 &lt;div class="nds-form-container nds-switch-container"&gt;
   &lt;div class="nds-form-header" data-feedback-target&gt;
     &lt;label for="switch-1"&gt;
@@ -118,11 +119,12 @@ last_edit: "28/06/2026 - 01:27 PM"
   &lt;/div&gt;
 &lt;/div&gt;
                   </code>
+                    </div>
+                  </div>
                 </div>
               </div>
+              </div>
             </div>
-          </div>
-          </div>
         </div>
       </div>
     </div>
@@ -138,119 +140,120 @@ last_edit: "28/06/2026 - 01:27 PM"
     </div>
     <div class="nds-section-body">
       <div class="nds-showcase">
-        <div class="nds-demo-card">
-          <div class="demo-header">
-            <div class="demo-action">
-              <div class="nds-dropmenu demo-toggle-menu">
-                <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger">
-                  <span class="nds-label">MD</span>
-                </button>
-                <div class="nds-dropmenu-menu" hidden>
-                  <div class="nds-dropmenu-scroll">
-                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                      data-toggler='["nds-sm", ".nds-switch-container", "sizeToggle"]'>
-                      <span class="nds-label">SM</span>
-                    </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
-                      data-toggler='["", ".nds-switch-container", "sizeToggle"]'>
+        <div class="nds-block">
+            <div class="nds-demo-card">
+              <div class="demo-header">
+                <div class="demo-action">
+                  <div class="nds-dropmenu demo-toggle-menu">
+                    <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger">
                       <span class="nds-label">MD</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                      data-toggler='["nds-lg", ".nds-switch-container", "sizeToggle"]'>
-                      <span class="nds-label">LG</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <button class="nds-btn nds-subtle demo-toggle-btn"
-                data-toggler='["disabled", ".nds-switch-group", "disabledToggle", "data-state"]'>
-                <span class="nds-label">Disabled</span>
-              </button>
-              <button class="nds-btn nds-subtle demo-toggle-btn"
-                data-toggler='["nds-rowView", ".nds-switch-group", "layoutToggle"]'>
-                <span class="nds-label">Row View</span>
-              </button>
-              <button class="nds-btn nds-subtle demo-toggle-btn"
-                data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
-                <span class="nds-label">Remove bg</span>
-              </button>
-            </div>
-          </div>
-          <div class="demo-container">
-            <div class="state-demo">
-                <fieldset class="nds-form-group nds-switch-group">
-                  <legend class="nds-label">Notification preferences</legend>
-                  <div class="nds-form-container nds-switch-container">
-                    <div class="nds-form-header">
-                      <label for="demo-switch1">
-                        <span class="nds-label">Email alerts</span>
-                      </label>
-                    </div>
-                    <div class="nds-form-control">
-                      <div class="nds-switch">
-                        <input type="checkbox" id="demo-switch1" name="notifications" value="email" class="nds-switch-input">
-                        <div class="nds-switch-track">
-                          <div class="nds-switch-thumb"></div>
-                        </div>
+                    <div class="nds-dropmenu-menu" hidden>
+                      <div class="nds-dropmenu-scroll">
+                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                          data-toggler='["nds-sm", ".nds-switch-container", "sizeToggle"]'>
+                          <span class="nds-label">SM</span>
+                        </button>
+                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
+                          data-toggler='["", ".nds-switch-container", "sizeToggle"]'>
+                          <span class="nds-label">MD</span>
+                        </button>
+                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                          data-toggler='["nds-lg", ".nds-switch-container", "sizeToggle"]'>
+                          <span class="nds-label">LG</span>
+                        </button>
                       </div>
                     </div>
                   </div>
-                  <div class="nds-form-container nds-switch-container">
-                    <div class="nds-form-header">
-                      <label for="demo-switch2">
-                        <span class="nds-label">Push notifications</span>
-                        <span class="nds-info">Instant alerts on your device</span>
-                      </label>
-                    </div>
-                    <div class="nds-form-control">
-                      <div class="nds-switch">
-                        <input type="checkbox" id="demo-switch2" name="notifications" value="push" checked class="nds-switch-input">
-                        <div class="nds-switch-track">
-                          <div class="nds-switch-thumb"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="nds-form-container nds-switch-container">
-                    <div class="nds-form-header">
-                      <label for="demo-switch3">
-                        <span class="nds-label">SMS alerts</span>
-                      </label>
-                    </div>
-                    <div class="nds-form-control">
-                      <div class="nds-switch">
-                        <input type="checkbox" id="demo-switch3" name="notifications" value="sms" class="nds-switch-input">
-                        <div class="nds-switch-track">
-                          <div class="nds-switch-thumb"></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </fieldset>
-            </div>
-          </div>
-          <div class="demo-code">
-          <div class="nds-tabs nds-code nds-divided">
-            <div class="nds-tab-list-container nds-scroll-more">
-              <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
-                <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
-                  aria-controls="panel-switch-group-1" id="tab-switch-group-1">
-                  <span class="nds-tab-label">HTML</span>
-                </button>
-              </nav>
-              <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div class="nds-tab-content">
-              <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-switch-group-1"
-                aria-labelledby="tab-switch-group-1">
-                <div class="nds-code-action">
-                  <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
-                    <i class="nds-icon nds-hgi-copy-01"></i>
+                  <button class="nds-btn nds-subtle demo-toggle-btn"
+                    data-toggler='["disabled", ".nds-switch-group", "disabledToggle", "data-state"]'>
+                    <span class="nds-label">Disabled</span>
+                  </button>
+                  <button class="nds-btn nds-subtle demo-toggle-btn"
+                    data-toggler='["nds-rowView", ".nds-switch-group", "layoutToggle"]'>
+                    <span class="nds-label">Row View</span>
+                  </button>
+                  <button class="nds-btn nds-subtle demo-toggle-btn"
+                    data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
+                    <span class="nds-label">Remove bg</span>
                   </button>
                 </div>
-                <div class="nds-expandable-content">
-                  <code class="lang-html code">
+              </div>
+              <div class="demo-container">
+                <div class="state-demo">
+                    <fieldset class="nds-form-group nds-switch-group">
+                      <legend class="nds-label">Notification preferences</legend>
+                      <div class="nds-form-container nds-switch-container">
+                        <div class="nds-form-header">
+                          <label for="demo-switch1">
+                            <span class="nds-label">Email alerts</span>
+                          </label>
+                        </div>
+                        <div class="nds-form-control">
+                          <div class="nds-switch">
+                            <input type="checkbox" id="demo-switch1" name="notifications" value="email" class="nds-switch-input">
+                            <div class="nds-switch-track">
+                              <div class="nds-switch-thumb"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="nds-form-container nds-switch-container">
+                        <div class="nds-form-header">
+                          <label for="demo-switch2">
+                            <span class="nds-label">Push notifications</span>
+                            <span class="nds-info">Instant alerts on your device</span>
+                          </label>
+                        </div>
+                        <div class="nds-form-control">
+                          <div class="nds-switch">
+                            <input type="checkbox" id="demo-switch2" name="notifications" value="push" checked class="nds-switch-input">
+                            <div class="nds-switch-track">
+                              <div class="nds-switch-thumb"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="nds-form-container nds-switch-container">
+                        <div class="nds-form-header">
+                          <label for="demo-switch3">
+                            <span class="nds-label">SMS alerts</span>
+                          </label>
+                        </div>
+                        <div class="nds-form-control">
+                          <div class="nds-switch">
+                            <input type="checkbox" id="demo-switch3" name="notifications" value="sms" class="nds-switch-input">
+                            <div class="nds-switch-track">
+                              <div class="nds-switch-thumb"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </fieldset>
+                </div>
+              </div>
+              <div class="demo-code">
+              <div class="nds-tabs nds-code nds-divided">
+                <div class="nds-tab-list-container nds-scroll-more">
+                  <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                    <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                      aria-controls="panel-switch-group-1" id="tab-switch-group-1">
+                      <span class="nds-tab-label">HTML</span>
+                    </button>
+                  </nav>
+                  <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div class="nds-tab-content">
+                  <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-switch-group-1"
+                    aria-labelledby="tab-switch-group-1">
+                    <div class="nds-code-action">
+                      <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                        <i class="nds-icon nds-hgi-copy-01"></i>
+                      </button>
+                    </div>
+                    <div class="nds-expandable-content">
+                      <code class="lang-html code">
 &lt;fieldset class="nds-form-group nds-switch-group"&gt;
   &lt;legend class="nds-label"&gt;Notification preferences&lt;/legend&gt;
   &lt;div class="nds-form-container nds-switch-container"&gt;
@@ -301,11 +304,12 @@ last_edit: "28/06/2026 - 01:27 PM"
   &lt;/div&gt;
 &lt;/fieldset&gt;
                   </code>
+                    </div>
+                  </div>
                 </div>
               </div>
+              </div>
             </div>
-          </div>
-          </div>
         </div>
       </div>
     </div>
@@ -321,33 +325,41 @@ last_edit: "28/06/2026 - 01:27 PM"
     </div>
     <div class="nds-section-body">
       <div class="nds-definition-list nds-divided nds-grid" style="--max-col:2;--mid-col:1;--min-col:1;">
-        <div class="nds-definition-item">
-          <span class="nds-item-title">
-            <i class="hgi hgi-stroke hgi-plug-socket"></i>
-            <span class="nds-label">Form Integration</span>
-          </span>
-          <p class="nds-item-desc">Auto-initializes with the forms system. Two-way binding syncs <code class="nds-inline-code lang-html">disabled</code> state between inputs and containers. Use <code class="nds-inline-code lang-html">data-state="disabled"</code> on the group to disable all switches at once.</p>
+        <div class="nds-block">
+            <div class="nds-definition-item">
+              <span class="nds-item-title">
+                <i class="hgi hgi-stroke hgi-plug-socket"></i>
+                <span class="nds-label">Form Integration</span>
+              </span>
+              <p class="nds-item-desc">Auto-initializes with the forms system. Two-way binding syncs <code class="nds-inline-code lang-html">disabled</code> state between inputs and containers. Use <code class="nds-inline-code lang-html">data-state="disabled"</code> on the group to disable all switches at once.</p>
+            </div>
         </div>
-        <div class="nds-definition-item">
-          <span class="nds-item-title">
-            <i class="hgi hgi-stroke hgi-cursor-02"></i>
-            <span class="nds-label">Visual Feedback</span>
-          </span>
-          <p class="nds-item-desc">Ripple effect on hover, thumb stretch on press, and smooth slide animation. Three sizes (SM, MD, LG) with proportional scaling.</p>
+        <div class="nds-block">
+            <div class="nds-definition-item">
+              <span class="nds-item-title">
+                <i class="hgi hgi-stroke hgi-cursor-02"></i>
+                <span class="nds-label">Visual Feedback</span>
+              </span>
+              <p class="nds-item-desc">Ripple effect on hover, thumb stretch on press, and smooth slide animation. Three sizes (SM, MD, LG) with proportional scaling.</p>
+            </div>
         </div>
-        <div class="nds-definition-item">
-          <span class="nds-item-title">
-            <i class="hgi hgi-stroke hgi-keyboard"></i>
-            <span class="nds-label">Keyboard Support</span>
-          </span>
-          <p class="nds-item-desc">Space and Enter keys toggle the switch. Track click, label click, and keyboard all fire the <code class="nds-inline-code lang-js">switchChange</code> event.</p>
+        <div class="nds-block">
+            <div class="nds-definition-item">
+              <span class="nds-item-title">
+                <i class="hgi hgi-stroke hgi-keyboard"></i>
+                <span class="nds-label">Keyboard Support</span>
+              </span>
+              <p class="nds-item-desc">Space and Enter keys toggle the switch. Track click, label click, and keyboard all fire the <code class="nds-inline-code lang-js">nds:switchChange</code> event.</p>
+            </div>
         </div>
-        <div class="nds-definition-item">
-          <span class="nds-item-title">
-            <i class="hgi hgi-stroke hgi-layout-01"></i>
-            <span class="nds-label">Responsive Layout</span>
-          </span>
-          <p class="nds-item-desc">Column layout by default, row layout with <code class="nds-inline-code lang-html">nds-rowView</code> class. Gaps adjust on mobile for touch-friendly spacing.</p>
+        <div class="nds-block">
+            <div class="nds-definition-item">
+              <span class="nds-item-title">
+                <i class="hgi hgi-stroke hgi-layout-01"></i>
+                <span class="nds-label">Responsive Layout</span>
+              </span>
+              <p class="nds-item-desc">Column layout by default, row layout with <code class="nds-inline-code lang-html">nds-rowView</code> class. Gaps adjust on mobile for touch-friendly spacing.</p>
+            </div>
         </div>
       </div>
     </div>
@@ -362,8 +374,8 @@ last_edit: "28/06/2026 - 01:27 PM"
       <p class="nds-section-description">When and how to use switches effectively</p>
     </div>
     <div class="nds-section-body">
-      <div class="nds-block">
-        <h3 class="nds-block-title">When to Use</h3>
+      <div class="nds-block nds-prose">
+          <h3 class="nds-block-title">When to Use</h3>
         <ul>
           <li>Instant on/off actions that take effect immediately without form submission</li>
           <li>Settings pages, preference panels, and feature toggles</li>
@@ -372,8 +384,8 @@ last_edit: "28/06/2026 - 01:27 PM"
           <li>Always label clearly what state "on" represents</li>
         </ul>
       </div>
-      <div class="nds-block">
-        <h3 class="nds-block-title">Modifier Classes</h3>
+      <div class="nds-block nds-prose">
+          <h3 class="nds-block-title">Modifier Classes</h3>
         <table class="nds-table nds-responsive">
           <thead><tr><th>Class</th><th>Element</th><th>Description</th></tr></thead>
           <tbody>
@@ -385,8 +397,8 @@ last_edit: "28/06/2026 - 01:27 PM"
         </table>
       </div>
 
-      <div class="nds-block">
-        <h3 class="nds-block-title">Data Attributes</h3>
+      <div class="nds-block nds-prose">
+          <h3 class="nds-block-title">Data Attributes</h3>
         <table class="nds-table nds-responsive">
           <thead><tr><th>Attribute</th><th>Element</th><th>Description</th></tr></thead>
           <tbody>
@@ -396,8 +408,8 @@ last_edit: "28/06/2026 - 01:27 PM"
         </table>
       </div>
 
-      <div class="nds-block">
-        <h3 class="nds-block-title">CSS Custom Properties</h3>
+      <div class="nds-block nds-prose">
+          <h3 class="nds-block-title">CSS Custom Properties</h3>
         <table class="nds-table nds-responsive">
           <thead><tr><th>Property</th><th>Default</th><th>Description</th></tr></thead>
           <tbody>
@@ -413,8 +425,8 @@ last_edit: "28/06/2026 - 01:27 PM"
         </table>
       </div>
 
-      <div class="nds-block">
-        <h3 class="nds-block-title">JavaScript API</h3>
+      <div class="nds-block nds-prose">
+          <h3 class="nds-block-title">JavaScript API</h3>
         <div class="nds-code nds-expandable">
               <div class="nds-code-action">
                 <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
@@ -425,7 +437,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                 <code class="lang-javascript code">
 // Listen for switch state changes
 var switchEl = document.querySelector('.nds-switch');
-switchEl.addEventListener('switchChange', function(e) {
+switchEl.addEventListener('nds:switchChange', function(e) {
   console.log('Checked:', e.detail.checked);
   console.log('Value:', e.detail.value);
   console.log('Input:', e.detail.input);
@@ -435,8 +447,8 @@ switchEl.addEventListener('switchChange', function(e) {
 var input = document.querySelector('.nds-switch-input');
 input.checked = !input.checked;
 input.dispatchEvent(new Event('change'));
-                </code>
-              </div>
+            </code>
+      </div>
         </div>
       </div>
     </div>

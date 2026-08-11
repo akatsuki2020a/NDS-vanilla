@@ -1,3 +1,32 @@
+/* NDS.Autocomplete — public surface
+ * Rides: nds-dropmenu (menu shell, open/close, positioning, outside-click)
+ *      · nds-forms (loading chrome via data-state="loading", the field's clear button)
+ *      · nds-empty (the "no results" placeholder; soft — the menu just closes without it)
+ * Methods:
+ *   NDS.Autocomplete.init() / .reinit()      arm the delegated focusin builder
+ *   NDS.Autocomplete.create(el, options)     build one field now; options {filter, renderItem}
+ * Events (bubble from the .nds-form-container):
+ *   nds:autocomplete:fetch    detail {query, results} — after every result set is rendered
+ *   nds:autocomplete:select   detail {item, text} — a suggestion was picked
+ *   nds:autocomplete:clear    detail {} — the field's clear button was used
+ * Hooks (all on the .nds-form-container):
+ *   data-url · data-name (result field to display, default "Title") · data-min-chars (3)
+ *   data-query-param (q) · data-results-path · data-fetch="each|once"
+ *   data-empty-message · data-empty-icon · data-strict (typed text must match a pick)
+ * Gotchas:
+ *   - data-strict adds a hidden NAMELESS .nds-autocomplete-value carrier at build: a pick
+ *     fills it, typing or clear empties it, and NDS.Forms.validateForm() rejects text that
+ *     doesn't match it ("Choose from the suggestions"). It never changes what submits.
+ *     Server-prefilled text in a never-focused field passes — the carrier only exists
+ *     after the field builds.
+ *   - Activates on an input[autocomplete="on"] inside .nds-form-container[data-url], built
+ *     on the field's FIRST FOCUS.
+ *   - renderItem() output is inserted as HTML — you own the escaping. The default renderer
+ *     escapes and highlights the match.
+ *   - Only the first 20 results render; data-fetch="once" caches the list and filters it
+ *     in the browser.
+ *   - Inside a .nds-search-box, picking a suggestion clicks the .nds-search-btn.
+ */
 /**
  * NDS Autocomplete Component
  * Enhances form inputs with remote typeahead/autocomplete functionality
@@ -87,6 +116,20 @@
             this.selectedItem = null;
             this.dropmenuInstance = null;
 
+            // data-strict: typed text must match a picked suggestion. The pick
+            // is runtime state (selectedItem), invisible to forms' submit
+            // validation — mirror it into a hidden NAMELESS carrier the strict
+            // check reads. Nameless on purpose: it must never change what the
+            // form submits.
+            this.strict = containerElement.hasAttribute('data-strict');
+            this.carrier = null;
+            if (this.strict) {
+                this.carrier = document.createElement('input');
+                this.carrier.type = 'hidden';
+                this.carrier.className = 'nds-autocomplete-value';
+                this.formControl.appendChild(this.carrier);
+            }
+
             this.init();
             containerElement.setAttribute('data-nds-autocomplete-initialized', 'true');
         }
@@ -160,16 +203,22 @@
 
             // Track held keys to prevent fetch spam (e.g. holding backspace)
             this._keyHeld = false;
+            // Set only while selectItem dispatches its own input event (below)
+            this._suppressFetch = false;
 
             const { signal } = this.abortController;
 
-            // Input typing — only process when 'typing' state is set by forms JS
+            // Input handler. The only input event that must NOT fetch is the one
+            // selectItem dispatches to sync forms after writing the picked value,
+            // and it flags that itself — every other input event fetches, whether
+            // the user typed it or the consumer dispatched it.
             this._onInput = () => {
-                if (!NDS.State.has(this.container, 'typing')) return;
+                if (this._suppressFetch) return;
                 if (this._keyHeld) return;
 
                 var value = this.input.value.trim();
                 this.selectedItem = null;
+                if (this.carrier) this.carrier.value = '';
 
                 if (value.length >= this.minChars) {
                     this._debouncedFetch(value);
@@ -429,11 +478,14 @@
 
             this.input.value = text;
             this.selectedItem = itemData;
+            if (this.carrier) this.carrier.value = text;
 
-            // Remove 'typing' so _onInput handler skips the fetch
-            removeState(this.container, 'typing');
-            // Trigger input/change events so forms JS updates state
+            // Trigger input/change events so forms JS updates state. Fetching on
+            // the value we just picked would reopen the menu — suppress just this
+            // one dispatch (triggerEvents is synchronous, so the flag can't leak).
+            this._suppressFetch = true;
             NDS.triggerEvents(this.input);
+            this._suppressFetch = false;
 
             this.close();
             this.input.focus();
@@ -455,6 +507,7 @@
 
         handleClear() {
             this.selectedItem = null;
+            if (this.carrier) this.carrier.value = '';
             this.results = [];
             this.activeIndex = -1;
 
@@ -593,6 +646,10 @@
 
             if (this.menu && this.menu.parentNode) {
                 this.menu.parentNode.removeChild(this.menu);
+            }
+
+            if (this.carrier && this.carrier.parentNode) {
+                this.carrier.parentNode.removeChild(this.carrier);
             }
 
             this.container.classList.remove('nds-dropmenu');

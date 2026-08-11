@@ -151,6 +151,27 @@
     --btn-LH: var(--typo-text-xs-LH);
   }
 
+  // Stacked button (.nds-col from the flex utilities): the icon sits above the
+  // label, so the fixed height gives way to the content and padding-block: 0
+  // leaves the rows touching the edges. Match the inline padding on both axes.
+  &.nds-col {
+    padding-block: var(--_btn-padding);
+    // Two rows of content, so the label wraps instead of running off, and the
+    // button fills its slot rather than sitting at the one-line --btn-height.
+    white-space: normal;
+    height: stretch;
+    // Column direction makes justify-content the vertical axis: the base centre
+    // would float the icon mid-button once a taller sibling stretches the row,
+    // so icons stay pinned to the top and line up across a row of choices.
+    justify-content: flex-start;
+
+    // Centred here only — the global start keeps wrapped menu labels (mainnav,
+    // drawer) hugging the start edge.
+    .nds-label {
+      text-align: center;
+    }
+  }
+
   // ==============================================
   // BUTTON VARIANTS
   // ==============================================
@@ -245,11 +266,13 @@
   // Button group border handling. The seam is the edge facing the previous
   // button, so it follows the group's axis — tinting inline-start in a column
   // would colour the group's outer side edge and leave the real seam plain.
-  .nds-btn-group:not(.nds-vertical) &:not(:first-child) {
+  // Disabled is excluded on every seam rule: they all outrank the base disabled
+  // rule, so without it a disabled button keeps an enabled-coloured inner edge.
+  .nds-btn-group:not(.nds-vertical) &:not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
     border-inline-start-color: var(--_btn-bg-hover);
   }
 
-  .nds-btn-group.nds-vertical &:not(:first-child) {
+  .nds-btn-group.nds-vertical &:not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
     border-block-start-color: var(--_btn-bg-hover);
   }
 
@@ -798,11 +821,11 @@
 // in either mode), falling back to the shared divider tint for solid secondary —
 // a 10% wash reads as an internal seam rather than an outer edge, and it stays
 // legible over the alpha fill secondary takes on a dark surface.
-.nds-btn-group:not(.nds-vertical) .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child) {
+.nds-btn-group:not(.nds-vertical) .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
   border-inline-start-color: var(--btn-border, var(--divider-color));
 }
 
-.nds-btn-group.nds-vertical .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child) {
+.nds-btn-group.nds-vertical .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
   border-block-start-color: var(--btn-border, var(--divider-color));
 }
 

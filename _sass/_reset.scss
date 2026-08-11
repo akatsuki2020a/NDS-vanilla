@@ -89,20 +89,16 @@ p {
     text-wrap: pretty;
 }
 
+// One indent for every list, nested or not — wide enough for two-digit <ol> markers.
 :is(ul, ol) {
-    padding-inline-start: 20px;
+    padding-inline-start: var(--spacing-3xl);
     line-height: 1.5;
-}
-
-// Increase padding for lists when mixed with other content types
-:not(ul):not(ol)~:is(ul, ol) {
-    padding-inline-start: 40px;
 }
 
 // Override for nav (must come after to take precedence)
 nav :is(ul, ol) {
     list-style: none;
-    padding: 0 !important;
+    padding: 0;
     margin: 0;
 }
 
@@ -160,14 +156,17 @@ address,
     font-style: normal;
 }
 
-*:focus:not(:focus-visible) {
-    outline: none;
-}
-
-*:focus-visible {
+:focus {
     outline: 2px solid var(--focus-outline);
     outline-offset: -2px;
     box-shadow: inset 0 0 0 3px var(--focus-inner);
+}
+
+// :where() keeps this at 0,1,0 so any component box-shadow overrides
+// naturally, without needing selector complexity to beat the reset.
+:focus:where(:not(:focus-visible)) {
+    outline: none;
+    box-shadow: none;
 }
 
 

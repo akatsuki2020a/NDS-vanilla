@@ -1,3 +1,26 @@
+/* NDS.Toc — public surface
+ * Rides: nds-drawer (the list itself is a .nds-drawer, so expand/collapse and the
+ *        responsive open rules come from there)
+ * Methods:
+ *   NDS.Toc.init() / .reinit()   scan + initialize .nds-toc
+ *   NDS.Toc.create(el)           instance one table of contents
+ *   instance.update()            re-pick the active entry now
+ *   instance.destroy()
+ * Events:
+ *   (none)
+ * Hooks:
+ *   data-toc-source   selector of the container to read headings from. Set it and the
+ *                     list is BUILT from those headings
+ *   data-toc-levels   which levels to include, default "h2,h3,h4"
+ * Gotchas:
+ *   - With data-toc-source the authored list is REPLACED, and a heading with no id gets
+ *     a slug written onto it so the anchor resolves.
+ *   - The scrollspy owns the active state: any data-state="active" you author is cleared
+ *     at init.
+ *   - A link click scrolls manually so the heading lands below the sticky nav, and
+ *     replaces the URL hash without a history entry.
+ *   - The instance lives on the element as el._ndsToc.
+ */
 /**
  * NDS TOC (Table of Contents)
  * Scrollspy for `.nds-drawer.nds-toc`: sets `data-state="active"` on the
@@ -22,7 +45,12 @@
                 })
                 .filter(Boolean);
 
-            if (!this.entries.length) return;
+            // Stamp even with no entries — the pre-init skeleton (_toc.scss)
+            // keys on the stamp and must release either way.
+            if (!this.entries.length) {
+                toc.setAttribute('data-nds-toc-initialized', 'true');
+                return;
+            }
 
             this.active = null;
             this.valid = true;
@@ -131,10 +159,12 @@
 
         // Pick the last entry whose section top has crossed the nav band.
         // 1px tolerance absorbs sub-pixel rounding from smooth scroll so a
-        // just-landed heading still counts as "reached".
+        // just-landed heading still counts as "reached". Null until the first
+        // heading is actually reached — on mobile the TOC sits ABOVE the content,
+        // so defaulting to entry[0] highlighted a section still off-screen.
         findActive() {
             const threshold = window.scrollY + this.navOffset() + 1;
-            let active = this.entries[0];
+            let active = null;
             for (const e of this.entries) {
                 if (e.target.getBoundingClientRect().top + window.scrollY <= threshold) {
                     active = e;

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.2.0"
-last_edit: "28/06/2026 - 01:27 PM"
+last_edit: "01/08/2026 - 11:45 PM"
 ---
 
 <!-- Overview -->
@@ -16,7 +16,8 @@ last_edit: "28/06/2026 - 01:27 PM"
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Overview</h2>
-      <p class="nds-section-description">A static JSON file at <code class="nds-inline-code lang-html">/assets/data/saudi-cities.json</code> that any page can fetch. Designed as a drop-in source for the autocomplete component, but plain enough to feed into selects, maps, filters, or any other lookup UI.</p>
+      <p class="nds-section-description">A static JSON file that any page can fetch. Designed as a drop-in source for the autocomplete component, but plain enough to feed into selects, maps, filters, or any other lookup UI.</p>
+      <p class="nds-section-description">It ships at <code class="nds-inline-code lang-html">docs-assets/data/saudi-cities.json</code>, outside the runtime assets a project copies wholesale — so copy the file into your own assets folder and serve it from there. The examples below assume <code class="nds-inline-code lang-html">/assets/data/saudi-cities.json</code>.</p>
     </div>
     <div class="nds-section-body">
       <div class="nds-definition-list nds-divided nds-grid" style="--max-col:2;--mid-col:1;--min-col:1;">
@@ -91,7 +92,7 @@ last_edit: "28/06/2026 - 01:27 PM"
           <div class="demo-container">
             <div class="state-demo" style="max-width: 480px;">
               <div class="nds-form-container"
-                data-url="{{ '/assets/data/saudi-cities.json' | relative_url }}"
+                data-url="{{ '/docs-assets/data/saudi-cities.json' | relative_url }}"
                 data-name="Name" data-fetch="once" data-min-chars="1">
                 <div class="nds-form-header">
                   <label for="demo-saudiCity"><span class="nds-label">City</span></label>
@@ -178,7 +179,7 @@ last_edit: "28/06/2026 - 01:27 PM"
           <div class="demo-container">
             <div class="state-demo" style="max-width: 480px;">
               <div class="nds-form-container" id="demo-saudiCityBilingual"
-                data-url="{{ '/assets/data/saudi-cities.json' | relative_url }}"
+                data-url="{{ '/docs-assets/data/saudi-cities.json' | relative_url }}"
                 data-name="Name" data-fetch="once" data-min-chars="1">
                 <div class="nds-form-header">
                   <label for="demo-saudiCityBilingualInput"><span class="nds-label">City</span></label>
@@ -311,7 +312,7 @@ const byRegion = cities.reduce((map, city) =&gt; {
       <h2 class="nds-section-title">Notes</h2>
     </div>
     <div class="nds-section-body">
-      <div class="nds-block">
+      <div class="nds-block nds-prose">
         <ul>
           <li>The dataset is editorial — it favors administrative seats and well-known towns over an exhaustive census of every village. Expect to extend it for use cases that need full coverage.</li>
           <li>Latin transliterations follow common English-language conventions, not a strict standard. Searches may need to handle alternate spellings (e.g., <em>Mecca</em> vs <em>Makkah</em>) — wire that into your <code class="nds-inline-code lang-html">filter</code> callback rather than duplicating entries.</li>

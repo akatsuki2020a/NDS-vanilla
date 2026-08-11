@@ -1,3 +1,26 @@
+/* NDS.Selection — public surface
+ * Rides: nds-tables (selected rows carry the table's own state; soft — a plain list of
+ *        input.nds-check items counts on its own)
+ * Methods:
+ *   NDS.Selection.init()            wire the document listener (the loader calls this)
+ *   NDS.Selection.reinit()          recount every widget after the DOM changed
+ *   NDS.Selection.refresh()         same recount, as the NDS.Init.refresh hook — takes no
+ *                                   container, because the widget sits outside the list
+ *   NDS.Selection.recount(listId)   recount one list's widgets
+ *   NDS.Selection.destroy()         detach the listener
+ * Events:
+ *   (none)
+ * Hooks:
+ *   data-selection-target   on the widget — the id of the list it counts
+ *   data-selection-count    slots the widget fills with the selected count
+ *   data-selection-total    slots the widget fills with the list's item count
+ * Gotchas:
+ *   - The count covers EVERY selected item in the list, including rows on other pages and
+ *     rows a filter currently hides — the bulk-action truth, matching what export sends.
+ *   - Ship .nds-selection-view with `hidden` so first paint is right before this bundle
+ *     lands; the component swaps it against .nds-records-view.
+ *   - data-state="has-selection" sits on the widget while anything is selected.
+ */
 /**
  * NDS Selection Count
  * Content-agnostic selected-items counter for records widgets.
@@ -99,5 +122,14 @@
         _offs = [];
     }
 
-    NDS.Selection = { init, reinit: recountAll, recount, destroy };
+    // refresh ignores the container on purpose: recountAll queries [data-selection-target]
+    // (a handful of elements on any page) and recounts each, so scoping buys nothing and
+    // risks the silent miss NDS.Init.refresh exists to remove — a wrapper handed in that
+    // holds the list, rather than the list itself, would match nothing.
+    // It calls init() first because the walk dispatches an owner's refresh INSTEAD of its
+    // init: on a page that had no [data-selection-target] at load the document listener
+    // was never wired, so counting once would leave the widget frozen on the first click.
+    // init() self-guards, but it RETURNS EARLY when already wired, so it cannot be the
+    // whole hook — recountAll() has to run either way.
+    NDS.Selection = { init, reinit: recountAll, refresh: () => { init(); recountAll(); }, recount, destroy };
 })();

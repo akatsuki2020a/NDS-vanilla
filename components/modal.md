@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.5.0"
-last_edit: "28/06/2026 - 01:27 PM"
+updated: "1.7.0"
+last_edit: "10/08/2026 - 12:31 AM"
 ---
 
 <!-- Modal Dialog -->
@@ -19,81 +19,83 @@ last_edit: "28/06/2026 - 01:27 PM"
             <p class="nds-section-description">Use when the user needs to confirm an action, acknowledge a warning, or complete a short form before the app can continue</p>
         </div>
         <div class="nds-section-body">
-            <div class="nds-showcase">
+            <div class="nds-block">
+                <div class="nds-showcase">
 
-                <div class="nds-demo-card">
-                    <div class="demo-header">
-                        <div class="demo-action">
-                            <div class="nds-dropmenu demo-toggle-menu">
-                                <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" data-label-prefix="Size: ">
-                                    <span class="nds-label">Size: Default</span>
-                                </button>
-                                <div class="nds-dropmenu-menu" hidden>
-                                    <div class="nds-dropmenu-scroll">
-                                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
-                                            data-toggler='["", ".nds-modal", "modalSize"]'
-                                            data-trigger-label="Default">
-                                            <span class="nds-label">Default (600px)</span>
-                                        </button>
-                                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                                            data-toggler='["nds-sm", ".nds-modal", "modalSize"]'>
-                                            <span class="nds-label">Small (400px)</span>
-                                        </button>
-                                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                                            data-toggler='["nds-lg", ".nds-modal", "modalSize"]'>
-                                            <span class="nds-label">Large (800px)</span>
-                                        </button>
-                                        <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
-                                            data-toggler='["nds-full", ".nds-modal", "modalSize"]'>
-                                            <span class="nds-label">Full</span>
-                                        </button>
+                    <div class="nds-demo-card">
+                        <div class="demo-header">
+                            <div class="demo-action">
+                                <div class="nds-dropmenu demo-toggle-menu">
+                                    <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" data-label-prefix="Size: ">
+                                        <span class="nds-label">Size: Default</span>
+                                    </button>
+                                    <div class="nds-dropmenu-menu" hidden>
+                                        <div class="nds-dropmenu-scroll">
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
+                                                data-toggler='["", ".nds-modal", "modalSize"]'
+                                                data-trigger-label="Default">
+                                                <span class="nds-label">Default (600px)</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='["nds-sm", ".nds-modal", "modalSize"]'>
+                                                <span class="nds-label">Small (400px)</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='["nds-lg", ".nds-modal", "modalSize"]'>
+                                                <span class="nds-label">Large (800px)</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='["nds-full", ".nds-modal", "modalSize"]'>
+                                                <span class="nds-label">Full</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="demo-container">
-                        <div class="state-demo">
-                            <button class="nds-btn nds-primary nds-lg" data-modal-target="modal-basic-demo">
-                                <span class="nds-label">Open Modal</span>
-                            </button>
-                            <div id="modal-basic-demo" class="nds-modal nds-card nds-stroke" role="dialog" aria-labelledby="modal-basic-title"
-                                aria-hidden="true" hidden>
-                                <div class="nds-card-header">
-                                    <span class="nds-featured-icon nds-circle" data-status="neutral">
-                                        <i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i>
-                                    </span>
-                                    <button class="nds-close nds-modal-close nds-btn nds-subtle" aria-label="Close modal">
-                                        <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                                <div class="nds-card-content">
-                                    <div class="nds-card-text">
-                                        <span class="nds-card-title" id="modal-basic-title">Confirm Action</span>
-                                        <p class="nds-card-description">Are you sure you want to proceed with this
-                                            action?
-                                            This cannot be undone.</p>
+                        <div class="demo-container">
+                            <div class="state-demo">
+                                <button class="nds-btn nds-primary nds-lg" data-modal-target="modal-basic-demo">
+                                    <span class="nds-label">Open Modal</span>
+                                </button>
+                                <div id="modal-basic-demo" class="nds-modal nds-card nds-stroke" role="dialog" aria-labelledby="modal-basic-title"
+                                    aria-hidden="true" hidden>
+                                    <div class="nds-card-header">
+                                        <span class="nds-featured-icon nds-circle" data-status="neutral">
+                                            <i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i>
+                                        </span>
+                                        <button class="nds-close nds-modal-close nds-btn nds-subtle" aria-label="Close modal">
+                                            <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                        </button>
                                     </div>
-                                    <div class="nds-form-container nds-textarea">
-                                        <div class="nds-form-header">
-                                            <label for="textareaInput">
-                                                <span class="nds-label">Textarea</span>
-                                            </label>
+                                    <div class="nds-card-content">
+                                        <div class="nds-card-text">
+                                            <span class="nds-card-title" id="modal-basic-title">Confirm Action</span>
+                                            <p class="nds-card-description">Are you sure you want to proceed with this
+                                                action?
+                                                This cannot be undone.</p>
                                         </div>
-                                        <div class="nds-form-control">
-                                            <textarea id="textareaInput" class="nds-textarea"
-                                                placeholder="Enter your message..." rows="4"></textarea>
-                                        </div>
-                                        <div class="nds-form-footer">
-                                            <span class="nds-feedback nds-outline nds-sm">
-                                                <span class="nds-feedback-icon">
-                                                    <i class="nds-icon" aria-hidden="true"></i>
+                                        <div class="nds-form-container nds-textarea">
+                                            <div class="nds-form-header">
+                                                <label for="textareaInput">
+                                                    <span class="nds-label">Textarea</span>
+                                                </label>
+                                            </div>
+                                            <div class="nds-form-control">
+                                                <textarea id="textareaInput" class="nds-textarea"
+                                                    placeholder="Enter your message..." rows="4"></textarea>
+                                            </div>
+                                            <div class="nds-form-footer">
+                                                <span class="nds-feedback nds-outline nds-sm">
+                                                    <span class="nds-feedback-icon">
+                                                        <i class="nds-icon" aria-hidden="true"></i>
+                                                    </span>
+                                                    <span class="nds-feedback-message"></span>
                                                 </span>
-                                                <span class="nds-feedback-message"></span>
-                                            </span>
+                                            </div>
                                         </div>
-                                    </div>
 
+                                    </div>
                                     <div class="nds-card-actions">
                                         <button class="nds-btn nds-primary nds-lg" data-modal-close>
                                             <span class="nds-label">Confirm</span>
@@ -105,29 +107,28 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="demo-code">
-                        <div class="nds-tabs nds-code nds-divided">
-                            <div class="nds-tab-list-container nds-scroll-more">
-                                <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
-                                    <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
-                                        aria-controls="panel-modal-default-1" id="tab-modal-default-1">
-                                        <span class="nds-tab-label">HTML</span>
-                                    </button>
-                                </nav>
-                                <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
-                                </button>
-                            </div>
-                            <div class="nds-tab-content">
-                                <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-modal-default-1"
-                                    aria-labelledby="tab-modal-default-1">
-                                    <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
-                                            <i class="nds-icon nds-hgi-copy-01"></i>
+                        <div class="demo-code">
+                            <div class="nds-tabs nds-code nds-divided">
+                                <div class="nds-tab-list-container nds-scroll-more">
+                                    <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                                        <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                                            aria-controls="panel-modal-default-1" id="tab-modal-default-1">
+                                            <span class="nds-tab-label">HTML</span>
                                         </button>
-                                    </div>
-                                    <div class="nds-expandable-content">
-                                        <code class="lang-html code">
+                                    </nav>
+                                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="nds-tab-content">
+                                    <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-modal-default-1"
+                                        aria-labelledby="tab-modal-default-1">
+                                        <div class="nds-code-action">
+                                            <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                                <i class="nds-icon nds-hgi-copy-01"></i>
+                                            </button>
+                                        </div>
+                                        <div class="nds-expandable-content">
+                                            <code class="lang-html code">
 &lt;!-- Trigger Button --&gt;
 &lt;button class="nds-btn nds-primary nds-lg" data-modal-target="modal-basic-demo"&gt;
   &lt;span class="nds-label"&gt;Open Modal&lt;/span&gt;
@@ -169,24 +170,25 @@ last_edit: "28/06/2026 - 01:27 PM"
         &lt;/span&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-    &lt;div class="nds-card-actions"&gt;
-      &lt;button class="nds-btn nds-primary nds-lg" data-modal-close&gt;
-        &lt;span class="nds-label"&gt;Confirm&lt;/span&gt;
-      &lt;/button&gt;
-      &lt;button class="nds-btn nds-secondary-outline nds-lg" data-modal-close&gt;
-        &lt;span class="nds-label"&gt;Cancel&lt;/span&gt;
-      &lt;/button&gt;
-    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="nds-card-actions"&gt;
+    &lt;button class="nds-btn nds-primary nds-lg" data-modal-close&gt;
+      &lt;span class="nds-label"&gt;Confirm&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;button class="nds-btn nds-secondary-outline nds-lg" data-modal-close&gt;
+      &lt;span class="nds-label"&gt;Cancel&lt;/span&gt;
+    &lt;/button&gt;
   &lt;/div&gt;
 &lt;/div&gt;
                                         </code>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </div>
@@ -199,62 +201,64 @@ last_edit: "28/06/2026 - 01:27 PM"
             <h2 class="nds-section-title">Built-in Features</h2>
         </div>
         <div class="nds-section-body">
-            <div class="nds-definition-list nds-divided nds-grid nds-doc-features">
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-plug-socket"></i>
-                        <span class="nds-label">Auto-initialization</span>
-                    </span>
-                    <p class="nds-item-desc">Modals wire up from <code class="nds-inline-code lang-html">data-modal-target</code> and <code class="nds-inline-code lang-html">data-modal-close</code> attributes with no JavaScript init call required.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-focus-point"></i>
-                        <span class="nds-label">Focus Trap</span>
-                    </span>
-                    <p class="nds-item-desc">Tab and Shift+Tab cycle through focusable elements inside the modal, keeping keyboard users contained until they dismiss it.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-keyboard"></i>
-                        <span class="nds-label">Keyboard Dismissal</span>
-                    </span>
-                    <p class="nds-item-desc">Pressing Escape closes the modal and its backdrop without any extra wiring.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-paint-board"></i>
-                        <span class="nds-label">Backdrop Overlay</span>
-                    </span>
-                    <p class="nds-item-desc">A dimmed, blurred overlay covers the page behind the modal. Clicking the backdrop closes the modal automatically.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-lock-key"></i>
-                        <span class="nds-label">Body Scroll Lock</span>
-                    </span>
-                    <p class="nds-item-desc">Page scrolling is disabled while a modal is open and restored when it closes.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-mobile-programming-01"></i>
-                        <span class="nds-label">Mobile Bottom Sheet</span>
-                    </span>
-                    <p class="nds-item-desc">On small screens the modal slides up from the bottom with rounded top corners, and action buttons expand to full width.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-motion-02"></i>
-                        <span class="nds-label">Animated Transitions</span>
-                    </span>
-                    <p class="nds-item-desc">Fade and scale on desktop, slide on mobile. The closing state drives the exit animation automatically.</p>
-                </div>
-                <div class="nds-definition-item">
-                    <span class="nds-item-title">
-                        <i class="hgi hgi-stroke hgi-code-circle"></i>
-                        <span class="nds-label">Programmatic Control</span>
-                    </span>
-                    <p class="nds-item-desc">Open, close, and check state with <code class="nds-inline-code lang-js">NDS.Modal.open()</code>, <code class="nds-inline-code lang-js">NDS.Modal.close()</code>, and <code class="nds-inline-code lang-js">NDS.Modal.isOpen()</code>.</p>
+            <div class="nds-block">
+                <div class="nds-definition-list nds-divided nds-grid nds-doc-features">
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-plug-socket"></i>
+                            <span class="nds-label">Auto-initialization</span>
+                        </span>
+                        <p class="nds-item-desc">Modals wire up from <code class="nds-inline-code lang-html">data-modal-target</code> and <code class="nds-inline-code lang-html">data-modal-close</code> attributes with no JavaScript init call required.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-focus-point"></i>
+                            <span class="nds-label">Focus Trap</span>
+                        </span>
+                        <p class="nds-item-desc">Tab and Shift+Tab cycle through focusable elements inside the modal, keeping keyboard users contained until they dismiss it.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-keyboard"></i>
+                            <span class="nds-label">Keyboard Dismissal</span>
+                        </span>
+                        <p class="nds-item-desc">Pressing Escape closes the modal and its backdrop without any extra wiring.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-paint-board"></i>
+                            <span class="nds-label">Backdrop Overlay</span>
+                        </span>
+                        <p class="nds-item-desc">A dimmed, blurred overlay covers the page behind the modal. Clicking the backdrop closes the modal automatically.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-lock-key"></i>
+                            <span class="nds-label">Body Scroll Lock</span>
+                        </span>
+                        <p class="nds-item-desc">Page scrolling is disabled while a modal is open and restored when it closes.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-mobile-programming-01"></i>
+                            <span class="nds-label">Mobile Bottom Sheet</span>
+                        </span>
+                        <p class="nds-item-desc">On small screens the modal slides up from the bottom with rounded top corners, and action buttons expand to full width.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-motion-02"></i>
+                            <span class="nds-label">Animated Transitions</span>
+                        </span>
+                        <p class="nds-item-desc">Fade and scale on desktop, slide on mobile. The closing state drives the exit animation automatically.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-code-circle"></i>
+                            <span class="nds-label">Programmatic Control</span>
+                        </span>
+                        <p class="nds-item-desc">Open, close, and check state with <code class="nds-inline-code lang-js">NDS.Modal.open()</code>, <code class="nds-inline-code lang-js">NDS.Modal.close()</code>, and <code class="nds-inline-code lang-js">NDS.Modal.isOpen()</code>.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -269,7 +273,7 @@ last_edit: "28/06/2026 - 01:27 PM"
         </div>
         <div class="nds-section-body">
 
-            <div class="nds-block">
+            <div class="nds-block nds-prose">
                 <h3 class="nds-block-title">Best Practices</h3>
                 <ul>
                     <li>Use a modal when the user must confirm or decide something before the app can continue, such as approving a submission or accepting terms</li>
@@ -278,6 +282,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                     <li>Don't use for success messages or non-blocking notifications. Use an Alert or Toast instead</li>
                     <li>For multi-step workflows inside a modal, use the <a class="nds-color" href="{{ 'components/stepper' | relative_url }}">Stepper</a> component to guide users through each stage. For workflows too complex for a modal, use a dedicated page instead</li>
                     <li>Don't stack modals. If one modal needs to open another, restructure the flow so a single modal handles the decision</li>
+                    <li>Add <code class="nds-inline-code lang-html">data-portal</code> to every menu-based control you put inside a modal: a <a class="nds-color" href="{{ 'components/dropmenu' | relative_url }}">Dropmenu</a>, a <a class="nds-color" href="{{ 'components/forms' | relative_url }}">select</a>, a <a class="nds-color" href="{{ 'components/multiselect' | relative_url }}">Multiselect</a>, an <a class="nds-color" href="{{ 'components/autocomplete' | relative_url }}">Autocomplete</a>, or a <a class="nds-color" href="{{ 'components/filter' | relative_url }}">Filter</a>. The modal card scrolls its own content and creates a stacking context, so an in-place menu is clipped at the card edge or hidden behind it. The attribute goes on the <code class="nds-inline-code lang-html">.nds-dropmenu</code> wrapper, which for a multiselect is the inner <code class="nds-inline-code lang-html">[data-multiselect-dropmenu]</code> element rather than the field root</li>
                     <li>Choose <code class="nds-inline-code lang-html">nds-sm</code> for simple confirmation prompts with one or two buttons. Use the default size when the modal includes a short form or longer description. Use <code class="nds-inline-code lang-html">nds-lg</code> for content-heavy modals like terms of service or data previews. Use <code class="nds-inline-code lang-html">nds-full</code> for immersive tasks like image editing or document previews</li>
                     <li>Keep titles clear and contextual to the required action</li>
                     <li>Limit content to a single focused message or task</li>
@@ -337,7 +342,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                 </table>
             </div>
 
-            <div class="nds-block">
+            <div class="nds-block nds-prose">
                 <h3 class="nds-block-title">JavaScript API</h3>
                 <p><strong>NDS.Modal</strong> initializes automatically on page load. The modal script depends on <code class="nds-inline-code lang-js">nds-backdrop.js</code>, which must load first.</p>
                 <div class="nds-code nds-expandable">
@@ -371,11 +376,11 @@ NDS.Modal.init();
 // Fired on the modal element, bubbles up to document
 const modal = document.getElementById('modal-id');
 
-modal.addEventListener('nds-modal-opened', (e) =&gt; {
+modal.addEventListener('nds:modal:opened', (e) =&gt; {
     // Modal is now visible
 });
 
-modal.addEventListener('nds-modal-closed', (e) =&gt; {
+modal.addEventListener('nds:modal:closed', (e) =&gt; {
     // Modal is now hidden, reset forms or clean up
     modal.querySelector('form')?.reset();
 });

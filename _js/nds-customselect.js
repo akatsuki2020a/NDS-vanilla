@@ -1,3 +1,21 @@
+/* NDS.CustomSelect — public surface
+ * Rides: nds-dropmenu (open/close, keyboard nav, positioning, portal, outside-click)
+ * Methods:
+ *   NDS.CustomSelect.init() / .reinit()    arm the delegated listeners; paint pre-selected labels
+ *   NDS.CustomSelect.create(el)            build one select now — pass the input or its form-control
+ *   NDS.CustomSelect.setValue(el, value)   pick by option value; false when no option carries it
+ *   NDS.CustomSelect.clear(el)             back to placeholder
+ * Events (fire ON the .nds-form-control — this one does NOT bubble):
+ *   nds:customselect:change   detail {value, text} — every pick, by click or by
+ *                             setValue()/clear()
+ * Hooks:
+ *   (none — the field is markup: one .nds-select-option per choice, .nds-select-value the
+ *    hidden input that submits, .nds-select-input the readonly display field)
+ * Gotchas:
+ *   - Read .nds-select-value for the value; the visible input is display-only and its label
+ *     is derived from the picked option.
+ *   - A select builds on its FIRST FOCUS, not at init — setValue()/clear() work before that.
+ */
 // NDS Custom Select — styled dropdown over a .nds-select-input
 //
 // Delegated + lazy (mirrors the voice-input pattern): init() installs two
@@ -23,9 +41,9 @@
     // is the source of truth (it submits); the visible `.nds-select-input` is a
     // readonly, non-submitting display surface, so its label is DERIVED from the
     // matching option's text — never hand-authored. Display-only: no dropmenu
-    // build. No-op once a label is present. Forms invokes this from its critical
-    // per-input init (it already iterates every select-input), so a pre-filled
-    // label paints at first paint rather than after a deferred build.
+    // build. No-op once a label is present. init() runs it over every
+    // select-input on the page, so a pre-filled label paints without waiting
+    // for the field's deferred build.
     function restoreDisplay(selectInput) {
         if (!selectInput || selectInput.value || !selectInput.closest) return;
         var formControl = selectInput.closest('.nds-form-control');
@@ -71,7 +89,10 @@
         // Back-reference so onOptionClick can find the owning form-control
         // after NDS.Dropmenu portals the menu to <body> — a portaled option's
         // closest('.nds-form-control') walk stops at <body> and returns null.
+        // Forward ref for the same reason in the other direction: setValue's
+        // option lookup while the menu is portaled open.
         dropdown._selectFormControl = formControl;
+        formControl._selectDropdown = dropdown;
         dropdown.removeAttribute('hidden');
         var optionsContainer = dropdown.querySelector('.nds-select-options');
         if (optionsContainer) optionsContainer.classList.add('nds-dropmenu-scroll');
@@ -113,7 +134,52 @@
         build(selectInput);
     }
 
-    // Delegated option pick → set the input text + hidden value. The dropmenu's
+    // The full write sequence a user pick runs — shared by the delegated
+    // click path and the public setValue/clear. `option` null = clear back to
+    // placeholder. Query options from the dropdown (forward ref / passed
+    // menu), not the form-control — while portaled, the options live under
+    // <body> and formControl.querySelectorAll would return nothing (so the
+    // selected marker would never update, and the next open would still show
+    // the initial selection highlighted).
+    function apply(formControl, option, menu) {
+        var selectInput = formControl.querySelector('.nds-select-input');
+        if (!selectInput) return false;
+
+        var hiddenInput = formControl.querySelector('.nds-select-value');
+        var value = option ? (option.dataset.value || '') : '';
+        var optionText = option && option.querySelector('.nds-option-text');
+        var text = option ? (optionText ? optionText.textContent : value) : '';
+
+        selectInput.value = text;
+        if (hiddenInput) hiddenInput.value = value;
+
+        var scope = menu || formControl._selectDropdown || formControl;
+        scope.querySelectorAll('.nds-select-option').forEach(function (o) {
+            if (option && o.dataset.value === value) NDS.State.add(o, 'selected');
+            else NDS.State.remove(o, 'selected');
+        });
+
+        // Dispatched input/change run forms' delegated field-state sync.
+        NDS.triggerEvents(selectInput);
+        if (hiddenInput) NDS.triggerEvents(hiddenInput);
+
+        formControl.dispatchEvent(new CustomEvent('nds:customselect:change', {
+            detail: { value: value, text: text }
+        }));
+        return true;
+    }
+
+    // Resolve the owning form-control from what consumers hold: the select
+    // input, the form-control, or any container holding one (create()'s
+    // tolerance).
+    function formControlOf(el) {
+        if (!el || !el.closest) return null;
+        if (el.classList.contains('nds-select-input')) return el.closest('.nds-form-control');
+        var input = el.querySelector && el.querySelector('.nds-select-input');
+        return input ? input.closest('.nds-form-control') : null;
+    }
+
+    // Delegated option pick → run the shared write sequence. The dropmenu's
     // own item-click handler auto-closes the menu and restores focus.
     function onOptionClick(e) {
         var t = e.target;
@@ -127,33 +193,7 @@
         var formControl = (menu && menu._selectFormControl)
                         || option.closest('.nds-form-control');
         if (!formControl) return;
-        var selectInput = formControl.querySelector('.nds-select-input');
-        if (!selectInput) return;
-
-        var hiddenInput = formControl.querySelector('.nds-select-value');
-        var value = option.dataset.value || '';
-        var optionText = option.querySelector('.nds-option-text');
-        var text = optionText ? optionText.textContent : value;
-
-        selectInput.value = text;
-        if (hiddenInput) hiddenInput.value = value;
-
-        // Query options from the menu, not the form-control — while portaled,
-        // the options live under <body> and formControl.querySelectorAll would
-        // return nothing (so the selected marker would never update, and the
-        // next open would still show the initial selection highlighted).
-        (menu || formControl).querySelectorAll('.nds-select-option').forEach(function (o) {
-            if (o.dataset.value === value) NDS.State.add(o, 'selected');
-            else NDS.State.remove(o, 'selected');
-        });
-
-        // Dispatched input/change run forms' delegated field-state sync.
-        NDS.triggerEvents(selectInput);
-        if (hiddenInput) NDS.triggerEvents(hiddenInput);
-
-        formControl.dispatchEvent(new CustomEvent('selectChange', {
-            detail: { value: value, text: text }
-        }));
+        apply(formControl, option, menu);
     }
 
     function init() {
@@ -178,6 +218,29 @@
                 ? el
                 : (el.querySelector && el.querySelector('.nds-select-input'));
             if (input) build(input);
+        },
+        // Programmatic pick: the same write sequence as a user click (display
+        // label, hidden value, selected markers, input/change events,
+        // nds:customselect:change). Returns false when no option carries the value —
+        // display and value are never desynced. Works before the dropmenu is
+        // built and while it is portaled open.
+        setValue: function (el, value) {
+            var formControl = formControlOf(el);
+            if (!formControl) return false;
+            var scope = formControl._selectDropdown || formControl;
+            var options = scope.querySelectorAll('.nds-select-option');
+            for (var i = 0; i < options.length; i++) {
+                if (options[i].dataset.value === String(value)) {
+                    return apply(formControl, options[i]);
+                }
+            }
+            return false;
+        },
+        // Back to placeholder: both inputs emptied, markers off, same events.
+        clear: function (el) {
+            var formControl = formControlOf(el);
+            if (!formControl) return false;
+            return apply(formControl, null);
         },
     };
 })();

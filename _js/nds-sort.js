@@ -1,3 +1,33 @@
+/* NDS.Sort — public surface
+ * Rides: nds-dropmenu (triggers authored inside a menu are still found while it is portaled
+ *        to <body>; soft)
+ * Methods:
+ *   NDS.Sort.create(root, options)      factory → instance (one per root, reused)
+ *   NDS.Sort.getInstance(rootOrSel)     the existing instance, or null
+ *   NDS.Sort.detectType(sampleValues)   'number' | 'date' | 'string'
+ *   NDS.Sort.parseValue(raw, type)      pure helper
+ *   NDS.Sort.compare(a, b, type, dir)   pure helper
+ *   instance.apply(key, dir)            sort now (null key resets to the authored order)
+ *   instance.reset()                    back to the authored order
+ *   instance.refresh()                  re-run the active sort over the items as they stand
+ *   instance.getState()                 {key, dir}
+ *   instance.destroy()
+ * Events (bubble from the root):
+ *   nds:sort:change   detail {key, dir, orderedItems, sort}
+ * Hooks:
+ *   data-sort        the key, on a trigger
+ *   data-sort-dir    the direction that trigger fixes (direct mode)
+ *   data-sort-<key>  the value to sort by, on each item (the default accessor)
+ * Gotchas:
+ *   - There is no init()/reinit(): sort has no auto-init selector. It is composed into
+ *     another widget with create() — filter and tables both do this.
+ *   - The options object IS the API: items, triggers, reorderIn, accessor, keyFrom,
+ *     mode ('direct' | 'cycle'), a11y ('pressed' | 'sort' | 'none'), a11yTarget, types,
+ *     initialState, urlSync, onChange.
+ *   - A selector string resolves INSIDE the root — pass a function for elements outside it.
+ *   - Sorting re-appends the nodes, so listeners and element state survive. Items that
+ *     arrive later need refresh().
+ */
 /**
  * NDS Sort Component
  * DOM-reorder sort for any collection of sibling elements. Consumed by Filter
@@ -146,11 +176,34 @@
 
         // Shared dispatch for the flexible `selector | NodeList | Array | () => NodeList`
         // shape that both `opts.items` and `opts.triggers` accept.
-        _resolveLike(src) {
+        // `deep` reaches into portaled menus — triggers only. Triggers authored
+        // inside a data-portal dropmenu sit at <body> while it is open, so a plain
+        // root walk finds none. Items must NOT reach there: sorting reparents them
+        // into the container, and _originalOrder was snapshotted with menus closed,
+        // so a swept menu node could never be put back.
+        _resolveLike(src, deep) {
             if (typeof src === 'function') return Array.from(src() || []);
-            if (typeof src === 'string') return Array.from(this.root.querySelectorAll(src));
+            if (typeof src === 'string') {
+                const found = deep ? NDS.queryAll(this.root, src)
+                                   : Array.from(this.root.querySelectorAll(src));
+                if (!found.length) this._warnOutOfScope(src);
+                return found;
+            }
             if (src && typeof src.length === 'number') return Array.from(src);
             return [];
+        }
+
+        // A selector that matches elsewhere on the page but nothing inside the root
+        // is always a scoping mistake, never an intended empty state — so it is worth
+        // saying out loud. An empty list whose selector matches nowhere stays silent.
+        // Once per selector: _resolveTriggers runs on every render.
+        _warnOutOfScope(src) {
+            if (this._warnedSelectors && this._warnedSelectors.has(src)) return;
+            if (!document.querySelector(src)) return;
+            this._warnedSelectors = this._warnedSelectors || new Set();
+            this._warnedSelectors.add(src);
+            console.warn(`NDS Sort: "${src}" matches elements on the page but none inside the root — `
+                + 'a selector string resolves inside the root. Pass a function for elements outside it.', this.root);
         }
 
         _resolveItems() {
@@ -165,7 +218,7 @@
         // ── Trigger resolution / wiring ──────────────────────────────────
 
         _resolveTriggers() {
-            return this._resolveLike(this.opts.triggers);
+            return this._resolveLike(this.opts.triggers, true);
         }
 
         _bindTriggers() {
@@ -226,6 +279,11 @@
                 return;
             }
 
+            // Items that arrive after init (async content) missed init()'s snapshot,
+            // leaving it empty with no original order to restore. Take it on first
+            // use instead — the DOM is still in its authored order until we sort.
+            if (!this._originalOrder.length) this._originalOrder = [...items];
+
             let ordered;
             if (hasKey) {
                 const accessor = this.opts.accessor;
@@ -235,7 +293,11 @@
                     compare(accessor(a, key), accessor(b, key), type, dir || 'asc')
                 );
             } else {
-                ordered = this._originalOrder ? [...this._originalOrder] : [...items];
+                // Drop snapshot entries the container no longer holds. appendChild
+                // on a removed node re-attaches it, so restoring a stale snapshot
+                // would resurrect deleted rows — and hold them detached until then.
+                this._originalOrder = this._originalOrder.filter(el => container.contains(el));
+                ordered = [...this._originalOrder];
             }
 
             // Preserves listeners and element state — appendChild on an attached node moves it.
@@ -255,6 +317,12 @@
         }
 
         reset() { this.apply(null, null); }
+
+        // Re-run the active sort against the items as they stand now. Items that
+        // arrive after create() — an async list, an AJAX swap — miss init()'s pass
+        // entirely: a URL-seeded sort settles its state with nothing to sort, and
+        // nothing re-applies it on its own. No-op when no sort is active.
+        refresh() { if (_hasKey(this.state.key)) this.apply(this.state.key, this.state.dir); }
 
         getState() { return { key: this.state.key, dir: this.state.dir }; }
 
@@ -301,10 +369,12 @@
         // When the triggers live inside a .nds-dropmenu, mirror the active trigger's
         // icon onto the dropmenu's own trigger button so the closed menu reflects the
         // current sort. Icon classes are copied verbatim, so authors can use any icon
-        // set (NDS inline, HGI font, custom) without JS changes.
+        // set (NDS inline, HGI font, custom) without JS changes. NDS.closest, not
+        // el.closest: a data-portal menu sits at <body> while open, so a plain walk
+        // finds no wrapper and the icon would silently stop tracking the sort.
         _syncDropmenuTriggerIcon(triggers) {
             if (!triggers.length) return;
-            const dropmenu = triggers[0].closest('.nds-dropmenu');
+            const dropmenu = NDS.closest(triggers[0], '.nds-dropmenu');
             if (!dropmenu) return;
             const triggerIcon = dropmenu.querySelector('.nds-dropmenu-trigger > i, .nds-dropmenu-trigger .nds-icon, .nds-dropmenu-trigger .hgi');
             if (!triggerIcon) return;

@@ -81,10 +81,16 @@
     // Knob: the bar's block margins, "<start> <end>". A toolbar hugs its content
     // and clears nothing above it; set --toolbar-margin-block on the bar (or an
     // ancestor) to change either edge.
-    --_toolbar-margin-block: var(--toolbar-margin-block, 0 var(--spacing-xl));
+    --_toolbar-margin-block: var(--toolbar-margin-block, 0 var(--spacing-4xl));
 
     margin-block: var(--_toolbar-margin-block);
     width: 100%;
+}
+
+// Inside a sub-row (a compact detail cell): a smaller bottom gap before the
+// nested content. Still overridable per-bar via the public --toolbar-margin-block.
+.nds-sub :is(.nds-toolbar, .nds-filter-bar) {
+    --_toolbar-margin-block: var(--toolbar-margin-block, 0 var(--spacing-xl));
 }
 
 // A row spans the bar, so whatever follows it starts a new line.
@@ -101,7 +107,7 @@
 :is(.nds-bar-text, .nds-results-count) {
     display: block;   // span-rooted; block so standalone counters sit on their own line
     align-self: end;  // sits on the bar's bottom edge next to taller controls; inert outside flex/grid
-    color: var(--text-secondary-paragraph);
+    color: var(--text-primary-paragraph);
 
     b {
         font-weight: var(--font-weight-medium);
@@ -133,10 +139,4 @@
     > :is(.nds-bar-start, .nds-bar-end) > :not([hidden])
 )) {
     display: none;
-}
-
-// Transitional: preserves the legacy bar's wider bottom gap for markup that still
-// ships .nds-filter-bar. Stays top-level — nested it would read as a bar INSIDE a bar.
-.nds-filter-bar {
-    --toolbar-margin-block: 0 var(--spacing-4xl);
 }

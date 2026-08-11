@@ -1,7 +1,17 @@
 - label: "Home"
   url: "/"
   href: "/"
-  
+
+- label: "Guides"
+  has_sub: true
+  children:
+    - label: "Get Started"
+      url: "/guides/get-started"
+      href: "/guides/get-started.html"
+    - label: "NDS IQ"
+      url: "/guides/integration-quality"
+      href: "/guides/integration-quality.html"
+
 - label: "DGA Templates"
   has_sub: true
   children:
@@ -45,6 +55,9 @@
 - label: "Examples"
   has_sub: true
   children:
+    - label: "Sign In"
+      url: "/examples/sign-in"
+      href: "/examples/sign-in.html"
     - label: "Registration"
       url: "/examples/registration"
       href: "/examples/registration.html"
@@ -54,9 +67,15 @@
     - label: "Faculty"
       url: "/examples/faculty"
       href: "/examples/faculty.html"
+    - label: "Faculty CV"
+      url: "/examples/faculty-cv"
+      href: "/examples/faculty-cv.html"
     - label: "Program"
       url: "/examples/program"
       href: "/examples/program.html"
+    - label: "Manage Records"
+      url: "/examples/manage-records"
+      href: "/examples/manage-records.html"
     - label: "Console"
       url: "/examples/console-demo"
       href: "/examples/console-demo.html"
@@ -219,6 +238,9 @@
         - label: "OTP Input"
           url: "/components/otp"
           href: "/components/otp.html"
+        - label: "Password"
+          url: "/components/password"
+          href: "/components/password.html"
         - label: "Radio Button"
           url: "/components/radio"
           href: "/components/radio.html"
@@ -309,6 +331,18 @@
         - label: "Flex"
           url: "/layout/flex"
           href: "/layout/flex.html"
+        - label: "Prose"
+          url: "/layout/prose"
+          href: "/layout/prose.html"
+    - label: "Core"
+      is_group: true
+      children:
+        - label: "Refresh"
+          url: "/core/refresh"
+          href: "/core/refresh.html"
+        - label: "Request"
+          url: "/core/request"
+          href: "/core/request.html"
     - label: "Utilities"
       is_group: true
       children:
@@ -327,15 +361,15 @@
         - label: "Expandable Content"
           url: "/utilities/expandable-content"
           href: "/utilities/expandable-content.html"
+        - label: "Helper Classes"
+          url: "/utilities/helpers"
+          href: "/utilities/helpers.html"
         - label: "Hidden"
           url: "/utilities/hidden"
           href: "/utilities/hidden.html"
         - label: "Numbers"
           url: "/utilities/numbers"
           href: "/utilities/numbers.html"
-        - label: "Request"
-          url: "/utilities/request"
-          href: "/utilities/request.html"
         - label: "Saudi Cities"
           url: "/utilities/saudi-cities"
           href: "/utilities/saudi-cities.html"

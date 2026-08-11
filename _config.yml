@@ -19,17 +19,19 @@
 # ============================================================================
 
 title: "NDS - Vanilla National Design System"
-version: 1.5.x-dev   # build stamp: released line + .x-dev during development (never the guessed next number); finalized in the release commit, which also sweeps the 1.5.x since/updated doc stamps to the real number
-latest_release: 1.5.0  # last published release (tag + GitHub Release artifact)
 description: "An open-source, vanilla implementation of Saudi Arabia's National Design System. Production-ready HTML, CSS, and JavaScript built from scratch with zero dependencies."
+
+version: 1.7.x-dev       # build stamp: released line + .x-dev during development (never the guessed next number); finalized in the release commit, which also sweeps the X.Y.x since/updated doc stamps to the real number
+latest_release: 1.7.0  # last published release (tag + GitHub Release artifact)
+
+# NDS IQ: the AI instruction system (block version is parsed from the include's
+# heading at build time, never declared here)
+nds_iq:
+  title: "NDS IQ"
+  description: "Integration Quality: the instruction system that governs AI agents building with NDS."
 
 baseurl: "/NDS-vanilla"
 url: "https://mazin-musleh.github.io"  # production origin (no trailing slash); used by sitemap.xml / robots.txt
-
-# HGI icon font from CDN: loads the font site-wide when true so any
-# `<i class="hgi hgi-stroke hgi-NAME">` markup in content/demo/doc pages renders.
-# UI icons always render via mask-image regardless.
-use_hgi_font: true
 
 # Set to true to show the dark/light theme toggle button in the topbar.
 theme_switcher: true
@@ -81,7 +83,7 @@ hero_image_sub:
 hero_image_pos: 50% 80%
 
 # Social share card (Open Graph / Twitter), 1200x627. Per-page override: `og_image` in front matter.
-og_image: assets/img/nds-cover.webp
+og_image: docs-assets/img/nds-cover.webp
 hero_title: National Design System
 hero_description: The National Design System provides comprehensive design guidelines, components, and resources for creating consistent and accessible digital experiences across government services in Saudi Arabia.
 
@@ -168,7 +170,10 @@ exclude:
   - vendor
   - .sass-cache
   - .jekyll-cache
+  - AGENTS.md
   - CLAUDE.md
+  - EDITORIAL.md
+  - TODO.md
   - .claude
   - .github
   - package.json

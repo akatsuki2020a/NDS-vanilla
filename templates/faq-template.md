@@ -206,18 +206,20 @@ sidemenu_mode: false
 <section id="faqFeedback" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-body">
-            <div class="nds-card nds-stroke" style="--card-width: 100%;">
-                <div class="nds-card-header">
-                    <div class="nds-card-featured-icon">
-                        <span class="nds-featured-icon nds-circle nds-xl">
-                            <i class="hgi hgi-stroke hgi-mail-01"></i>
-                        </span>
+            <div class="nds-block">
+                <div class="nds-card nds-stroke" style="--card-width: 100%;">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-xl">
+                                <i class="hgi hgi-stroke hgi-mail-01"></i>
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div class="nds-card-content">
-                    <div class="nds-card-text">
-                        <span class="nds-card-title">Comments &amp; suggestions</span>
-                        <p class="nds-card-description">For any inquiry or feedback on Government Services, please fill the required information.</p>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <span class="nds-card-title">Comments &amp; suggestions</span>
+                            <p class="nds-card-description">For any inquiry or feedback on Government Services, please fill the required information.</p>
+                        </div>
                     </div>
                     <div class="nds-card-actions">
                         <a href="{{ '/templates/contact-us-template' | relative_url }}" class="nds-btn nds-primary">

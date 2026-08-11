@@ -1,3 +1,62 @@
+/* NDS.Forms — public surface
+ * Rides: (none — base component)
+ * Methods:
+ *   NDS.Forms.init()                       scan + initialize every .nds-form-container
+ *   NDS.Forms.initializeContainer(el)      initialize one container
+ *   NDS.Forms.initForm(form)               wire one .nds-form (submit validation)
+ *   NDS.Forms.setStatus({element, status, message, permanent})   set field status
+ *                                          (error/success/warning/info/neutral)
+ *   NDS.Forms.clearStatus(el)              clear it
+ *   NDS.Forms.getStatus(el)                read {status, message}
+ *   NDS.Forms.setState(el, name, add)      add/remove a field state ('required' also
+ *                                          flips the inputs' required property)
+ *   NDS.Forms.syncState(input)             re-sync a control's chrome after setting
+ *                                          value/checked from JS
+ *   NDS.Forms.setIndeterminate(cb, value)  set a checkbox's indeterminate state
+ *   NDS.Forms.validateForm(el, opts)       validate everything → {valid, invalidFields, errors};
+ *                                          el is the .nds-form or anything inside it — works on
+ *                                          a non-<form> container too (see the Gotcha below)
+ *   NDS.Forms.validateCheckboxGroup(group, opts)
+ *   NDS.Forms.validateRadioGroup(group, opts)
+ *   NDS.Forms.validateMultiselect(el, opts)
+ *   NDS.Forms.validateTaginput(el, opts)
+ *   NDS.Forms.validateOtpGroup(el, opts)
+ *   NDS.Forms.initCheckboxGroupValidation(group) / .initRadioGroupValidation(group)
+ *   NDS.Forms.initMultiselectValidation(el)      live-validation wiring for a group
+ * Events:
+ *   nds:statusChange         detail {status, message} — from the form container
+ *   nds:formValidate         detail {valid, invalidFields, errors} — from the form, every
+ *                            validateForm() run
+ *   nds:formValid            detail {} — from the form, on a passing submit
+ *   nds:formInvalid          detail {invalidFields, errors} — from the form, on a blocked submit
+ *   nds:switchChange         detail {checked, value, input} — from the .nds-switch element
+ *   nds:indeterminateChange  detail {indeterminate} — from the checkbox
+ * Hooks:
+ *   data-required · data-min-checked · data-max-checked · data-error-message
+ *   data-ajax · data-message · data-feedback-target · data-loading-slot
+ *   data-target · data-autofill-apply (auto-fill containers)
+ * Gotchas:
+ *   - Singleton shape: init() and initializeContainer() only — no reinit(), no create().
+ *   - A required custom select is validated through its hidden .nds-select-value carrier:
+ *     author data-required on the .nds-select container. The readonly display input is
+ *     never constraint-validated, so required on it does nothing.
+ *   - An autocomplete with data-strict is checked at submit too: typed text must match a
+ *     picked suggestion (mechanism and carve-outs in the autocomplete banner).
+ *   - syncState() dispatches nothing, so it cannot re-enter your own input handler. Setting
+ *     input.value from JS notifies nothing on its own: call syncState() or dispatch input/change.
+ *   - Forms owns the submit listener on every real <form class="nds-form">. data-ajax makes it
+ *     preventDefault() after validation — the request is yours to send from nds:formValid.
+ *   - That automatic wiring is <form>-tags only: on any other element .nds-form is a layout
+ *     marker (wizard step divs use it that way) and initForm() skips it — no submit validation,
+ *     no nds:formValid, silently. Can't use a <form> tag (one outer server form, a fragment)?
+ *     Keep .nds-form on the container, call NDS.Forms.validateForm(container) from your own
+ *     trigger (the button's click), and branch on its {valid} result — validation works the
+ *     same; only the automatic submit lifecycle is absent.
+ *   - validateForm() is called synchronously at submit; keep it in the main bundle.
+ *   - Never call form.reset(): nothing in NDS listens for the native reset event. Clear
+ *     per field and syncState() each.
+ */
+
 // NDS Forms Controller - Form Control Logic
 
 (function () {
@@ -424,6 +483,37 @@
             return this._finishGroupValidation(ti, options, isValid, message, { count: count });
         },
 
+        // Custom select: the visible .nds-select-input is readonly — barred
+        // from constraint validation, so checkValidity() always passes it.
+        // The hidden .nds-select-value is the carrier that submits; required
+        // reads it. Internal — reached via validateForm, not exported.
+        validateCustomSelect: function(csElement, options) {
+            options = options || { showMessage: true };
+            var container = csElement.closest('.nds-select') || csElement;
+            var carrier = container.querySelector('.nds-select-value');
+            var hasRequired = container.hasAttribute('data-required') || container.classList.contains('nds-required');
+            var isValid = !hasRequired || !!(carrier && carrier.value.trim());
+            var message = isValid ? '' : (NDS.isArabic ? 'يرجى اختيار خيار' : 'Please select an option');
+            return this._finishGroupValidation(container, options, isValid, message, { value: carrier ? carrier.value : '' });
+        },
+
+        // Autocomplete strict: data-strict says typed text must match a picked
+        // suggestion. The hidden .nds-autocomplete-value carrier (JS-created at
+        // build under data-strict) holds the last picked text; typing or clear
+        // empties it. No carrier = the field never built (e.g. server-prefilled
+        // and untouched) — sanctioned as-is. Empty text is the required rule's
+        // business, not strict's. Internal — reached via validateForm.
+        validateAutocomplete: function(acElement, options) {
+            options = options || { showMessage: true };
+            var container = acElement.closest('.nds-form-container') || acElement;
+            var carrier = container.querySelector('.nds-autocomplete-value');
+            var input = ownField(container);
+            var text = input ? input.value.trim() : '';
+            var isValid = !carrier || text === '' || carrier.value === text;
+            var message = isValid ? '' : (NDS.isArabic ? 'اختر من الاقتراحات' : 'Choose from the suggestions');
+            return this._finishGroupValidation(container, options, isValid, message, { picked: !!(carrier && carrier.value) });
+        },
+
         validateOtpGroup: function(groupElement, options) {
             options = options || { showMessage: true };
 
@@ -455,6 +545,11 @@
                 // Composite wrappers own their own validators — taginput's
                 // typing field isn't the carrier, checkValidity would false-fail.
                 if (container.classList.contains('nds-taginput')) return;
+                // Custom selects too: the readonly display input false-PASSES
+                // checkValidity, so the carrier block in _validateGroups reads
+                // the hidden .nds-select-value instead. Keyed on the carrier —
+                // a native <select> in the same .nds-select shell stays here.
+                if (container.querySelector('.nds-select-value')) return;
 
                 var input = ownField(container);
                 if (!input || input.disabled) return;
@@ -541,6 +636,39 @@
                     if (!acc.firstInvalidInput) acc.firstInvalidInput = anchor;
                 }
             });
+
+            // Custom selects: same pattern — the readonly display input is
+            // barred from constraint validation, so required reads the hidden
+            // .nds-select-value carrier. Keyed on the carrier: a native
+            // <select> shares the .nds-select shell and stays with
+            // _validateContainers. Anchor is the display input (focusable).
+            form.querySelectorAll('.nds-select[data-required], .nds-select.nds-required').forEach(function(cs) {
+                if (!isFieldVisible(cs, form)) return;
+                if (!cs.querySelector('.nds-select-value')) return;
+                var result = Validator.validateCustomSelect(cs, { showMessage: options.showMessages });
+                if (!result.valid) {
+                    var anchor = cs.querySelector('.nds-select-input');
+                    acc.invalidFields.push(cs);
+                    acc.errors.push({ field: cs, input: anchor, message: result.message });
+                    if (!acc.firstInvalidInput) acc.firstInvalidInput = anchor;
+                }
+            });
+
+            // Autocomplete strict fields: typed-vs-picked check on the hidden
+            // carrier. Skip taginput containers — assist mode makes one
+            // container serve both components, and taginput owns its own
+            // commit rejection at add-time.
+            form.querySelectorAll('.nds-form-container[data-strict]').forEach(function(ac) {
+                if (!isFieldVisible(ac, form)) return;
+                if (ac.classList.contains('nds-taginput')) return;
+                var result = Validator.validateAutocomplete(ac, { showMessage: options.showMessages });
+                if (!result.valid) {
+                    var anchor = ownField(ac);
+                    acc.invalidFields.push(ac);
+                    acc.errors.push({ field: ac, input: anchor, message: result.message });
+                    if (!acc.firstInvalidInput) acc.firstInvalidInput = anchor;
+                }
+            });
         },
 
         // Thin orchestrator over both validation passes (shared accumulator),
@@ -600,7 +728,10 @@
                 // Skip required propagation for radios/checkboxes — managed at group level.
                 // Skip for taginput too: the wrapper's data-required is authoritative,
                 // the typing input's required attr isn't (and mustn't be — see initializeInput).
-                if (input.type !== 'radio' && input.type !== 'checkbox' && !formContainer.classList.contains('nds-taginput')) {
+                // Same for custom selects: the readonly display input never carries
+                // required — syncing from it would strip the container's authored attr.
+                if (input.type !== 'radio' && input.type !== 'checkbox' && !formContainer.classList.contains('nds-taginput')
+                    && !input.classList.contains('nds-select-input')) {
                     formContainer.toggleAttribute('data-required', input.required);
                 }
             }
@@ -980,7 +1111,7 @@
                     switchInput.checked = !switchInput.checked;
                     Utils.triggerEvents(switchInput);
                     FieldSync.update(switchInput, formControl);
-                    switchElement.dispatchEvent(new CustomEvent('switchChange', {
+                    switchElement.dispatchEvent(new CustomEvent('nds:switchChange', {
                         detail: { checked: switchInput.checked, value: switchInput.value, input: switchInput },
                         bubbles: true
                     }));
@@ -1130,8 +1261,20 @@
                         input.value = '';
                     }
                     Utils.triggerEvents(input);
-                    FieldSync.update(input, formControl);
+                    // Skip validation: clearing is an edit like typing, so it must
+                    // not raise "required" on a field the user just emptied. The
+                    // input event above already cleared any error being shown.
+                    FieldSync.update(input, formControl, true);
                 });
+
+                // The clear button hides itself once the field is empty, which
+                // would drop focus to <body>. Hand it back to the field so the
+                // user can keep typing.
+                for (var i = 0; i < inputElements.length; i++) {
+                    if (inputElements[i].type === 'hidden' || inputElements[i].disabled) continue;
+                    inputElements[i].focus();
+                    break;
+                }
             });
         }
     };

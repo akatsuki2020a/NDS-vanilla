@@ -16,7 +16,7 @@ sidemenu_mode: false
 <section id="contentTemplate" class="nds-content-section nds-sideinfo-section">
     <div class="nds-section-body">
         <aside class="nds-sideinfo nds-md nds-sticky nds-top" aria-label="On this page">
-            <nav class="nds-toc" aria-label="Table of contents"
+            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 11"
                 data-toc-source="#contentTemplate article" data-toc-levels="h2, h3, h4">
                 <div class="nds-toc-head">
                     <span class="nds-label">On this page</span>
@@ -28,7 +28,7 @@ sidemenu_mode: false
             </nav>
         </aside>
         <div class="nds-info-content">
-            <article>
+            <article class="nds-prose">
 
                 <h2 id="section-1" class="nds-section-title">Section 1</h2>
                 <p>This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system.</p>

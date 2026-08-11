@@ -7,10 +7,9 @@ breadcrumb:
 - ["Examples", "/examples"]
 hero_title: "Government Services"
 hero_description: "Browse all available government digital services"
-layout_class:
 sidemenu_mode: false
 exclude_showcase: false
-last_edit: "14/07/2026 - 04:13 PM"
+last_edit: "10/08/2026 - 12:42 AM"
 ---
 
 <section id="servicesList" class="nds-content-section">
@@ -18,7 +17,7 @@ last_edit: "14/07/2026 - 04:13 PM"
         <div class="nds-section-body">
             <div class="nds-toolbar">
                 <div class="nds-form-container nds-search-box nds-demo-showcase" data-filter-target="services_list_content"
-                    data-url="{{ '/assets/data/services-autocomplete.json' | relative_url }}" data-name="Title"
+                    data-url="{{ '/docs-assets/data/services-autocomplete.json' | relative_url }}" data-name="Title"
                     data-query-param="q">
                     <div class="nds-search-content">
                         <div class="nds-form-control">
@@ -74,15 +73,15 @@ last_edit: "14/07/2026 - 04:13 PM"
                     <span class="nds-label">Most Searched:</span>
                     <div class="nds-chips">
                         <button class="nds-chip nds-neutral nds-rounded nds-item">
-                            <i class="hgi hgi-stroke hgi-rounded hgi-plus-sign"></i>
+                            <i class="hgi hgi-stroke hgi-plus-sign"></i>
                             <span class="nds-label">Tag 1</span>
                         </button>
                         <button class="nds-chip nds-neutral nds-rounded nds-item">
-                            <i class="hgi hgi-stroke hgi-rounded hgi-plus-sign"></i>
+                            <i class="hgi hgi-stroke hgi-plus-sign"></i>
                             <span class="nds-label">Tag 2</span>
                         </button>
                         <button class="nds-chip nds-neutral nds-rounded nds-item">
-                            <i class="hgi hgi-stroke hgi-rounded hgi-plus-sign"></i>
+                            <i class="hgi hgi-stroke hgi-plus-sign"></i>
                             <span class="nds-label">Tag 3</span>
                         </button>
                     </div>
@@ -115,16 +114,16 @@ last_edit: "14/07/2026 - 04:13 PM"
                         </span>
                         {% endif %}
                     </div>
-                    <div class="nds-card-actions">
-                        <a href="{{ '/templates/service-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg"
-                            aria-label="Service Details">
-                            <span class="nds-label">Details</span>
-                        </a>
-                        <a href="{{ service.url }}" class="nds-btn nds-primary nds-lg nds-trail-icon"
-                            aria-label="Get Started">
-                            <span class="nds-label">Get Started</span>
-                        </a>
-                    </div>
+                </div>
+                <div class="nds-card-actions">
+                    <a href="{{ '/templates/service-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg"
+                        aria-label="Service Details">
+                        <span class="nds-label">Details</span>
+                    </a>
+                    <a href="{{ service.url }}" class="nds-btn nds-primary nds-lg nds-trail-icon"
+                        aria-label="Get Started">
+                        <span class="nds-label">Get Started</span>
+                    </a>
                 </div>
             </div>
             {% endfor %}
