@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.7.0"
-updated: "1.7.0"
-last_edit: "09/08/2026 - 09:49 PM"
+updated: "1.11.0"
+last_edit: "01/09/2026 - 11:56 PM"
 ---
 
 <!-- Overview -->
@@ -20,59 +20,47 @@ last_edit: "09/08/2026 - 09:49 PM"
     </div>
     <div class="nds-section-body">
       <div class="nds-definition-list nds-divided nds-grid nds-doc-features">
-        <div class="nds-block">
-            <div class="nds-definition-item">
-              <span class="nds-item-title">
-                <i class="hgi hgi-stroke hgi-refresh"></i>
-                <span class="nds-label">One call, one argument</span>
-              </span>
-              <p class="nds-item-desc">The same call covers a table, a card grid, or any list. You never have to remember which component wants the content element and which wants an id.</p>
-            </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-refresh"></i>
+            <span class="nds-label">One call, one argument</span>
+          </span>
+          <p class="nds-item-desc">The same call covers a table, a card grid, or any list. You never have to remember which component wants the content element and which wants an id.</p>
         </div>
-        <div class="nds-block">
-            <div class="nds-definition-item">
-              <span class="nds-item-title">
-                <i class="hgi hgi-stroke hgi-hierarchy-square-01"></i>
-                <span class="nds-label">Driven by the registry</span>
-              </span>
-              <p class="nds-item-desc">Components are updated because they are registered, not because you listed them. A page that gains a component later is covered without changing your code.</p>
-            </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-hierarchy-square-01"></i>
+            <span class="nds-label">Driven by the registry</span>
+          </span>
+          <p class="nds-item-desc">Components are updated because they are registered, not because you listed them. A page that gains a component later is covered without changing your code.</p>
         </div>
-        <div class="nds-block">
-            <div class="nds-definition-item">
-              <span class="nds-item-title">
-                <i class="hgi hgi-stroke hgi-target-02"></i>
-                <span class="nds-label">Scoped to what changed</span>
-              </span>
-              <p class="nds-item-desc">Components with nothing in the container are left alone. Call it with no argument to sweep the whole document instead.</p>
-            </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-target-02"></i>
+            <span class="nds-label">Scoped to what changed</span>
+          </span>
+          <p class="nds-item-desc">Components with nothing in the container are left alone. Call it with no argument to sweep the whole document instead.</p>
         </div>
-        <div class="nds-block">
-            <div class="nds-definition-item">
-              <span class="nds-item-title">
-                <i class="hgi hgi-stroke hgi-cloud"></i>
-                <span class="nds-label">Safe for server-driven lists</span>
-              </span>
-              <p class="nds-item-desc">Nothing here re-sorts, re-pages, or re-filters a result set your server produced. Server pagination and AJAX filters are left exactly as they arrived.</p>
-            </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-cloud"></i>
+            <span class="nds-label">Safe for server-driven lists</span>
+          </span>
+          <p class="nds-item-desc">Nothing here re-sorts, re-pages, or re-filters a result set your server produced. Server pagination and AJAX filters are left exactly as they arrived.</p>
         </div>
-        <div class="nds-block">
-            <div class="nds-definition-item">
-              <span class="nds-item-title">
-                <i class="hgi hgi-stroke hgi-package"></i>
-                <span class="nds-label">Loads no bundles</span>
-              </span>
-              <p class="nds-item-desc">A component whose bundle has not arrived is skipped rather than triggered. It has initialized nothing yet, and it reads the new content when it does load.</p>
-            </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-package"></i>
+            <span class="nds-label">Loads no bundles</span>
+          </span>
+          <p class="nds-item-desc">A component whose bundle has not arrived is skipped rather than triggered. It has initialized nothing yet, and it reads the new content when it does load.</p>
         </div>
-        <div class="nds-block">
-            <div class="nds-definition-item">
-              <span class="nds-item-title">
-                <i class="hgi hgi-stroke hgi-repeat"></i>
-                <span class="nds-label">Safe to call twice</span>
-              </span>
-              <p class="nds-item-desc">Calling it again on settled content leaves the page as it was, so you can call it after every mutation without tracking whether you already did. A client-side filter in scope re-announces its result with <code class="nds-inline-code lang-js">nds:filter:change</code> each time.</p>
-            </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-repeat"></i>
+            <span class="nds-label">Safe to call twice</span>
+          </span>
+          <p class="nds-item-desc">Calling it again on settled content leaves the page as it was, so you can call it after every mutation without tracking whether you already did. A client-side filter in scope re-announces its result with <code class="nds-inline-code lang-js">nds:filter:change</code> each time.</p>
         </div>
       </div>
     </div>
@@ -88,32 +76,31 @@ last_edit: "09/08/2026 - 09:49 PM"
     </div>
     <div class="nds-section-body">
       <div class="nds-showcase">
-        <div class="nds-block">
-            <div class="nds-demo-card">
-              <div class="demo-header">
-                <div class="demo-label">Refresh after a row changes</div>
+        <div class="nds-demo-card">
+          <div class="demo-header">
+            <div class="demo-label">Refresh after a row changes</div>
+          </div>
+          <div class="demo-code">
+            <div class="nds-tabs nds-code nds-divided">
+              <div class="nds-tab-list-container nds-scroll-more">
+                <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                  <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                    aria-controls="panel-refresh-basic-1" id="tab-refresh-basic-1">
+                    <span class="nds-tab-label">JS</span>
+                  </button>
+                </nav>
+                <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                </button>
               </div>
-              <div class="demo-code">
-                <div class="nds-tabs nds-code nds-divided">
-                  <div class="nds-tab-list-container nds-scroll-more">
-                    <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
-                      <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
-                        aria-controls="panel-refresh-basic-1" id="tab-refresh-basic-1">
-                        <span class="nds-tab-label">JS</span>
-                      </button>
-                    </nav>
-                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+              <div class="nds-tab-content">
+                <div class="nds-tab-panel code-example" role="tabpanel" id="panel-refresh-basic-1"
+                  aria-labelledby="tab-refresh-basic-1">
+                  <div class="nds-code-action">
+                    <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                      <i class="nds-icon nds-hgi-copy-01"></i>
                     </button>
                   </div>
-                  <div class="nds-tab-content">
-                    <div class="nds-tab-panel code-example" role="tabpanel" id="panel-refresh-basic-1"
-                      aria-labelledby="tab-refresh-basic-1">
-                      <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
-                          <i class="nds-icon nds-hgi-copy-01"></i>
-                        </button>
-                      </div>
-                      <code class="lang-js code">
+                  <code class="lang-js code">
 const tbody = document.getElementById('requestsTableBody');
 
 // Add, edit, or delete rows however your app does it
@@ -121,12 +108,11 @@ tbody.appendChild(buildRow(record));
 
 // Then tell NDS the contents changed
 NDS.Init.refresh(tbody);
-                  </code>
-                    </div>
-                  </div>
+              </code>
                 </div>
               </div>
             </div>
+          </div>
         </div>
       </div>
     </div>
@@ -142,19 +128,16 @@ NDS.Init.refresh(tbody);
     </div>
     <div class="nds-section-body">
       <table class="nds-table nds-responsive">
-        <div class="nds-block">
-            <thead><tr><th>Component</th><th>What happens</th></tr></thead>
-        </div>
-        <div class="nds-block">
-            <tbody>
-              <tr><td>Anything inside the rows</td><td>Re-scanned and wired: dropmenus, formatted numbers, form controls, copy buttons, tooltips, and every other component with an element in the new content.</td></tr>
-              <tr><td><a class="nds-color" href="{{ 'components/filter' | relative_url }}">Filter</a></td><td>Re-resolves its item set so new rows are filterable, and regenerates auto-scanned options so a value that arrived at runtime becomes selectable.</td></tr>
-              <tr><td><a class="nds-color" href="{{ 'components/selection' | relative_url }}">Selection</a></td><td>Recounts every widget, so the selected and total figures match the list.</td></tr>
-              <tr><td><a class="nds-color" href="{{ 'components/pagination' | relative_url }}">Pagination</a></td><td>Recomputed, and your current page is kept. Auto-pagination also re-paginates itself whenever page items are added or removed, so editing a row on page 3 leaves you on page 3.</td></tr>
-              <tr><td><a class="nds-color" href="{{ 'components/empty' | relative_url }}">Empty</a></td><td>Nothing to do. It watches its own container and shows or clears the placeholder on its own.</td></tr>
-              <tr><td><a class="nds-color" href="{{ 'components/sort' | relative_url }}">Sort</a></td><td>Nothing, by design. See Server-Driven Lists below.</td></tr>
-            </tbody>
-        </div>
+        <thead><tr><th>Component</th><th>What happens</th></tr></thead>
+        <tbody>
+          <tr><td>Anything inside the rows</td><td>Re-scanned and wired: dropmenus, formatted numbers, form controls, copy buttons, tooltips, and every other component with an element in the new content.</td></tr>
+          <tr><td><a class="nds-color" href="{{ 'components/filter' | relative_url }}">Filter</a></td><td>Re-resolves its item set so new rows are filterable, and regenerates auto-scanned options so a value that arrived at runtime becomes selectable.</td></tr>
+          <tr><td><a class="nds-color" href="{{ 'components/selection' | relative_url }}">Selection</a></td><td>Recounts every widget, so the selected and total figures match the list.</td></tr>
+          <tr><td><a class="nds-color" href="{{ 'components/pagination' | relative_url }}">Pagination</a></td><td>Recomputed, and your current page is kept. Auto-pagination also re-paginates itself whenever page items are added or removed, so editing a row on page 3 leaves you on page 3.</td></tr>
+          <tr><td><a class="nds-color" href="{{ 'utilities/numbers' | relative_url }}">Numbers</a></td><td>Re-scanned. A new value gets locale digits and separators, and a new counter is armed to run when it scrolls into view. A counter that already finished carries <code class="nds-inline-code lang-html">data-animated</code> and does not replay: remove that attribute first if you want it to count again.</td></tr>
+          <tr><td><a class="nds-color" href="{{ 'components/empty' | relative_url }}">Empty</a></td><td>Nothing to do. It watches its own container and shows or clears the placeholder on its own.</td></tr>
+          <tr><td><a class="nds-color" href="{{ 'components/sort' | relative_url }}">Sort</a></td><td>Nothing, by design. See Server-Driven Lists below.</td></tr>
+        </tbody>
       </table>
     </div>
   </div>
@@ -181,12 +164,76 @@ NDS.Init.refresh(tbody);
 </section>
 
 <!-- Usage Guidelines -->
+<!-- Teardown -->
+<section id="refreshDestroy" class="nds-content-section nds-demo-section">
+  <div class="nds-section-wrapper">
+    <div class="nds-section-head">
+      <h2 class="nds-section-title">Teardown</h2>
+      <p class="nds-section-description"><code class="nds-inline-code lang-js">NDS.Init.destroy()</code> is the mirror call. Use <code class="nds-inline-code lang-js">refresh()</code> when the contents of a container changed and the container stays. Use <code class="nds-inline-code lang-js">destroy()</code> when the container itself is about to go away. It returns the number of instances it released.</p>
+    </div>
+    <div class="nds-section-body">
+      <div class="nds-block nds-prose">
+        <p>A page that loads once never needs this call. Nothing is removed, so nothing has to be released. A framework app is different: it swaps one view for another on every navigation. Each component in the old view holds listeners, observers, and menus that now point at markup the browser has thrown away. Nothing warns you, and the page keeps working, so the cost only shows up after many navigations.</p>
+        <p>Call it on the root element of the view you are about to remove, not on one list inside it. A filter toolbar can sit beside the grid it drives, so a call on the grid alone misses it.</p>
+        <p>Teardown is not one way. Each component clears its own init marker, so the same markup can be mounted again later with <code class="nds-inline-code lang-js">refresh()</code>.</p>
+        <p>Two components move their element out of your view while it is open. A FAB routes to a dock on <code class="nds-inline-code lang-html">&lt;body&gt;</code>. A dropmenu with <code class="nds-inline-code lang-html">data-portal</code> sends its open menu to the same place. Teardown puts both back where you wrote them, so the node leaves with your view instead of staying on the page after it.</p>
+      </div>
+
+      <div class="nds-showcase">
+        <div class="nds-demo-card">
+          <div class="demo-header">
+            <div class="demo-label">Destroy a view before it is removed</div>
+          </div>
+          <div class="demo-code">
+            <div class="nds-tabs nds-code nds-divided">
+              <div class="nds-tab-list-container nds-scroll-more">
+                <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                  <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                    aria-controls="panel-refresh-destroy-1" id="tab-refresh-destroy-1">
+                    <span class="nds-tab-label">JS</span>
+                  </button>
+                </nav>
+                <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                </button>
+              </div>
+              <div class="nds-tab-content">
+                <div class="nds-tab-panel code-example" role="tabpanel" id="panel-refresh-destroy-1"
+                  aria-labelledby="tab-refresh-destroy-1">
+                  <div class="nds-code-action">
+                    <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                      <i class="nds-icon nds-hgi-copy-01"></i>
+                    </button>
+                  </div>
+                  <code class="lang-js code">
+// Mount a view, then keep it in step as its rows change
+NDS.Init.refresh(view);
+
+// Before the view is removed, release everything inside it
+NDS.Init.destroy(view);
+view.remove();
+              </code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Usage guidelines -->
 <section id="refreshGuidelines" class="nds-content-section nds-demo-section">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Usage Guidelines</h2>
     </div>
     <div class="nds-section-body">
+
+      <div class="nds-block nds-prose">
+        <h3 class="nds-block-title">Framework Views</h3>
+        <p>A framework view needs no readiness check. Call <code class="nds-inline-code lang-js">window.NDS?.Init.refresh(view)</code> after mount and <code class="nds-inline-code lang-js">NDS.Init.destroy(view)</code> before unmount — that is the whole contract. A view that mounts before the runtime or one of its bundles arrives is picked up by NDS's own startup and arrival scans, and the optional chain covers the one moment where <code class="nds-inline-code lang-js">NDS</code> does not exist yet. Do not write a poll or retry helper for this; there is nothing to wait for. The one exception is a component type the first paint never had anywhere: load its bundle once — <code class="nds-inline-code lang-js">await NDS.loadBundle('extras')</code> — then call that component's <code class="nds-inline-code lang-js">init()</code>.</p>
+      </div>
 
       <div class="nds-block nds-prose">
         <h3 class="nds-block-title">Best Practices</h3>
@@ -199,14 +246,34 @@ NDS.Init.refresh(tbody);
           <li>You do not need it after a filter, sort, or pagination interaction. Those components already keep each other in step.</li>
           <li>Call it after your response has been written to the DOM, not when the request resolves. It reads the page, so the rows must be in place.</li>
           <li>Do not call it from a handler for an event it can cause, such as a filter change. That is how a refresh loop starts.</li>
-          <li>Tear down what you remove before you remove it. A dropmenu inside a deleted row holds a document listener, so call <code class="nds-inline-code lang-js">NDS.Dropmenu.destroy()</code> on it first. Refreshing does not clean up detached elements.</li>
+          <li>Tear down what you remove before you remove it. Call <code class="nds-inline-code lang-js">NDS.Init.destroy(element)</code> on it first. Refreshing does not clean up detached elements.</li>
           <li>Server-driven list? Read Server-Driven Lists above before adding calls of your own. Most of what you might reach for is deliberately not done for you.</li>
         </ul>
       </div>
 
       <div class="nds-block nds-prose">
         <h3 class="nds-block-title">What it does not do</h3>
-        <p>It updates components against the DOM as it stands. It does not fetch, build rows, or manage loading state, and it does not undo work you did by hand: a component you configured through its own API keeps that configuration. It also does not destroy anything. Elements you removed from the page are your responsibility to tear down first.</p>
+        <p>It updates components against the DOM as it stands. It does not fetch, build rows, or manage loading state, and it does not undo work you did by hand: a component you configured through its own API keeps that configuration. It also does not destroy anything. Elements you are about to remove need <code class="nds-inline-code lang-js">NDS.Init.destroy()</code> first, described under Teardown above.</p>
+      </div>
+
+      <div class="nds-block nds-prose">
+        <h3 class="nds-block-title">Reaching an Instance</h3>
+        <p>A component stores its instance on the element it claims, as an <code class="nds-inline-code lang-js">nds{Name}</code> property: <code class="nds-inline-code lang-js">el.ndsAccordion</code>, <code class="nds-inline-code lang-js">el.ndsChart</code>, <code class="nds-inline-code lang-js">el.ndsStepper</code>, <code class="nds-inline-code lang-js">el.ndsSort</code>. That property is how you reach an instance from a DOM node, and it is the same property <code class="nds-inline-code lang-js">NDS.Init.destroy()</code> reads to find what to release.</p>
+        <p>Three namespaces also take the element and hand back the instance: <code class="nds-inline-code lang-js">NDS.Filter.getInstance(el)</code>, <code class="nds-inline-code lang-js">NDS.Sort.getInstance(el)</code>, and <code class="nds-inline-code lang-js">NDS.Upload.getInstance(el)</code>. No other namespace has <code class="nds-inline-code lang-js">getInstance</code>, so use the element property for the rest.</p>
+        <div class="nds-code">
+          <div class="nds-code-action">
+            <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+              <i class="nds-icon nds-hgi-copy-01"></i>
+            </button>
+          </div>
+          <code class="lang-js">
+// The instance sits on the element
+document.getElementById('salesChart').ndsChart.render();
+
+// Filter, Sort, and Upload also expose a lookup
+const filter = NDS.Filter.getInstance(document.getElementById('resultsFilter'));
+          </code>
+        </div>
       </div>
 
       <div class="nds-block nds-prose">
@@ -245,13 +312,27 @@ grid.innerHTML = html;
 NDS.Init.refresh(grid);
 
 // Remove a row: tear down its listeners first, then refresh
-row.querySelectorAll('.nds-dropmenu').forEach(NDS.Dropmenu.destroy);
+NDS.Init.destroy(row);
 row.remove();
 NDS.Init.refresh(tbody);
 
+NDS.Init.destroy(container)   // release every component instance inside container,
+                              // before the container itself is removed. Returns the
+                              // number released. Omit it to sweep the whole document.
+
+// A framework view: mount, keep in step, release
+NDS.Init.refresh(view);
+NDS.Init.destroy(view);
+
 // The rest of the NDS.Init surface
-NDS.Init.audit()        // report silent failures: unregistered inline icons,
-                        // filter and paged containers nothing ever claimed
+await NDS.Init.audit()  // report silent failures: unregistered inline icons,
+                        // filter and paged containers nothing ever claimed,
+                        // lang and dir disagreement, a nav link that should be
+                        // marked current, a stepper control fighting its form's
+                        // submit, and a framework wrapper that breaks the shell.
+                        // The checks live in nds-audit.min.js, which is never
+                        // auto-injected — this first call loads it and returns a
+                        // promise, so a production page ships zero audit bytes.
 NDS.Init.initialize()   // full re-init of the page. Rarely what you want;
                         // prefer refresh(container)
 NDS.Init.components     // the component registry: {name, selector, init, critical}

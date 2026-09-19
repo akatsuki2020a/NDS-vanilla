@@ -6,6 +6,7 @@
  *   NDS.Chart.create(elOrSel, opts)   build one chart — replaces any chart already on the
  *                                     element. Returns the instance
  *   instance.update(newOpts)          MERGE new options in and re-render
+ *   instance.render()                 redraw in place from the current options
  *   instance.destroy()                empty the element and release its observers
  * Events:
  *   (none)
@@ -143,7 +144,6 @@
             this.opts = this._resolveOpts(opts);
             this._tooltip = null;
             this._lastW = 0;
-            this._rafPending = false;
             this._activeHover = null;
             this.abortController = new AbortController();
             this._setupDelegation();
@@ -186,6 +186,10 @@
             if (this.renderAbortController) { this.renderAbortController.abort(); this.renderAbortController = null; }
             if (this._offResize) { this._offResize(); this._offResize = null; }
             this.el.innerHTML = '';
+            // Drop the init sentinel with the instance: leaving it on makes teardown
+            // one-way — the init sweep skips a stamped element, so a view that unmounts
+            // and mounts again gets an emptied chart no instance will ever claim.
+            this.el.removeAttribute('data-nds-chart-initialized');
             delete this.el.ndsChart;
         }
 
@@ -230,17 +234,12 @@
         // ── ResizeObserver ────────────────────────────────────────
 
         _setupResize() {
+            const renderOnResize = NDS.rafThrottle(() => this.render());
             this._offResize = NDS.onElementResize(this.el, () => {
                 const w = this.el.clientWidth;
                 if (w && w !== this._lastW) {
                     this._lastW = w;
-                    if (!this._rafPending) {
-                        this._rafPending = true;
-                        requestAnimationFrame(() => {
-                            this._rafPending = false;
-                            this.render();
-                        });
-                    }
+                    renderOnResize();
                 }
             });
         }
@@ -277,7 +276,7 @@
         // an explicit labelRotate/labelDecimate overrides the auto decision.
         _xaxisStrategy(catLabels, plotW) {
             const xaxis = this.opts.xaxis || {};
-            const isMobile = typeof window !== 'undefined' && window.matchMedia(NDS.breakpoints['tablet-max']).matches;
+            const isMobile = window.matchMedia(NDS.breakpoints['tablet-max']).matches;
             const fontSize = isMobile ? 11 : 13;
             const charW = fontSize * 0.6;
             const padding = 8;
@@ -1050,15 +1049,25 @@
 
     function initCharts() {
         setupDirObserver();
-        document.querySelectorAll('.nds-chart:not([data-nds-chart-initialized])').forEach(el => {
-            if (el.ndsChart) return;
+        // Every root, stamped or not: the instance backref is the truth. A re-render
+        // that keeps the element but wipes its SVG (stamp and instance intact) gets
+        // redrawn here; a cloned root (stamp, no instance) gets claimed.
+        document.querySelectorAll('.nds-chart').forEach(el => {
+            if (el.ndsChart) {
+                if (!el.firstElementChild && !el.ndsChart._deferCount) el.ndsChart.render();
+                return;
+            }
             const d = el.dataset;
             const config = tryParse(d.chartConfig) || {};
             if (d.chartType) config.type = d.chartType;
             if (d.chartSeries) config.series = tryParse(d.chartSeries) || config.series;
             if (d.chartLabels) config.labels = tryParse(d.chartLabels) || config.labels;
 
-            if (config.type || config.series) {
+            // Series, not type: every render path reads series (the legend maps it even
+            // for pie), so claiming an element on data-chart-type alone builds an instance
+            // that throws. The markup for a JS-created chart carries the type as a hint
+            // and gets its data from NDS.Chart.create — this sweep must leave those alone.
+            if (config.series) {
                 el.ndsChart = new NDSChartInstance(el, config);
                 el.setAttribute('data-nds-chart-initialized', '');
             }

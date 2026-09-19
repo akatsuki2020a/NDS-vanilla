@@ -3,6 +3,7 @@ layout: minimal
 title: Create your account
 lang: en
 direction: ltr
+# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
 layout_class: nds-middle
 page_bg: assets/img/riyadhcenter.webp
 bg_opacity_top: 60%
@@ -21,9 +22,17 @@ breadcrumb: [["Examples", "/examples"]]
       <div class="nds-block nds-flex nds-col" style="--align: center;">
         <!-- Step 1: Account Details -->
         <div class="nds-card nds-shadow nds-stroke" id="registration-step-1">
-          <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+          <div class="nds-card-header nds-rowView">
+            <!-- The logo is the way home: the minimal layout ships no site chrome -->
+            <a href="{{ '/' | relative_url }}" class="nds-brand">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
+            <!-- Language switch: point this at the Arabic URL of the same page -->
+            <a href="#" class="nds-btn nds-subtle nds-icon-only" hreflang="ar" lang="ar">
+              <i class="nds-icon nds-hgi-translation" aria-hidden="true"></i>
+              <span class="nds-label">العربية</span>
+            </a>
           </div>
           <form id="registration-form-1" class="nds-form" data-ajax>
             <div class="nds-card-content">
@@ -160,8 +169,11 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Step 2: Verify Email -->
         <div class="nds-card nds-shadow nds-stroke" id="registration-step-2" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <!-- The logo is the way home: the minimal layout ships no site chrome -->
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <form id="registration-form-2" class="nds-form" data-ajax>
             <div class="nds-card-content">
@@ -207,12 +219,10 @@ breadcrumb: [["Examples", "/examples"]]
                   </span>
                 </div>
               </fieldset>
-
-              <p class="nds-note nds-center">Didn't receive the code?</p>
               <div class="nds-center">
+                  <p class="nds-note nds-center">Didn't receive the code?</p>
                 <button type="button" class="nds-btn nds-subtle nds-cooldown" id="registration-resend" data-cooldown="30"
-                  data-cooldown-loading="1" data-cooldown-label="Resend in {s}s" data-resend-label="Resend"
-                  data-sent-title="Code sent" data-sent-message="A new code is on its way.">
+                  data-cooldown-label="Resend in {s}s" data-resend-label="Resend">
                   <span class="nds-label">Resend code</span>
                 </button>
               </div>
@@ -232,8 +242,11 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Step 3: Success -->
         <div class="nds-card nds-shadow nds-stroke" id="registration-step-3" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <!-- The logo is the way home: the minimal layout ships no site chrome -->
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <div class="nds-card-content">
             <div class="nds-card-text nds-center">
@@ -252,20 +265,12 @@ breadcrumb: [["Examples", "/examples"]]
           </div>
         </div>
       </div>
-
-      <div class="nds-block nds-center">
-        <!-- The minimal layout ships no site chrome, so the way out is on the page -->
-        <a href="{{ '/' | relative_url }}" class="nds-btn nds-subtle">
-          <i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i>
-          <span class="nds-label">Back to home</span>
-        </a>
-      </div>
     </div>
   </div>
 </section>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initPage() {
     var cards = {
       step1: document.getElementById('registration-step-1'),
       step2: document.getElementById('registration-step-2'),
@@ -293,25 +298,52 @@ breadcrumb: [["Examples", "/examples"]]
       NDS.OTP.clear(otpGroup);
       NDS.Forms.clearStatus(otpGroup);
       demoCode.textContent = expectedCode;
+      // Confirm from the outcome, never from the click. This demo issues the code
+      // locally so it cannot fail; against a real endpoint, move this into the
+      // response handler and show an error alert from the failure path.
+      NDS.Alert.create({
+        variant: 'success', title: 'Code sent',
+        description: 'A new code is on its way.',
+        display: 'toast', position: 'top', duration: 4000
+      });
     }
 
-    // The loading state is visual only — pair it with disabled, or the button stays
-    // clickable for the whole wait and a second click queues a second submit.
+    // Visual loading only — the loading class itself guards re-entry so a second
+    // click during the wait no-ops without flipping the button to :disabled.
+    // Back/cancel paths call cancelLoading() to abort the pending work and clear
+    // the button. ponytail: setTimeout stands in for the request; a real page
+    // would carry an AbortController and call controller.abort() here.
+    var pending = null;
     function withLoading(btn, delay, done) {
       if (!btn) { done(); return; }
+      if (btn.classList.contains('nds-loading')) return;
       NDS.State.add(btn, 'loading');
-      btn.disabled = true;
-      setTimeout(function () {
+      btn.setAttribute('aria-busy', 'true');
+      var record = { btn: btn };
+      pending = record;
+      record.timer = setTimeout(function () {
+        pending = null;
         NDS.State.remove(btn, 'loading');
-        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
         done();
       }, delay);
+    }
+    function cancelLoading() {
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      NDS.State.remove(pending.btn, 'loading');
+      pending.btn.removeAttribute('aria-busy');
+      pending = null;
     }
 
     // The confirm field carries data-password-match, so nds-password owns the
     // cross-field check and blocks submit on a mismatch. Nothing to wire here.
 
-    // Step 1 — Create account
+    // Step 1 — Create account. A server rejection belongs in the card, not a
+    // toast — it must stay until fixed. Create it on demand from the failure path:
+    //   NDS.Alert.create({ variant: 'error', title: 'Registration failed',
+    //     description: reason, target: '#registration-form-1 .nds-card-content',
+    //     prepend: true, closable: false });
     form1.addEventListener('nds:formValid', function () {
       var btn = form1.querySelector('button[type="submit"]');
       withLoading(btn, 1500, function () {
@@ -331,28 +363,28 @@ breadcrumb: [["Examples", "/examples"]]
         return;
       }
       var btn = form2.querySelector('button[type="submit"]');
-      withLoading(btn, 1500, function () {
-        show('step3');
-        NDS.Alert.create({
-          variant: 'success',
-          title: 'Email verified',
-          description: 'Your account is ready.',
-          display: 'toast',
-          position: 'top',
-          duration: 3000
-        });
-      });
+      // No toast here: the success card IS the confirmation, and a top toast
+      // would paint over the card on mobile.
+      withLoading(btn, 1500, function () { show('step3'); });
     });
 
     // Back
     form2.querySelectorAll('.step-prev-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () { show('step1'); });
+      btn.addEventListener('click', function () { cancelLoading(); show('step1'); });
     });
 
-    // Resend — the cooldown button owns the throttle, the countdown label and the
-    // sent toast. Issue the code from its event, never from a bare click handler:
-    // a plain link would let the user hammer a real send-code endpoint.
-    document.getElementById('registration-resend')
-      .addEventListener('nds:cooldown:triggered', function () { sendCode(); });
-  });
+    // Resend — the cooldown button owns the throttle and the countdown label; the
+    // send and its confirmation are yours. Issue the code from its event, never from
+    // a bare click handler: a plain link would let the user hammer a real endpoint.
+    // The loading state is the page's — against a real endpoint it lasts exactly
+    // as long as the request, and the countdown ticks underneath it.
+    var resendBtn = document.getElementById('registration-resend');
+    resendBtn.addEventListener('nds:cooldown:triggered', function () {
+      // withLoading stands in for the request: it holds data-state="loading" for as
+      // long as the call runs, then issues the code. The countdown ticks underneath.
+      withLoading(resendBtn, 1200, sendCode);
+    });
+  }
+  // Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
 </script>

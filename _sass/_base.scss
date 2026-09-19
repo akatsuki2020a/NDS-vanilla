@@ -1,5 +1,11 @@
 @use './mixins' as *;
 
+// Crit holds scroll anchoring at none until main lands (_fold.scss); main is
+// where it comes back — the reset sits in crit, so it cannot do this.
+html {
+    overflow-anchor: auto;
+}
+
 /* ========================================
    VIEW TRANSITIONS (theme switch)
    ======================================== */
@@ -62,7 +68,9 @@ mark {
         gap: var(--spacing-md);
         color: var(--text-secondary-paragraph);
         font-size: var(--typo-text-sm-FS);
-        line-height: var(--typo-text-sm-LH);
+        // Label, not prose — the paired LH pads the line box and throws the
+        // label off the flanking lines. 1 keeps the box on the text.
+        line-height: 1;
         border-block-start: 0;
 
         &::before,

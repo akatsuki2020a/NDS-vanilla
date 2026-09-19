@@ -17,7 +17,7 @@ Each entry has four fields, each doing one job:
 
 If the canonical and the corpus disagree, the audit flags the divergent files as migration targets. The canonical changes only through Phase 7 EVOLVE, which surfaces a revision candidate when the divergent file's cited reasoning clears the evolve quality bar — applied only on the user's explicit `evolve` go and recorded in the `## Catalog evolved (applied)` block. Raw adoption counts or "the corpus changed" never trigger a revision — those are migration targets; the canonical is the deliberate choice, and the corpus catches up. Citation hygiene (expiring a resolved motivating finding, healing a drifted symbol-anchored citation) needs no quality bar — it is reported under `Bookkeeping reconciled` so the change is never silent, and it too lands only on the explicit `evolve` go (concurrent audit sessions share this file).
 
-*(No maturity ladder, no adoption tallies, no counting ledger — divergence detection, not counting, is what the persona is for. Do not add one: cross-run counting depends on a saved-report trail the skill never recommends creating.)*
+*(No maturity ladder, no adoption tallies, no counting ledger — divergence detection, not counting, is what the persona is for. Do not add one: cross-run counting depends on a report trail the skill does not keep — reports live in-conversation only, git is the archive.)*
 
 ---
 
@@ -95,13 +95,15 @@ The verb pair encodes the concept, not the DOM mutation. Two components making a
 
 #### 3.2 Per-section toggleable → `show()` / `hide()`
 
-**Canonical:** `show()` / `hide()` as the public lifecycle pair.
+**Canonical:** `show()` / `hide()` when the method acts on the surface the instance IS. When the method instead takes an index or a child reference and acts on one item WITHIN a container instance, the verb follows the state vocabulary that item's markup already carries — `openItem(i)` / `closeItem(i)` against `data-state="open"` + `aria-expanded`, `showX` / `hideX` against a visibility flip. The suffix names the target; the verb matches the attribute a reader will inspect in devtools.
 
 **Concept:** multiple instances can be visible simultaneously (sections within a single component, submenus within a drawer). No focus trap; no backdrop; no attention capture. The mutation is a per-instance visibility flip, not a singleton state transition.
 
-**Discriminator:** multi-instance simultaneous visibility AND file does NOT invoke `NDS.trapFocus` / `NDS.Backdrop.show`.
+**Discriminator:** multi-instance simultaneous visibility AND file does NOT invoke `NDS.trapFocus` / `NDS.Backdrop.show`. Then: does the method act on the instance's own surface (bare `show()`/`hide()`) or on an addressed child (suffixed pair, verb from the child's state vocabulary)?
 
-**Examples:** `_js/nds-accordion.js`, `_js/nds-drawer.js` (`showSubmenu` / `hideSubmenu`).
+**Examples:** `_js/nds-accordion.js` — `openItem(i)` / `closeItem(i)` / `toggleItem(i)` on the container instance; the item's markup contract is `data-state="open"` plus `aria-expanded`, so `open`/`close` is the verb a reader can verify against the DOM. `_js/nds-drawer.js` `showSubmenu` / `hideSubmenu` — module-private functions, not a public instance pair; cited for the naming shape only.
+
+**Why the verb follows the markup, not the events.** Accordion dispatches `nds:accordion:shown` / `nds:accordion:hidden`, which argues the other way, and the split is real. The markup wins because it is what a consumer inspects while debugging and what CSS selects on; the event names are a separate, already-shipped surface. Renaming either side is a breaking change to documented public API (`components/accordion.md` documents `instance.openItem(0)`), so the canonical accommodates the addressed-child shape rather than minting a migration with no reader benefit.
 
 #### 3.3 Transient self-dismissing surfaces → `create({...})` + `dismiss(target)`
 

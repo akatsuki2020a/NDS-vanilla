@@ -2,13 +2,13 @@
 layout: page
 title: Block
 hero_title: Block Layout - National Design System
-hero_description: A lightweight content grouping primitive used inside a section body to separate titled sub-groups of paragraphs, lists, tables, and other flow content without starting a new section.
+hero_description: A lightweight spacing unit used inside a section body. It carries a bottom margin that separates the parts of a section, and takes an optional title.
 breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.6.0"
-last_edit: "10/08/2026 - 12:42 AM"
+last_edit: "22/08/2026 - 04:48 AM"
 ---
 
 <!-- Block Structure -->
@@ -16,7 +16,7 @@ last_edit: "10/08/2026 - 12:42 AM"
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Structure</h2>
-            <p class="nds-section-description">Blocks live inside <code class="nds-inline-code lang-html">.nds-section-body</code> and hold flow content directly. An optional <code class="nds-inline-code lang-html">.nds-block-title</code> heading sits at the top of the block.</p>
+            <p class="nds-section-description">Blocks live inside <code class="nds-inline-code lang-html">.nds-section-body</code>. A block is spacing only: full width plus a bottom margin, dropped on the last one. It is not a container and it groups nothing, so put the class straight on a block component such as a stepper, tab set, or table, or on a wrapper holding flow content. An optional <code class="nds-inline-code lang-html">.nds-block-title</code> heading sits at the top. Two groups need two blocks, or the gap between them never appears.</p>
         </div>
         <div class="nds-section-body">
             <div class="nds-block">
@@ -167,7 +167,7 @@ section.nds-content-section nds-demo-section
                             <i class="hgi hgi-stroke hgi-distribute-vertical-center"></i>
                             <span class="nds-label">Consistent Vertical Rhythm</span>
                         </span>
-                        <p class="nds-item-desc">Blocks carry a 2rem bottom margin that collapses on the last child, so stacks of blocks inside a section body breathe without extra classes.</p>
+                        <p class="nds-item-desc">Blocks carry a default bottom margin that collapses on the last child, so stacks of blocks inside a section body breathe without extra classes.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -179,9 +179,9 @@ section.nds-content-section nds-demo-section
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-artboard"></i>
-                            <span class="nds-label">Container Query Anchor</span>
+                            <span class="nds-label">Container Query Opt-In</span>
                         </span>
-                        <p class="nds-item-desc">Each block establishes a named <code class="nds-inline-code lang-html">block</code> CSS container. Descendants like <a class="nds-color" href="{{ 'layout/grid' | relative_url }}">grids</a> and <a class="nds-color" href="{{ 'components/quote' | relative_url }}">quotes</a> respond to the block's actual width, not the viewport — correct sizing in multi-column layouts where the block is narrower than the section.</p>
+                        <p class="nds-item-desc">A block is not a CSS container on its own. Add <code class="nds-inline-code lang-html">.nds-cq</code> to it when a nested <a class="nds-color" href="{{ 'layout/grid' | relative_url }}">grid</a> must size against the block width instead of the viewport. It stays opt-in because a container also traps <code class="nds-inline-code lang-html">position: fixed</code> descendants such as modals and dropmenus.</p>
                     </div>
                 </div>
             </div>

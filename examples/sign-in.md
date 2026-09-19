@@ -3,6 +3,7 @@ layout: minimal
 title: Sign in
 lang: en
 direction: ltr
+# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
 layout_class: nds-middle
 page_bg: assets/img/riyadhcenter.webp
 bg_opacity_top: 60%
@@ -22,10 +23,13 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Sign in: national SSO first, credentials as the fallback -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-start">
           <div class="nds-card-header nds-rowView">
-            <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <!-- The logo is the way home: the minimal layout ships no site chrome -->
+            <a href="{{ '/' | relative_url }}" class="nds-brand">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
             <!-- Language switch: point this at the Arabic URL of the same page -->
-            <a href="#" class="nds-btn nds-subtle" hreflang="ar" lang="ar">
+            <a href="#" class="nds-btn nds-subtle nds-icon-only" hreflang="ar" lang="ar">
               <i class="nds-icon nds-hgi-translation" aria-hidden="true"></i>
               <span class="nds-label">العربية</span>
             </a>
@@ -58,29 +62,16 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- National ID and password: its own card, so it can move to its own page -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-credentials" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <form id="credentials-form" class="nds-form" data-ajax>
             <div class="nds-card-content">
               <div class="nds-card-text nds-center">
                 <h1 class="nds-card-title">Sign in with National ID</h1>
                 <p class="nds-card-description">Enter your National ID and password.</p>
-              </div>
-
-              <!-- Form-level error: no close button, so the same alert can be shown again -->
-              <div class="nds-alert nds-card nds-color" data-status="error" role="alert" id="credentials-error" hidden>
-                <span class="nds-feedback nds-alert-icon nds-outline">
-                  <span class="nds-feedback-icon">
-                    <i class="nds-icon" aria-hidden="true"></i>
-                  </span>
-                </span>
-                <div class="nds-alert-content">
-                  <div class="nds-alert-text">
-                    <span class="nds-alert-title">Sign-in failed</span>
-                    <p class="nds-alert-description">Check the verification code and try again.</p>
-                  </div>
-                </div>
               </div>
 
               <!-- National ID -->
@@ -164,7 +155,7 @@ breadcrumb: [["Examples", "/examples"]]
                   </svg>
                 </span>
                 <button type="button" class="nds-btn nds-secondary nds-cooldown" id="captcha-refresh" data-cooldown="5"
-                  data-cooldown-loading="1" data-cooldown-label="{s}s">
+                  data-cooldown-label="{s}s">
                   <span class="nds-label">New</span>
                 </button>
               </div>
@@ -184,8 +175,10 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Delivery method: where the one-time code is sent -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-delivery" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <div class="nds-card-content">
             <div class="nds-card-text nds-center">
@@ -194,7 +187,7 @@ breadcrumb: [["Examples", "/examples"]]
             </div>
 
             <!-- The three choices are the page's content, not its actions -->
-            <div class="nds-grid" style="--gap: var(--spacing-md);">
+            <div class="nds-grid" style="--max-col: 1; --gap: var(--spacing-md);">
               <button type="button" class="nds-btn nds-secondary-outline nds-col delivery-btn" data-delivery="your mobile app">
                 <i class="nds-icon nds-hgi-smart-phone-01" aria-hidden="true"></i>
                 <span class="nds-label">Mobile app</span>
@@ -220,8 +213,10 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- One-time code -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-otp" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <form id="otp-form" class="nds-form" data-ajax>
             <div class="nds-card-content">
@@ -276,8 +271,7 @@ breadcrumb: [["Examples", "/examples"]]
 
               <div class="nds-center">
                 <button type="button" class="nds-btn nds-subtle nds-cooldown" id="otp-resend" data-cooldown="30"
-                  data-cooldown-loading="1" data-cooldown-label="Resend in {s}s" data-resend-label="Resend"
-                  data-sent-title="Code sent" data-sent-message="A new code is on its way.">
+                  data-cooldown-label="Resend in {s}s" data-resend-label="Resend">
                   <span class="nds-label">Resend code</span>
                 </button>
               </div>
@@ -298,8 +292,10 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Signed in: account home for the rest of the family -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-account" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <div class="nds-card-content">
             <div class="nds-card-text nds-center">
@@ -333,8 +329,10 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Change password -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-change-password" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <form id="password-form" class="nds-form" data-ajax>
             <div class="nds-card-content">
@@ -470,8 +468,10 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Update mobile number -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-mobile" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <form id="mobile-form" class="nds-form" data-ajax>
             <div class="nds-card-content">
@@ -523,8 +523,10 @@ breadcrumb: [["Examples", "/examples"]]
         <!-- Signed out -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-out" hidden>
           <div class="nds-card-header">
-            <img class="nds-brand-logo nds-center" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
-              height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            <a href="{{ '/' | relative_url }}" class="nds-brand nds-center">
+              <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
+                height="{{ brand_height }}" alt="{{ site_title }} Logo">
+            </a>
           </div>
           <div class="nds-card-content">
             <div class="nds-card-text nds-center">
@@ -554,20 +556,12 @@ breadcrumb: [["Examples", "/examples"]]
           </div>
         </div>
       </div>
-
-      <div class="nds-block nds-center">
-        <!-- The minimal layout ships no site chrome, so the way out is on the page -->
-        <a href="{{ '/' | relative_url }}" class="nds-btn nds-subtle">
-          <i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i>
-          <span class="nds-label">Back to home</span>
-        </a>
-      </div>
     </div>
   </div>
 </section>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initPage() {
     var cards = {
       start: document.getElementById('signin-start'),
       credentials: document.getElementById('signin-credentials'),
@@ -579,7 +573,6 @@ breadcrumb: [["Examples", "/examples"]]
       out: document.getElementById('signin-out')
     };
     var credForm = document.getElementById('credentials-form');
-    var credError = document.getElementById('credentials-error');
     var captchaInput = document.getElementById('captcha-value');
     var captchaText = document.getElementById('captcha-image');
     var otpForm = document.getElementById('otp-form');
@@ -596,6 +589,10 @@ breadcrumb: [["Examples", "/examples"]]
 
     // Plain [hidden] toggling: no NDS component swaps sibling cards (Panel is a
     // slide-in surface, Stepper only stamps the indicator), so this stays native.
+    // Native toggling runs no lifecycle: state on a hidden card's children
+    // (loading, aria-busy, feedback, field values) survives the swap, so every
+    // transition path resets what it left pending — cancelLoading() below is
+    // that reset for the submit buttons.
     function show(which) {
       Object.keys(cards).forEach(function (key) {
         cards[key].toggleAttribute('hidden', key !== which);
@@ -606,17 +603,32 @@ breadcrumb: [["Examples", "/examples"]]
       }
     }
 
-    // The loading state is visual only — pair it with disabled, or the button stays
-    // clickable for the whole wait and a second click queues a second submit.
+    // Visual loading only — the loading class itself guards re-entry so a second
+    // click during the wait no-ops without flipping the button to :disabled.
+    // Cancel/back paths call cancelLoading() to abort the pending work and clear
+    // the button. ponytail: setTimeout stands in for the request; a real page
+    // would carry an AbortController and call controller.abort() here.
+    var pending = null;
     function withLoading(btn, delay, done) {
       if (!btn) { done(); return; }
+      if (btn.classList.contains('nds-loading')) return;
       NDS.State.add(btn, 'loading');
-      btn.disabled = true;
-      setTimeout(function () {
+      btn.setAttribute('aria-busy', 'true');
+      var record = { btn: btn };
+      pending = record;
+      record.timer = setTimeout(function () {
+        pending = null;
         NDS.State.remove(btn, 'loading');
-        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
         done();
       }, delay);
+    }
+    function cancelLoading() {
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      NDS.State.remove(pending.btn, 'loading');
+      pending.btn.removeAttribute('aria-busy');
+      pending = null;
     }
 
     function toast(variant, title, description) {
@@ -641,8 +653,10 @@ breadcrumb: [["Examples", "/examples"]]
 
     // The cooldown component handles the disabled state and the countdown;
     // this only fetches a fresh code when the countdown starts.
-    document.getElementById('captcha-refresh')
-      .addEventListener('nds:cooldown:triggered', newCaptcha);
+    var captchaBtn = document.getElementById('captcha-refresh');
+    captchaBtn.addEventListener('nds:cooldown:triggered', function () {
+      withLoading(captchaBtn, 800, newCaptcha);
+    });
 
     document.getElementById('credentials-btn').addEventListener('click', function () {
       show('credentials');
@@ -658,9 +672,20 @@ breadcrumb: [["Examples", "/examples"]]
       toast('info', 'Password reset', 'A reset link was sent to your registered email.');
     });
 
+    // A server rejection belongs in the card, not a toast — it must stay until
+    // fixed. Create it on demand from the failure path:
+    //   NDS.Alert.create({ variant: 'error', title: 'Sign-in failed',
+    //     description: reason, target: '#credentials-form .nds-card-content',
+    //     prepend: true, closable: false });
     credForm.addEventListener('nds:formValid', function () {
+      var captchaField = captchaInput.closest('.nds-form-container');
       if (captchaInput.value !== captchaCode) {
-        credError.hidden = false;
+        // A wrong code is a field error: pin it to the input, not a form banner
+        NDS.Forms.setStatus({
+          element: captchaField,
+          status: 'error',
+          message: 'Wrong code. Enter the new code shown below.'
+        });
         captchaInput.value = '';
         // The refresh button owns the regeneration, so drive it rather than calling
         // newCaptcha() here as well — that changed the code twice, once now and once
@@ -672,7 +697,7 @@ breadcrumb: [["Examples", "/examples"]]
         captchaInput.focus();
         return;
       }
-      credError.hidden = true;
+      NDS.Forms.clearStatus(captchaField);
       withLoading(credForm.querySelector('button[type="submit"]'), 1500, function () {
         show('delivery');
       });
@@ -700,8 +725,23 @@ breadcrumb: [["Examples", "/examples"]]
       });
     });
 
-    document.getElementById('otp-resend')
-      .addEventListener('nds:cooldown:triggered', function () { sendCode(); });
+    // The cooldown button owns the throttle and the countdown label; the send and its
+    // confirmation are yours. Confirm from the outcome, never from the click — this
+    // demo issues the code locally so it cannot fail, but against a real endpoint the
+    // alert moves into the response handler and failures show an error variant.
+    var otpResendBtn = document.getElementById('otp-resend');
+    otpResendBtn.addEventListener('nds:cooldown:triggered', function () {
+      // withLoading stands in for the request: it holds data-state="loading" for as
+      // long as the call runs, then sends. The countdown ticks underneath it.
+      withLoading(otpResendBtn, 1200, function () {
+        sendCode();
+        NDS.Alert.create({
+          variant: 'success', title: 'Code sent',
+          description: 'A new code is on its way.',
+          display: 'toast', position: 'top', duration: 4000
+        });
+      });
+    });
 
     otpForm.addEventListener('nds:formValid', function () {
       if (NDS.OTP.getValue(otpGroup) !== expectedCode) {
@@ -721,6 +761,7 @@ breadcrumb: [["Examples", "/examples"]]
     });
 
     document.getElementById('otp-cancel').addEventListener('click', function () {
+      cancelLoading();
       show(otpFlow === 'mobile' ? 'mobile' : 'start');
     });
 
@@ -734,7 +775,7 @@ breadcrumb: [["Examples", "/examples"]]
     });
 
     document.querySelectorAll('.back-to-start').forEach(function (btn) {
-      btn.addEventListener('click', function () { show('start'); });
+      btn.addEventListener('click', function () { cancelLoading(); show('start'); });
     });
 
     // --- Change password ----------------------------------------------------
@@ -786,5 +827,7 @@ breadcrumb: [["Examples", "/examples"]]
         show('start');
       }, 1000);
     }
-  });
+  }
+  // Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
 </script>

@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.5.0"
-last_edit: "28/06/2026 - 01:27 PM"
+updated: "1.12.0"
+last_edit: "27/08/2026 - 01:04 AM"
 ---
 
 <!-- Side Menu Structure -->
@@ -16,7 +16,7 @@ last_edit: "28/06/2026 - 01:27 PM"
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Side Menu Structure</h2>
-            <p class="nds-section-description">The side menu sits inside the content layout wrapper alongside the main content area. It uses the drawer component internally for scrollable, collapsible list navigation.</p>
+            <p class="nds-section-description">The side menu sits inside the content layout wrapper alongside the main content area. It uses the drawer component internally for scrollable, collapsible list navigation. The markup below is the plain baseline. This site's own side menu also carries <code class="nds-inline-code lang-html">nds-lined</code> on the drawer, which draws the vertical rail beside each submenu. That class is optional. See <a class="nds-color" href="{{ 'components/drawer' | relative_url }}">Drawer</a> for that class and the other drawer variants.</p>
         </div>
         <div class="nds-section-body">
             <div class="nds-block">
@@ -34,7 +34,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 </div>
                                 <div class="nds-expandable-content">
                                     <code class="lang-html code">
-aside.nds-sidemenu
+aside.nds-sidemenu (direct child of div.nds-content-layout.nds-wSideMenu)
 &#9500;&#9472;&#9472; button.nds-sidemenu-toggle.nds-btn.nds-peek
 &#9474;   &#9500;&#9472;&#9472; i.hgi.hgi-stroke.hgi-menu-02.nds-icon
 &#9474;   &#9492;&#9472;&#9472; span.nds-label.nds-truncate (toggle label, hidden on desktop)
@@ -53,7 +53,7 @@ aside.nds-sidemenu
         &#9474;           &#9500;&#9472;&#9472; li (flat link)
         &#9474;           &#9474;   &#9492;&#9472;&#9472; a.nds-btn.nds-subtle.nds-indicator
         &#9474;           &#9474;       &#9492;&#9472;&#9472; span.nds-label
-        &#9474;           &#9492;&#9472;&#9472; li.nds-drawer-group (optional 3rd level)
+        &#9474;           &#9492;&#9472;&#9472; li (optional 3rd level group)
         &#9474;               &#9500;&#9472;&#9472; button.nds-btn.nds-subtle.nds-indicator
         &#9474;               &#9474;   &#9500;&#9472;&#9472; span.nds-label
         &#9474;               &#9474;   &#9492;&#9472;&#9472; span.nds-tag (optional count)
@@ -188,7 +188,7 @@ aside.nds-sidemenu
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Grouped Navigation</h2>
-            <p class="nds-section-description">Add a third level by placing <code class="nds-inline-code lang-html">li.nds-drawer-group</code> items inside a section's submenu. Each group gets its own collapsible button. Use a count tag to show the number of items at a glance.</p>
+            <p class="nds-section-description">To add a third level, put another <code class="nds-inline-code lang-html">ul</code> inside a submenu item. No class is needed: an <code class="nds-inline-code lang-html">li</code> that sits directly inside a sub-<code class="nds-inline-code lang-html">ul</code> is styled as a group header. Each group gets its own collapsible button. Use a count tag to show the number of items at a glance.</p>
         </div>
         <div class="nds-section-body">
             <div class="nds-block nds-prose">
@@ -207,7 +207,7 @@ aside.nds-sidemenu
                                                 <span class="nds-tag nds-gray nds-xs nds-rounded"><span class="nds-label">10</span></span>
                                             </button>
                                             <ul>
-                                                <li class="nds-drawer-group">
+                                                <li>
                                                     <button class="nds-btn nds-subtle nds-indicator" aria-expanded="false">
                                                         <span class="nds-label">Forms</span>
                                                         <span class="nds-tag nds-gray nds-xs nds-rounded"><span class="nds-label">4</span></span>
@@ -219,7 +219,7 @@ aside.nds-sidemenu
                                                         <li><a class="nds-btn nds-subtle nds-indicator" href="#"><span class="nds-label">Upload</span></a></li>
                                                     </ul>
                                                 </li>
-                                                <li class="nds-drawer-group">
+                                                <li>
                                                     <button class="nds-btn nds-subtle nds-indicator" aria-expanded="false">
                                                         <span class="nds-label">UI</span>
                                                         <span class="nds-tag nds-gray nds-xs nds-rounded"><span class="nds-label">3</span></span>
@@ -230,7 +230,7 @@ aside.nds-sidemenu
                                                         <li><a class="nds-btn nds-subtle nds-indicator" href="#"><span class="nds-label">Tabs</span></a></li>
                                                     </ul>
                                                 </li>
-                                                <li class="nds-drawer-group">
+                                                <li>
                                                     <button class="nds-btn nds-subtle nds-indicator" aria-expanded="false">
                                                         <span class="nds-label">Data</span>
                                                         <span class="nds-tag nds-gray nds-xs nds-rounded"><span class="nds-label">3</span></span>
@@ -288,7 +288,7 @@ aside.nds-sidemenu
     &lt;ul&gt;
 
       &lt;!-- Level 2: Group --&gt;
-      &lt;li class="nds-drawer-group"&gt;
+      &lt;li&gt;
         &lt;button class="nds-btn nds-subtle nds-indicator" aria-expanded="false"&gt;
           &lt;span class="nds-label"&gt;Forms&lt;/span&gt;
           &lt;span class="nds-tag nds-gray nds-xs nds-rounded"&gt;&lt;span class="nds-label"&gt;4&lt;/span&gt;&lt;/span&gt;
@@ -414,7 +414,7 @@ aside.nds-sidemenu
             <div class="nds-block" style="margin-top: var(--spacing-3xl);">
                 <h3 class="nds-block-title">Mode Comparison</h3>
                 <table class="nds-table nds-responsive">
-                    <thead><tr><th>Mode</th><th>Class / Front Matter</th><th>Mobile Behavior</th><th>Best For</th></tr></thead>
+                    <thead><tr><th>Mode</th><th>Class</th><th>Mobile Behavior</th><th>Best For</th></tr></thead>
                     <tbody>
                         <tr>
                             <td>Slider</td>
@@ -528,7 +528,7 @@ aside.nds-sidemenu
                             <i class="hgi hgi-stroke hgi-layout-04"></i>
                             <span class="nds-label">Dual Responsive Modes</span>
                         </span>
-                        <p class="nds-item-desc">Choose between a slide-in sidebar panel or a top dropdown bar for mobile. Switch modes by adding <code class="nds-inline-code lang-html">nds-top</code> to the sidemenu or setting <code class="nds-inline-code lang-html">sidemenu_mode: top</code> in front matter.</p>
+                        <p class="nds-item-desc">Choose between a slide-in sidebar panel or a top dropdown bar for mobile. Switch modes by adding <code class="nds-inline-code lang-html">nds-top</code> to the sidemenu.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -573,11 +573,11 @@ aside.nds-sidemenu
                     <li>Choose <strong>top submenu mode</strong> (<code class="nds-inline-code lang-html">nds-top</code>) when the navigation list is short (under 10 items) or the content area needs full viewport width on mobile</li>
                     <li>Choose <strong>slider mode</strong> (default) for longer navigation trees or when users frequently switch between pages and benefit from a persistent, independently scrollable menu</li>
                     <li>Do not use the side menu for simple linear flows or single-page sites. Use <a class="nds-color" href="{{ 'components/stepper' | relative_url }}">Stepper</a> for sequential processes or <a class="nds-color" href="{{ 'components/tabs' | relative_url }}">Tabs</a> for switching between views on the same page</li>
-                    <li>Use <strong>two levels</strong> for most navigation trees. Use the three-level grouped pattern (with <code class="nds-inline-code lang-html">nds-drawer-group</code>) only when the section has enough items to benefit from categorization, such as a large component library</li>
+                    <li>Use <strong>two levels</strong> for most navigation trees. Use the three-level grouped pattern only when the section has enough items to benefit from categorization, such as a large component library</li>
                     <li>Always set <code class="nds-inline-code lang-html">data-state="active"</code> on the current page's <code class="nds-inline-code lang-html">&lt;li&gt;</code> so users can orient themselves</li>
                     <li>Group related pages under a single accordion parent with a clear category label. Avoid mixing unrelated items in the same group</li>
                     <li>Add <code class="nds-inline-code lang-html">nds-cardView</code> to the layout wrapper when the page design calls for rounded, card-like containers. This applies border-radius to the sidebar</li>
-                    <li>Hide the side menu entirely with <code class="nds-inline-code lang-html">sidemenu_mode: false</code> in front matter on pages that do not need section navigation (landing pages, full-width dashboards)</li>
+                    <li>Hide the side menu entirely on pages that do not need section navigation (landing pages, full-width dashboards): omit the <code class="nds-inline-code lang-html">&lt;aside&gt;</code> and drop <code class="nds-inline-code lang-html">nds-wSideMenu</code> from the layout wrapper</li>
                 </ul>
             </div>
 
@@ -590,6 +590,11 @@ aside.nds-sidemenu
                             <td><code class="nds-inline-code lang-html">nds-top</code></td>
                             <td><code class="nds-inline-code lang-html">.nds-sidemenu</code></td>
                             <td>Switches mobile behavior from slide-in sidebar to top dropdown bar</td>
+                        </tr>
+                        <tr>
+                            <td><code class="nds-inline-code lang-html">nds-wSideMenu</code></td>
+                            <td><code class="nds-inline-code lang-html">.nds-content-layout</code></td>
+                            <td>Required. The layout hides a direct-child <code class="nds-inline-code lang-html">&lt;aside&gt;</code> unless it carries this class (or <code class="nds-inline-code lang-html">nds-wSideInfo</code>)</td>
                         </tr>
                         <tr>
                             <td><code class="nds-inline-code lang-html">nds-cardView</code></td>

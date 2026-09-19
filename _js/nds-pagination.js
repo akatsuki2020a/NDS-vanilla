@@ -18,6 +18,7 @@
  *   data-auto-pagination · data-total-pages · data-paged-target · data-per-page-target
  *   data-page-param · data-page-url · data-pagination-no-scroll
  *   data-paged-count · data-paged-from · data-paged-to (record slots the component fills)
+ *   data-paged-split (loader-stamped at init: items past the inline --per-page, else 6, are hidden)
  * Gotchas:
  *   - setPage() moves the nav but fires no event — dispatch your own if listeners depend on it.
  *   - scrollToContent() ignores data-pagination-no-scroll: the explicit call is the intent.
@@ -30,8 +31,9 @@
  *
  * Delegated (ships in nds-delegated.min.js, loader-INJECTED after the reveal —
  * NOT critical:true). Pre-init paint is owned by the data-paged-initialized
- * crit-CSS skeleton, which hides items past the default page size (and collapses
- * table rows) until init stamps data-paged-initialized — so init landing
+ * crit-CSS skeleton, which hides items past the default page size — or past the
+ * inline --per-page, once the loader's init-time split stamped data-paged-split —
+ * until init stamps data-paged-initialized, so init landing
  * post-reveal inserts the list without shifting content. The state init sets:
  *   - HTML builders + the manual-collapse path (NDSPagination →
  *     reconcileCollapse): more than 5 pages collapse to
@@ -39,8 +41,8 @@
  *     paint then collapse (horizontal CLS).
  *   - Auto-pagination initial paint (setupAutoContainer → updateAutoPagination):
  *     generates the collapsed list from data-total-pages, hides items past
- *     --per-page via showPage, locks table column widths from the all-rows
- *     skeleton, stamps data-paged-initialized so the skeleton reveals.
+ *     --per-page via showPage, locks table column widths from one all-rows
+ *     layout, stamps data-paged-initialized so the skeleton reveals.
  *   - Initial active-state stamping (setActivePage + updatePrevNextStates +
  *     initializePaginationStates) so the active page is highlighted and the
  *     prev/next disabled states are correct on first frame.
@@ -90,13 +92,13 @@
     // the common case is a consumer setting style="--per-page:N", and an inline
     // read costs nothing. Only media-query-driven values (no inline) fall through
     // to getComputedStyle, which forces a style recalc on the (laid-out) container.
-    // Defaults to 5. The container itself isn't display:none pre-init — the
+    // Defaults to 6. The container itself isn't display:none pre-init — the
     // skeleton hides individual items past --per-page, so the read is not free.
     // Synchronous at init by necessity — the page split must settle before data-paged-initialized reveals, or items flash all → paginated.
     function readPerPage(el) {
         const inline = el.style.getPropertyValue('--per-page');
         const v = parseInt(inline || getComputedStyle(el).getPropertyValue('--per-page'), 10);
-        return v > 0 ? v : 5;
+        return v > 0 ? v : 6;
     }
 
     // THE paged-item set for a container: the .nds-page-item elements it owns,
@@ -124,10 +126,20 @@
     const _PAGE_CTRL_SEL = `${_PAGE_ITEM_SEL} button, ${_PAGE_ITEM_SEL} a`;
 
     // The list element inside a nav, tolerating a bare .nds-pagination-list used
-    // as the root. Every path that stamps state or reads controls resolves the
-    // list through here, so the standalone-root contract lives in one place.
+    // as the root. The manual/author paths resolve the list through here, so the
+    // standalone-root contract lives in one place. The auto paths query
+    // .nds-pagination-list raw on purpose: they need null once a <=1-page rebuild
+    // has emptied the nav, where this would hand back the nav itself.
     function _listOf(el) {
         return el.querySelector('.nds-pagination-list') || el;
+    }
+
+    // The nav for a list-or-nav element — _listOf's mirror. Without it the
+    // standalone .nds-pagination-list root initializePagination accepts loses
+    // whatever the caller hangs off the nav: the skeleton release, the scroll,
+    // the no-scroll opt-out, the URL param.
+    function _navOf(el) {
+        return el.closest('.nds-pagination') || el;
     }
 
     // Page number from a clickable page element: prefer the `.nds-label`
@@ -152,6 +164,9 @@
             if (!list.querySelector('.nds-pagination-item:not(.nds-pagination-prev):not(.nds-pagination-next)')) return;
 
             this.valid = true;
+            // Registered here, not in the sweep, so every construction path —
+            // sweep, reinit() and programmatic create() — reaches destroy().
+            paginationNav.ndsPagination = this;
             this.init();
         }
 
@@ -261,6 +276,13 @@
         const isCollapsed = !!list.querySelector('.nds-pagination-ellipsis');
         if (model.length <= 5 && !isCollapsed) return;
 
+        // Committed to rebuilding — tear the old ellipsis menu down, as both other
+        // rebuild paths do (_rebuildAutoNav, setTotalPages). Runs AFTER the capture
+        // above, which needs the live menu items: destroy() unportals the menu, so
+        // an open one is back in place before replaceChildren discards its shell
+        // instead of being stranded at <body> with its listeners orphaned.
+        _destroyEllipsisMenu(nav);
+
         const activeNum = (model.find(e => e.active) || {}).num;
         const prevLi = list.querySelector('.nds-pagination-prev');
         const nextLi = list.querySelector('.nds-pagination-next');
@@ -297,7 +319,7 @@
         _collapseWatchReady = true;
         NDS.onChildrenChange('.nds-pagination-list', lists => {
             lists.forEach(list => {
-                const nav = list.closest('.nds-pagination') || list;
+                const nav = _navOf(list);
                 if (nav.hasAttribute('data-auto-pagination')) return;
                 reconcileCollapse(nav);
             });
@@ -399,7 +421,6 @@
                 // Stamp only successful constructions — a bailed (empty) nav stays
                 // eligible for the next reinit() instead of being skipped forever.
                 if (paginationInstance.valid) {
-                    container.ndsPagination = paginationInstance;
                     container.setAttribute('data-nds-pagination-initialized', 'true');
                 }
 
@@ -420,8 +441,10 @@
                 // Universal reveal: a non-auto pagination releases its paged-content's
                 // skeleton hold at init. Auto navs are skipped here — setupAutoContainer
                 // stamps after it collapses, so pre-collapse content stays held.
-                if (container.classList.contains('nds-pagination') &&
-                    !container.hasAttribute('data-auto-pagination')) {
+                // No .nds-pagination class gate: a standalone .nds-pagination-list root
+                // owns paged content the same way, and gating on the class left its
+                // items past --per-page hidden by the crit skeleton forever.
+                if (!container.hasAttribute('data-auto-pagination')) {
                     const content = contentForNav(container);
                     if (content) content.setAttribute('data-paged-initialized', '');
                 }
@@ -429,13 +452,14 @@
         });
     }
 
-    // Collect the dropmenu items inside a pagination's ellipsis menus. The
-    // ellipsis dropmenu renders in place (it never opts into data-portal), so
-    // each menu is a direct descendant. On a lazy menu this is the rendered
-    // window only — callers needing the true page span use _lazyRange /
-    // the always-visible 1,2,3,N strip buttons.
+    // Collect the dropmenu items inside a pagination's ellipsis menus. Queried
+    // portal-aware: the ellipsis menu sets no data-portal, but a pagination
+    // inside a modal or a scrolling wrapper portals on open anyway, which parks
+    // the menu at <body> and out of a plain descendant walk. On a lazy menu this
+    // is the rendered window only — callers needing the true page span use
+    // _lazyRange / the always-visible 1,2,3,N strip buttons.
     function getPaginationDropmenuItems(pagination) {
-        return Array.from(pagination.querySelectorAll('.nds-dropmenu-menu .nds-dropmenu-item'));
+        return NDS.queryAll(pagination, '.nds-dropmenu-menu .nds-dropmenu-item');
     }
 
     // All clickable page elements (in-list buttons + dropmenu items).
@@ -487,7 +511,11 @@
         NDS.State.set(target, 'active');
         NDS.aria.current(target, 'page');
         if (target.classList.contains('nds-dropmenu-item')) {
-            const ellipsisTrigger = target.closest('.nds-dropmenu')?.querySelector('.nds-dropmenu-trigger');
+            // NDS.closest, not closest: a portaled menu's row sits under <body>
+            // with no .nds-dropmenu ancestor — core hops back via the owner backref.
+            // Without it the trigger never carries the active page, and once the
+            // menu closes and drops its rows nothing holds it at all.
+            const ellipsisTrigger = NDS.closest(target, '.nds-dropmenu')?.querySelector('.nds-dropmenu-trigger');
             if (ellipsisTrigger) {
                 NDS.State.set(ellipsisTrigger, 'active');
                 const ellipsisLabel = ellipsisTrigger.querySelector('.nds-label');
@@ -537,15 +565,17 @@
         updatePrevNextStates(pagination, currentPageNum, minPage, maxPage);
     }
 
-    // Lock a paged table's column widths before pagination hides its rows.
-    // The skeleton collapses overflow rows with `visibility: collapse` (not
-    // display:none), so they stay in the layout tree and the column widths
-    // already reflect every row's content — this read is free, no un-hide
-    // reflow. Once showPage hides the off-page rows, the explicit widths stop
-    // columns jumping page to page. No-op for non-table (card) paged content.
+    // Lock a paged table's column widths before pagination hides its rows, so
+    // columns don't jump page to page. The pre-init hold display:nones rows
+    // past page one; the caller stamps data-paged-initialized first, so this
+    // read forces ONE full-table layout with every row's content in it — the
+    // only pre-init pass that pays for all rows. No-op for card paged content.
     function lockTableColumns(items) {
         const first = items[0];
         if (!first || first.tagName !== 'TR') return;
+        // The loader's pre-reveal split hid rows past page one; show them so
+        // the read below sees every row's content. showPage re-hides them.
+        for (const row of items) row.hidden = false;
         const table = first.closest('table');
         // Own header row only. A sub-row's nested <table> has its own thead whose
         // cells sit inside a hidden row and measure 0 — and since the outer
@@ -655,55 +685,34 @@
         const items = _pagedItems(contentContainer);
 
         // Build the paginated UI in final state — no all-items → paginated
-        // flash. For a table, lockTableColumns first freezes column widths
-        // from the full-content layout (the collapsed skeleton rows still
-        // size columns) so they don't jump page to page. data-paged-initialized
-        // is released only AFTER paginating, so the collapse — and thus the
-        // all-rows column sizing — survives through the lock.
-        const paginate = () => {
-            const perPage = readPerPage(contentContainer);
-            contentContainer._ndsPerPage = perPage;
-            lockTableColumns(items);
-            updateAutoPagination(paginationNav, items, perPage);
+        // flash. Stamp FIRST: it releases the pre-init hold on rows past page
+        // one, so lockTableColumns measures every row's content. All of this
+        // runs in one task, so nothing paints between the release and showPage.
+        const perPage = readPerPage(contentContainer);
+        contentContainer._ndsPerPage = perPage;
+        contentContainer.setAttribute('data-paged-initialized', '');
+        lockTableColumns(items);
+        updateAutoPagination(paginationNav, items, perPage);
 
-            // Opt-in URL restore: land on ?page=N before the skeleton reveal —
-            // silent (no event, no scroll), clamped to the page count.
-            const urlPage = _readPageParam(paginationNav);
-            if (urlPage && urlPage > 1) {
-                const totalPages = Math.ceil(items.length / perPage);
-                const page = Math.min(urlPage, Math.max(1, totalPages));
-                const list = paginationNav.querySelector('.nds-pagination-list');
-                if (list && page > 1) {
-                    setActivePage(list, page);
-                    updatePrevNextStates(list, page, 1, totalPages);
-                    showPage(items, page, perPage);
-                }
+        // Opt-in URL restore: land on ?page=N before the skeleton reveal —
+        // silent (no event, no scroll), clamped to the page count.
+        const urlPage = _readPageParam(paginationNav);
+        if (urlPage && urlPage > 1) {
+            const totalPages = Math.ceil(items.length / perPage);
+            const page = Math.min(urlPage, Math.max(1, totalPages));
+            const list = paginationNav.querySelector('.nds-pagination-list');
+            if (list && page > 1) {
+                setActivePage(list, page);
+                updatePrevNextStates(list, page, 1, totalPages);
+                showPage(items, page, perPage);
             }
+        }
 
-            contentContainer.setAttribute('data-paged-initialized', '');
-
-            // Wire interaction: clicks + the --per-page ResizeObserver.
-            // _wireAutoNav re-queries items live (per click, per resize), so it
-            // takes only the per-container handles + the perPage baseline
-            // (which the resize observer detects changes against).
-            _wireAutoNav(paginationNav, contentContainer, perPage);
-        };
-
-        // Tables defer one frame: by the next paint the collapsed table is
-        // already laid out, so lockTableColumns' width read is free — no
-        // pre-paint forced reflow. The skeleton shows the first rows in the
-        // meantime, so the one-frame defer is invisible. Grids have no column
-        // lock, so they paginate synchronously.
-        // A hidden document never runs rAF, so a timer races it behind a
-        // one-shot latch: in the foreground rAF wins and keeps the free read
-        // (the timer then no-ops), while a tab opened in the background still
-        // paginates and releases its skeleton instead of waiting for focus.
-        if (items[0] && items[0].tagName === 'TR') {
-            let kicked = false;
-            const kick = () => { if (kicked) return; kicked = true; paginate(); };
-            requestAnimationFrame(kick);
-            setTimeout(kick, 100);
-        } else paginate();
+        // Wire interaction: clicks + the --per-page ResizeObserver.
+        // _wireAutoNav re-queries items live (per click, per resize), so it
+        // takes only the per-container handles + the perPage baseline
+        // (which the resize observer detects changes against).
+        _wireAutoNav(paginationNav, contentContainer, perPage);
 
         // Re-paginate automatically when items are added/removed. Default for all
         // auto-pagination; wired once per page, subsequent calls no-op.
@@ -775,14 +784,14 @@
     // prev/next anchor drops its href; CSS pointer-events handles the rest.
     const _prevLi = (disabled, url, prevPage) => {
         const inner = url
-            ? `<a class="nds-btn nds-subtle" aria-label="${_t('prev')}"${disabled ? ' aria-disabled="true"' : ` href="${url(prevPage)}"`}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></a>`
-            : `<button type="button" class="nds-btn nds-subtle" aria-label="${_t('prev')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></button>`;
+            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('prev')}"${disabled ? ' aria-disabled="true"' : ` href="${url(prevPage)}"`}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('prev')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></button>`;
         return `<li class="nds-pagination-item nds-pagination-prev">${inner}</li>`;
     };
     const _nextLi = (disabled, url, nextPage) => {
         const inner = url
-            ? `<a class="nds-btn nds-subtle" aria-label="${_t('next')}"${disabled ? ' aria-disabled="true"' : ` href="${url(nextPage)}"`}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></a>`
-            : `<button type="button" class="nds-btn nds-subtle" aria-label="${_t('next')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></button>`;
+            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('next')}"${disabled ? ' aria-disabled="true"' : ` href="${url(nextPage)}"`}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('next')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></button>`;
         return `<li class="nds-pagination-item nds-pagination-next">${inner}</li>`;
     };
     const _pageLi = (i, activePage, url) => {
@@ -877,7 +886,13 @@
     // The lazily-windowed page range stamped on a generated ellipsis menu's
     // scroll container, or null for an eager (author-markup) menu.
     function _lazyRange(host) {
-        const scroll = host.querySelector('.nds-pagination-ellipsis .nds-dropmenu-scroll');
+        // Resolve the menu, then scope into it. A wrapper→menu selector matches
+        // nothing once the menu portals to <body>, and NDS.queryAll can't carry a
+        // spanning selector either — the menu is the search root, not its own
+        // ancestor. Returning null while open let reconcileCollapse's
+        // builder-owned guard fail open and rebuild a live lazy nav.
+        const menu = NDS.querySelector(host, '.nds-pagination-menu');
+        const scroll = menu && menu.querySelector('.nds-dropmenu-scroll');
         return (scroll && scroll._ndsRange) || null;
     }
 
@@ -909,7 +924,8 @@
         if (page > 1) params.set(attr || 'page', page);
         else params.delete(attr || 'page');
         const qs = params.toString();
-        window.history.replaceState({}, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+        // Keep the hash — a hash-routed app stores its route there.
+        window.history.replaceState({}, '', (qs ? `${window.location.pathname}?${qs}` : window.location.pathname) + window.location.hash);
     }
 
     // Land a manual nav on ?page=N at init, silently — no event (not user
@@ -980,8 +996,12 @@
     // menu (open() measured it empty) and scroll the active row into mid-view.
     // Runs synchronously inside the opened event — same task as open(), pre-paint.
     function _openLazyMenu(wrapper, scroll) {
-        const nav = wrapper.closest('.nds-pagination');
-        const list = nav ? _listOf(nav) : null;
+        // Resolve the list first: the wrapper always sits in an ellipsis <li>, so
+        // this holds for a standalone .nds-pagination-list root too, where a
+        // .nds-pagination lookup finds nothing and the menu opened at the range
+        // start instead of the current page.
+        const list = wrapper.closest('.nds-pagination-list');
+        const nav = list ? _navOf(list) : null;
         const { from, to } = scroll._ndsRange;
         const active = list ? getCurrentPage(list) : from;
 
@@ -1098,6 +1118,14 @@
         win.end = end;
     }
 
+    // Height via CSSOM, never a style attribute — a strict style-src blocks the
+    // attribute form, which would collapse every spacer and break the scroll math.
+    function _spacer(height) {
+        const el = document.createElement('div');
+        el.style.height = height + 'px';
+        return el;
+    }
+
     // Materialize exactly the rows [start..end] (page numbers) plus a focused
     // row we must not detach (removal OR re-append kills focus — kept rows are
     // never moved, only neighbors change around them). Spacers are cheap
@@ -1143,10 +1171,10 @@
         scroll.querySelectorAll('.nds-dropmenu-item').forEach(rowEl => {
             const p = pageNumberOf(rowEl);
             const gap = p - prev - 1;
-            if (gap > 0) rowEl.insertAdjacentHTML('beforebegin', `<div style="height:${gap * pitch}px"></div>`);
+            if (gap > 0) rowEl.insertAdjacentElement('beforebegin', _spacer(gap * pitch));
             prev = p;
         });
-        if (prev < to) scroll.insertAdjacentHTML('beforeend', `<div style="height:${(to - prev) * pitch}px"></div>`);
+        if (prev < to) scroll.insertAdjacentElement('beforeend', _spacer((to - prev) * pitch));
 
         // 4. Active row: aria-current is baked by _menuItem; data-state stays
         //    NDS.State-managed (never a literal attribute).
@@ -1217,9 +1245,7 @@
     // and the scroll target: override per-page or globally via
     // `--pagination-scroll-offset` (read off the nav element).
     function scrollToContent(pagination) {
-        const paginationNav = pagination.closest('.nds-pagination');
-        if (!paginationNav) return;
-
+        const paginationNav = _navOf(pagination);
         const contentContainer = contentForNav(paginationNav);
         NDS.scrollBelowNav(contentContainer || paginationNav, {
             offsetVar: '--pagination-scroll-offset',
@@ -1233,8 +1259,8 @@
     // to guess. NDS.Pagination.scrollToContent() ignores the attribute: calling it
     // explicitly is the intent.
     function _scrollOnPageChange(pagination) {
-        const nav = pagination.closest('.nds-pagination');
-        if (nav?.hasAttribute('data-pagination-no-scroll')) return;
+        const nav = _navOf(pagination);
+        if (nav.hasAttribute('data-pagination-no-scroll')) return;
         scrollToContent(pagination);
     }
 
@@ -1243,7 +1269,7 @@
     // previous + total + the component element. Fired on the .nds-pagination nav,
     // bubbling. setPage() (programmatic) stays silent to avoid feedback loops.
     function _dispatchPageChange(pagination, page, previousPage, totalPages) {
-        const nav = pagination.closest('.nds-pagination') || pagination;
+        const nav = _navOf(pagination);
         nav.dispatchEvent(new CustomEvent('nds:pagination:change', {
             detail: { page, previousPage, totalPages, pagination: nav },
             bubbles: true
@@ -1259,7 +1285,7 @@
         _scrollOnPageChange(pagination);
 
         _dispatchPageChange(pagination, pageNumber, previousPage, totalPages);
-        _writePageParam(pagination.closest('.nds-pagination') || pagination, pageNumber);
+        _writePageParam(_navOf(pagination), pageNumber);
     }
 
     // Per-nav click handler for an auto-pagination's <ul>. getItems() returns
@@ -1276,7 +1302,18 @@
         if (newPagination._ndsAutoClickWired) return;
         newPagination._ndsAutoClickWired = true;
         newPagination.addEventListener('click', (e) => {
-            const pageElement = e.target.closest(`${_PAGE_CTRL_SEL}, .nds-dropmenu-item`);
+            // The re-dispatch fires on the WRAPPER, so e.target is the wrapper, not
+            // the row — dropmenu hands the row over as ndsDropmenuItem. Resolving
+            // from e.target alone matched nothing and the click died silently.
+            const src = e.ndsDropmenuItem || e.target;
+            // Strip control, or an own-ellipsis row. The ownership test is on the
+            // row's wrapper, not a selector ancestor, so it survives the portal —
+            // same guard as _wireManualNavClicks. The two are mutually exclusive:
+            // _PAGE_ITEM_SEL excludes .nds-pagination-ellipsis.
+            const strip = src.closest(_PAGE_CTRL_SEL);
+            const row = src.closest('.nds-dropmenu-item');
+            const pageElement = strip ||
+                (row && newPagination.contains(NDS.closest(row, '.nds-dropmenu')) ? row : null);
 
             if (pageElement) {
                 if (pageElement.tagName.toLowerCase() === 'a') e.preventDefault();
@@ -1479,7 +1516,7 @@
         updatePrevNextStates(pagination, targetPageNum, min, max);
         _scrollOnPageChange(pagination);
         _dispatchPageChange(pagination, targetPageNum, previousPage, max);
-        _writePageParam(pagination.closest('.nds-pagination') || pagination, targetPageNum);
+        _writePageParam(_navOf(pagination), targetPageNum);
     }
 
     // Per-nav click handler for manual pagination. Scoped to the nav element,
@@ -1499,8 +1536,16 @@
             // the list element).
             const pagination = _listOf(paginationNav);
 
-            const pageElement = e.target.closest(_PAGE_CTRL_SEL);
-            const dropdownItem = e.target.closest('.nds-pagination-list .nds-dropmenu-item');
+            // Portaled ellipsis: the re-dispatch fires on the WRAPPER, so e.target
+            // is the wrapper — dropmenu hands the row over as ndsDropmenuItem.
+            const src = e.ndsDropmenuItem || e.target;
+            const pageElement = src.closest(_PAGE_CTRL_SEL);
+            // Own-ellipsis scoping moves from the selector onto the row's owning
+            // wrapper: a '.nds-pagination-list …' ancestor can't match a portaled
+            // menu, but NDS.closest hops back to the wrapper via the owner backref.
+            const row = src.closest('.nds-dropmenu-item');
+            const dropdownItem = row && pagination.contains(NDS.closest(row, '.nds-dropmenu')) ? row : null;
+            // e.target, not src: prev/next never live in the menu.
             const prevElement = e.target.closest('.nds-pagination-prev button, .nds-pagination-prev a');
             const nextElement = e.target.closest('.nds-pagination-next button, .nds-pagination-next a');
 
@@ -1567,6 +1612,9 @@
         reinit: () => { initializePagination(); initializeAutoPagination(); },
         initAuto: initializeAutoPagination,
         create: (container) => {
+            // A live nav is returned as-is — re-wiring its click handler would
+            // stack a second listener on the same element.
+            if (container.ndsPagination) return container.ndsPagination;
             const inst = new NDSPagination(container);
             // Match initializePagination: wire the per-nav click handler for
             // manual navs; auto-paginations are wired by _wireAutoNav.
@@ -1585,7 +1633,7 @@
             setActivePage(pagination, pageNumber);
             updatePrevNextStates(pagination, pageNumber, min, max);
             _scrollOnPageChange(pagination);
-            _writePageParam(container, pageNumber);
+            _writePageParam(_navOf(container), pageNumber);
         },
         // Manual scroll for consumers driving their own page changes. Ignores
         // data-pagination-no-scroll — the explicit call is the intent.

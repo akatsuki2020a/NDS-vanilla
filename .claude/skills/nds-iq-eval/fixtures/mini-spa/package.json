@@ -1,0 +1,8 @@
+{
+  "name": "records-portal",
+  "private": true,
+  "version": "0.4.2",
+  "scripts": {
+    "dev": "python -m http.server 5173"
+  }
+}

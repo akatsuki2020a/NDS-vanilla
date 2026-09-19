@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.7.0"
-last_edit: "09/08/2026 - 09:52 PM"
+updated: "1.11.0"
+last_edit: "22/08/2026 - 01:19 PM"
 ---
 
 <!-- Basic Client-Side Filter -->
@@ -1736,6 +1736,7 @@ NDS.Filter.whenReady('#apiFilter', (filter) =&gt; {
                                 <div class="nds-block">
                                     <p>Add a separate <code class="nds-inline-code lang-html">&lt;form&gt;</code> element with <code class="nds-inline-code lang-html">data-filter-target</code> linking it to the filter anchor, plus <code class="nds-inline-code lang-html">data-filter-submit</code> and <code class="nds-inline-code lang-html">data-ajax</code> attributes. Set the <code class="nds-inline-code lang-html">action</code> attribute to the API endpoint URL.</p>
                                     <p><code class="nds-inline-code lang-html">.nds-filter</code> stays a pure anchor — the form drives submission. HTML responses are automatically injected into the target container. For JSON responses, listen for the <code class="nds-inline-code lang-js">nds:filterFormComplete</code> event and render the data yourself.</p>
+                                    <p>Give the form an <code class="nds-inline-code lang-html">id</code> when any filter surface sits outside it. Surfaces are linked by <code class="nds-inline-code lang-html">data-filter-target</code>, not by nesting, so a search box or dropmenu can be a sibling of the form. The filter associates those controls with the form through the <code class="nds-inline-code lang-html">id</code>. Without an <code class="nds-inline-code lang-html">id</code> the outside controls submit nothing, and the request carries no filter values.</p>
                                 </div>
                             </div>
                         </div>
@@ -2111,7 +2112,7 @@ filterForm.addEventListener('nds:filterFormAjax', (e) =&gt; {
                     <tbody>
                         <tr><td><code class="nds-inline-code lang-html">data-filter-target</code></td><td>ID of the container holding filterable items. Also used to link the anchor to its submission form, search box, applied-chips row, query/count slots, and filter controls.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-search</code></td><td>When the anchor is also a <a class="nds-color" href="{{ 'components/dropmenu' | relative_url }}">Dropmenu</a>, adds a search box above the options and filters the generated rows as the user types. Pass a number (<code class="nds-inline-code lang-html">data-search="50"</code>) to show it only once the menu holds that many options.</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">data-portal</code></td><td>Moves the open menu to <code class="nds-inline-code lang-html">&lt;body&gt;</code>. Use it when the filter sits inside a modal, drawer, or any scrolling box that would clip the menu. Width knobs travel with the menu.</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-portal</code></td><td>Forces the open menu to <code class="nds-inline-code lang-html">&lt;body&gt;</code>. A filter inside a modal, drawer, or any scrolling box already moves there on its own, so set this only where no container demands it. Width knobs travel with the menu.</td></tr>
                     </tbody>
                 </table>
 
@@ -2218,17 +2219,15 @@ filterForm.addEventListener('nds:filterFormAjax', (e) =&gt; {
                     </tbody>
                 </table>
 
-                <h4>State and Status (form submission mode)</h4>
-                <p>In form mode, the filter sets these attributes on the <code class="nds-inline-code lang-html">.nds-filter</code> anchor element via <code class="nds-inline-code lang-js">NDS.State</code> and <code class="nds-inline-code lang-js">NDS.Status</code>. These drive the built-in SCSS rules below.</p>
+                <h4>State (form submission mode)</h4>
+                <p>In form mode, the filter sets this attribute on the <code class="nds-inline-code lang-html">.nds-filter</code> anchor element via <code class="nds-inline-code lang-js">NDS.State</code>.</p>
                 <table class="nds-table nds-responsive">
                     <thead><tr><th>Selector</th><th>Effect</th><th>When set</th></tr></thead>
                     <tbody>
                         <tr><td><code class="nds-inline-code lang-html">.nds-filter[data-state~="submitting"]</code></td><td><code class="nds-inline-code">pointer-events: none</code></td><td>Set on the anchor when a standard or AJAX form submission is in flight. Cleared when the response arrives.</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">.nds-filter[data-status="success"]</code></td><td>Search inputs get <code class="nds-inline-code">border-color: var(--border-success)</code></td><td>Set on successful AJAX response. Auto-cleared after 3 seconds.</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">.nds-filter[data-status="error"]</code></td><td>Search inputs get <code class="nds-inline-code">border-color: var(--border-error)</code></td><td>Set on AJAX request failure. Auto-cleared after 5 seconds.</td></tr>
                     </tbody>
                 </table>
-                <p>Because a failed submission deliberately leaves the results untouched, the border tint is the only thing on screen that moves — so filter also raises an error toast via <a class="nds-color" href="{{ 'components/alert' | relative_url }}">Alert</a> (soft dependency: skipped if <code class="nds-inline-code lang-js">nds-alert.js</code> isn't bundled). Call <code class="nds-inline-code lang-js">preventDefault()</code> on <code class="nds-inline-code lang-js">nds:filterFormError</code> to suppress it.</p>
+                <p>Because a failed submission deliberately leaves the results untouched, nothing on screen moves — so filter raises an error toast via <a class="nds-color" href="{{ 'components/alert' | relative_url }}">Alert</a> (soft dependency: skipped if <code class="nds-inline-code lang-js">nds-alert.js</code> isn't bundled). Call <code class="nds-inline-code lang-js">preventDefault()</code> on <code class="nds-inline-code lang-js">nds:filterFormError</code> to suppress it.</p>
                 <p>A failure also rolls the applied state back to what the displayed results represent: chips, the filter-button badge, the dropmenu controls and the URL params all return to their pre-submission values. Without it a failed Clear would show no chips over results that are still filtered. The trade-off is that an unsaved selection made in the dropmenu is discarded along with the failed submission.</p>
             </div>
 
@@ -2269,6 +2268,10 @@ NDS.Filter.whenReady('.nds-filter', (instance) =&gt; {
 filter.setFilterValues('department', ['Engineering', 'Design']);  // Check/uncheck existing inputs
 filter.setSearchValue('Ahmed');
 filter.removeFilterValue('department', 'Design');
+// In AJAX mode each of these re-fetches, so the chips never describe results
+// the server was not asked for. Calls in the same tick collapse into one
+// request, and your own submitForm() replaces the queued one — so a run of
+// setters followed by submitForm() still sends a single request.
 filter.removeSearchFilter();                 // Clear the search keyword, keep the other filters
 filter.resetRangeFilter('price');            // Put a slider filter back to its full span
 
@@ -2286,8 +2289,9 @@ const visible = filter.getVisibleItems();   // Array of visible card elements
 const hidden = filter.getHiddenItems();     // Array of hidden card elements
 
 // ── Reset and refresh ───────────────────────────────
-filter.reset();     // Clear all filters and search, show all items
-filter.clear();     // Clear all inputs without re-showing items
+filter.reset();     // Clear all filters and search, show all items. AJAX mode re-fetches
+filter.clear();     // Clear all inputs without re-showing items. AJAX mode does NOT
+                    // re-fetch, so the chips and the rows both stay until you submit
 filter.refresh();   // Re-resolve target container, re-scan items, regenerate auto filters
 
 // Changed the list itself? Prefer NDS.Init.refresh(container): it refreshes this
@@ -2297,7 +2301,8 @@ filter.refresh();   // Re-resolve target container, re-scan items, regenerate au
 NDS.Filter.refresh(container);   // Or scope it to filters alone (client-side only)
 
 // ── Manual control ──────────────────────────────────
-filter.applyFilters();  // Trigger filtering logic manually
+filter.applyFilters();  // Trigger filtering logic manually. In form mode it repaints
+                        // chips, badge and URL and never submits — use submitForm()
 filter.submitForm();    // Submit the form (form submission mode only)
 filter.destroy();       // Show all items and remove initialization flag
 
@@ -2362,6 +2367,12 @@ filterEl.addEventListener('nds:filterFormSubmit', (e) =&gt; {
 // rollback() restores chips, badge, controls and URL params to their
 // pre-submission values — call it if your own request fails, so they don't
 // describe results that were never rendered.
+// hiddenInputsContainer is the .nds-filter-hidden-inputs div inside the form.
+// The filter fills it on each submit with any criteria its own controls cannot
+// carry — a slider renders two unnamed thumbs for one encoded value, so it
+// would otherwise be missing from the request while its chip says it applies.
+// The key matches the URL parameter, so a slider named "price" submits
+// price=200-600. Add your own fields to this container here.
 filterEl.addEventListener('nds:filterFormAjax', (e) =&gt; {
     const { criteria, form, hiddenInputsContainer, rollback } = e.detail;
 });

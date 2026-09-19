@@ -124,10 +124,18 @@
   // would push the leading tabs past the scroll origin (scrollLeft can't go
   // negative) where they're unreachable — so gate on the parent's has-more and
   // fall back to the base start-align.
-  .nds-scroll-more:not([data-state~="has-more"]) > .nds-tab-list:is(.nds-center, .center) {
-    justify-content: center;
-    width: fit-content;
-    margin-inline: auto;
+  // Centering rides the --_tabs-fit-* hooks from the scroll-more host: a `.nds-center`
+  // tail after [data-state] would join the shared invalidation set (PERF-06).
+  .nds-scroll-more:not([data-state~="has-more"]) {
+    --_tabs-fit-justify: center;
+    --_tabs-fit-width: fit-content;
+    --_tabs-fit-margin: auto;
+  }
+
+  .nds-tab-list:is(.nds-center, .center) {
+    justify-content: var(--_tabs-fit-justify, normal);
+    width: var(--_tabs-fit-width, auto);
+    margin-inline: var(--_tabs-fit-margin, 0);
   }
 }
 
@@ -229,6 +237,8 @@
     flex-wrap: nowrap !important;
     max-width: 100%;
     scroll-behavior: smooth;
+    // Without this the JS paths' behavior:'auto' would still animate here.
+    @include reduced-motion { scroll-behavior: auto; }
 
     >* {
       width: fit-content;
@@ -305,7 +315,7 @@
   }
 
   .nds-tab-content {
-    padding-inline: var(--_card-padding);
+    padding-inline: var(--_card-padding-inline);
     padding-block: var(--spacing-2xl);
 
     // Card variant zeroes the panel padding (the tab-content already
@@ -344,7 +354,7 @@
 }
 
 .nds-tab-content.nds-card {
-  padding-inline: var(--_card-padding);
+  padding-inline: var(--_card-padding-inline);
   padding-block: var(--spacing-2xl);
 
   // Same shape as the .nds-tabs.nds-card branch — zero by default
@@ -398,19 +408,23 @@ section>.nds-max-width {
 // _loading.scss.
 // Skeleton is also the DEFAULT pre-init state: any tabs root bars its
 // labels until its init stamp lands.
-:is(:is(.nds-tabs, .nds-tab-list):is(.nds-loading, [data-state='loading']),
-    .nds-tabs:not([data-nds-tabs-initialized])) .nds-tab {
+:is(:is(.nds-tabs, .nds-tab-list).nds-loading,
+    .nds-tabs:not([data-nds-tabs-initialized])) {
+    @include skeleton-pulse;
 
-    .nds-label {
-        @include skeleton-bar;
-    }
+    .nds-tab {
 
-    :is(.nds-icon, i) {
-        visibility: hidden;
-    }
+        .nds-label {
+            @include skeleton-bar;
+        }
 
-    &::before {
-        background-color: transparent;
+        :is(.nds-icon, i) {
+            visibility: hidden;
+        }
+
+        &::before {
+            background-color: transparent;
+        }
     }
 }
 
@@ -419,9 +433,10 @@ section>.nds-max-width {
 // panel becomes a bar; nested content hides so colored backgrounds don't
 // paint through. Components with their own skeleton (accordion, grids,
 // tables, nested tabs) are excluded — mark them loading for their richer
-// per-item placeholder.
-:is(.nds-tabs:is(.nds-loading, [data-state='loading']),
-    .nds-tabs:not([data-nds-tabs-initialized])) .nds-tab-panel>*:not(.nds-accordion, .nds-grid, .nds-paged-content, .nds-table, .nds-tabs, .nds-code-action) {
+// per-item placeholder. A pagination nav is an empty row reserve until its
+// init; as a bar it read as one full-width plank under the list.
+:is(.nds-tabs.nds-loading,
+    .nds-tabs:not([data-nds-tabs-initialized])) .nds-tab-panel>*:not(.nds-accordion, .nds-grid, .nds-paged-content, .nds-table, .nds-tabs, .nds-code-action, .nds-pagination) {
     --nds-skeleton-width: 100%;   // fill the panel (skeleton-fill defaults to fit-content)
     @include skeleton-bar;
 

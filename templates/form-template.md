@@ -1,6 +1,7 @@
 ---
 exclude_showcase: true
 layout: page
+# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
 layout_class: nds-wSideInfo
 title: Form Template
 hero_style: "nds-flat nds-aside"
@@ -67,7 +68,6 @@ sidemenu_mode: false
                                     placeholder="DD/MM/YYYY" autocomplete="bday"
                                     data-year-before="100" data-year-after="0" required>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required>
@@ -87,7 +87,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required>
@@ -102,11 +101,8 @@ sidemenu_mode: false
                                     <button type="button" class="nds-btn nds-subtle nds-cooldown"
                                         id="ft-otp-resend"
                                         data-cooldown="5"
-                                        data-cooldown-loading="1.5"
                                         data-cooldown-label="Resend in {s}s"
-                                        data-resend-label="Resend"
-                                        data-sent-title="Verification code sent"
-                                        data-sent-message="A new code has been sent to your mobile number.">
+                                        data-resend-label="Resend">
                                         <span class="nds-label">Send code</span>
                                     </button>
                                 </div>
@@ -122,8 +118,7 @@ sidemenu_mode: false
                     </div>
 
                     <div class="nds-form-actions">
-                        <button type="button" class="nds-btn nds-primary"
-                            data-stepper-control="next" data-stepper-target="formStepper">
+                        <button type="button" class="nds-btn nds-primary" data-ft-continue>
                             <span class="nds-label">Continue</span>
                         </button>
                     </div>
@@ -148,7 +143,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required>
@@ -164,7 +158,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container">
@@ -180,7 +173,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required>
@@ -196,7 +188,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required>
@@ -213,7 +204,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required
@@ -232,7 +222,6 @@ sidemenu_mode: false
                                     </button>
                                 </div>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container" data-required>
@@ -243,7 +232,6 @@ sidemenu_mode: false
                                 <input type="text" id="ft-district" name="district" class="nds-input"
                                     placeholder="Neighborhood or district" autocomplete="address-level3" required>
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                         <div class="nds-form-container">
@@ -255,7 +243,6 @@ sidemenu_mode: false
                                     placeholder="5-digit code" inputmode="numeric" pattern="[0-9]{5}"
                                     autocomplete="postal-code">
                             </div>
-                            <div class="nds-form-footer" data-feedback-target hidden></div>
                         </div>
 
                     </div>
@@ -265,8 +252,7 @@ sidemenu_mode: false
                             data-stepper-control="previous" data-stepper-target="formStepper">
                             <span class="nds-label">Back</span>
                         </button>
-                        <button type="button" class="nds-btn nds-primary"
-                            data-stepper-control="next" data-stepper-target="formStepper">
+                        <button type="button" class="nds-btn nds-primary" data-ft-continue>
                             <span class="nds-label">Continue</span>
                         </button>
                     </div>
@@ -322,8 +308,9 @@ sidemenu_mode: false
                             data-stepper-control="previous" data-stepper-target="formStepper">
                             <span class="nds-label">Back</span>
                         </button>
-                        <button type="submit" class="nds-btn nds-primary"
-                            data-stepper-control="next" data-stepper-target="formStepper">
+                        <!-- No data-stepper-control: it would preventDefault the click
+                             and submit would never fire. Advance from nds:formValid. -->
+                        <button type="submit" class="nds-btn nds-primary" id="ft-submit">
                             <span class="nds-label">Submit Application</span>
                         </button>
                     </div>
@@ -369,10 +356,10 @@ sidemenu_mode: false
             </form>
         </div>
 
-        <aside class="nds-sideinfo nds-card nds-stroke nds-shadow nds-sticky nds-sticky-md nds-top" aria-label="Application progress" style="--nds-sideinfo-top-offset: var(--spacing-6xl);">
+        <aside class="nds-sideinfo nds-sticky nds-sticky-md nds-top" aria-label="Application progress" style="--nds-sideinfo-top-offset: var(--spacing-6xl);">
             <!-- Vertical fallback (tablet + desktop) with a radial override on
                  mobile so the 4-step flow stays compact on small screens. -->
-            <div class="nds-stepper nds-radial nds-vertical-lg"
+            <div class="nds-stepper nds-radial nds-vertical-lg nds-card nds-stroke nds-shadow"
                 id="formStepper"
                 data-current="1" data-total="4">
                 <!-- Radial-only progress ring; hidden on non-radial variants by base CSS. -->
@@ -440,6 +427,35 @@ sidemenu_mode: false
 <script>
     (function () {
         const panels = document.querySelectorAll('[data-form-step]');
+
+        // The cooldown button owns the throttle and the countdown label. Send the code
+        // from its event — a bare click handler would let the user hammer the endpoint —
+        // and confirm from the outcome so a failure never reports success.
+        document.getElementById('ft-otp-resend')
+            .addEventListener('nds:cooldown:triggered', function () {
+                // Replace sendCode() with your own request. The loading state is the
+                // page's: it lasts exactly as long as the request does, and the countdown
+                // ticks underneath it.
+                var btn = document.getElementById('ft-otp-resend');
+                NDS.State.add(btn, 'loading');
+                sendCode()
+                    .then(() => NDS.Alert.create({
+                        variant: 'success', title: 'Verification code sent',
+                        description: 'A new code has been sent to your mobile number.',
+                        display: 'toast', position: 'top', duration: 4000
+                    }))
+                    .catch(() => NDS.Alert.create({
+                        variant: 'error', title: 'Could not send the code',
+                        description: 'Check your connection and try again.',
+                        display: 'toast', position: 'top', duration: 0
+                    }))
+                    .finally(() => NDS.State.remove(btn, 'loading'));
+            });
+
+        // Stands in for the request this template has no server for.
+        function sendCode() {
+            return new Promise(resolve => setTimeout(resolve, 1200));
+        }
 
         const requiredNotice = document.querySelector('#formTemplate .nds-required-notice');
         const formSection = document.getElementById('formTemplate');
@@ -520,9 +536,37 @@ sidemenu_mode: false
             }
         });
 
-        // The form carries data-ajax, so Forms validates on submit, stops the POST
-        // and fires nds:formValid. The stepper-control handler on the Submit
-        // Application button advances the stepper to step 4 (success).
+        // Continue is a GATED move, so JS drives it — data-stepper-control is the
+        // unconditional mover and would advance an invalid step. validateForm() skips
+        // fields in a hidden panel, so this checks the step on screen.
+        formSection.querySelectorAll('[data-ft-continue]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (NDS.Forms.validateForm(btn).valid) NDS.Stepper.next('formStepper');
+            });
+        });
+
+        // data-ajax: Forms validates on submit, stops the POST and fires nds:formValid.
+        // Advance from the request's OUTCOME, never the click — a failure must not
+        // report success. Forms skips fields in a hidden panel, so this validates step 3.
+        document.getElementById('form-template')
+            .addEventListener('nds:formValid', function () {
+                var btn = document.getElementById('ft-submit');
+                NDS.State.add(btn, 'loading');
+                // Replace submitApplication() with your own request.
+                submitApplication()
+                    .then(() => NDS.Stepper.next('formStepper'))
+                    .catch(() => NDS.Alert.create({
+                        variant: 'error', title: 'Could not submit the application',
+                        description: 'Check your connection and try again.',
+                        display: 'toast', position: 'top', duration: 0
+                    }))
+                    .finally(() => NDS.State.remove(btn, 'loading'));
+            });
+
+        // Stands in for the request this template has no server for.
+        function submitApplication() {
+            return new Promise(resolve => setTimeout(resolve, 1200));
+        }
 
         // OTP Resend: loading, cooldown, countdown, and success toast are all
         // owned by NDS.CooldownButton via data-* attrs on the button.

@@ -5,12 +5,19 @@
  *   NDS.Modal.open(idOrEl)      open a .nds-modal
  *   NDS.Modal.close()           close whatever is open — takes no argument
  *   NDS.Modal.isOpen()          is a modal open?
+ *   NDS.Modal.destroy(root)     release an open modal inside root before its markup is
+ *                               removed — drops the backdrop and the scroll lock at once.
+ *                               NDS.Init.destroy(view) calls it for you
  * Events (bubble from the .nds-modal):
  *   nds:modal:opened   detail (none) — after the open state paints
  *   nds:modal:closed   detail (none) — after the close animation finishes, not on the click
  * Hooks:
  *   data-modal-target   on a trigger — the id of the modal to open
  *   data-modal-close    on any control that should close it (.nds-modal-close works too)
+ *   data-modal-static   on the .nds-modal — no ESC, no backdrop click. It closes only
+ *                       through a [data-modal-close] control or NDS.Modal.close()
+ *   data-state          open | closing — written by JS on the .nds-modal while it is
+ *                       shown and while it animates out. Read-only for consumers
  * Gotchas:
  *   - One modal at a time: open() closes the current one first.
  *   - nds-backdrop.js must be in the bundle. Without it init() and open() log an error
@@ -32,6 +39,7 @@
   // State
   let activeModal = null;
   let initAbortController = null;
+  let trapAbortController = null; // scopes the per-open-cycle focus-trap listener; aborted in close() and destroy()
   let _initDone = false;
 
   // Tab focus trap — delegates to the shared NDS.trapFocus factory.
@@ -43,9 +51,9 @@
    * Open modal by ID or element
    */
   function open(target) {
-    // Get modal element
+    // Get modal element — fromTemplate covers an id still inside a <template>
     const modal = typeof target === 'string'
-      ? document.getElementById(target)
+      ? NDS.fromTemplate(target)
       : target;
 
     if (!modal || !modal.classList.contains('nds-modal')) return;
@@ -57,15 +65,27 @@
       return;
     }
 
-    // Close existing modal if any
-    if (activeModal) {
-      close();
+    // Already the active modal: re-assert the open state and stop (a framework
+    // re-render can put [hidden] back). close()+show here would leave close()'s
+    // deferred teardown to hide it again after the fade and pop the backdrop.
+    if (activeModal === modal) {
+      modal.removeAttribute('hidden');
+      NDS.aria.hidden(modal, false);
+      NDS.State.set(modal, 'open');
+      return;
     }
+    if (activeModal) close();
 
-    // Show backdrop
+    // Show backdrop. A [data-modal-static] modal drops both dismiss paths, so
+    // it closes only through a [data-modal-close] control or NDS.Modal.close()
+    // — same contract as [data-panel-static].
+    const isStatic = modal.hasAttribute('data-modal-static');
+
     NDS.Backdrop.show({
       zIndex: 1100,
-      onClick: () => close()
+      onClick: () => close(),
+      escapeClose: !isStatic,
+      clickToClose: !isStatic
     });
 
     // Show modal
@@ -83,7 +103,8 @@
     });
 
     // Enable focus trap
-    document.addEventListener('keydown', trapFocus);
+    trapAbortController = new AbortController();
+    document.addEventListener('keydown', trapFocus, { signal: trapAbortController.signal });
 
     activeModal = modal;
   }
@@ -97,7 +118,8 @@
     const modal = activeModal;
 
     // Disable focus trap
-    document.removeEventListener('keydown', trapFocus);
+    trapAbortController?.abort();
+    trapAbortController = null;
 
     // Blur any focused element inside the modal to prevent aria-hidden warning
     if (document.activeElement && modal.contains(document.activeElement)) {
@@ -113,12 +135,43 @@
     // keeping it out of the click frame is what holds the close INP down.
     setTimeout(() => {
       NDS.Backdrop.hide();
+      // Re-opened during the fade: open() pushed a fresh backdrop owner, so the
+      // pop above stays balanced and the modal must stay up.
+      if (activeModal === modal) return;
       modal.setAttribute('hidden', '');
       NDS.State.clear(modal);
       modal.dispatchEvent(new CustomEvent('nds:modal:closed', { bubbles: true }));
     }, NDS.transitionSpeed() + 100);
 
     activeModal = null;
+  }
+
+  /**
+   * Release an open modal whose element is inside `root`, before that markup is removed.
+   *
+   * The listeners this component installs are delegated on document and belong to the page,
+   * not to any modal, so there is nothing per-element to release. What CANNOT survive the
+   * removal is the open state: the backdrop is showing, the page is scroll-locked (body
+   * carries an inline top offset), and the focus trap is reading `activeModal`. Remove the
+   * markup without this and the app is left with an overlay it cannot dismiss and a page
+   * that will not scroll — the modal element is gone, so nothing can call close().
+   *
+   * Teardown is immediate, with no closing animation and no nds:modal:closed event: the
+   * view is leaving, so there is nothing to animate, and re-entering app code mid-unmount
+   * is a hazard rather than a courtesy.
+   */
+  function destroy(root) {
+    if (!activeModal) return 0;
+    const scope = root || document;
+    if (scope !== document && scope !== activeModal && !scope.contains?.(activeModal)) return 0;
+
+    trapAbortController?.abort();
+    trapAbortController = null;
+    NDS.Backdrop.hide();
+    activeModal.setAttribute('hidden', '');
+    NDS.State.clear(activeModal);
+    activeModal = null;
+    return 1;
   }
 
   /**
@@ -160,7 +213,8 @@
 
     // ESC key handling is now in backdrop, but keep this for additional modal-specific behavior
     document.addEventListener('keydown', (e) => {
-      if ((e.key === 'Escape' || e.key === 'Esc') && activeModal) {
+      if ((e.key === 'Escape' || e.key === 'Esc') && activeModal
+          && !activeModal.hasAttribute('data-modal-static')) {
         e.preventDefault();
         close();
       }
@@ -176,7 +230,8 @@
     init,
     open,
     close,
-    isOpen: () => activeModal !== null
+    isOpen: () => activeModal !== null,
+    destroy
   };
 
 })();

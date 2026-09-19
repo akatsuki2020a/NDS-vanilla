@@ -115,7 +115,6 @@
             if (closable || duration > 0) {
                 // Add progress class and SVG if toast has auto-dismiss
                 const progressClass = (display === 'toast' && duration > 0) ? ' nds-progress' : '';
-                const progressStyle = (display === 'toast' && duration > 0) ? ` style="--progress-duration: ${Number(duration)}ms;"` : '';
                 const progressSVG = (display === 'toast' && duration > 0) ? `
                     <div class="nds-progress-circle">
                         <svg width="100%" height="100%" viewBox="0 0 24 24">
@@ -126,7 +125,7 @@
                 ` : '';
 
                 html += `
-                    <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close${progressClass}" aria-label="Close"${progressStyle}>
+                    <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close${progressClass}" aria-label="Close">
                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                         ${progressSVG}
                     </button>
@@ -134,6 +133,11 @@
             }
 
             alert.innerHTML = html;
+
+            // Knob via CSSOM, never a style attribute — a strict style-src blocks the attribute form.
+            if (display === 'toast' && duration > 0) {
+                alert.querySelector('.nds-alert-close').style.setProperty('--progress-duration', `${Number(duration)}ms`);
+            }
 
             // Build actions via DOM so caller-supplied href/class/target/label never reach the HTML parser,
             // and so target="_blank" always pairs with rel="noopener noreferrer".
@@ -282,24 +286,24 @@
                 document.body.appendChild(placeholder);
             }
 
-            // Sync top offset to nav bottom
-            if (position.startsWith('top') && !placeholder._scrollSync) {
-                const nav = document.querySelector('.nds-main-nav');
-                if (nav) {
-                    const update = () => placeholder.style.setProperty('--_toast-top', nav.getBoundingClientRect().bottom + 'px');
-                    update();
-                    const sync = () => {
-                        if (!placeholder.isConnected) {
-                            window.removeEventListener('scroll', throttledSync);
-                            placeholder._scrollSync = null;
-                            return;
-                        }
-                        if (window.scrollY < 200) update();
-                    };
-                    const throttledSync = NDS.rafThrottle(sync);
-                    window.addEventListener('scroll', throttledSync, { passive: true });
-                    placeholder._scrollSync = throttledSync;
-                }
+            // Sync top offset to the sticky chrome's bottom edge. A topbar counts as
+            // much as the nav and either can be absent, so the measurement is core's —
+            // it takes whichever sits lower and clamps a scrolled-away one at 0.
+            if (position.startsWith('top') && !placeholder._scrollSync
+                && document.querySelector('.nds-main-nav, .nds-topbar')) {
+                const update = () => placeholder.style.setProperty('--_toast-top', NDS.stickyHeaderBottom() + 'px');
+                update();
+                const sync = () => {
+                    if (!placeholder.isConnected) {
+                        window.removeEventListener('scroll', throttledSync);
+                        placeholder._scrollSync = null;
+                        return;
+                    }
+                    if (window.scrollY < 200) update();
+                };
+                const throttledSync = NDS.rafThrottle(sync);
+                window.addEventListener('scroll', throttledSync, { passive: true });
+                placeholder._scrollSync = throttledSync;
             }
 
             return placeholder;
@@ -358,7 +362,5 @@
         },
     };
 
-    if (typeof window !== 'undefined') {
-        NDS.Alert = NDSAlert;
-    }
+    NDS.Alert = NDSAlert;
 })();

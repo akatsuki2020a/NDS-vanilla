@@ -1,6 +1,7 @@
 ---
 exclude_showcase: true
 layout: page
+# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
 layout_class: nds-wSideInfo
 title: Service Page Template
 hero_style: "nds-aside"
@@ -73,8 +74,8 @@ sidemenu_mode: false
                 </div>
             </div>
         </div>
-        <aside class="nds-sideinfo nds-card nds-stroke nds-shadow" aria-label="Service information">
-                <dl class="nds-definition-list">
+        <aside class="nds-sideinfo" aria-label="Service information">
+                <dl class="nds-definition-list nds-card nds-stroke nds-shadow">
                     <div class="nds-definition-item">
                         <dt>
                             <i class="hgi hgi-stroke hgi-user-multiple-02"></i>
@@ -172,7 +173,7 @@ sidemenu_mode: false
     </div>
     <div class="nds-section-body nds-max-width">
         <div class="nds-block">
-            <div class="nds-swiper" slides-max="3" slides-mid="2" slides-min="1" peek="40">
+            <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px">
                 <div class="nds-swiper-wrapper">
                     {% for service in site.data.content.services limit:6 %}
                     <div class="nds-swiper-slide">

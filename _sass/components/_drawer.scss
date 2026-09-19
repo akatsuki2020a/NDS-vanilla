@@ -95,10 +95,13 @@
             white-space: normal;
         }
 
-        &:is(:hover,[data-state~="active"]) .nds-featured-icon {
-            --featuredicon-bg: var(--featuredicons-background-default-light);
-            --featuredicon-color: var(--featuredicons-icon-neutral);
-            --featuredicon-dark-bg: var(--featuredicons-icon-default);
+        // Set on the button, not on the icon: a `.nds-featured-icon` tail here would
+        // sit in the shared data-state set (PERF-06). -forced out-ranks the icon's
+        // own variant class, which a plain inherited knob cannot.
+        &:is(:hover,[data-state~="active"]) {
+            --featuredicon-bg-forced: var(--featuredicons-background-default-light);
+            --featuredicon-color-forced: var(--featuredicons-icon-neutral);
+            --featuredicon-dark-bg-forced: var(--featuredicons-icon-default);
         }
     }
 }
@@ -116,7 +119,9 @@
 // ALWAYS OPEN STATE
 // ==============================================
 
-.nds-drawer[data-state~="always-open"] {
+// always-open is mirrored to .nds-always-open by core (the loading pattern): keyed on
+// the attribute, these `.nds-btn` rules would sit in the shared data-state set (PERF-06).
+.nds-drawer.nds-always-open {
 
     // Hide arrow icons in always-open mode
     .nds-drawer-list>li>.nds-btn {
@@ -377,7 +382,8 @@
 
 .nds-drawer.nds-divided {
     .nds-drawer-list>li {
-        border-block-end: 1px solid var(--_divider);
+        // always-open moves this border onto the button by setting --_item-border.
+        border-block-end: var(--_item-border, 1px solid var(--_divider));
         padding-bottom: var(--_gap);
 
         &:last-child {
@@ -386,20 +392,19 @@
         }
     }
 
-    // When always open, move border to button instead of li
-    &[data-state~="always-open"] {
-        .nds-drawer-list>li {
+    // When always open, move border to button instead of li. The li side rides
+    // --_item-border: a `> li` tail here would join the shared data-state set (PERF-06).
+    &.nds-always-open {
+        --_item-border: none;
+
+        .nds-drawer-list>li>.nds-btn {
+            border-block-end: 1px solid var(--_divider);
+            border-radius: 0;
+        }
+
+        // Remove border only if it's the only child (no siblings)
+        .nds-drawer-list>li:only-child>.nds-btn {
             border-block-end: none;
-
-            >.nds-btn {
-                border-block-end: 1px solid var(--_divider);
-                border-radius: 0;
-            }
-
-            // Remove border only if it's the only child (no siblings)
-            &:only-child>.nds-btn {
-                border-block-end: none;
-            }
         }
     }
 }

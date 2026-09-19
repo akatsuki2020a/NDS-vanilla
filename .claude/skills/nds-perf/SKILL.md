@@ -1,6 +1,6 @@
 ---
 name: nds-perf
-description: Measure real page performance for NDS pages (local builds or remote https URLs) using the repo's calibrated throttled-Chrome harness — LCP, FCP, reveal-gate timing, and with --trace a main-thread breakdown (style/layout/script self-time, culprit script frames, long tasks) — instead of hand-writing a Puppeteer script each time. Builds (if needed), gzip-serves the site like GitHub Pages, drives headless Chrome under slow-4G + 6.6× CPU on a mobile viewport, names the actual LCP element, and reports per-run values + median. Use for "measure LCP", "test LCP", "check page speed", "measure performance of <page>", "did this change regress LCP", "what's the LCP on mobile", "measure the live site", "profile the main thread", "what's blocking the main thread", "find long tasks". For the Lighthouse LAB score (the simulated 0–100), see the "Lighthouse lab score" section below — but trust this harness's real numbers over lantern's simulated LCP, which over-estimates ~2× on this site.
+description: Measure real page performance for NDS pages (local builds or remote https URLs) using the repo's calibrated throttled-Chrome harness — LCP, FCP, reveal-gate timing, and with --trace a main-thread breakdown (style/layout/script self-time, culprit script frames, long tasks) — instead of hand-writing a Puppeteer script each time. Builds (if needed), gzip-serves the site like GitHub Pages, drives headless Chrome under slow-4G + 6.6× CPU on a mobile viewport, names the actual LCP element, and reports per-run values + median. Use for "measure LCP", "test LCP", "measure INP", "why is this component slow to respond", "interaction latency", "check page speed", "measure performance of <page>", "did this change regress LCP", "what's the LCP on mobile", "measure the live site", "profile the main thread", "what's blocking the main thread", "find long tasks". For the Lighthouse LAB score (the simulated 0–100), see the "Lighthouse lab score" section below — but trust this harness's real numbers over lantern's simulated LCP, which over-estimates ~2× on this site.
 argument-hint: "[page-paths-or-urls…] [--runs=N] [--no-throttle] [--dir=PATH]"
 ---
 
@@ -8,8 +8,9 @@ argument-hint: "[page-paths-or-urls…] [--runs=N] [--no-throttle] [--dir=PATH]"
 
 Measure real LCP/FCP/reveal for `$ARGUMENTS` (page paths relative to the site root, or full `https://` URLs for remote pages like the live deploy; omit for the local home page).
 
-This skill wraps the calibrated measurement harness used to verify every perf change in this repo, so the script never has to be rewritten. Two committed scripts live beside this file:
+This skill wraps the calibrated measurement harness used to verify every perf change in this repo, so the script never has to be rewritten. Three committed scripts live beside this file:
 - `measure-lcp.mjs` — self-contained: starts its own gzip server, drives Chrome under the calibrated throttle, names the LCP element, prints per-run + median, tears down.
+- `measure-inp.mjs` — the interaction sibling: loads a page, settles, clicks the selectors you name, reports each interaction's INP and the style/layout/script/paint split of the click window. See [Measuring INP](#measuring-inp-interaction-latency).
 - `gz-serve.mjs` — standalone gzip static server (used by the script; also handy to keep a server up for a manual Lighthouse run).
 
 ## Why this and not `jekyll serve` + DevTools
@@ -59,6 +60,7 @@ Three traps this harness avoids — all have produced wrong answers before:
 | `--chrome=PATH` | auto | Chrome path (else `CHROME_PATH` env, then common locations) |
 | `--trace` | off | per-run main-thread breakdown (script/style-layout/paint/parse/gc self-time), **culprits** (top script frames by self + forced time), and long tasks ≥50ms with the longest task's dominant child — parsed from a DevTools trace. Tracing adds overhead — use it to diagnose *where* time goes, not for regression medians |
 | `--monitor` | off | inject `_includes/perf-monitor.html` into the page (no `perf_monitor: true` rebuild needed; works on remote URLs): **CLS with shifting elements named**, LoAF long tasks with per-script forced-layout attribution, reflow hotspots, FPS drops. Wraps DOM globals — perturbs timing like `--trace`; diagnosis only |
+| `--selectors` | off | adds Chrome's per-selector matching stats to the trace (`disabled-by-default-blink.debug`): style recalc count, elements styled, and the 25 costliest selectors, main thread only; the raw trace is saved to `tmp/trace-selectors.json`. **Instrumentation inflates recalc time ~10×, so read shares, never milliseconds.** Rules whose rightmost part is `:is()`/`:where()`/`*`/a bare pseudo are tried on every element — on console-demo that was 244 rules and 75% of matching time — yet an A/B that anchored the ten costliest (2026-09-02) moved style/layout by under 1%: matching is not where recalc time goes on this site, so do not chase it again without a new A/B. The saved trace also carries JS stacks and invalidation reasons: `python .claude/skills/nds-perf/trace-recalcs.py [minElements]` lists each large recalc with the frame that forced it, or Chrome's reason when no script did (`Animation` on `::before` = the skeleton shimmer, `Node was inserted` = a component building DOM), after the font and stylesheet arrivals |
 
 ### Attributing main-thread time to scripts/functions (`--trace`)
 
@@ -74,6 +76,31 @@ Unminified bundles are ~3–4× larger, so use those runs to identify *who*, not
 ### CLS and on-page diagnostics (`--monitor`)
 
 `--monitor` injects the repo's perf-monitor overlay ([_includes/perf-monitor.html](../../../_includes/perf-monitor.html)) headlessly and scrapes `__ndsPerf.data()` after the run. Per run you get `monitor: CLS 0.0000 · DOM 1234 · FPS min N` plus the monitor's problem lines: layout shifts **with the shifting element named**, LoAF long tasks with per-script `forced-layout` attribution, and reflow hotspots. This is the harness's only CLS source — use it to verify a change didn't introduce shifts (e.g. the content-visibility adoption). Pick `--trace` for *where main-thread time goes*, `--monitor` for *CLS sources + which script forced layout*; both perturb timing, so neither belongs in regression medians.
+
+## Measuring INP (interaction latency)
+
+LCP is a load metric; a component that paints fast can still take half a second to respond to a tap. `measure-inp.mjs` measures that, on the same calibration:
+
+```bash
+# a component's primary interaction, low-end phone
+node .claude/skills/nds-perf/measure-inp.mjs   --url=http://localhost:4002/NDS-vanilla/components/modal.html   --click="[data-modal-open]" --cpu=20
+
+# a sequence — each --click fires in order and is reported separately
+node .claude/skills/nds-perf/measure-inp.mjs --url=... --click=".open" --click=".close"
+
+# isolate third-party cost on a live consumer site
+node .claude/skills/nds-perf/measure-inp.mjs --url=https://example.gov.sa/   --click="button.nds-nav-link[aria-expanded]" --block="*clarity*"
+```
+
+Per click it prints the INP median, one run's **input delay / processing / presentation** split, and the click window as **script + style (xN) + layout (xN) + paint**. Read the split before optimising: `processing` near zero with a large `presentation` means the handler is fine and the render is the cost, and a high style count means something is invalidating style repeatedly (an attribute written on `<body>`, a class toggled in several separate frames).
+
+`--cpu=20` is the low-end-device proxy; the calibrated `6.6` is a mid-range phone. Anchors: **good <=200ms, poor >500ms.**
+
+Flags beyond the shared ones: `--url=` (required), `--click=SEL` (repeatable), `--settle=MS` before the first click (default 4000), `--wait=MS` after each (default 2500), `--reduced` (emulate `prefers-reduced-motion` — isolates transition cost), `--block=PATTERN` (repeatable), `--trace` (first run only: every style recalc the click caused, with its element count, and for the big ones Chrome's own reason — which attribute or class flipped on which node, and the selector when one made the whole subtree invalid).
+
+**Read the element count against the component's size.** A recalc far bigger than the thing you clicked means a write landed on an ancestor: `data-state` on `<body>` restyled 1,578 elements at the end of a 283-element drawer's open (2026-09-02, fixed in `866128e8`). Chrome keys attribute invalidation by attribute NAME, and NDS's `data-state` set is packed with component classes, so any `data-state` write restyles most NDS-classed descendants of that element — keep such writes off big containers. Selector matching was 5–7% of those recalcs and the nav's `:has()` rules measured inside noise; don't chase either without a new A/B.
+
+**Two traps this script exists to avoid.** Anchor clicks are `preventDefault`ed so a navigation can't tear the page down mid-measurement. And it never uses `setRequestInterception` — that silently suppresses every event-timing entry, so `interactionCount` reads 0 and a broken rig looks like a fast page. The script asserts `interactionCount > 0` and shouts if not; do not trust a run that warns.
 
 ## Lighthouse lab score (optional, separate concern)
 

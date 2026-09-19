@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.7.0"
-last_edit: "02/08/2026 - 11:35 PM"
+updated: "1.12.x"
+last_edit: "09/09/2026 - 10:06 PM"
 ---
 
 <!-- Code Block Overview -->
@@ -87,10 +87,8 @@ last_edit: "02/08/2026 - 11:35 PM"
                     </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Code Block with Line Numbers -->
-            <div class="nds-block">
                 <div class="nds-demo-card">
                     <div class="demo-header">
                         <div class="demo-label">Code Block with Line Numbers</div>
@@ -164,10 +162,8 @@ NDS.Alert.create({
                     </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Expandable Code Block -->
-            <div class="nds-block">
                 <div class="nds-demo-card">
                     <div class="demo-header">
                         <div class="demo-label">Expandable Code Block</div>
@@ -261,7 +257,7 @@ async function handleFormSubmit(form) {
                     </div>
                     </div>
                 </div>
-            </div>
+                </div>
 
             </div>
         </div>
@@ -372,10 +368,8 @@ async function handleFormSubmit(form) {
                     </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Multiple Tabs -->
-            <div class="nds-block">
                 <div class="nds-demo-card">
                     <div class="demo-header">
                         <div class="demo-label">Multiple Tabs</div>
@@ -534,10 +528,8 @@ NDS.Alert.create({
                     </div>
                     </div>
                 </div>
-            </div>
 
             <!-- Hidden Tabbed Code (inside demo cards) -->
-            <div class="nds-block nds-prose">
                 <div class="nds-demo-card">
                     <div class="demo-header">
                         <div class="demo-label">Hidden Code in Demo Cards</div>
@@ -583,7 +575,7 @@ NDS.Alert.create({
                     </div>
                     </div>
                 </div>
-            </div>
+                </div>
 
             </div>
         </div>
@@ -807,7 +799,7 @@ NDS.Alert.create({
                 <table class="nds-table nds-responsive">
                     <thead><tr><th>Attribute</th><th>Element</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code class="nds-inline-code lang-html">data-nds-code-processed</code></td><td><code class="nds-inline-code lang-html">code</code></td><td>Set to <code class="nds-inline-code lang-html">true</code> by JS after highlighting. Guards against double-processing. Set to <code class="nds-inline-code lang-html">false</code> by <code class="nds-inline-code lang-js">reprocessCodeElement</code> before re-highlighting.</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-nds-code-initialized</code></td><td><code class="nds-inline-code lang-html">code</code></td><td>Set to <code class="nds-inline-code lang-html">true</code> by JS after highlighting. Guards against double-processing. Set to <code class="nds-inline-code lang-html">false</code> by <code class="nds-inline-code lang-js">reprocessCodeElement</code> before re-highlighting.</td></tr>
                     </tbody>
                 </table>
             </div>

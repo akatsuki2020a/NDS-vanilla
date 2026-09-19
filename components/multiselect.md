@@ -5,8 +5,8 @@ hero_title: Multiselect - National Design System
 hero_description: A form field for picking multiple options from grouped lists, with selections shown as removable chips and submitted natively as a checkbox array.
 breadcrumb: [["Components", "/components"]]
 since: "1.0.0"
-updated: "1.5.0"
-last_edit: "10/08/2026 - 12:31 AM"
+updated: "1.11.0"
+last_edit: "05/09/2026 - 08:04 PM"
 lang: en
 direction: ltr
 ---
@@ -138,7 +138,6 @@ direction: ltr
                                         <div class="nds-chips nds-multiselect-chips" data-multiselect-chips></div>
                                         <span class="nds-multiselect-placeholder">Select options&hellip;</span>
                                     </div>
-                                    <div class="nds-form-footer" data-feedback-target hidden></div>
                                 </div>
                             </div>
                         </div>
@@ -251,7 +250,6 @@ direction: ltr
     &lt;div class="nds-chips nds-multiselect-chips" data-multiselect-chips&gt;&lt;/div&gt;
     &lt;span class="nds-multiselect-placeholder"&gt;Select options&amp;hellip;&lt;/span&gt;
   &lt;/div&gt;
-  &lt;div class="nds-form-footer" data-feedback-target hidden&gt;&lt;/div&gt;
 &lt;/div&gt;
                                         </code>
                                         </div>
@@ -361,11 +359,12 @@ direction: ltr
                                             <div class="nds-chips nds-multiselect-chips" data-multiselect-chips></div>
                                             <span class="nds-multiselect-placeholder">Select 2&ndash;4 options&hellip;</span>
                                         </div>
-                                        <div class="nds-form-footer" data-feedback-target hidden></div>
                                     </div>
-                                    <button class="nds-btn nds-primary nds-sm" type="submit">
-                                        <span class="nds-label">Submit</span>
-                                    </button>
+                                    <div class="nds-form-actions">
+                                        <button class="nds-btn nds-primary nds-sm" type="submit">
+                                            <span class="nds-label">Submit</span>
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
                         </div>
@@ -398,11 +397,12 @@ direction: ltr
        data-min-checked="2" data-max-checked="4"&gt;
     &lt;!-- same markup as Grouped Options above: header label, dropmenu
          trigger + panel with option checkboxes, chip track, placeholder --&gt;
-    &lt;div class="nds-form-footer" data-feedback-target hidden&gt;&lt;/div&gt;
   &lt;/div&gt;
-  &lt;button class="nds-btn nds-primary" type="submit"&gt;
-    &lt;span class="nds-label"&gt;Submit&lt;/span&gt;
-  &lt;/button&gt;
+  &lt;div class="nds-form-actions"&gt;
+    &lt;button class="nds-btn nds-primary" type="submit"&gt;
+      &lt;span class="nds-label"&gt;Submit&lt;/span&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
 &lt;/form&gt;
                                         </code>
                                         </div>
@@ -537,7 +537,7 @@ direction: ltr
                         <tr><td><code class="nds-inline-code lang-html">data-multiselect-name</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-multiselect</code>. Auto-fills <code class="nds-inline-code lang-html">name="name[]"</code> on any option checkbox missing a name, so the form posts the checked set as an array. Redundant when every checkbox already carries its own <code class="nds-inline-code lang-html">name</code></td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-chip-class</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-multiselect</code>. Classes applied to generated chips: color variants <code class="nds-inline-code lang-html">nds-primary</code> / <code class="nds-inline-code lang-html">nds-neutral</code>, sizes <code class="nds-inline-code lang-html">nds-sm</code> / <code class="nds-inline-code lang-html">nds-md</code> / <code class="nds-inline-code lang-html">nds-lg</code>, plus <code class="nds-inline-code lang-html">nds-rounded</code>. Defaults to <code class="nds-inline-code lang-html">nds-primary nds-sm</code>. See <a class="nds-color" href="{{ 'components/chips' | relative_url }}">Chips</a></td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-multiselect-dropmenu</code></td><td>Marks the wrapping <code class="nds-inline-code lang-html">.nds-form-action.nds-prefix.nds-dropmenu</code> as the host of the options panel</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">data-portal</code></td><td>Set it on that same <code class="nds-inline-code lang-html">[data-multiselect-dropmenu]</code> wrapper, not on <code class="nds-inline-code lang-html">.nds-multiselect</code>. The options panel then moves to <code class="nds-inline-code lang-html">&lt;body&gt;</code> while open, so it escapes a container that would clip it. Add it whenever the field sits inside a modal, a drawer, a table cell, or any box with its own scrolling or stacking context. Inherited from <a class="nds-color" href="{{ 'components/dropmenu' | relative_url }}">Dropmenu</a>, along with the other menu knobs</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-portal</code></td><td>Set it on that same <code class="nds-inline-code lang-html">[data-multiselect-dropmenu]</code> wrapper, not on <code class="nds-inline-code lang-html">.nds-multiselect</code>. It forces the options panel to <code class="nds-inline-code lang-html">&lt;body&gt;</code> while open. A field inside a modal, a drawer, a table cell, or any box with its own scrolling or stacking context already moves there on its own, so the attribute is only for the case where no container demands it. Inherited from <a class="nds-color" href="{{ 'components/dropmenu' | relative_url }}">Dropmenu</a>, along with the other menu knobs</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-multiselect-chips</code></td><td>Marks the container that receives rendered chips. Required inside <code class="nds-inline-code lang-html">.nds-form-control</code></td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-multiselect-options</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-multiselect</code>. JSON that builds the option rows into the (otherwise empty) menu: an array (value doubles as label), a <code class="nds-inline-code lang-js">{value: label}</code> map, or a grouped <code class="nds-inline-code lang-js">{legend: {value: label}}</code> object rendering one fieldset per key. Omit to hand-write the rows</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-multiselect-selected</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-multiselect</code> alongside <code class="nds-inline-code lang-html">data-multiselect-options</code>. JSON array of values to pre-check — the populated equivalent of the <code class="nds-inline-code lang-html">checked</code> attribute</td></tr>

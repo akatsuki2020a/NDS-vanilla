@@ -44,6 +44,10 @@
             // Look for .nds-expandable-content as child element first, then check if the container itself has nds-expandable-content class
             this.contentElement = expandableContainer.querySelector('.nds-expandable-content') ||
                                  (expandableContainer.classList.contains('nds-expandable-content') ? expandableContainer : null);
+            // A wrapper between container and content gets named, so _utilities.scss can clip
+            // it without a bare `> *:has()` subject (which taxes every data-state write).
+            const holder = this.contentElement?.parentElement;
+            if (holder && holder !== expandableContainer) holder.classList.add('nds-expandable-clip');
             this.expandButton = null;
             this.isExpanded = false;
 
@@ -53,6 +57,9 @@
             }
 
             this.valid = true;
+            // Registered here, not in the sweep, so every construction path —
+            // sweep, reinit() and programmatic create() — is reachable.
+            expandableContainer.ndsExpandable = this;
             this.init();
         }
 
@@ -182,11 +189,17 @@
         syncSiblings(expand) {
             const parent = this.expandableContainer.closest('.nds-expand-all');
             if (!parent) return;
+            // Only direct members sync: an expandable nested inside a member's
+            // content neither drives the group nor follows it. Keyed on the
+            // group (not "any expandable ancestor") so a group that itself
+            // sits inside an expandable still works.
+            const isMember = el => el.parentElement.closest('.nds-expandable, .nds-expand-all') === parent;
+            if (!isMember(this.expandableContainer)) return;
 
             // Find all expandable siblings
             const siblings = parent.querySelectorAll('.nds-expandable[data-nds-expandable-initialized]');
             siblings.forEach(sibling => {
-                if (sibling === this.expandableContainer) return;
+                if (sibling === this.expandableContainer || !isMember(sibling)) return;
                 if (sibling.ndsExpandable) {
                     if (expand && !sibling.ndsExpandable.isExpanded) {
                         sibling.ndsExpandable.expand(false);
@@ -275,28 +288,39 @@
 
             // Remove states
             NDS.State.remove(this.expandableContainer, 'expanded', 'expandable');
+
+            // Drop the instance back-ref and the init sentinel last: leaving either on
+            // makes teardown one-way — the init sweep skips a stamped container and
+            // create() hands back the dead instance, so a view that unmounts and mounts
+            // again gets markup no live instance will ever claim.
+            delete this.expandableContainer.ndsExpandable;
+            this.expandableContainer.removeAttribute('data-nds-expandable-initialized');
         }
     }
 
-    // Auto-initialize expandable content on page load
+    // Auto-initialize expandable content on page load. Deferred: content is
+    // already CSS-clamped before JS runs, so the sweep buys nothing by
+    // staying on the critical path — NDS.onIdle keeps a page with many
+    // expandables from paying it as one blocking task.
     function initializeExpandableContent() {
-        const expandableContainers = document.querySelectorAll('.nds-expandable');
+        NDS.onIdle(() => {
+            const expandableContainers = document.querySelectorAll('.nds-expandable');
 
-        expandableContainers.forEach(container => {
-            // Skip elements rendered inside <code> tags (markup text, not live components)
-            if (container.closest('code')) {
-                return;
-            }
-
-            if (!container.hasAttribute('data-nds-expandable-initialized')) {
-                const expandableInstance = new NDSExpandable(container);
-                // Stamp only successful constructions — content that renders late
-                // stays eligible for the next reinit().
-                if (expandableInstance.valid) {
-                    container.ndsExpandable = expandableInstance;
-                    container.setAttribute('data-nds-expandable-initialized', 'true');
+            expandableContainers.forEach(container => {
+                // Skip elements rendered inside <code> tags (markup text, not live components)
+                if (container.closest('code')) {
+                    return;
                 }
-            }
+
+                if (!container.hasAttribute('data-nds-expandable-initialized')) {
+                    const expandableInstance = new NDSExpandable(container);
+                    // Stamp only successful constructions — content that renders late
+                    // stays eligible for the next reinit().
+                    if (expandableInstance.valid) {
+                        container.setAttribute('data-nds-expandable-initialized', 'true');
+                    }
+                }
+            });
         });
     }
 
@@ -307,7 +331,9 @@
 
     // Recheck height for all initialized expandable elements
     function recheckAllHeights() {
-        const expandableContainers = document.querySelectorAll('.nds-expandable[data-nds-expandable-initialized]');
+        // Keyed on the instance, not the sweep's stamp, so create()-built
+        // containers are rechecked too.
+        const expandableContainers = document.querySelectorAll('.nds-expandable');
         expandableContainers.forEach(container => {
             if (container.ndsExpandable && container.ndsExpandable.recheckHeight) {
                 container.ndsExpandable.recheckHeight();
@@ -320,7 +346,7 @@
         init: initializeExpandableContent,
         reinit: reinitializeExpandableContent,
         recheckHeights: recheckAllHeights,
-        create: (container) => new NDSExpandable(container)
+        create: (container) => container.ndsExpandable || new NDSExpandable(container)
     };
 
     // Note: Initialization now handled by nds-loader.js unified system

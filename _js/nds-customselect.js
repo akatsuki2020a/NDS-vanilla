@@ -42,6 +42,19 @@
     // readonly, non-submitting display surface, so its label is DERIVED from the
     // matching option's text — never hand-authored. Display-only: no dropmenu
     // build. No-op once a label is present. init() runs it over every
+    // The visible label for an option. Prefers a nested .nds-label inside
+    // .nds-option-text (the shape that carries a description alongside the
+    // label — reading .textContent would return "Label Description" glued
+    // together and leak into the trigger). Falls back to .nds-option-text's
+    // own text for the plain-label shape every existing consumer uses.
+    function optionLabel(option) {
+        if (!option) return '';
+        var t = option.querySelector('.nds-option-text');
+        if (!t) return '';
+        var label = t.querySelector('.nds-label');
+        return label ? label.textContent : t.textContent;
+    }
+
     // select-input on the page, so a pre-filled label paints without waiting
     // for the field's deferred build.
     function restoreDisplay(selectInput) {
@@ -54,8 +67,8 @@
         var options = formControl.querySelectorAll('.nds-select-option');
         for (var i = 0; i < options.length; i++) {
             if (options[i].dataset.value === current) {
-                var t = options[i].querySelector('.nds-option-text');
-                selectInput.value = t ? t.textContent : current;
+                var label = optionLabel(options[i]);
+                selectInput.value = label || current;
                 return;
             }
         }
@@ -91,8 +104,8 @@
         // closest('.nds-form-control') walk stops at <body> and returns null.
         // Forward ref for the same reason in the other direction: setValue's
         // option lookup while the menu is portaled open.
-        dropdown._selectFormControl = formControl;
-        formControl._selectDropdown = dropdown;
+        dropdown._customSelectFormControl = formControl;
+        formControl._customSelectDropdown = dropdown;
         dropdown.removeAttribute('hidden');
         var optionsContainer = dropdown.querySelector('.nds-select-options');
         if (optionsContainer) optionsContainer.classList.add('nds-dropmenu-scroll');
@@ -147,13 +160,12 @@
 
         var hiddenInput = formControl.querySelector('.nds-select-value');
         var value = option ? (option.dataset.value || '') : '';
-        var optionText = option && option.querySelector('.nds-option-text');
-        var text = option ? (optionText ? optionText.textContent : value) : '';
+        var text = option ? (optionLabel(option) || value) : '';
 
         selectInput.value = text;
         if (hiddenInput) hiddenInput.value = value;
 
-        var scope = menu || formControl._selectDropdown || formControl;
+        var scope = menu || formControl._customSelectDropdown || formControl;
         scope.querySelectorAll('.nds-select-option').forEach(function (o) {
             if (option && o.dataset.value === value) NDS.State.add(o, 'selected');
             else NDS.State.remove(o, 'selected');
@@ -190,7 +202,7 @@
         // descendant, portaled or not — then read the back-reference
         // stamped in build(). Fall back to closest() for the in-place path.
         var menu = option.closest('.nds-select-dropdown, .nds-dropmenu-menu');
-        var formControl = (menu && menu._selectFormControl)
+        var formControl = (menu && menu._customSelectFormControl)
                         || option.closest('.nds-form-control');
         if (!formControl) return;
         apply(formControl, option, menu);
@@ -227,7 +239,7 @@
         setValue: function (el, value) {
             var formControl = formControlOf(el);
             if (!formControl) return false;
-            var scope = formControl._selectDropdown || formControl;
+            var scope = formControl._customSelectDropdown || formControl;
             var options = scope.querySelectorAll('.nds-select-option');
             for (var i = 0; i < options.length; i++) {
                 if (options[i].dataset.value === String(value)) {

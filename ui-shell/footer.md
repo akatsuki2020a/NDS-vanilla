@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.6.0"
-last_edit: "01/08/2026 - 11:45 PM"
+updated: "1.12.0"
+last_edit: "11/09/2026 - 02:27 AM"
 ---
 
 <!-- Footer Structure -->
@@ -44,11 +44,11 @@ footer.nds-footer.nds-content-wrapper.nds-brand
 │       ├── div.nds-footer-icon-group (social)
 │       │   ├── span.nds-footer-heading
 │       │   └── div.nds-footer-icon-row
-│       │       └── a.nds-btn.nds-secondary-outline.nds-icon-only
+│       │       └── a.nds-btn.nds-secondary-outline.nds-icon-only.nds-tooltip
 │       └── div.nds-footer-icon-group (mobile apps)
 │           ├── span.nds-footer-heading
 │           └── div.nds-footer-icon-row
-│               └── a.nds-btn.nds-secondary-outline.nds-xl.nds-icon-only
+│               └── a.nds-btn.nds-secondary-outline.nds-xl.nds-icon-only.nds-tooltip
 │
 ├── hr.nds-divider.nds-lg
 │
@@ -182,16 +182,16 @@ footer.nds-footer.nds-content-wrapper.nds-brand
   &lt;div class="nds-footer-icon-group"&gt;
     &lt;span class="nds-footer-heading"&gt;Follow Us&lt;/span&gt;
     &lt;div class="nds-footer-icon-row"&gt;
-      &lt;a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank" rel="noopener noreferrer" aria-label="Twitter"&gt;
+      &lt;a class="nds-btn nds-secondary-outline nds-icon-only nds-tooltip" data-tooltip-hover="500" href="#" target="_blank" title="Twitter" aria-label="Twitter"&gt;
         &lt;i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"&gt;&lt;/i&gt;
       &lt;/a&gt;
-      &lt;a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank" rel="noopener noreferrer" aria-label="Facebook"&gt;
+      &lt;a class="nds-btn nds-secondary-outline nds-icon-only nds-tooltip" data-tooltip-hover="500" href="#" target="_blank" title="Facebook" aria-label="Facebook"&gt;
         &lt;i class="nds-icon nds-hgi-facebook-02" aria-hidden="true"&gt;&lt;/i&gt;
       &lt;/a&gt;
-      &lt;a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank" rel="noopener noreferrer" aria-label="YouTube"&gt;
+      &lt;a class="nds-btn nds-secondary-outline nds-icon-only nds-tooltip" data-tooltip-hover="500" href="#" target="_blank" title="YouTube" aria-label="YouTube"&gt;
         &lt;i class="nds-icon nds-hgi-youtube" aria-hidden="true"&gt;&lt;/i&gt;
       &lt;/a&gt;
-      &lt;a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"&gt;
+      &lt;a class="nds-btn nds-secondary-outline nds-icon-only nds-tooltip" data-tooltip-hover="500" href="#" target="_blank" title="LinkedIn" aria-label="LinkedIn"&gt;
         &lt;i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"&gt;&lt;/i&gt;
       &lt;/a&gt;
     &lt;/div&gt;
@@ -233,10 +233,10 @@ footer.nds-footer.nds-content-wrapper.nds-brand
 &lt;div class="nds-footer-icon-group"&gt;
   &lt;span class="nds-footer-heading"&gt;Mobile App&lt;/span&gt;
   &lt;div class="nds-footer-icon-row"&gt;
-    &lt;a class="nds-btn nds-secondary-outline nds-xl nds-icon-only" href="#" target="_blank" rel="noopener noreferrer" aria-label="Apple App Store"&gt;
+    &lt;a class="nds-btn nds-secondary-outline nds-xl nds-icon-only nds-tooltip" data-tooltip-hover="500" href="#" target="_blank" title="Apple App Store" aria-label="Apple App Store"&gt;
       &lt;svg&gt;...&lt;/svg&gt;
     &lt;/a&gt;
-    &lt;a class="nds-btn nds-secondary-outline nds-xl nds-icon-only" href="#" target="_blank" rel="noopener noreferrer" aria-label="Google Play Store"&gt;
+    &lt;a class="nds-btn nds-secondary-outline nds-xl nds-icon-only nds-tooltip" data-tooltip-hover="500" href="#" target="_blank" title="Google Play Store" aria-label="Google Play Store"&gt;
       &lt;svg&gt;...&lt;/svg&gt;
     &lt;/a&gt;
   &lt;/div&gt;
@@ -311,7 +311,7 @@ footer.nds-footer.nds-content-wrapper.nds-brand
     &lt;a href="#"&gt;
       &lt;img src="assets/img/logo.svg" loading="lazy" width="40" height="40" alt="Authority Logo"&gt;
     &lt;/a&gt;
-    &lt;a href="https://www.vision2030.gov.sa/" target="_blank" rel="noopener noreferrer"&gt;
+    &lt;a href="https://www.vision2030.gov.sa/" target="_blank"&gt;
       &lt;img src="assets/img/vision-2030.svg" loading="lazy" width="60" height="40" alt="Saudi Vision 2030"&gt;
     &lt;/a&gt;
   &lt;/div&gt;
@@ -371,14 +371,14 @@ footer.nds-footer.nds-content-wrapper.nds-brand
                             <i class="hgi hgi-stroke hgi-dark-mode"></i>
                             <span class="nds-label">Light and Brand Variants</span>
                         </span>
-                        <p class="nds-item-desc">Default light neutral background adapts to dark mode automatically. Add <code class="nds-inline-code lang-html">nds-brand</code> for a dark green footer with white text and on-color button tokens.</p>
+                        <p class="nds-item-desc">The canonical footer above ships with <code class="nds-inline-code lang-html">nds-brand</code>: a deep primary background with white text and on-color button tokens. Remove the class for the light neutral background, which adapts to dark mode automatically.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-swatch"></i>
                             <span class="nds-label">On-Color Token Cascade</span>
                         </span>
-                        <p class="nds-item-desc">The brand variant rewires all button, link, and divider tokens to their on-color equivalents automatically, so social icon buttons, navigation links, and headings stay legible on the dark green background without any extra overrides in your markup.</p>
+                        <p class="nds-item-desc">The brand variant rewires all button, link, and divider tokens to their on-color equivalents automatically, so social icon buttons, navigation links, and headings stay legible on the deep primary background without any extra overrides in your markup.</p>
                     </div>
                 </div>
             </div>
@@ -406,8 +406,8 @@ footer.nds-footer.nds-content-wrapper.nds-brand
                     <li>Always include at minimum: privacy policy, terms and conditions, and accessibility links in the bottom bar for government compliance</li>
                     <li>Use <code class="nds-inline-code lang-html">target="_blank"</code> on external links and social media to keep users on the site</li>
                     <li>App store links use inline SVG for the Apple, Google Play, and Huawei logos rather than icon fonts, since these are brand marks not available in the icon set</li>
-                    <li>The default footer uses a light neutral background that adapts to dark mode automatically. Add <code class="nds-inline-code lang-html">nds-brand</code> to <code class="nds-inline-code lang-html">.nds-footer</code> for the dark green variant with white text</li>
-                    <li>Add <code class="nds-inline-code lang-html">nds-oncolor</code> to individual logo <code class="nds-inline-code lang-html">&lt;img&gt;</code> elements that should invert to white on dark backgrounds (dark mode and green variant). Logos without the class keep their original colors in all modes</li>
+                    <li>Keep <code class="nds-inline-code lang-html">nds-brand</code> on <code class="nds-inline-code lang-html">.nds-footer</code> unless you have a reason to drop it. The canonical markup above carries it, and it is the shipped look: deep primary with white text. Removing it is a choice, not a reset to a default, and gives you the light neutral background instead, which adapts to dark mode automatically</li>
+                    <li>Add <code class="nds-inline-code lang-html">nds-oncolor</code> to individual logo <code class="nds-inline-code lang-html">&lt;img&gt;</code> elements that should invert to white on dark backgrounds (dark mode and the brand variant). Logos without the class keep their original colors in all modes</li>
                 </ul>
             </div>
 
@@ -419,12 +419,12 @@ footer.nds-footer.nds-content-wrapper.nds-brand
                         <tr>
                             <td><code class="nds-inline-code lang-html">nds-brand</code></td>
                             <td><code class="nds-inline-code lang-html">.nds-footer</code></td>
-                            <td>Dark green background with white text, inverted logos, and on-color button/link tokens</td>
+                            <td>Deep primary background with white text, inverted logos, and on-color button/link tokens. Present in the canonical markup; drop it for the light neutral footer</td>
                         </tr>
                         <tr>
                             <td><code class="nds-inline-code lang-html">nds-oncolor</code></td>
                             <td>Logo <code class="nds-inline-code lang-html">&lt;img&gt;</code> elements</td>
-                            <td>Inverts the image to white on dark backgrounds (dark mode and green variant)</td>
+                            <td>Inverts the image to white on dark backgrounds (dark mode and the brand variant)</td>
                         </tr>
                         <tr>
                             <td><code class="nds-inline-code lang-html">nds-footer-icons</code></td>
@@ -453,7 +453,7 @@ footer.nds-footer.nds-content-wrapper.nds-brand
                         <tr>
                             <td><code class="nds-inline-code lang-html">--background-footer</code></td>
                             <td>Theme token</td>
-                            <td>Background color for the <code class="nds-inline-code lang-html">nds-brand</code> variant. Resolves to dark green in light mode and a semi-transparent green in dark mode.</td>
+                            <td>Background color for the <code class="nds-inline-code lang-html">nds-brand</code> variant. Resolves to the deep primary surface in light mode and a semi-transparent primary wash in dark mode.</td>
                         </tr>
                         <tr>
                             <td><code class="nds-inline-code lang-html">--divider-color</code></td>

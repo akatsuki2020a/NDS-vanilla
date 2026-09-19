@@ -11,8 +11,9 @@
  *   NDS.Filter.refresh(root)           re-resolve items + regenerate auto filters for every
  *                                      CLIENT-SIDE instance whose target is root, sits inside
  *                                      it, or wraps it — no getByTarget() lookup first. Omit
- *                                      root for all. AJAX-mode filters are skipped: the server
- *                                      owns their result set. Prefer NDS.Init.refresh(root),
+ *                                      root for all. Form-mode filters are skipped, AJAX or
+ *                                      not: the server owns their result set. Prefer
+ *                                      NDS.Init.refresh(root),
  *                                      which calls this and every other affected component
  * Events (bubble from the filter surface element):
  *   nds:filter:ready       detail = the instance
@@ -39,6 +40,12 @@
  * Gotchas:
  *   - Always NDS.Filter.create(); a bare `new NDSFilter` skips the registry, the init stamp
  *     and the ready event, so getInstance/getByTarget/whenReady never see it.
+ *   - NDS.Filter rides the delegated bundle, so until that bundle lands NDS.Filter is the
+ *     loader's lazy stub and EVERY call on it returns a Promise. getInstance()/getByTarget()
+ *     are synchronous reads, so in that gap they hand back a Promise, not an instance —
+ *     truthy, with every method undefined. Only whenReady(el, cb) survives it: the stub
+ *     bridges the call and the real whenReady runs the callback with the instance. Resolve
+ *     through whenReady() from module or deferred script code.
  *   - Every surface (search box, dropmenu, chips, sort toolbar) carries the same
  *     data-filter-target — there is no privileged container element.
  *   - data-filtered is written by the filter to hide an item; CSS owns the hiding. Count
@@ -48,7 +55,40 @@
  *     undefined.
  *   - Declare data-filter-items only where a live filter exists: a crit rule holds such a
  *     container as skeleton until an instance stamps data-nds-filter-initialized, with no
- *     console warning — NDS.Init.audit() is what reports an unclaimed one.
+ *     console warning — NDS.Init.audit() is what reports an unclaimed one. The same audit
+ *     flags a .nds-filter carrying no data-filter-target: a surface no instance ever binds,
+ *     so its options never render.
+ *   - A hidden auto-populated filter defers its option build to first open (data-delay="500"
+ *     on the dropmenu, options built on nds:dropmenu:prepare). An empty option list right
+ *     after load has not run yet — it is not a broken filter. Open the menu to see it.
+ *   - .nds-filter is a pure anchor; submit mode is a SEPARATE form carrying the same target:
+ *       <form data-filter-target="results" data-filter-submit method="get">
+ *       <div class="nds-filter" data-filter-target="results">…</div>
+ *     Without data-ajax the browser submits and the server returns the filtered page; add
+ *     data-ajax on that form for AJAX submission instead. The filter stamps form="<that
+ *     form's id>" on its own controls, so surfaces outside the form still submit — give
+ *     the form an id or the criteria never leave the page.
+ *     Criteria that no control carries — a range filter's encoded value, an unnamed
+ *     search box — are written into .nds-filter-hidden-inputs on each submit, keyed
+ *     like the URL param, so the request matches this.criteria. A filter whose own
+ *     inputs are named is left alone (auto-generated options submit `filter-{name}`,
+ *     not `{name}`). nds:filterFormAjax exposes that container as
+ *     hiddenInputsContainer; add your own fields to it there.
+ *   - Sort is NOT criteria and never rides the request — by design, not a gap.
+ *     ONE question decides who owns the order: does the server return all matching
+ *     rows, or one page? All rows (the client pages them via data-auto-pagination)
+ *     → CLIENT sort: author data-sort triggers, which ARE the client-side engine.
+ *     One page (a data-page-url nav) → SERVER sort: author no data-sort at all
+ *     (with no triggers setupSort() returns early and no engine is created) and
+ *     give the form your own named control — <select name="sort"> rides FormData
+ *     like any criterion, and the server's row order arrives untouched.
+ *     The presence of data-sort IS the switch, so the two cannot conflict; author
+ *     both and a client reorder lands on top of a server-paged response, sorting
+ *     that page only. Measured in scripts/check-filter-sort-ownership.mjs.
+ *   - Auto-generated options come from _buildFilterInput(): div.nds-form-container plus
+ *     nds-{check,radio,switch}-container, wrapping div.nds-form-header > label[for] >
+ *     span.nds-label and div.nds-form-control > the input. Hand-written options must match
+ *     that shape — read the generator, do not guess it.
  *   - Resetting is markup, not JS: a [data-filter-action="reset"] button inside the surface
  *     clears every input and re-emits nds:filter:change. Hand-clearing fields + syncState
  *     repaints only — it dispatches nothing.
@@ -322,6 +362,11 @@
 
             // Handle form submission
             this.submissionForm.addEventListener('submit', (e) => {
+                // Both branches read the form's named controls — AJAX through
+                // FormData, native through the browser — so criteria that no
+                // control carries must exist as real inputs before either runs.
+                this._writeCriteriaInputs();
+
                 if (this.isAjaxMode) {
                     e.preventDefault();
                     this.handleAjaxSubmit();
@@ -329,6 +374,54 @@
                     this.handleFormSubmit(e);
                 }
             }, { signal: this.abortController.signal });
+        }
+
+        /**
+         * Fill .nds-filter-hidden-inputs so the submission carries everything
+         * this.criteria claims. A range filter renders two unnamed thumbs for one
+         * encoded value, so nothing about it reaches the server otherwise — while
+         * its chip, badge and URL param all say it is applied. Rebuilt on every
+         * submit; the key is the one updateUrlParams writes, so the request and
+         * the URL agree.
+         *
+         * Only fills genuine gaps. A filter whose own controls already put
+         * something in the form is left alone even when they use a different key
+         * (auto-generated options submit `filter-{name}`) — reconciling that key
+         * would rename a parameter consumers may already read.
+         */
+        _writeCriteriaInputs() {
+            const box = this.hiddenInputsContainer;
+            if (!box) return;
+            box.textContent = '';
+
+            const add = (name, value) => {
+                if (!name) return;
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                box.appendChild(input);
+            };
+
+            for (const [name, values] of Object.entries(this.criteria.filters)) {
+                if (values.length && !this._filterReachesForm(name)) {
+                    add(name, values.join(','));
+                }
+            }
+
+            // The direct search box is the form-associated one (setupDirectSearch);
+            // an unnamed one submits nothing, so carry the keyword here instead.
+            if (this.criteria.search && !this.searchInputs.direct?.input.name) {
+                add(this.getSearchInputName(), this.criteria.search);
+            }
+        }
+
+        // Does this filter's own markup put anything in the form, under any key?
+        // A range never does — two thumbs, no name, one encoded value between them.
+        _filterReachesForm(filterName) {
+            const fd = this.filterInputs[filterName];
+            if (!fd || fd.type === 'range') return false;
+            return Array.from(fd.inputs || []).some(input => input.name);
         }
 
         /**
@@ -414,7 +507,6 @@
 
             NDS.State.set(this.filterContainer, 'submitting');
             this._showTriggerLoading();
-            NDS.Status.clear(this.filterContainer);
             if (this.targetContainer) this.targetContainer.classList.add('nds-loading');
 
             const { url, options } = this._buildAjaxRequest();
@@ -537,16 +629,14 @@
         }
 
         /**
-         * Settle UI state after a successful response: clear loading, set
-         * success status, refresh dependent UI, fire the complete event,
-         * schedule status auto-clear.
+         * Settle UI state after a successful response: clear loading, refresh
+         * dependent UI, fire the complete event.
          */
         _finishAjaxSubmit(eventDetail, isJson) {
             if (this.targetContainer) {
                 this.targetContainer.classList.remove('nds-loading');
             }
 
-            NDS.Status.set(this.filterContainer, 'success');
             NDS.State.clear(this.filterContainer);
             if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
 
@@ -561,8 +651,6 @@
             // data-total-count on the target container there — re-run the count so
             // the slots reflect their updates.
             if (isJson) this.updateFilterCount();
-
-            setTimeout(() => NDS.Status.clear(this.filterContainer), 3000);
         }
 
         /**
@@ -582,7 +670,6 @@
 
             if (appliedUrl !== undefined) this._rollbackApplied(appliedUrl);
 
-            NDS.Status.set(this.filterContainer, 'error');
             NDS.State.clear(this.filterContainer);
             if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
 
@@ -597,8 +684,6 @@
                 bubbles: true
             }));
             if (shouldToast) this._showAjaxErrorToast();
-
-            setTimeout(() => NDS.Status.clear(this.filterContainer), 5000);
         }
 
         /**
@@ -613,9 +698,9 @@
          * applyUrlParams only sets what the params contain, it never unsets.
          */
         _rollbackApplied(appliedUrl) {
-            window.history.replaceState({}, '', appliedUrl
+            window.history.replaceState({}, '', (appliedUrl
                 ? `${window.location.pathname}${appliedUrl}`
-                : window.location.pathname);
+                : window.location.pathname) + window.location.hash);
 
             this._mirrorSearchInputs('');
             this.criteria.search = '';
@@ -654,8 +739,8 @@
                     ? 'حدث خطأ أثناء تطبيق التصفية. النتائج المعروضة لم تتغير.'
                     : 'Something went wrong applying the filter. The results shown are unchanged.',
                 id: alertId,
-                // Matches the 5s data-status auto-clear above so both failure
-                // signals leave together.
+                // The toast is the only failure signal — the results on screen
+                // are unchanged, so nothing else marks the page.
                 duration: 5000
             });
         }
@@ -819,9 +904,11 @@
                 }
             }
 
-            const newUrl = params.toString()
+            // Keep the hash: a hash-routed app stores its route there, and rebuilding
+            // the URL from pathname+search alone drops it on every filter change.
+            const newUrl = (params.toString()
                 ? `${window.location.pathname}?${params.toString()}`
-                : window.location.pathname;
+                : window.location.pathname) + window.location.hash;
 
             window.history.replaceState({}, '', newUrl);
         }
@@ -1391,6 +1478,12 @@
 
         setupDirectSearch(searchInput, clearBtn) {
             const signal = this.abortController.signal;
+            // Both entry paths land here — the explicit data-filter="search"
+            // element and _autoDetectDirectSearch — so the form association is
+            // set once. The dropmenu search is deliberately left out: its value
+            // is mirrored onto this input before submit, and naming both would
+            // put two `search` entries in the same FormData.
+            this._associateWithForm(searchInput);
             const searchContainer = searchInput.closest('.nds-search-box, .nds-form-control')?.parentElement ||
                                    searchInput.closest('.nds-search-content')?.parentElement ||
                                    searchInput.parentElement;
@@ -1465,6 +1558,9 @@
          */
         submitForm(triggerBtn) {
             if (!this.submissionForm) return;
+            // This call is the submission, so drop any commit queued in the same
+            // tick — a setter followed by submitForm() sends one request.
+            this._commitQueued = false;
             // Track which button triggered this submit so its spinner shows at
             // submit and clears via the AJAX lifecycle (native submits self-clear
             // on navigation). null for programmatic submits with no button.
@@ -1476,16 +1572,12 @@
                 NDS.Feedback.dismissAll(this.filterContainer);
             }
 
-            // Trigger form submission on the actual form element.
-            // Fallback gap: .submit() skips the submit event, so without
-            // requestSubmit (pre-2022 engines) the setupFormSubmission listener
-            // never fires — validation is bypassed and AJAX mode degrades to a
-            // full-page navigation.
-            if (this.submissionForm.requestSubmit) {
-                this.submissionForm.requestSubmit();
-            } else {
-                this.submissionForm.submit();
-            }
+            // requestSubmit, never .submit(): .submit() skips the submit event, so
+            // setupFormSubmission's listener never fires — validation is bypassed and
+            // AJAX mode silently degrades to a full-page navigation. The old fallback
+            // only ever reached Safari 15.4–15.6 (this file already requires :has()
+            // in querySelector), where it submitted wrongly instead of failing loudly.
+            this.submissionForm.requestSubmit();
         }
 
         updateClearButtonVisibility(input, clearBtn) {
@@ -1594,6 +1686,7 @@
 
             inputs.forEach(input => {
                 input._ndsFilterBound = true;
+                this._associateWithForm(input);
                 input.addEventListener('change', () => {
                     this.updateFilterCriteria(filterName);
                     this.updateApplyButtonLabel();
@@ -1776,6 +1869,8 @@
                 fd.minInput.value = lo;
                 fd.maxInput.value = hi;
             }
+            // Soft dependency on NDS.Slider — same cross-bundle contract declared where
+            // the slider is built; without it the thumbs keep their last paint.
             if (NDS.Slider && NDS.Slider.reinit) NDS.Slider.reinit(fd.controlContainer);
             this.updateRangeCriteria(filterName);
         }
@@ -2134,13 +2229,15 @@
         }
 
         // Form mode: a filter's surfaces are linked by data-filter-target, not
-        // by nesting, so generated controls may live anywhere on the page.
-        // Associate them with the submission form via HTML's native `form`
-        // attribute so FormData/GET submissions include them (matching the
-        // Apply button's association in _bindApplyButton). No-op outside form
-        // mode or when the form has no id to reference.
+        // by nesting, so its controls — authored or generated — may live
+        // anywhere on the page. Associate them with the submission form via
+        // HTML's native `form` attribute so FormData/GET submissions include
+        // them (matching the Apply button's association in _bindApplyButton).
+        // No-op outside form mode, when the form has no id to reference, or
+        // when the input already belongs to it.
         _associateWithForm(input) {
-            if (this.isFormMode && this.submissionForm.id) {
+            if (!this.isFormMode || !this.submissionForm.id) return;
+            if (input.form !== this.submissionForm) {
                 input.setAttribute('form', this.submissionForm.id);
             }
         }
@@ -2190,7 +2287,6 @@
                 input.name = `filter-${filterName}`;
                 input.value = value;
                 input.className = 'nds-switch-input';
-                this._associateWithForm(input);
 
                 const track = document.createElement('div');
                 track.className = 'nds-switch-track';
@@ -2210,7 +2306,6 @@
                 input.name = inputType === 'radio' ? groupName : `filter-${filterName}`;
                 input.value = value;
                 input.className = inputClass;
-                this._associateWithForm(input);
                 if (variant) {
                     input.classList.add(variant);
                 }
@@ -2257,8 +2352,27 @@
         // definition so a new commit path can't pick the wrong half — the chip,
         // clear and range-reset paths all route here.
         _commitCriteriaChange() {
-            if (this.isAjaxMode) this.submitForm();
-            else this.applyFilters();
+            if (!this.isAjaxMode) {
+                this.applyFilters();
+                return;
+            }
+
+            // Coalesce. Setting three filters in a row is one intent, but each
+            // submit is a server round-trip, so queue on a microtask and let a
+            // run of criteria changes collapse into one request. An explicit
+            // submitForm() in the same tick supersedes the queued one — it
+            // clears the flag, so the consumer's own call is the one that goes.
+            this._commitQueued = true;
+            if (this._commitScheduled) return;
+            this._commitScheduled = true;
+            Promise.resolve().then(() => {
+                this._commitScheduled = false;
+                // destroy() aborts this signal; without the check a queued
+                // commit would fetch on behalf of a dead instance.
+                if (!this._commitQueued || this.abortController.signal.aborted) return;
+                this._commitQueued = false;
+                this.submitForm();
+            });
         }
 
         applyFilters() {
@@ -2531,11 +2645,14 @@
         }
 
         clearDropmenuFilters() {
+            // Emptying the dropmenu search box has to zero criteria.search with it.
+            // Clearing the value alone left the keyword applied: the box read empty
+            // and the Apply count dropped, while the results stayed filtered and the
+            // search chip stayed up until the next Apply. _mirrorSearchInputs is the
+            // same pair every other clear path uses, and keeps the direct box in step.
             if (this.searchInputs.dropmenu) {
-                this.searchInputs.dropmenu.input.value = '';
-                if (this.searchInputs.dropmenu.clearBtn) {
-                    this.searchInputs.dropmenu.clearBtn.hidden = true;
-                }
+                this.criteria.search = '';
+                this._mirrorSearchInputs('');
             }
 
             this._resetFilterInputs();
@@ -2561,7 +2678,6 @@
             // Clear form state if in form mode
             if (this.isFormMode) {
                 NDS.State.clear(this.filterContainer);
-                NDS.Status.clear(this.filterContainer);
             }
 
             this.updateApplyButtonLabel();
@@ -2601,7 +2717,11 @@
             const event = new CustomEvent('nds:filter:change', {
                 detail: {
                     filter: this,
-                    criteria: { ...this.criteria },
+                    // getCriteria(), not a shallow spread: the spread handed out the
+                    // live criteria.filters object, so a consumer holding an old
+                    // detail.criteria saw it track later changes and every
+                    // what-changed comparison read as unchanged.
+                    criteria: this.getCriteria(),
                     totalItems: hasCount ? this.items.length : null,
                     visibleItems: hasCount ? visibleCount : null,
                     hiddenItems: hasCount ? this.items.length - visibleCount : null
@@ -2667,7 +2787,8 @@
         }
 
         getCriteria() {
-            return { ...this.criteria, filters: { ...this.criteria.filters } };
+            // Deep clone — a caller's snapshot must not alias the live filter arrays.
+            return structuredClone(this.criteria);
         }
 
         /**
@@ -2681,6 +2802,15 @@
 
             // Re-resolve target surfaces in case the surrounding UI changed
             this._targetRoots = this.resolveTargetRoots();
+            // Re-stamp: a container or surface rendered (or re-rendered) after
+            // createInstance is otherwise held by the skeleton gate under a live instance.
+            (this._targetRoots || []).forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
+            this.targetContainer?.setAttribute('data-nds-filter-initialized', 'true');
+
+            // A replaced search box leaves the cached ref (and its listeners) on a
+            // detached node; drop it so detection rebinds to the live one.
+            if (this.searchInputs.direct && !this.searchInputs.direct.input.isConnected) this.searchInputs.direct = null;
+            this._autoDetectDirectSearch();
 
             // Update items list
             this.items = this.resolveItems();
@@ -2726,7 +2856,12 @@
             this._mirrorSearchInputs(value);
 
             this.updateApplyButtonLabel();
-            this.applyFilters();
+            // Not applyFilters(): in AJAX mode that repaints chips, badge and URL
+            // from the new criteria without fetching, so the page would state a
+            // keyword the displayed results were never filtered by. Same commit
+            // path as removeFilterValue — the closest sibling, also a programmatic
+            // criteria change.
+            this._commitCriteriaChange();
         }
 
         setFilterValues(filterName, values) {
@@ -2743,7 +2878,9 @@
 
             this.updateFilterCriteria(filterName);
             this.updateApplyButtonLabel();
-            this.applyFilters();
+            // See setSearchValue — commit, don't just repaint, so AJAX mode
+            // re-fetches instead of showing chips for an unrequested filter.
+            this._commitCriteriaChange();
         }
 
         populateFilter(filterName, values, inputType = null) {
@@ -2814,6 +2951,22 @@
     // element existing (e.g. a search-only filter).
     const _instancesByTarget = new Map();
 
+    // Resolve the LIVE instance for a target id, or null. A framework view
+    // unmounted without NDS.Init.destroy() leaves a detached instance squatting
+    // its id: every claim below would then skip the remount and the crit hold
+    // (data-nds-filter-initialized) would keep the new region hidden forever.
+    // A detached representative means that filter is gone — destroy it (which
+    // releases its pooled NDS.onDOMAdd/listener subscriptions) and free the id.
+    function liveInstance(id) {
+        const instance = _instancesByTarget.get(id);
+        if (!instance) return null;
+        if (instance.filterContainer?.isConnected) return instance;
+        console.warn(`NDS Filter: reclaiming target "${id}" — its instance was removed from the DOM without NDS.Init.destroy(). Call destroy() on unmount.`);
+        instance.destroy();
+        _instancesByTarget.delete(id);
+        return null;
+    }
+
     // Construct an instance on `representative` (the element that carries the
     // backref, init-guard attribute, and dispatches the filter's events) and
     // register it by target id.
@@ -2842,21 +2995,29 @@
         return instance;
     }
 
-    function initializeFilters() {
+    function initializeFilters(scope) {
         // One filter per unique data-filter-target. Group every linked surface
         // (search box, dropmenu, applied-chips, auto-fill, sort toolbar) by target,
         // then build once per target. The representative is the .nds-filter surface
         // when present — keeping events, backref, and the init guard on it preserves
         // backward compatibility — otherwise the first surface (e.g. a lone search
         // box), so a filter needs no .nds-filter element at all.
+        //
+        // scope narrows the scan to a changed container (see refresh() below) — a
+        // new [data-filter-target] can only appear inside it, per that method's
+        // contract, so this skips a whole-document scan on every scoped refresh.
+        const root = scope || document;
         const groups = new Map();
-        document.querySelectorAll('[data-filter-target]').forEach(el => {
+        const addCandidate = el => {
             if (el.closest('code, .code-example')) return;
             const id = el.getAttribute('data-filter-target');
-            if (!id || _instancesByTarget.has(id)) return;
+            if (!id || liveInstance(id)) return;
             if (!groups.has(id)) groups.set(id, []);
             groups.get(id).push(el);
-        });
+        };
+        // querySelectorAll never matches the root element itself — check it separately.
+        if (root !== document && root.matches?.('[data-filter-target]')) addCandidate(root);
+        root.querySelectorAll('[data-filter-target]').forEach(addCandidate);
 
         groups.forEach(surfaces => {
             const representative = surfaces.find(el => el.classList.contains('nds-filter')) || surfaces[0];
@@ -2880,7 +3041,8 @@
             if (!container) return null;
             if (container.ndsFilter) return container.ndsFilter;
             const id = container.getAttribute('data-filter-target');
-            if (id && _instancesByTarget.has(id)) return _instancesByTarget.get(id);
+            const live = id && liveInstance(id);
+            if (live) return live;
             return createInstance(container);
         },
 
@@ -2893,10 +3055,10 @@
             // element's target linkage so any surface element works.
             if (container.ndsFilter) return container.ndsFilter;
             const id = container.getAttribute('data-filter-target');
-            return id ? (_instancesByTarget.get(id) || null) : null;
+            return id ? liveInstance(id) : null;
         },
 
-        getByTarget: (targetId) => _instancesByTarget.get(targetId) || null,
+        getByTarget: (targetId) => liveInstance(targetId),
 
         /**
          * Re-resolve items and regenerate auto-scanned filters for every instance
@@ -2923,7 +3085,9 @@
             // injected [data-filter-target] region is never instanced — and the crit
             // hold keyed on data-nds-filter-initialized would keep it hidden forever.
             // Idempotent: createInstance skips a target already in the registry.
-            initializeFilters();
+            // Scoped to root — a new surface can only appear inside "the container
+            // whose contents changed" (see this method's JSDoc above).
+            initializeFilters(root);
 
             const scope = root && root !== document ? root : null;
             _instancesByTarget.forEach(instance => {
@@ -2933,6 +3097,9 @@
                 // list from the rows currently rendered and hand back unchecked inputs,
                 // so the next real submit would silently drop the applied filter.
                 if (instance.isFormMode) return;
+                // Reap an instance whose surfaces left the DOM (route change with
+                // no NDS.Init.destroy()) instead of refreshing a detached filter.
+                if (!liveInstance(instance.targetId)) return;
                 const target = instance.targetId
                     ? document.getElementById(instance.targetId)
                     : instance.targetContainer;
@@ -2962,7 +3129,20 @@
                 return;
             }
 
-            // Not yet — ready bubbles from the representative element
+            // Not yet. Ready fires on the representative surface only, and bubbling
+            // never reaches siblings — a search box sitting beside the .nds-filter
+            // would wait forever. Match at the document by target id instead; an
+            // element without one (an ancestor wrapper) still gets the bubble.
+            const id = container.getAttribute('data-filter-target');
+            if (id) {
+                const onReady = (e) => {
+                    if (e.detail?.targetId !== id) return;
+                    document.removeEventListener('nds:filter:ready', onReady);
+                    callback(e.detail);
+                };
+                document.addEventListener('nds:filter:ready', onReady);
+                return;
+            }
             container.addEventListener('nds:filter:ready', (e) => {
                 callback(e.detail);
             }, { once: true });

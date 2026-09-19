@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.6.0"
-last_edit: "26/07/2026 - 09:20 PM"
+updated: "1.12.0"
+last_edit: "05/09/2026 - 09:00 PM"
 ---
 
 <!-- Topbar -->
@@ -46,7 +46,7 @@ last_edit: "26/07/2026 - 09:20 PM"
                                         <div class="nds-expandable-content">
                                             <code class="lang-html code">
 &lt;div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities"&gt;
-  &lt;button class="nds-btn nds-menu-btn nds-topbar-info nds-digitalStamp-tab"
+  &lt;button class="nds-btn nds-menu-btn nds-digitalStamp-tab"
       role="button" aria-expanded="false" aria-controls="nds-digitalStamp"&gt;
     &lt;img class="nds-flag" src="flag.svg" width="20" height="14" loading="lazy" alt="Saudi Arabia Flag"&gt;
     &lt;span class="nds-digitalStamp-lg-text nds-truncate"&gt;A government website registered with the Digital Government Authority.&lt;/span&gt;
@@ -60,7 +60,8 @@ last_edit: "26/07/2026 - 09:20 PM"
         data-city="الرياض" data-city-en="Riyadh"&gt;&lt;/span&gt;
     &lt;span id="nds-weatherInfo" class="nds-text-icon" data-hidden="sm"
         data-latitude="24.7136" data-longitude="46.6753"&gt;&lt;/span&gt;
-    &lt;button class="nds-btn nds-subtle nds-theme-toggle-wrap" data-theme-toggle aria-label="Toggle dark mode"&gt;
+    &lt;!-- Icon-only: the hover tooltip is built from the title, on a native-title delay --&gt;
+    &lt;button class="nds-btn nds-subtle nds-theme-toggle-wrap nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" aria-label="Toggle dark mode"&gt;
       &lt;i class="nds-icon nds-hgi-moon-02" aria-hidden="true"&gt;&lt;/i&gt;
     &lt;/button&gt;
   &lt;/div&gt;
@@ -112,7 +113,7 @@ last_edit: "26/07/2026 - 09:20 PM"
                                         </div>
                                         <code class="lang-html code">
 &lt;!-- Hijri or Gregorian date (set via data-calendar);
-     data-hidden picks where the widget hides (here: 960px and below) --&gt;
+     data-hidden picks where the widget hides (here: 959px and below) --&gt;
 &lt;span id="nds-date" class="nds-text-icon" data-calendar="hijri" data-hidden="sm md"&gt;&lt;/span&gt;
 
 &lt;!-- Real-time clock (updates every second); hidden on mobile --&gt;
@@ -339,7 +340,7 @@ last_edit: "26/07/2026 - 09:20 PM"
                         <tr><td><code class="nds-inline-code lang-html">nds-digitalStamp-tab</code></td><td>top bar button</td><td>Styles the DGA stamp trigger with flag icon and verification text</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-digitalStamp-lg-text</code></td><td>inside stamp tab</td><td>Full-length label shown on desktop, hidden on tablet and below</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-digitalStamp-sm-text</code></td><td>inside stamp tab</td><td>Short label shown on tablet and below, hidden on desktop</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">nds-topbar-info</code></td><td>container</td><td>Groups the DGA tab contents and the right-side widget cluster</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-topbar-info</code></td><td>container</td><td>Groups the right-side widget cluster. It is a flex row with a wide gap, so it belongs on that container only — never on the digital-stamp button, whose contents it would stretch apart</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -350,7 +351,7 @@ last_edit: "26/07/2026 - 09:20 PM"
                     <thead><tr><th>Attribute</th><th>Element</th><th>Description</th></tr></thead>
                     <tbody>
                         <tr><td><code class="nds-inline-code lang-html">data-theme-toggle</code></td><td>top bar button</td><td>Registers the element as a dark/light mode toggle</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">data-hidden</code></td><td>any widget</td><td>Hides the widget inside the named viewport range: <code class="nds-inline-code lang-html">mobile</code> (600px and below), <code class="nds-inline-code lang-html">tablet</code> (601 to 960px), <code class="nds-inline-code lang-html">desktop</code> (961 to 1280px), space-separated to combine. See the <a class="nds-color" href="{{ 'utilities/hidden' | relative_url }}">Hidden</a> utility. An unstamped widget stays visible at every width</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-hidden</code></td><td>any widget</td><td>Hides the widget inside the named viewport range: <code class="nds-inline-code lang-html">mobile</code> (up to 599px), <code class="nds-inline-code lang-html">tablet</code> (600 to 959px), <code class="nds-inline-code lang-html">desktop</code> (960 to 1279px), space-separated to combine. See the <a class="nds-color" href="{{ 'utilities/hidden' | relative_url }}">Hidden</a> utility. An unstamped widget stays visible at every width</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-calendar</code></td><td><code class="nds-inline-code lang-html">#nds-date</code></td><td>Set to <code class="nds-inline-code lang-html">hijri</code> or <code class="nds-inline-code lang-html">gregorian</code>. Defaults to Hijri for Arabic pages.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-latitude</code> / <code class="nds-inline-code lang-html">data-longitude</code></td><td><code class="nds-inline-code lang-html">#nds-weatherInfo</code></td><td>GPS coordinates for the weather lookup. Defaults to Riyadh (24.7136, 46.6753).</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-city</code> / <code class="nds-inline-code lang-html">data-city-en</code></td><td><code class="nds-inline-code lang-html">#nds-cityName</code></td><td>City name shown in the widget (<code class="nds-inline-code lang-html">data-city-en</code> is the English variant). Recommended — when set, the city renders directly with no network call; otherwise it falls back to a Nominatim reverse-geocode of the coordinates.</td></tr>

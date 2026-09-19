@@ -2,6 +2,9 @@
  * Rides: nds-backdrop (dims the page behind an open drawer or dropdown; soft)
  * Methods:
  *   NDS.Mainnav.init()               wire the one nav on the page
+ *   NDS.Mainnav.reinit()             re-resolve the markup and wire it again — for a nav
+ *                                    that mounted after the bundle ran, or was replaced by
+ *                                    a route change. NDS.Init.refresh() calls it
  *   NDS.Mainnav.toggleNavbar()       open or close the collapsed drawer
  *   NDS.Mainnav.toggleDropdown(e)    open or close a nav dropdown — takes the click EVENT,
  *                                    not an element; the .nds-dropdown is resolved from
@@ -13,18 +16,21 @@
  *    .nds-nav-actions, .nds-mainNav-toggler opens #ndsNavCollapse, and a
  *    .nds-nav-item.nds-PAB stays reachable in minimal mode)
  * Gotchas:
- *   - One nav per page. The module caches its DOM references when the file loads, so a
- *     nav swapped in later is not picked up.
+ *   - One nav per page. DOM references resolve when the file loads; a nav that mounts LATER
+ *     (a framework rendering the chrome after the deferred bundle) or is swapped in by a
+ *     route change needs reinit() — until then CSS paints the nav and nothing works.
  *   - Minimal (mobile) mode starts under --nds-minimal-nav-bp, default 960px. Set that
  *     custom property on :root to move it.
  *   - A .nds-PAB item is MOVED into the minimal bar and moved back — do not reparent one
  *     yourself at runtime.
- *   - There is no reinit() and no destroy().
+ *   - Minimal mode is the nds-minimal class on the nav itself; <body> carried it
+ *     until 1.11.0, so consumer CSS keyed on body.nds-minimal must move.
+ *   - There is no destroy().
  */
 // NDS Navigation Controller
 //
 // Mainnav inits in the deferred pass and owns first paint of the nav chrome.
-// init-time work (DOM refs, mode/body-class sync, PAB placement, toggler
+// init-time work (DOM refs, mode-class sync, PAB placement, toggler
 // visibility, the overflow/show-more measurement + drawer reveal, event wiring)
 // is cold — no forced layout reads. The dropdown/navbar animation + interaction
 // cluster only runs once the user opens something; its functions are defined
@@ -45,20 +51,27 @@
     // alone is touched ~25× across this file.
     // The two dynamic refs (`minimal`, created on first mobile pass; reset to null
     // when removed) are kept in sync by managePABPlacement().
-    const _nav = document.querySelector('.nds-main-nav');
     const DOM = {
-        nav: _nav,
-        collapse: _nav?.querySelector('#ndsNavCollapse') || null,
-        collapseContent: _nav?.querySelector('.nds-collapse-content') || null,
-        container: _nav?.querySelector('.nds-nav-container') || null,
-        primary: _nav?.querySelector('.nds-nav-primary') || null,
-        secondary: _nav?.querySelector('.nds-nav-actions') || null,
-        brand: _nav?.querySelector('.nds-brand') || null,
-        toggler: _nav?.querySelector('.nds-mainNav-toggler') || null,
-        minimal: _nav?.querySelector('.nds-nav-minimal') || null,
-        showMore: null,
+        nav: null, collapse: null, collapseContent: null,
+        primary: null, secondary: null, toggler: null, minimal: null,
     };
-    DOM.showMore = DOM.collapseContent?.querySelector('.nds-show-more') || null;
+
+    // Re-resolvable rather than captured once: the module runs when the bundle does, and a
+    // framework consumer may not have rendered the chrome yet. Capturing null there left
+    // the whole nav inert for the session with no warning — CSS painted it, nothing worked.
+    // Fields are reassigned in place so the ~25 `DOM.collapse` reads elsewhere keep working.
+    function captureDOM() {
+        const nav = document.querySelector('.nds-main-nav');
+        DOM.nav = nav;
+        DOM.collapse = nav?.querySelector('#ndsNavCollapse') || null;
+        DOM.collapseContent = nav?.querySelector('.nds-collapse-content') || null;
+        DOM.primary = nav?.querySelector('.nds-nav-primary') || null;
+        DOM.secondary = nav?.querySelector('.nds-nav-actions') || null;
+        DOM.toggler = nav?.querySelector('.nds-mainNav-toggler') || null;
+        DOM.minimal = nav?.querySelector('.nds-nav-minimal') || null;
+        return !!DOM.collapse;
+    }
+    captureDOM();
 
     // State helpers — delegated to NDS.State (nds-core.js)
     const { add: addState, remove: removeState, has: hasState } = NDS.State;
@@ -74,6 +87,22 @@
         .getPropertyValue('--nds-minimal-nav-bp')) || MINIMAL_NAV_BP_FALLBACK;
     const _mqMinimal = window.matchMedia(`(max-width: ${_minimalBp}px)`);
 
+    // Scroll behavior for every JS-driven nav scroll. 'auto' defers to the element's
+    // CSS scroll-behavior, which is unset on the nav and on the document — so it is a
+    // real instant scroll here. Check the stylesheet before copying this onto a
+    // surface that sets scroll-behavior: smooth, where 'auto' still animates.
+    const _behavior = () => NDS.prefersReducedMotion ? 'auto' : 'smooth';
+
+    // Mode class at eval, ahead of the loader's reveal stamp, so it rides the
+    // reveal's own recalc: written from init it lands a frame later (the loader
+    // yields every 5 ms) and restyles again. On the nav, not <body>: only the
+    // nav's rules read it, so a flip restyles the nav alone. init's
+    // updateBodyClass then finds both in sync and takes its no-change PAB path.
+    if (DOM.nav && DOM.collapse) {
+        DOM.nav.classList.toggle('nds-minimal', _mqMinimal.matches);
+        DOM.minimal?.toggleAttribute('hidden', !_mqMinimal.matches);
+    }
+
     // ==============================================
     // STATE MANAGEMENT
     // ==============================================
@@ -82,7 +111,6 @@
         isAnimating: false,
         pendingAction: null,
         pendingOverflowCheck: null,
-        pendingUpdate: null,
         // Flipped true by the navChanged DOM-mutation debounce; consumed in
         // scheduleUpdate to gate the toggler-visibility recompute. Reset there.
         _navChanged: false,
@@ -233,11 +261,17 @@
             if (state.isMinimal) {
                 const maxH = getPrimaryMaxHeight();
                 const scrollHeight = DOM.primary.scrollHeight;
-                if (scrollHeight === 0) { this.schedule('low', 50); return; }
+                // 0 means "not laid out yet", so retry. But a CHILDLESS primary measures 0
+                // forever and the retry never ends — ~9 wake-ups a second for as long as the
+                // drawer stays open. Falling through is also the right answer for it: an
+                // empty list cannot overflow.
+                if (scrollHeight === 0 && DOM.primary.firstElementChild) { this.schedule('low', 50); return; }
                 if (isFinite(maxH) && maxH > 0) hasOverflow = scrollHeight > maxH + 2;
             } else {
                 const { scrollWidth, clientWidth } = DOM.primary;
-                if (scrollWidth === 0 && clientWidth === 0) { this.schedule('low', 50); return; }
+                // Same guard as the minimal branch above: only retry when there is content
+                // whose layout could still arrive.
+                if (scrollWidth === 0 && clientWidth === 0 && DOM.primary.firstElementChild) { this.schedule('low', 50); return; }
                 hasOverflow = scrollWidth > clientWidth;
             }
 
@@ -298,17 +332,17 @@
 
     function updateBodyClass() {
         const should = state.isMinimal;
-        const isBodyMin = document.body.classList.contains('nds-minimal');
+        const isNavMin = DOM.nav.classList.contains('nds-minimal');
         const wantsHidden = !should;
-        // Layouts render <body> without `nds-minimal` (desktop-first default;
+        // Markup ships the nav without `nds-minimal` (desktop-first default;
         // .nds-nav-minimal is gated by [hidden] in markup so no FOUC). On
         // init the body class state can already match `should` while
         // .nds-nav-minimal[hidden] hasn't been toggled yet. Compare both
         // states so the first sync still fires when only the hidden attr
         // is out of step.
         const isHidden = DOM.minimal ? DOM.minimal.hasAttribute('hidden') : wantsHidden;
-        if (should !== isBodyMin || wantsHidden !== isHidden) {
-            document.body.classList.toggle('nds-minimal', should);
+        if (should !== isNavMin || wantsHidden !== isHidden) {
+            DOM.nav.classList.toggle('nds-minimal', should);
             if (DOM.minimal) DOM.minimal.toggleAttribute('hidden', wantsHidden);
             _primaryMaxHeightCached = null;
             managePABPlacement();
@@ -317,9 +351,9 @@
         return false;
     }
 
-    function checkTogglerVisibility() {
-        if (!DOM.toggler) return;
-
+    // One pass, two readers: the toggler hides when neither container has items,
+    // and .nds-nav-actions drops out of layout when it has none of its own.
+    function checkNavComposition() {
         // Pure markup check — no layout reads, no style recalcs.
         // The mainnav SCSS doesn't conditionally hide individual .nds-nav-item
         // via media queries; PABs are MOVED between containers by
@@ -340,15 +374,19 @@
             return false;
         };
 
-        const show = hasItems(DOM.primary) || hasItems(DOM.secondary);
-        DOM.toggler.style.display = show ? '' : 'none';
+        const primaryHas = hasItems(DOM.primary);
+        const secondaryHas = hasItems(DOM.secondary);
+
+        if (DOM.secondary) DOM.secondary.toggleAttribute('data-nav-empty', !secondaryHas);
+        if (!DOM.toggler) return;
+        DOM.toggler.style.display = (primaryHas || secondaryHas) ? '' : 'none';
     }
 
     // ==============================================
     // PAB (Persistent Action Buttons) MANAGEMENT
     // ==============================================
     function managePABPlacement() {
-        const pabs = document.querySelectorAll('.nds-nav-item.nds-PAB');
+        const pabs = DOM.nav ? DOM.nav.querySelectorAll('.nds-nav-item.nds-PAB') : [];
         if (!pabs.length) return;
 
         // PAB moves change the ancestor chain of any dropdown inside a PAB li;
@@ -386,7 +424,7 @@
             pabs.forEach(item => {
                 const pos = item.dataset.origPos;
                 if (pos !== undefined) {
-                    const ph = document.querySelector(`[data-pab-ph="${pos}"]`);
+                    const ph = DOM.nav.querySelector(`[data-pab-ph="${pos}"]`);
                     if (ph) { ph.parentNode.insertBefore(item, ph); ph.remove(); }
                     delete item.dataset.origPos;
                 }
@@ -531,6 +569,10 @@
 
             if (open) addState(navLink, 'active');
             else removeState(navLink, 'active');
+            // The link's own open signal — AT reads it, and _buttons.scss rotates the
+            // arrow off it, because a parent-state tail would put .nds-btn in the
+            // shared data-state set (PERF-06).
+            NDS.aria.expanded(navLink, open);
 
             const collapseHandlesBackdrop = !isInMinimal && hasState(DOM.collapse, 'open');
             if (open && !collapseHandlesBackdrop) {
@@ -788,10 +830,10 @@
                 _openDropdowns.forEach(dd => {
                     if (dd.closest('.nds-nav-actions')) dropdown.toggle(dd, false);
                 });
-                DOM.primary.scrollTo({ top: atEnd ? 0 : DOM.primary.scrollTop + amount, behavior: 'smooth' });
+                DOM.primary.scrollTo({ top: atEnd ? 0 : DOM.primary.scrollTop + amount, behavior: _behavior() });
             } else {
                 const dir = NDS.isRTL ? -1 : 1;
-                DOM.primary.scrollTo({ left: atEnd ? 0 : DOM.primary.scrollLeft + amount * dir, behavior: 'smooth' });
+                DOM.primary.scrollTo({ left: atEnd ? 0 : DOM.primary.scrollLeft + amount * dir, behavior: _behavior() });
             }
             // Fallback for browsers without `scrollend` (the listener below
             // covers modern browsers). The smooth-scroll duration is
@@ -819,7 +861,9 @@
     }
 
     function _bindWheelConversion(signal) {
-        DOM.primary.style.scrollBehavior = 'smooth';
+        // Inline, so it outranks any stylesheet — it must honour reduced motion here
+        // or every scrollTo below silently animates through its 'auto' branch.
+        DOM.primary.style.scrollBehavior = _behavior();
 
         DOM.primary.addEventListener('wheel', (e) => {
             if (state.isMouseOverDropdown || state.isMinimal ||
@@ -828,7 +872,7 @@
 
             e.preventDefault();
             // Native smooth scroll — successive deltas compose; no frame-rate assumptions.
-            DOM.primary.scrollBy({ left: e.deltaY * (NDS.isRTL ? -0.8 : 0.8), behavior: 'smooth' });
+            DOM.primary.scrollBy({ left: e.deltaY * (NDS.isRTL ? -0.8 : 0.8), behavior: _behavior() });
         }, { passive: false, signal });
     }
 
@@ -839,7 +883,7 @@
             drag.active = false;
             document.removeEventListener('mousemove', dragMove);
             document.removeEventListener('mouseup', dragUp);
-            Object.assign(DOM.primary.style, { cursor: '', userSelect: '', scrollBehavior: 'smooth' });
+            Object.assign(DOM.primary.style, { cursor: '', userSelect: '', scrollBehavior: _behavior() });
         };
 
         const dragMove = (e) => {
@@ -853,8 +897,8 @@
             drag = { active: true, startX: e.pageX, scrollLeft: DOM.primary.scrollLeft };
             Object.assign(DOM.primary.style, { cursor: 'grabbing', userSelect: 'none', scrollBehavior: 'auto' });
             e.preventDefault();
-            document.addEventListener('mousemove', dragMove);
-            document.addEventListener('mouseup', dragUp);
+            document.addEventListener('mousemove', dragMove, { signal });
+            document.addEventListener('mouseup', dragUp, { signal });
         }, { signal });
     }
 
@@ -877,12 +921,14 @@
         }, { signal });
     }
 
+    let _interactionsAbortController = null;
     function setupInteractions() {
         if (!DOM.primary) return;
 
-        // Scope all listeners attached in this function to a single AbortController
-        // so teardown can detach them atomically if setupInteractions is ever re-run.
-        const _interactionsAbortController = new AbortController();
+        // One controller per run, aborted on the next: a reinit on a kept root
+        // would otherwise stack every interaction listener (wheel scroll doubles).
+        if (_interactionsAbortController) _interactionsAbortController.abort();
+        _interactionsAbortController = new AbortController();
         const { signal } = _interactionsAbortController;
 
         _bindShowMore(signal);
@@ -895,52 +941,46 @@
     // ==============================================
     // EVENT HANDLERS
     // ==============================================
-    function scheduleUpdate() {
-        if (state.pendingUpdate) return;
+    const scheduleUpdate = NDS.rafThrottle(() => {
+        const modeChanged = updateBodyClass();
 
-        state.pendingUpdate = requestAnimationFrame(() => {
-            state.pendingUpdate = null;
+        // Mode-transition cleanup only matters when something is open (close
+        // dropdowns / collapse the drawer / drop a stale backdrop). When
+        // nothing is open the half isn't needed — route through behavior, whose
+        // guarded-direct stubs no-op until the half is installed. _navBackdropOwner
+        // writes stay here (shell local).
+        if (modeChanged && _anyOpen()) {
+            dropdown.closeAll();
 
-            const modeChanged = updateBodyClass();
-
-            // Mode-transition cleanup only matters when something is open (close
-            // dropdowns / collapse the drawer / drop a stale backdrop). When
-            // nothing is open the half isn't needed — route through behavior, whose
-            // guarded-direct stubs no-op until the half is installed. _navBackdropOwner
-            // writes stay here (shell local).
-            if (modeChanged && _anyOpen()) {
-                dropdown.closeAll();
-
-                if (hasState(DOM.collapse, 'open')) {
-                    _navBackdropOwner = 'navbar';
-                    cancelToggleAction();
-                    toggleNavbar();
-                    return;
-                }
-
-                if (_navBackdropOwner) {
-                    _navBackdropOwner = null;
-                    cancelToggleAction();
-                    // Soft dependency — backdrop cleanup no-ops if NDS.Backdrop isn't
-                    // bundled (matches the guarded showNavBackdrop/hideNavBackdrop handoff).
-                    if (NDS.Backdrop && NDS.Backdrop.isActive()) NDS.Backdrop.hide();
-                }
+            if (hasState(DOM.collapse, 'open')) {
+                _navBackdropOwner = 'navbar';
+                cancelToggleAction();
+                toggleNavbar();
+                return;
             }
 
-            if (hasState(DOM.collapse, 'open') && !hasState(DOM.collapse, 'closing')) {
-                updatePositions();
+            if (_navBackdropOwner) {
+                _navBackdropOwner = null;
+                cancelToggleAction();
+                // Soft dependency — backdrop cleanup no-ops if NDS.Backdrop isn't
+                // bundled (matches the guarded showNavBackdrop/hideNavBackdrop handoff).
+                if (NDS.Backdrop && NDS.Backdrop.isActive()) NDS.Backdrop.hide();
             }
+        }
 
-            // Toggler visibility is a pure markup check (no layout reads) that
-            // depends on what's in primary/secondary, not on viewport width.
-            // It only needs to re-run when the markup composition changes
-            // (PAB placement / mode flip / DOM mutations), not on every resize.
-            if (modeChanged || state._navChanged) {
-                state._navChanged = false;
-                checkTogglerVisibility();
-            }
-        });
-    }
+        if (hasState(DOM.collapse, 'open') && !hasState(DOM.collapse, 'closing')) {
+            updatePositions();
+        }
+
+        // Pure markup check (no layout reads) — re-run on composition changes
+        // (PAB placement / mode flip / DOM mutations), not on every resize.
+        // Order matters: updateBodyClass() above moved the PABs, so the
+        // data-nav-empty stamp reads the settled DOM in the same frame.
+        if (modeChanged || state._navChanged) {
+            state._navChanged = false;
+            checkNavComposition();
+        }
+    });
 
     // ==============================================
     // EVENT LISTENERS
@@ -954,6 +994,7 @@
     let _eventsAbortController = null;
     let _offResize = null;
     const _offElementResizes = [];
+    const _offDOMWatches = [];
     let _initDone = false;
 
     function _bindGlobalEvents(signal) {
@@ -1009,7 +1050,7 @@
             const delay = wasNavOpen || openCount ? NDS.transitionSpeed() + 100 : 0;
 
             setTimeout(() => {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                target.scrollIntoView({ behavior: _behavior(), block: 'start' });
                 history.replaceState(null, '', `#${hash}`);
             }, delay);
         }, { signal });
@@ -1020,12 +1061,14 @@
     }
 
     function _bindMutationAndResizeObservers() {
-        // mainnav is a singleton so the init-guard below prevents duplicate
-        // registrations; that's why the unsubscribe handles NDS.onDOMAdd /
-        // onDOMRemove now return aren't captured here.
+        // Captured, unlike before: reinit() re-runs this, and an uncaptured pooled
+        // subscriber would stack one closure per re-run for the page lifetime.
+        _offDOMWatches.splice(0).forEach(off => off());
         const navChanged = NDS.debounce(() => { state._navChanged = true; scheduleUpdate(); }, 100);
-        NDS.onDOMAdd('.nds-nav-item, .nds-dropdown', navChanged);
-        NDS.onDOMRemove('.nds-nav-item, .nds-dropdown', navChanged);
+        _offDOMWatches.push(
+            NDS.onDOMAdd('.nds-nav-item, .nds-dropdown', navChanged),
+            NDS.onDOMRemove('.nds-nav-item, .nds-dropdown', navChanged),
+        );
 
         // Steady-state resize: coalesce storms before the recompute.
         // CSS flex owns the width budget, but JS still owns the has-more
@@ -1079,10 +1122,39 @@
     // ==============================================
     // INITIALIZATION
     // ==============================================
+    // Re-resolve the markup and wire it, whether or not a prior pass found anything.
+    //
+    // Two cases reach here, and both are the same fix. A nav that did not exist when the
+    // bundle ran (a framework consumer whose chrome mounts after the deferred script — the
+    // cold-load case, where every DOM ref captured null and the nav was inert for the whole
+    // session), and a nav REPLACED at runtime by a route change, where the refs point at
+    // detached nodes. Neither used to recover, and neither said anything: CSS paints the
+    // chrome either way, so it looks correct and no click does anything.
+    //
+    // Only a CHANGE OF NODE counts — or, under a kept root, a swapped-out collapse or a
+    // reverted [hidden] on it, which is how a diffing framework re-renders the nav (the
+    // markup ships [hidden]; init strips it and nothing puts it back). This is the
+    // NDS.Init.refresh hook, so it fires on every
+    // refresh call a page makes — most about a table or a card grid, nothing to do with the
+    // nav — and re-wiring on each one would re-attach every listener and reset an open
+    // drawer for nothing. Items added or removed INSIDE a live nav need no call at all: the
+    // onDOMAdd/onDOMRemove watchers already pick those up.
+    //
+    // Safe to call repeatedly. setupEventListeners aborts the previous batch, and the
+    // pooled onResize / onElementResize / onDOMAdd handles are all released before re-registering.
+    function reinit() {
+        const live = document.querySelector('.nds-main-nav');
+        if (!live) return;
+        if (_initDone && DOM.nav === live && live.isConnected
+            && DOM.collapse?.isConnected && !DOM.collapse.hasAttribute('hidden')) return;
+        if (!captureDOM()) return;
+        _initDone = false;
+        init();
+    }
+
     function init() {
-        // Entry guard: mainnav is a singleton; a second init() call would stack
-        // pooled subscribers because the unsubscribe handles from
-        // NDS.onDOMAdd / onDOMRemove aren't captured (see setupEventListeners).
+        // Entry guard: mainnav is a singleton, so repeat init() calls are no-ops. Use
+        // reinit() when the markup itself changed — it re-resolves DOM and rewires.
         if (_initDone || !DOM.collapse) return;
         _initDone = true;
 
@@ -1099,19 +1171,23 @@
         // its correct breakpoint layout (display:none mobile /
         // display:flex desktop). Hamburger click can now animate freely.
         removeCollapseHidden();
+        // Closed is the start state, and dropdown.toggle only writes on a flip.
+        // Ours ships the attribute; stamp it for consumer markup that doesn't.
+        DOM.nav.querySelectorAll('.nds-dropdown > .nds-nav-link:not([aria-expanded])')
+            .forEach(link => NDS.aria.expanded(link, false));
         setupEventListeners();
         // handleDocumentClick shares the setupEventListeners AbortController so
         // both document-click listeners detach atomically on teardown. It
         // fast-bails when nothing is open, so it's cheap on the common click.
         document.addEventListener('click', (e) => handleDocumentClick(e), { signal: _eventsAbortController.signal });
         if (!bodyClassChanged) managePABPlacement();
-        // Set toggler visibility now that PABs (if any) have been placed.
+        // Read the nav composition now that PABs (if any) have been placed.
         // scheduleUpdate's only call site for this fires on width/mode/nav
         // changes — none of which trigger on first load — so without this,
         // a page that loads in minimal with an empty collapse panel (e.g.
         // primary empty, secondary all PABs) would leave the toggler
-        // CSS-visible with nothing to expose.
-        checkTogglerVisibility();
+        // CSS-visible with nothing to expose, and .nds-nav-actions unstamped.
+        checkNavComposition();
 
         if (hasState(DOM.collapse, 'open')) updatePositions();
         setupInteractions();
@@ -1128,7 +1204,7 @@
 
     // Mode-flip listener: fires only when the viewport crosses
     // `--nds-minimal-nav-bp`. scheduleUpdate's updateBodyClass call then
-    // sees the mismatch between body.nds-minimal and the new state.isMinimal
+    // sees the mismatch between .nds-main-nav.nds-minimal and the new state.isMinimal
     // and runs the mode-transition logic (close dropdowns, drawer cleanup,
     // PAB placement). Replaces the old windowWidth-vs-minimalBp poll.
     _mqMinimal.addEventListener('change', () => {
@@ -1138,6 +1214,7 @@
 
     NDS.Mainnav = {
         init,
+        reinit,
         toggleNavbar: () => toggleNavbar(),
         toggleDropdown: (e) => toggleDropdown(e),
     };

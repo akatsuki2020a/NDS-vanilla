@@ -33,13 +33,17 @@
 
 /* ── Loading / skeleton state ──
    The tables/tabs/accordion contract: item labels bar out when the consumer
-   marks the TOC loading (.nds-loading / data-state="loading") and as the
+   marks the TOC loading (.nds-loading) and as the
    default pre-init state (authored lists sit behind the critical-component
    safeguard until the reveal, so that arm only shows if a list is revealed
    early). */
-:is(.nds-toc:is(.nds-loading, [data-state='loading']),
-    .nds-toc:not([data-nds-toc-initialized])) .nds-drawer-list .nds-btn .nds-label {
-    @include skeleton-bar;
+:is(.nds-toc.nds-loading,
+    .nds-toc:not([data-nds-toc-initialized])) {
+    @include skeleton-pulse;
+
+    .nds-drawer-list .nds-btn .nds-label {
+        @include skeleton-bar;
+    }
 }
 
 /* An auto-populate list is EMPTY until the JS critical pass fills it, and
@@ -64,8 +68,12 @@
         --btn-indicator-color: var(--background-primary);
         --btn-indicator-selected: var(--background-primary);
 
-        &[data-state~="active"] .nds-label { font-weight: var(--font-weight-semibold); }
+        // Set on the button, read by the label: no `.nds-label` tail after [data-state] (PERF-06).
+        &[data-state~="active"] { --_toc-label-weight: var(--font-weight-semibold); }
     }
+
+    // (0,3,0): above the button's own medium, below the drawer's menu-btn semibold.
+    :where(.nds-drawer-list .nds-btn) .nds-label { font-weight: var(--_toc-label-weight, var(--font-weight-medium)); }
 
     .nds-drawer-list li > ul {
         display: flex;

@@ -3,23 +3,37 @@
 /* ── Section layout tokens ── */
 
 :is(.nds-hero-section, .nds-content-section) {
+    // A variant retunes the -base value, never the private itself, so the public
+    // knob check is written once here instead of at every override.
+    // --section-padding-block is the exception: layouts set it on an ancestor
+    // (_content-layout), and an inherited public value outranks a base default,
+    // so variants that must beat the layout keep writing the public name.
     --_section-padding-block: var(--section-padding-block, var(--spacing-5xl));
-    --_section-padding-block-start: var(--section-padding-block-start, var(--_section-padding-block));
-    --_section-padding-block-end: var(--section-padding-block-end, var(--_section-padding-block));
-    --_section-margin-block-start: var(--section-margin-block-start, 0);
-    --_section-margin-block-end: var(--section-margin-block-end, 0);
+    --_section-padding-block-start-base: var(--_section-padding-block);
+    --_section-padding-block-start: var(--section-padding-block-start, var(--_section-padding-block-start-base));
+    --_section-padding-block-end-base: var(--_section-padding-block);
+    --_section-padding-block-end: var(--section-padding-block-end, var(--_section-padding-block-end-base));
+    --_section-margin-block-start-base: 0;
+    --_section-margin-block-start: var(--section-margin-block-start, var(--_section-margin-block-start-base));
+    --_section-margin-block-end-base: 0;
+    --_section-margin-block-end: var(--section-margin-block-end, var(--_section-margin-block-end-base));
     --_section-col-gap: var(--section-col-gap, var(--spacing-xl));
     --_section-row-gap: var(--section-row-gap, var(--spacing-4xl));
 
-    --_section-title-FS: var(--section-title-FS, var(--typo-display-clamp-md-FS));
-    --_section-title-LH: var(--section-title-LH, var(--typo-display-clamp-md-LH));
-    --_section-title-MB: var(--section-title-MB, var(--typo-display-clamp-md-MB));
-    --_section-shape-size: var(--section-shape-size, var(--_section-title-FS));
+    --_section-title-FS-base: var(--typo-display-clamp-md-FS);
+    --_section-title-FS: var(--section-title-FS, var(--_section-title-FS-base));
+    --_section-title-LH-base: var(--typo-display-clamp-md-LH);
+    --_section-title-LH: var(--section-title-LH, var(--_section-title-LH-base));
+    --_section-title-MB-base: var(--typo-display-clamp-md-MB);
+    --_section-title-MB: var(--section-title-MB, var(--_section-title-MB-base));
+    --_section-icon-size: var(--section-icon-size, var(--_section-title-FS));
     --_section-subtitle-FS: var(--section-subtitle-FS, var(--typo-text-clamp-lg-FS));
     --_section-subtitle-LH: var(--section-subtitle-LH, var(--typo-text-clamp-lg-LH));
     --_section-subtitle-MB: var(--section-subtitle-MB, var(--_section-title-MB));
-    --_section-description-FS: var(--section-description-FS, var(--typo-text-lg-FS));
-    --_section-description-LH: var(--section-description-LH, var(--typo-text-lg-LH));
+    --_section-description-FS-base: var(--typo-text-lg-FS);
+    --_section-description-FS: var(--section-description-FS, var(--_section-description-FS-base));
+    --_section-description-LH-base: var(--typo-text-lg-LH);
+    --_section-description-LH: var(--section-description-LH, var(--_section-description-LH-base));
     --_section-description-MB: var(--section-description-MB, var(--spacing-2xl));
     --_section-image-MB: var(--section-image-MB, var(--spacing-2xl));
 
@@ -88,21 +102,48 @@
     font-weight: var(--font-weight-bold);
     letter-spacing: -0.02rem;
     margin-top: 0;
-    flex-wrap: wrap;
+    // No wrap: the text is one flex item, so wrapping drops an icon beside it
+    // onto a line of its own. Nowrap lets the text shrink and wrap inside
+    // itself while the icon stays put. .nds-center stacks via column instead.
+    max-width: var(--paragraph-max-width);
+
+    // Same escape the subtitle and description carry.
+    &.nds-full {
+        max-width: none;
+    }
 
     .nds-center &,
     &.nds-center {
         flex-direction: column;
         gap: var(--spacing-xl);
+        // Stacked above the text it reads as an emblem, not a mark beside a
+        // word, so it stops tracking the title size. Re-declared rather than
+        // given a -base: the section root already resolved the knob above.
+        --_section-icon-size: var(--section-icon-size, 48px);
     }
 
     &:not(:last-child) {
         margin-bottom: var(--_section-title-MB);
     }
 
-    .nds-section-shape {
-        height: var(--_section-shape-size);
-        width: auto;
+    // Inside the title it is a mark beside the text, not the centering box it
+    // is as a sibling of the head.
+    .nds-section-icon {
+        // A featured icon sizes through its own knob, so glyph, padding and
+        // radius scale together. A size class (.nds-sm) ties on specificity and
+        // ships in the later bundle, so it still wins: asking for one is asking
+        // to opt out of title sizing.
+        --featuredicon-size: var(--_section-icon-size);
+        // normal, not unset: font-weight inherits, so unset would keep the
+        // title's bold and synthesize a heavier glyph.
+        font-weight: normal;
+
+        // A bare svg/img has no knob to read. Excluding the featured icon keeps
+        // its box and glyph on one size instead of half-overriding it.
+        &:not(.nds-featured-icon) {
+            height: var(--_section-icon-size);
+            width: auto;
+        }
     }
 }
 
@@ -137,9 +178,9 @@
     line-height: var(--_section-description-LH);
 }
 
-/* ── Section image ── */
+/* ── Section image / icon ── */
 
-.nds-section-image {
+:is(.nds-section-image, .nds-section-icon) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -346,10 +387,16 @@
     }
 }
 
-/* ── 404 ── */
+/* ── Status section (an outcome message: not found, submitted, failed) ──
+   .nds-404 is the old name of this variant, kept so pages copied from the
+   previous 404 template keep working. Drop it at the next major. ── */
 
-:is(.nds-hero-section, .nds-content-section).nds-404 {
+:is(.nds-hero-section, .nds-content-section):is(.nds-404, .nds-status-section) {
     max-height: unset;
+    --feedback-size: 56px;
+    display: flex;
+    align-items: center;
+    flex: 1;
 
     * {
         text-align: center;

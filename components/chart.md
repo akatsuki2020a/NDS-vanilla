@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.3.0"
-last_edit: "28/06/2026 - 01:27 PM"
+updated: "1.12.x"
+last_edit: "02/09/2026 - 12:00 AM"
 ---
 
 <!-- Bar Chart -->
@@ -801,7 +801,7 @@ NDS.Chart.create('#my-chart', {
                     <li>For a headline number with a trend sparkline, use a <a class="nds-color" href="{{ 'components/metric' | relative_url }}">Metric</a> tile instead of a standalone chart</li>
                     <li>Use HTML <code class="nds-inline-code lang-html">data-chart-*</code> attributes for static charts that don't change. Use the JS API for dynamic or user-driven data that updates after load</li>
                     <li>Set axis titles (<code class="nds-inline-code lang-js">yaxis.title</code>, <code class="nds-inline-code lang-js">xaxis.title</code>) to label what the numbers represent. Without titles, the chart relies on the legend alone</li>
-                    <li>Override <code class="nds-inline-code lang-html">--chart-color-*</code> properties to match your project's brand palette. The default palette uses Saudi flag green tones</li>
+                    <li>Override <code class="nds-inline-code lang-html">--chart-color-*</code> properties to match your project's brand palette. The default series colors are drawn from the primary brand family, so a custom palette recolors them with no override</li>
                     <li>Charts auto-resize via ResizeObserver. No manual resize calls are needed when the container width changes</li>
                     <li>X-axis labels auto-rotate to 45&deg; when they would overlap (<code class="nds-inline-code lang-js">xaxis.labelRotate: 'auto'</code> by default). For dense time-series, opt into <code class="nds-inline-code lang-js">xaxis.labelDecimate: 'auto'</code> to show only every Nth label instead</li>
                 </ul>
@@ -832,6 +832,10 @@ NDS.Chart.create('#my-chart', {
                         <tr>
                             <td><code class="nds-inline-code lang-js">chart.update(opts)</code></td>
                             <td>Update chart with new options (merges with existing) and re-render</td>
+                        </tr>
+                        <tr>
+                            <td><code class="nds-inline-code lang-js">chart.render()</code></td>
+                            <td>Redraw the chart in place from its current options. Use it when a re-render emptied the element but kept it, so the instance survived. <code class="nds-inline-code lang-js">NDS.Chart.reinit()</code> does this for you on an empty root</td>
                         </tr>
                         <tr>
                             <td><code class="nds-inline-code lang-js">chart.destroy()</code></td>
@@ -1214,7 +1218,7 @@ NDS.Chart.create('#my-chart', {
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initPage() {
 
     NDS.Chart.create('#demo-bar', {
         type: 'bar',
@@ -1266,5 +1270,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ],
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
     });
-});
+}
+// Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
 </script>

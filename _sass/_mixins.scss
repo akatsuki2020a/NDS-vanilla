@@ -10,12 +10,25 @@
 // BREAKPOINTS
 // ==============================================
 
+// One truth for the tiers, the same numbers as NDS.breakpoints in nds-core.js:
+// mobile < 600, tablet 600–959, desktop 960–1279, wide >= 1280. The map and the
+// mixins below both derive from these three, so CSS and JS agree at every edge.
+//
+// Every edge is written as `< N` against the next tier's `>= N`, never `max-width:
+// N - 1`. A tier that ends at 959px stops matching at 959.01, and the next does not
+// start until 960 — so a viewport of 959.2 (ordinary under browser zoom or Windows
+// DPI scaling) matched NEITHER tier and fell through to the base rules. `<` and
+// `>=` on the same number are exact complements: no gap, and no overlap either.
+$bp-tablet: 600px;
+$bp-desktop: 960px;
+$bp-wide: 1280px;
+
 // Viewport breakpoints — range-based (exclusive ranges for alignment utilities)
 $breakpoints-range: (
-  sm: '(max-width: 599px)',
-  md: '(min-width: 600px) and (max-width: 959px)',
-  lg: '(min-width: 960px) and (max-width: 1279px)',
-  xl: '(min-width: 1280px)'
+  sm: '(width < #{$bp-tablet})',
+  md: '(#{$bp-tablet} <= width < #{$bp-desktop})',
+  lg: '(#{$bp-desktop} <= width < #{$bp-wide})',
+  xl: '(width >= #{$bp-wide})'
 );
 
 // ==============================================
@@ -23,26 +36,26 @@ $breakpoints-range: (
 // ==============================================
 
 @mixin mobile {
-  @media (max-width: 600px) {
+  @media #{map.get($breakpoints-range, sm)} {
     @content;
   }
 }
 
 @mixin tablet($break: null) {
   @if $break =='min' {
-    @media (min-width: 601px) {
+    @media (width >= $bp-tablet) {
       @content;
     }
   }
 
   @else if $break =='max' {
-    @media (max-width: 960px) {
+    @media (width < $bp-desktop) {
       @content;
     }
   }
 
   @else {
-    @media (min-width: 601px) and (max-width: 960px) {
+    @media #{map.get($breakpoints-range, md)} {
       @content;
     }
   }
@@ -50,19 +63,19 @@ $breakpoints-range: (
 
 @mixin desktop($break: null) {
   @if $break =='min' {
-    @media (min-width: 961px) {
+    @media (width >= $bp-desktop) {
       @content;
     }
   }
 
   @else if $break =='max' {
-    @media (max-width: 1280px) {
+    @media (width < $bp-wide) {
       @content;
     }
   }
 
   @else {
-    @media (min-width: 961px) and (max-width: 1280px) {
+    @media #{map.get($breakpoints-range, lg)} {
       @content;
     }
   }
@@ -196,7 +209,7 @@ $breakpoints-range: (
   --_btn-size: var(--btn-size, 40px);
   --_btn-height: var(--btn-height, var(--_btn-size));
   --_btn-height-min: var(--btn-height-min, fit-content);
-  --_btn-width: var(--btn-width, unset);
+  --_btn-width: var(--btn-width, auto);
   --_btn-gap: var(--btn-gap, var(--spacing-xs));
   --_btn-padding-default: calc((var(--_btn-size) - 8px) / 2);
   --_btn-padding: var(--btn-padding, var(--_btn-padding-default));
@@ -423,10 +436,10 @@ $breakpoints-range: (
 // ==============================================
 
 @mixin reset-section-style($important: null) {
-  --section-bg: transparent #{$important};
-  --section-shadow: none #{$important};
-  --section-border: none #{$important};
-  --section-border-radius: 0 #{$important};
+  --_section-bg-base: transparent #{$important};
+  --_section-shadow-base: none #{$important};
+  --_section-border-base: none #{$important};
+  --_section-border-radius-base: 0 #{$important};
 }
 
 // ==============================================
@@ -438,11 +451,17 @@ $breakpoints-range: (
 // keyframes override in _animations.scss flattens it). color:transparent
 // hides the real glyphs the gradient covers; harmless on image surfaces.
 // Tokens live in _skeleton.scss (crit).
+// One pulse per held REGION, never per bar. Blink ticks these on the main
+// thread: per-bar it restyled 258 pseudos a frame and cost ~10% of load
+// blocking (2026-09-02). Include on the hold root; bars stay static.
+@mixin skeleton-pulse {
+  animation: processing 1.5s ease-in-out infinite;
+}
+
 @mixin skeleton-fill {
   background: var(--nds-skeleton-fill);
   color: transparent !important;
   width: var(--nds-skeleton-width, fit-content);
-  animation: processing 1.5s ease-in-out infinite;
 }
 
 // Paint a text element as a skeleton bar — fill + radius, descendants'
@@ -477,6 +496,7 @@ $breakpoints-range: (
   mask: var(--nds-icon-arrow-left-01) center / contain no-repeat;
   opacity: var(--nds-icons-opacity, 1);
   rotate: -90deg;
+  transform: rotate(var(--_caret-flip, 0deg)); // open hosts set --_caret-flip
   top: 50%;
   translate: 0 -50%;
 

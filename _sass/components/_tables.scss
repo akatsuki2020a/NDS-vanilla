@@ -135,7 +135,9 @@
     td {
         padding: var(--_cell-padding-block) var(--_cell-padding-inline);
         vertical-align: middle;
-        background-color: var(--table-background-cell);
+        // Row states set --_row-bg on the <tr>; cells read it. A `tr[data-state] td`
+        // tail would join the shared data-state invalidation set (PERF-06).
+        background-color: var(--_row-bg, var(--table-background-cell));
         color: var(--table-text-body);
         border-left: 1px solid var(--table-cell-border);
         height: var(--_table-row-height, 64px);
@@ -155,11 +157,12 @@
 
     // ── Row states ──
 
-    // Striping counts parent rows only — a sub row sits between two parents and
-    // would otherwise flip the phase of every row below it. Child combinators
-    // keep the rule off a nested sub-table, which stripes from its own instance.
-    > tbody > tr:nth-child(even of :not(.nds-sub)) > td {
-        background-color: var(--table-background-row);
+    // Count VISIBLE parent rows only — a sub or hidden row still holds a DOM slot
+    // and flips the phase below it. `of` list mirrors _fold.scss's hide set; the
+    // hidden token arrives as .nds-hidden (core mirrors it), which keeps
+    // [data-state] out of this rule's sibling invalidation set (PERF-06).
+    > tbody > tr:nth-child(even of :not(.nds-sub, .nds-hidden, [hidden], [data-filtered])) > td {
+        background-color: var(--_row-bg, var(--table-background-row));
     }
 
     // One selector, not two: the old :nth-child(even):hover twin existed only to
@@ -167,22 +170,19 @@
     // :not(.nds-sub) keeps the row highlight off a sub — it's a panel, not a row,
     // and this would otherwise out-rank the sub's own background.
     &.nds-interactive {
-        tbody tr:not(.nds-sub):hover td {
-            background-color: var(--table-background-header);
+        tbody tr:not(.nds-sub):hover {
+            --_row-bg: var(--table-background-header);
         }
     }
 
-    // :not(.nds-sub) is here for specificity, not matching — a sub row is never
-    // selected. The `of` argument above lifts striping to (0,3,3), so without it
-    // the stripe would out-rank a selected row sitting on an even index.
-    tbody tr[data-state~="selected"]:not(.nds-sub) {
-        td {
-            background-color: var(--table-background-row-selected);
-        }
+    // Selected out-ranks the stripe by value, not specificity: both cell rules
+    // read --_row-bg first.
+    tbody tr[data-state~="selected"] {
+        --_row-bg: var(--table-background-row-selected);
     }
 
-    &.nds-interactive tbody tr[data-state~="selected"]:hover td {
-        background-color: var(--table-background-hover-selected);
+    &.nds-interactive tbody tr[data-state~="selected"]:hover {
+        --_row-bg: var(--table-background-hover-selected);
     }
 
     // ── Sub-rows ──
@@ -211,8 +211,8 @@
     // A sub-request in flight parks the toggle in loading, which _loading.scss
     // makes pointer-events:none. Keep it clickable so a second click cancels
     // instead of hitting a dead button — same reason, same fix as
-    // .nds-dropmenu-trigger[data-state~="loading"] in _dropmenu.scss.
-    [data-sub-toggle][data-state~="loading"] {
+    // .nds-dropmenu-trigger.nds-loading in _dropmenu.scss.
+    [data-sub-toggle].nds-loading {
         pointer-events: auto;
     }
 
@@ -333,12 +333,12 @@
 // TABLE LOADING STATE
 // ==============================================
 // Processing skeleton — both loading entry points (filter's
-// tbody.nds-loading, consumer's data-state on the table) render cells as
+// tbody.nds-loading, consumer's .nds-loading on the table) render cells as
 // gradient bars; cell children hide so only the bar paints (hidden boxes
 // keep their size, so column sizing and lockTableColumns are unaffected).
 // Spinner + dim are suppressed in _loading.scss. The same look serves the
 // pre-init hold: not-yet-initialized filter/paged table bodies show
-// shimmer rows (crit exempts tbody from its visibility hold and collapses
+// shimmer rows (crit exempts tbody from its visibility hold and hides
 // rows past the first page). Pulses via the shared `processing`
 // keyframes; the a11y reduce-motion kill leaves the bars static.
 // Skeleton is also the DEFAULT pre-init state: any table bars its cells
@@ -346,7 +346,15 @@
 // must hold until their own stamps land, even after table init.
 // Editor content (.nds-editor-editable) is exempt: tables pasted into the
 // editor are editor-owned display copies tables JS never wires.
-.nds-table:is([data-state~="loading"], .nds-loading) tbody tr td,
+.nds-table.nds-loading tbody,
+.nds-table:not([data-nds-tables-initialized], [data-nds-tables-initialized] .nds-table, .nds-editor-editable *) tbody,
+:is(tbody.nds-loading,
+    tbody[data-filter-items]:not([data-nds-filter-initialized]),
+    tbody.nds-paged-content:not([data-paged-initialized])) {
+    @include skeleton-pulse;
+}
+
+.nds-table.nds-loading tbody tr td,
 .nds-table:not([data-nds-tables-initialized], [data-nds-tables-initialized] .nds-table, .nds-editor-editable *) tbody tr td,
 :is(tbody.nds-loading,
     tbody[data-filter-items]:not([data-nds-filter-initialized]),
@@ -368,7 +376,6 @@
         height: var(--typo-text-md-LH);
         background: var(--nds-skeleton-fill);
         border-radius: var(--nds-skeleton-radius);
-        animation: processing 1.5s ease-in-out infinite;
     }
 
     >* {

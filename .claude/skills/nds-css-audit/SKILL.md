@@ -1,6 +1,6 @@
 ---
 name: nds-css-audit
-description: Audit NDS source SCSS for measurable CSS-output improvements — selector compaction (combine `:hover`/`:focus-visible` blocks with `:is()`, fold chained `:not()` calls), dead declarations (shorthand-after-longhand overrides, duplicate property/custom-property keys, `@include ltr` blocks that re-state RTL defaults), duplicate rule bodies (in-file and cross-file mixin candidates), selector performance/complexity (unanchored `*`, unanchored `[attr]`, ID selectors in components, deep/compound selector chains), and token-usage consistency (hardcoded numeric values where a token exists, dead component tokens, semantic-token use where a more specific component-level token wraps the same value, asymmetric component-token state coverage). Use for "audit the CSS", "shrink the CSS output", "optimize selectors", "find dead CSS", "combine state blocks with :is()", "find duplicate rule bodies", "find selectors that are too expensive", "check token consistency", "find hardcoded values that should be tokens", "find dead tokens", "find dangling token references" (a `var(--x)` defined nowhere). NOT for JS audits (use `nds-js-audit`), doc-page audits (use `nds-doc`), accessibility/contrast checks, specificity-conflict resolution, unused-selector detection, or anything that requires the rendered DOM.
+description: Audit NDS source SCSS for measurable CSS-output improvements — selector compaction (combine `:hover`/`:focus-visible` blocks with `:is()`, fold chained `:not()` calls), dead declarations (shorthand-after-longhand overrides, duplicate property/custom-property keys, `@include ltr` blocks that re-state RTL defaults), duplicate rule bodies (in-file and cross-file mixin candidates), selector performance/complexity (unanchored `*`, unanchored `[attr]`, ID selectors in components, deep/compound selector chains, a universal or bare tail under a class or attribute JS toggles at runtime — which makes every flip restyle the host's whole subtree — and a named descendant tail after `[data-state]`, which taxes every state write on every container above it), and token-usage consistency (hardcoded numeric values where a token exists, dead component tokens, semantic-token use where a more specific component-level token wraps the same value, asymmetric component-token state coverage). Use for "audit the CSS", "shrink the CSS output", "optimize selectors", "find dead CSS", "combine state blocks with :is()", "find duplicate rule bodies", "find selectors that are too expensive", "check token consistency", "find hardcoded values that should be tokens", "find dead tokens", "find dangling token references" (a `var(--x)` defined nowhere). NOT for JS audits (use `nds-js-audit`), doc-page audits (use `nds-doc`), accessibility/contrast checks, specificity-conflict resolution, unused-selector detection, or anything that requires the rendered DOM.
 argument-hint: "[target] [optional: rule-group]"
 ---
 
@@ -12,7 +12,7 @@ This skill audits NDS SCSS source — files in `_sass/` — for measurable impro
 
 > **Scope this skill narrowly.** Full-tree runs read every file under `_sass/components/` and re-parse the token table from the token-source files (Phase 2 list). Single-file runs are several times cheaper and are the default fit.
 > - `/nds-css-audit _sass/components/_<name>.scss [rule-group]` — single-file audit. Omit the rule-group to run all five groups. The cheap mode; best fit before merging a new or refactored component.
-> - `/nds-css-audit full-tree <rule-group>` — cross-file rules only. Costs several single-file passes. Best fit for cross-file consistency sweeps (DUPE-02, TOK-01, TOK-02, TOK-04, TOK-05, TOK-06).
+> - `/nds-css-audit full-tree <rule-group>` — cross-file rules only. Costs several single-file passes. Best fit for cross-file consistency sweeps (DUPE-02, TOK-01, TOK-02, TOK-04, TOK-05, TOK-06) and for ranking the whole shared `[data-state]` invalidation set (PERF-06; single-file sees only the target's own tails).
 
 ---
 
@@ -61,7 +61,7 @@ Reports are scannable, not prose.
 - **One-line disclosures.** `Skipped: DUPE-02, TOK-01/02/04/05/06 (full-tree only, single-file mode).` No banner blocks.
 - **Omit empty sections.** No "Gaps observed: none" headers.
 - **End with a numbered Next Step** where item 1 IS the recommended action. Close with "Reply with a number."
-- **Numbered-reply discipline** — applies to **EVERY block that offers the user a choice**: the no-args menu, the Phase 4 Next Step, AND any closing "open / optional / your call" block (authorizing an evolve candidate, committing, running a verification, etc.). **If you offer even ONE actionable option, present the options as a NUMBERED list — never as prose bullets or a "your call" list** (that prose-bullet closing is the exact failure mode this rule kills). Every primary acceptance path gets a number, *including the recommended action itself* — never demote it to an un-numbered header on the grounds the user already sees it as the recommendation. Renumber to drop no-op options. Literal `apply <rule-id>` / `apply <file>:<line>` / `save` filters sit below the numbered block, not inside it. Never close with "reply with the literal action or a number" — the numbers ARE the apply triggers (suggest-only contract).
+- **Numbered-reply discipline** — applies to **EVERY block that offers the user a choice**: the no-args menu, the Phase 4 Next Step, AND any closing "open / optional / your call" block (authorizing an evolve candidate, committing, running a verification, etc.). **If you offer even ONE actionable option, present the options as a NUMBERED list — never as prose bullets or a "your call" list** (that prose-bullet closing is the exact failure mode this rule kills). Every primary acceptance path gets a number, *including the recommended action itself* — never demote it to an un-numbered header on the grounds the user already sees it as the recommendation. Renumber to drop no-op options. Literal `apply <rule-id>` / `apply <file>:<line>` filters sit below the numbered block, not inside it. Never close with "reply with the literal action or a number" — the numbers ARE the apply triggers (suggest-only contract).
 
 Target: a report a reader skims in ~15 seconds with the decision obvious.
 
@@ -75,7 +75,7 @@ Default to advancing, not asking. Run the audit and emit the report. Pause ONLY 
 2. **On a regression** — if a user-requested edit breaks the build (Jekyll/Sass error), revert and stop.
 3. **Before a git commit** — never auto-commit. Propose the message and wait.
 
-Read-only / reversible steps (running the audit, emitting the report, `save`-ing it on request) take the recommended action without extra confirmation. `save` is never the recommendation — offer it as a clause when it would pay off, let the user decide.
+Read-only / reversible steps (running the audit, emitting the report) take the recommended action without extra confirmation.
 
 Phase 6 EVOLVE writes NOTHING to the repo — it is session-scoped. It surfaces catalog-change candidates (gap→rule promotions, rule refinements, resolved-example regression-guard annotations, citation drift) in a `## Catalog evolved` section of the report; the user makes any edit to `RULES-*.md` / `SKILL.md` directly. Nothing is auto-applied, so there is nothing to revert. The user is the only one who adds, removes, or rewrites rules.
 
@@ -99,6 +99,7 @@ NDS CSS Audit — for best results target a single file or run one group at a ti
   Full-tree (cross-file rules only):
     1  full-tree DUPE     Cross-file duplicate rule bodies (mixin candidates)
     2  full-tree TOK      Token-consistency (hardcoded values, dead tokens, asymmetric states)
+    3  full-tree PERF     The shared [data-state] invalidation set — every descendant tail ranked and paired with container writes (PERF-06)
     0  exit
 
 Reply with a number, or type the scope directly.
@@ -111,7 +112,7 @@ Accept `0` or `exit` as "end here, nothing runs".
 | `$1` | Files in scope | Rule groups run |
 |---|---|---|
 | **filename** (e.g. `_sass/components/_buttons.scss`, `_buttons.scss`, `buttons`) | One file: the resolved target | A rule-group filter (`SEL` / `DEAD` / `DUPE` / `PERF` / `TOK`), or `all`. **When omitted, default to `all`** — single-file `all` is cheap. Full-tree-only rules (DUPE-02, TOK-01, TOK-02, TOK-04, TOK-05, TOK-06) are skipped with a one-line banner. |
-| `full-tree` | All `_sass/components/*.scss` (plus `_variables*.scss` and `_mixins.scss` for reference) | Must be paired with a rule-group filter that contains cross-file rules — only `DUPE` and `TOK`. Other groups rejected in full-tree mode. |
+| `full-tree` | All `_sass/components/*.scss` (plus `_variables*.scss` and `_mixins.scss` for reference) | Must be paired with a rule-group filter that contains cross-file rules — `DUPE`, `TOK`, or `PERF` (PERF-06 alone). `SEL` and `DEAD` are rejected in full-tree mode. |
 
 **File resolution.** When `$1` doesn't match `full-tree`, treat as a filename and try in order: (1) literal `$1` if it includes a path separator and exists; (2) `_sass/components/$1` if it ends in `.scss`; (3) `_sass/components/_$1.scss` if it starts with `_`; (4) `_sass/components/_$1.scss` for the bare name. Stop at the first match. If none exist, branch by tier before the generic miss-message: **(a)** if the bare `<X>` matches a **Tier-2** file at `_sass/_<X>.scss` (the Tier-2 list below), reply: *"`<X>` isn't a component, but `_sass/_<X>.scss` is a Tier-2 foundation file, excluded from bare-name scope by design (prevents accidental Tier-2 audits). To audit it directly (reduced catalog — see the Tier-2 advisory), pass the explicit path: `/nds-css-audit _sass/_<X>.scss`."* and stop. **(b)** if `<X>` matches a **Tier-1** file at `_sass/_<X>.scss` (e.g. `showcase`, `hgiRoundedStroke`), give the Tier-1 hard-exclusion reply (above) instead. **(c)** otherwise reply: *"Couldn't resolve `<filename>`. Tried: `_sass/components/_<X>.scss`. Pass the filename as it appears in `_sass/components/`."* — and if the target ends in `.js` or names a component that exists only under `_js/`, add: *"For JS behavior, use `/nds-js-audit nds-<name>.js` — this skill audits SCSS only."* Then stop.
 
@@ -132,16 +133,16 @@ If a user explicitly targets a Tier 1 file, reply: *"`<file>` is hard-excluded f
 
 | Files | Why Tier 2 (not Tier 1, not Tier 3) |
 |---|---|
-| `_sass/_base.scss`, `_sass/_grid.scss`, `_sass/_skeleton.scss`, `_sass/_typography.scss` | Foundation layers — some rules apply (DEAD, SEL-01, DUPE-01) but others have file-specific carve-outs. |
+| `_sass/_base.scss`, `_sass/_grid.scss`, `_sass/_skeleton.scss` | Foundation layers — some rules apply (DEAD, SEL-01, DUPE-01) but others have file-specific carve-outs. |
 | `_sass/_reset.scss`, `_sass/_fonts.scss`, `_sass/_icons.scss` | Foundation — `*`, `[hidden]`, raw hex are by design here. PERF-01/PERF-02/TOK-01 don't apply. |
 | `_sass/_utilities.scss` | Utility classes — `!important` and high specificity are intentional. DEAD rules apply with caution. |
 | `_sass/_mixins.scss` | Mixin definitions — `@include ltr` body, `!important` autofill resets, etc. are intentional. Some DEAD/DUPE rules still apply to mixin bodies. |
 | `_sass/tokens/_primitives.scss`, `_sass/tokens/_semantic.scss`, `_sass/tokens/_components.scss` | Token-source files, one per tier; the semantic and component files each end with their own `:root[data-theme~="dark"]` mode block. TOK-02 (dead tokens) and DEAD-02/-03/-05 are valid; SEL/PERF rules don't apply (no real selectors). |
 | `_sass/_variables-a11y.scss` | Mode override file — re-binds existing tokens for `[data-a11y]`. Same rule profile as Tier 2 token-source files. |
-| `_sass/themes/_register.scss`, `_sass/themes/_oklch-template.scss`, `_sass/themes/_foundation-day.scss` | Theme system — seed maps + OKLCH ramp engine + predefined-theme tokens. Component SEL/PERF/TOK rules don't apply (generated ramps, no component selectors); DEAD/DUPE apply with caution when explicitly path-named. |
+| `_sass/themes/_register.scss`, `_sass/themes/_oklch-template.scss`, `_sass/themes/events/_foundation-day.scss` | Theme system — seed maps + OKLCH ramp engine + predefined-theme tokens. Component SEL/PERF/TOK rules don't apply (generated ramps, no component selectors); DEAD/DUPE apply with caution when explicitly path-named. |
 | `_sass/_animations.scss` | Animation definitions — keyframes, transition timings. DEAD/DUPE apply; SEL/PERF rules don't. |
 
-To audit a Tier 2 file, the user must pass the explicit path: `/nds-css-audit _sass/_utilities.scss`. Resolving from a bare name (`utilities`) WILL NOT route to a Tier 2 file — it tries `_sass/components/_utilities.scss` first and fails over to nothing. This intentional friction prevents accidental Tier 2 audits.
+To audit a Tier 2 file, the user must pass the explicit path: `/nds-css-audit _sass/_utilities.scss`. Resolving from a bare name (`utilities`) WILL NOT route to a Tier 2 file — it tries `_sass/components/_utilities.scss`<!-- cite-ok: intentionally absent --> first and fails over to nothing. This intentional friction prevents accidental Tier 2 audits.
 
 When Tier 2 IS explicitly named, the audit applies **file-specific carve-outs** (in addition to the rule's own carve-outs):
 
@@ -167,7 +168,7 @@ When Tier 2 IS explicitly named, the audit applies **file-specific carve-outs** 
 | `SEL` | Selector compaction (3 rules) | single-file only |
 | `DEAD` | Dead declarations (7 rules — DEAD-07 browser-confirmed) | single-file only |
 | `DUPE` | Duplicate rule bodies (3 rules — DUPE-02 full-tree) | single-file + DUPE-02 full-tree |
-| `PERF` | Selector performance/complexity (4 rules) | single-file only |
+| `PERF` | Selector performance/complexity (6 rules — PERF-06 also full-tree) | single-file + PERF-06 full-tree |
 | `TOK` | Token consistency (7 rules — TOK-01/02/04/05/06 full-tree, +TOK-07 dangling refs single-file+full-tree) | single-file + TOK-01/02/04/05/06 full-tree |
 | `all` (**single-file only**) | SEL + DEAD + DUPE + PERF + TOK against one file → one consolidated report | single-file only |
 
@@ -175,7 +176,7 @@ When Tier 2 IS explicitly named, the audit applies **file-specific carve-outs** 
 
 **Ponytail overlay.** The ponytail lens (Phase 3) runs on top of whichever groups run — it is not itself a selectable group and needs no full-tree pairing. Pass a `no-pony` token (e.g. `/nds-css-audit _buttons.scss all no-pony`, or alongside a single group) to suppress it for a pure catalog run.
 
-**Full-tree restriction.** Only DUPE-02 (cross-file duplicate rule bodies), TOK-01 (cross-file hardcoded-value duplication), TOK-02 (dead component tokens), TOK-04 (asymmetric state coverage), TOK-05 (cross-file duplicate keys / upstream-value duplication), and TOK-06 (cross-sibling indirection-token asymmetry) work cross-file. If the user passes `full-tree SEL` / `full-tree DEAD` / `full-tree PERF`, reject: *"`SEL`/`DEAD`/`PERF` rules are per-file — full-tree mode applies only to `DUPE` and `TOK`. Run single-file (`/nds-css-audit _sass/components/_<name>.scss <group>`) instead."*
+**Full-tree restriction.** Only DUPE-02 (cross-file duplicate rule bodies), TOK-01 (cross-file hardcoded-value duplication), TOK-02 (dead component tokens), TOK-04 (asymmetric state coverage), TOK-05 (cross-file duplicate keys / upstream-value duplication), TOK-06 (cross-sibling indirection-token asymmetry) and PERF-06 (the shared `[data-state]` invalidation set — single-file reports the target's own tails and its component's container writes, full-tree ranks every tail in the compiled CSS against every container write in `_js/`) work cross-file. `full-tree PERF` runs PERF-06 alone and says so in the header line. If the user passes `full-tree SEL` / `full-tree DEAD`, reject: *"`SEL`/`DEAD` rules are per-file — full-tree mode applies only to `DUPE`, `TOK` and `PERF` (PERF-06). Run single-file (`/nds-css-audit _sass/components/_<name>.scss <group>`) instead."*
 
 ## Phase 2: READ
 
@@ -185,7 +186,7 @@ Source files are the single source of truth. Read fully, not by skimming.
 
 - **The rule catalog for THIS run's scope** — `RULES-SEL.md` (`SEL`), `RULES-DEAD.md` (`DEAD`), `RULES-DUPE.md` (`DUPE`), `RULES-PERF.md` (`PERF`), `RULES-TOK.md` (`TOK`). A run with no rule-group filter reads all five. Read only what the scope needs.
 - **`PONYTAIL.md`** — the ponytail over-engineering overlay (Phase 3). Read it on every analyze pass UNLESS the run carries a `no-pony` token. It runs after the catalog, within this run's scope, and carries its own carve-outs.
-- **No maturity ledger to read.** A rule's lifecycle — its motivating example, and whether that example was resolved into a regression guard — lives inline in its `RULES-*.md` row, already read as part of the rule catalog above. There is no separate maturity file and no cross-run trail the audit depends on. (A prior saved report in `.claude/audit-reports/` is read ONLY when the user asks for a `Diff vs. Run (N−1)` — an optional comparison export, never an input to detection or EVOLVE.)
+- **No maturity ledger to read.** A rule's lifecycle — its motivating example, and whether that example was resolved into a regression guard — lives inline in its `RULES-*.md` row, already read as part of the rule catalog above. There is no separate maturity file and no cross-run trail — reports live in-conversation only; git is the archive.
 - **The token-source files** — the canonical token table lives in `_sass/tokens/`, one file per tier: `_sass/tokens/_primitives.scss` (spacing/radius/typo scales, app-shell dims, transition + font knobs), `_sass/tokens/_semantic.scss` (background/text/border/icon/controls/shadow), `_sass/tokens/_components.scss` (`--{component}-*` tier), plus `_sass/themes/_dga.scss` (the `--colors-*` palette — vendored DGA mirror, DO NOT MODIFY). **DEAD-05** and the **TOK rules** all reference them; this list is the canonical one (RULES-TOK.md restates it with per-file detail). The semantic and component files each END with a `:root[data-theme~="dark"]` mode block, and `_variables-a11y.scss` is wholly a mode file — mode blocks are NOT token definitions. Parse definitions from the `:root { … }` block only; consult the mode blocks when checking DEAD-05 carve-outs (mode-conditional token availability) and TOK-02 dead-token analysis (a mode binding counts as a use).
 
   **Pre-parse the token map** (symmetric to the mixin map in `_mixins.scss` below). Build ONE keyed structure capturing, per token: (a) its resolved concrete value (chasing `var()` aliases down to a literal), (b) which mode-override files re-bind it, (c) whether it's *unconditionally* defined (top-level `:root`, not under `@media` / `@supports` / a mode selector). TOK-01 (value→token lookup), TOK-02 (dead-token), TOK-03 (alias graph), and DEAD-05 (unconditionally-defined check) then READ this one map instead of each re-parsing the source files — their per-rule detection steps consume it rather than re-deriving it. The list above is exemplars for orientation; the map is rebuilt from the current token files each run.
@@ -303,6 +304,8 @@ The expanded view is what every rule's detection operates on. The source view is
 - **DUPE-03** — the same fully-resolved selector emitted twice in the file with no intervening cascade-relevant rule.
 - **Transitive mixin expansion** — the depth-5 `@include`-chain resolution from "Mixin resolution" above, where a finding may live inside a mixin definition rather than the call site.
 - **PERF-04** — compound-count / descendant-depth / cascade reasoning on deep variant grids.
+- **PERF-05** — the JS cross-read: which class/attribute names `_js/` toggles at runtime and on which host, then every selector in the file that mentions them, tail by tail.
+- **PERF-06** — the same read for the shared `[data-state]` set: every named tail this file puts after a `[data-state…]` compound, ranked tag / shared class / component-internal, plus the component's own container-host `data-state` writes.
 - **Cross-component reach** — the dependency-graph scan (Component relationships, above): list every consumer of a touched token/mixin/class so the recommendation can downgrade to "coordinate first."
 
 **Skip guard.** When the run's only in-scope rules are mechanically-greppable single-rule groups with no whole-file rule (e.g. a lone `SEL` or `PERF` run), skip the agent entirely — there is nothing for it to deep-read.
@@ -381,6 +384,8 @@ For each finding, the report MUST emit both lines:
 | **PERF-01** (anchor universal `*`) | size ↑ slightly (anchor class added) | perf ↑↑ — universal-match cost eliminated. **Classic tradeoff.** |
 | **PERF-02** (anchor attribute) | size ↑ slightly | perf ↑ — attribute search bounded by class. |
 | **PERF-03** (ID → class) | ±0 | perf ↑ — lower specificity, easier overrides. |
+| **PERF-05** (name the tail / move the state down) | ±0 | perf ↑↑ on every runtime flip — a whole-subtree restyle becomes a targeted one (mainnav: ~890 ms → ~80 ms at 20x). Needs the JS cross-read for the toggled names; the flip timing in the fix column is the proof. |
+| **PERF-06** (styling onto the stateful element / own attribute for a container host) | ±0 | perf ↑↑ on every `data-state` write above the tail — the table wrapper went 140 ms → 0 at 1x. Single-file finds the target's own tails; full-tree ranks the whole set. The write timing against a no-rule attribute control is the proof. |
 | **PERF-04** (Solution A / B / accept-and-annotate) | profile authoritative in the PERF-04 fix-column "Size impact:/Perf impact:" blocks in `RULES-PERF.md` — Sol-A size ↑ (DE-RECOMMENDED), Sol-B ±0, annotate ±0 | Sol-A/B perf ↑ (compound/depth drop), annotate ±0 |
 | **TOK-01** (literal → token) | size ↑ — `var(--name)` is wider than typical literals (`var(--spacing-md)` ~ 18B vs `16px` ~ 4B) | ±0 — runtime lookup is cheap. **Hidden size tradeoff** — design-system consistency win, output-bytes loss. |
 | **TOK-02** (delete dead token) | size ↓ | ±0. |
@@ -501,7 +506,7 @@ One scannable report. Sections in this order:
 5. **Token consistency (TOK)** — sorted by severity. Per-finding block.
 6. **One-line disclosures** — `Skipped: DUPE-02, TOK-01/02/04/05/06 (full-tree only, single-file mode).`
 7. **Gaps observed** — one line each, only if non-empty.
-8. **Next step** — numbered list. Item 1 IS the recommended action; renumber to drop options that are no-ops on this run. `save` is NOT a numbered item — it's a literal command that sits below the numbered block as a filter:
+8. **Next step** — numbered list. Item 1 IS the recommended action; renumber to drop options that are no-ops on this run:
    ```
    1. Apply the top 5 byte-saving findings (estimated ~640B saved). Reply `1` to apply each in turn.
    2. Apply all SEL findings (selector compaction only).
@@ -510,59 +515,12 @@ One scannable report. Sections in this order:
    5. Annotate accepted tradeoffs — emit each de-recommended finding's `// <RULE> <reason>` exemption comment so it stops re-firing next run.
    0. Exit.
 
-   Filters: apply <rule-id> / apply <file>:<line> / save
+   Filters: apply <rule-id> / apply <file>:<line>
    ```
 
-Follow **Numbered-reply discipline** (see Response style): the recommended action is itself numbered, renumber to drop no-ops, and `apply <rule-id>` / `apply <file>:<line>` / `save` stay below the numbered block as filters.
+Follow **Numbered-reply discipline** (see Response style): the recommended action is itself numbered, renumber to drop no-ops, and `apply <rule-id>` / `apply <file>:<line>` stay below the numbered block as filters.
 
-Close with "Reply with a number; `apply` / `save` filters sit below the numbered block. Any apply action ends with a Verification footer (build status, actual compiled-byte delta, per-finding spot-checks)."
-
-### Recommending `save`
-
-`save` is never the headline recommendation. It is optional and exists purely for cross-run comparison (the "Diff vs. Run (N−1)" diff) — a user-facing export, NOT a mechanism input. Phase 6 EVOLVE is session-scoped and does not read saved reports, so skipping `save` costs nothing but the optional diff. After the recommendation reason, add a short `save` clause only when it would pay off:
-
-- If a prior saved run for this exact scope exists (a same-`{scope}` file in `.claude/audit-reports/`): "; `save` to extend the comparison trail (Diff vs. Run N−1)."
-- Else (no prior saved run): "; `save` if you want a baseline to diff future runs against."
-
-Never frame `save` as something the user *should* do — it is the user's call.
-
-### Saving the report (optional, user-approved)
-
-**What save is for.** A saved report is a comparison artifact, not a requirement. Its payoff is *across* runs: the "Diff vs. Run (N−1)" section that makes multi-run refinement legible. Within a single session, applying fixes does not depend on a saved file. So never push `save`; offer it, and let the user decide whether the comparison trail is worth keeping.
-
-When the user replies `save` — alone, or combined with another action like `apply 1 then save` — write the current report verbatim to `.claude/audit-reports/` under one of these patterns:
-
-**Full-tree filename:** `YYYY-MM-DD-nds-css-{group}-audit-run-N.md`
-**Single-file filename:** `YYYY-MM-DD-nds-css-{component}-{group}-audit-run-N.md`
-
-- `YYYY-MM-DD` is the run date (today, unless the audit is being re-saved later).
-- `{group}` is the rule-group filter the run used, lowercased: `sel` / `dead` / `dupe` / `perf` / `tok` / `all`. The Phase 1 rule-group filter maps 1:1 to this slug.
-- `{component}` (single-file mode only) is the resolved target's stem with the leading `_` stripped and the `.scss` extension removed: `_sass/components/_buttons.scss` → `buttons`. Lowercased, hyphens preserved (`_sass/components/_cooldown-button.scss` → `cooldown-button`).
-- `N` is the **per-scope save-order index**:
-  - **Full-tree:** `(count of existing files matching `*-nds-css-{group}-audit-run-*.md` in `.claude/audit-reports/`) + 1`.
-  - **Single-file:** `(count of existing files matching `*-nds-css-{component}-{group}-audit-run-*.md` in `.claude/audit-reports/`) + 1`. Indexed per-(component, group) so "Run 2 vs Run 1 of buttons SEL" stays diffable independently of any full-tree run that landed between them.
-- Index is per-scope, not global — comparing apples to apples is what makes "Diff vs. Run (N−1)" useful. Do NOT count `/nds-css-audit` invocations from the conversation that didn't get saved; the index reflects persisted artifacts only.
-
-**Always include a frontmatter-style header** in the saved file so later audits can be diffed meaningfully:
-
-```markdown
-# CSS Audit — {scope-line} — Run N
-
-**Date:** YYYY-MM-DD
-**Rule catalog:** {single group e.g. "SEL" | combined e.g. "SEL + DEAD + DUPE + PERF + TOK"}
-**Invocation:** `/nds-css-audit {args}`
-
-## Summary
-…
-```
-
-`{scope-line}` is `` `full-tree` `` for full-tree runs, or `` `_sass/components/_buttons.scss` `` (use the actual file path) for single-file runs.
-
-**Diff-vs-prior section.** If `N ≥ 2`, append a "Diff vs. Run (N−1)" section at the bottom listing what changed since the last saved one: new findings, closed findings, re-classified findings (severity changes), and any catalog notes (rule narrowing / gap proposals applied between runs). This is what makes multi-run refinement legible across time. For diffing, locate the prior file via `ls .claude/audit-reports/ | grep -E '<pattern>'` filtering on the same scope, sort by `-N`, pick the highest-numbered existing entry.
-
-**Never overwrite.** Before writing, `ls .claude/audit-reports/` to confirm the target filename doesn't exist. If it does (e.g., two saves on the same day), bump the `-N` index.
-
-**Writes go only to `.claude/audit-reports/`.** Never save reports inside `_sass/`, `assets/`, the project root, or other Jekyll-tracked directories — the `.claude/` tree is outside the site build. If the `.claude/audit-reports/` directory doesn't exist, create it before the first save.
+Close with "Reply with a number; `apply` filters sit below the numbered block. Any apply action ends with a Verification footer (build status, actual compiled-byte delta, per-finding spot-checks)."
 
 ### Single-file `all` — consolidated report
 
@@ -598,13 +556,13 @@ From THIS run's gap and SKIP logs (Phase 3), surface — never auto-apply:
 - **Rule refinement:** a SKIP reason recurring across the run's files → a proposed carve-out.
 - **Resolved motivating example:** a rule whose `RULES-*.md` motivating example was fixed this session → surface the one-line "annotate as regression guard" edit.
 - **Dead-rule candidate:** a rule with NO motivating example in its `RULES-*.md` row that also did not fire here → a *soft* "consider narrowing or removing" note. No hard counter (that needed a cross-run ledger) — narrow before deleting, and only on a clear pattern.
-- **Citation drift:** spot-check each rule's motivating-example citation in its `RULES-*.md` row **by its symbol, not its line** — citations are symbol-anchored (the greppable selector / token / mixin name / quoted snippet is authoritative; the line number is a decaying hint). Symbol moved → note the new line; symbol gone because the fix was applied → surface the regression-guard annotation above. Candidate citations a user adds to `RULES-*.md` must name a symbol, never a bare `file:line`.
+- **Citation drift:** run `node scripts/check-audit-citations.mjs` (verifies cited paths, symbol anchors, and line hints across both audit skills mechanically), then spot-check each rule's motivating-example citation in its `RULES-*.md` row **by its symbol, not its line** — citations are symbol-anchored (the greppable selector / token / mixin name / quoted snippet is authoritative; the line number is a decaying hint). Symbol moved → note the new line; symbol gone because the fix was applied → surface the regression-guard annotation above. Candidate citations a user adds to `RULES-*.md` must name a symbol, never a bare `file:line`.
 
 Append a `## Catalog evolved` section to the report when any candidate exists — each line names the candidate + the action the user takes (e.g. "Add DEAD-06 per the draft above" / "Annotate DEAD-03 row: motivating example resolved → regression guard"). The candidates are SUGGESTIONS — Phase 6 never auto-edits the catalog. Omit the section when there are none.
 
 ### Where lifecycle state lives
 
-The catalog's only cross-session memory is the committed `RULES-*.md` itself — rules, carve-outs, regression-guard annotations, and each group's "Deleted rules & declined patterns" lessons. Durable judgments live there, inline. Volatile cross-run bookkeeping (match counts, maturity ladders, reconciliation logs) is deliberately NOT kept — anything worth keeping is promoted to a committed rule row instead; do not introduce a committed bookkeeping ledger or any file Phase 6 rewrites per run. Saved reports remain a **purely optional export** (a `Diff vs. Run (N−1)` for users who choose to save), never a mechanism input to detection or EVOLVE.
+The catalog's only cross-session memory is the committed `RULES-*.md` itself — rules, carve-outs, regression-guard annotations, and each group's "Deleted rules & declined patterns" lessons. Durable judgments live there, inline. Volatile cross-run bookkeeping (match counts, maturity ladders, reconciliation logs) is deliberately NOT kept — anything worth keeping is promoted to a committed rule row instead; do not introduce a committed bookkeeping ledger or any file Phase 6 rewrites per run. Reports live in-conversation only; git is the archive.
 
 ### Writing guardrails (for the edits the user applies)
 

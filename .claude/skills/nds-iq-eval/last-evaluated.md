@@ -1,275 +1,347 @@
-# NDS IQ — building UI with the National Design System (instructions v7)
-
-Validated against template 1.7.0. Works with 1.7.0 or later.
+# NDS IQ — building UI with the National Design System (instructions v3.0)
 
 ## How to use this file
 
-This file is the rulebook for NDS work in this project. The anchor in the project's agent instruction file (`CLAUDE.md` / `AGENTS.md`) points here: it declares the two paths and tells every session to read this file before NDS work starts.
+The project's agent file (`CLAUDE.md` / `AGENTS.md`) declares `NDS_ROOT` and `NDS_ASSETS` and points here.
 
-- Read this file top to bottom, once per session, before any NDS work. NDS work is any UI, page, component, styling, or asset task — and any task where you are unsure whether NDS applies.
-- This file is universal. It holds no project-specific values. Never edit it. Never copy rules out of it into the agent file: one rule source, one place. The sole exception is the anchor's own fixed text ("Install and upgrade this file"): it restates the few hard stops that must hold before any session has read this file. Add no others.
-- The two paths, `NDS_ROOT` and `NDS_ASSETS`, are declared in the anchor. Read their values there; this file only explains what they mean.
-- Upgrades replace this file whole. See "Install and upgrade this file" at the end.
+- Read this file top to bottom once per session before any NDS/UI work or when unsure.
+- This file is universal and read-only: no project values and no edits.
+- Path values live only in the anchor.
+- Updates replace this file whole. After any replacement or context compaction, reread it before continuing.
+- At each phase boundary, reread that phase's entry and exit gates before acting.
 
 ## The two paths
 
-`NDS_ROOT` is the NDS template folder, a read-only reference. It is a `nds-vanilla-template-*.zip` release from https://github.com/mazin-musleh/NDS-vanilla/releases, extracted; which release, the banner-first rule below decides. The zip holds one top-level `nds-vanilla-template-v<version>/` folder. `NDS_ROOT` is that folder, not its parent; the path is right when `NDS_ROOT/_site/` exists. Its home is a gitignored `.nds/` folder at the project root. That home is canon, not preference: the anchor ships in a committed file, so only a project-relative path resolves on every teammate's machine, and the gitignored folder self-restores on any fresh clone per the rule below; an absolute or out-of-repo path resolves only on the PC that set it. A different location (a sibling folder, a shared extract, committing the folder) is the dev's explicit call, taken knowing that cost. Do NOT edit anything under it. Copy what you need OUT of it into this project.
+**`NDS_ROOT`** — the flat contents of one NDS template release from https://github.com/mazin-musleh/NDS-vanilla/releases. Default: `.nds/` at project root, gitignored. The path is correct when `NDS_ROOT/_site/` resolves directly; never keep the zip's versioned wrapper. Read-only.
 
-`NDS_ASSETS` is the folder INSIDE THIS PROJECT that the NDS runtime assets get copied to. The anchor's `public/assets/` is an example suffix; use the project's real static root (`wwwroot/`, `static/`, …). Never a path under `NDS_ROOT`. It is a filesystem path, but the `<link>` and `<script>` tags need the URL that folder is served at. Derive that URL from the stack's static-file convention (`public/assets/` → `/assets/`, `wwwroot/` → `/`) and confirm it with the dev before writing the first tag: a wrong prefix breaks every asset on every page.
+**`NDS_ASSETS`** — the project's static folder receiving NDS runtime assets; never under `NDS_ROOT`.
 
-If either anchor path still looks like a placeholder (`/path/to/…`), **stop and ask the dev to set it**. A declared `NDS_ROOT` missing on disk (a fresh clone; `.nds/` is gitignored) is restorable instead:
+- Derive its served URL from the stack and confirm it before the first asset tag.
+- Placeholder path? Stop NDS-side work and ask the dev. Inventory/plan work may continue; NDS targets stay `blocked on NDS_ROOT` until sources resolve.
+- Never adopt candidate paths yourself. Enumerate candidates, read their banners, and let the dev choose.
+- Persist any dev-supplied path in the anchor that session. Never store paths in `NDS-PLAN.md`.
 
-- Read the `Version:` banner in `NDS_ASSETS/js/nds-main.min.js`. Download that exact release — `releases/download/v<version>/nds-vanilla-template-v<version>.zip` on the repo — extract it to the declared path, and tell the dev. That banner-first rule covers every population of `NDS_ROOT`, first install included, not just restores: whenever `NDS_ASSETS` already holds a runtime, its banner picks the release, never the latest link.
-- One floor overrides it: these rules read artifacts that template 1.7.0 introduced — the per-file JS banners and the `_source/` doc, template and example sources — so a banner below 1.7.0 has no supported reference to install, and half of what this file tells you to read would not exist. Report it and propose the upgrade per "Upgrading NDS"; below the floor the upgrade is the prerequisite for any NDS work, not an option, and until the dev approves it you are blocked exactly as on a placeholder path.
-- Above the floor, a newer template against the older runtime is an upgrade with its own migration steps, the dev's call ("Upgrading NDS"): report both versions and propose it; never silently install a newer reference than the runtime. A `-dev` banner matches no release: report it and let the dev choose.
-- An empty `NDS_ASSETS` alone does not prove a fresh start: an install predating these rules may serve NDS from another path. Sweep the project for a stray `nds-main.min.js` and the layouts loading it before concluding anything. A found runtime's banner governs the same rules; whether `NDS_ASSETS` should point at that folder, or the runtime moves wholesale to the declared path, is the dev's call (its pages take Workflow step 1's prior-NDS split).
-- No runtime anywhere in the project means first setup: ask the dev; only then is the latest release the default. A missing `NDS_ASSETS` folder is not a blocker: create it at the first asset copy.
+## Standing principles
 
-More rules that hold while paths are unsettled:
+**P1 — Check before claim.**
 
-- **While blocked:** nothing NDS-side may proceed. This holds however mature the install looks — pages already built here do not license more. The project-side work that needs no NDS path still runs: do the Workflow section's step 1 inventory and write `NDS-PLAN.md`, which is what you deliver while blocked. Never write guessed NDS targets into `NDS-PLAN.md`; a blocked path leaves the plan's NDS Target column reading `blocked on NDS_ROOT` until you can read the real catalogs.
-- **Never adopt a likely folder yourself.** A plausible candidate (an old extract, a different version, a sibling project; for `NDS_ASSETS`, an existing assets folder already serving NDS) silently wires the whole project to the wrong template, or copies assets into the wrong place. Enumerating candidates for the dev to choose from is fine: read each one's `Version:` banner per rule #2. The choice stays the dev's.
-- **When the dev supplies or changes a path, update the anchor's two declaration lines in the same session. Not optional.** Chat answers don't survive the session; those two lines are what every future session reads.
-- **Newer template, older rules.** Raw main of this file stays valid for the latest published template, so a `NDS_ROOT` newer than the stamp on line 3 is fine. Older than the floor is not: take the paragraph above.
+| Claim | Required check |
+|---|---|
+| "NDS has no X" — yours or the dev's "use native X" | search catalog `use_when` (§Build) |
+| release known / unknown | banner check (P2) |
+| cannot see page | headless attempt (§Verify) |
+| no CSP concern | response-header sweep (§Plan) |
+| page done | both browser passes (§Verify) |
+
+**P2 — Banner checks are bounded.** Read only a bundle's opening comment for `Version:`. If absent, the release is unknown. Never scan deeper into minified files or infer the version elsewhere → P5.
+
+**P3 — Source first.** Before asking/answering an NDS question or wiring page JS, read the relevant source:
+
+| Need | Read |
+|---|---|
+| component markup/usage | `_source/<folder>/<name>.md` (`folder` from catalog `url`) |
+| chrome, head, CSP, locale | `_source/ui-shell/*.md` |
+| runtime/framework lifecycle APIs | `_source/core/*.md` |
+| component JS API | `_source/_js/nds-<name>.js` banner |
+| available UI | `_source/_data/content/*.yml` |
+| styling knobs/tokens | `_source/_sass/components/*.scss`, `_source/_sass/tokens/` |
+| built visual twin | `_site/**/*.html` |
+
+Ask the dev only what NDS does not answer: project paths/conventions, pacing, or unresolved trade-offs.
+
+**P4 — Copy is a contract.** Canonical markup, the head, and copied page scripts stay canonical. Only hard rule #3's four edit types are allowed.
+
+**P5 — Report and stop** when a dev decision is required:
+
+| State | Report | Dev decides |
+|---|---|---|
+| JS/CSS banners disagree | hand-assembled runtime or interrupted upgrade | release |
+| both lack `Version:` | release unknown | release |
+| `-dev` banner | no matching release | release |
+| runtime outside `NDS_ASSETS` | location + affected pages | point anchor there / move it |
+| reference newer than runtime | pending upgrade | upgrade or not |
+| no runtime anywhere | first setup | install latest and report |
+| prior NDS work / inherited plan | conformance split (§Plan) | adopt / retire / rebuild |
+| project rules conflict | conflict | which rules win |
+| NDS itself needs changes | gap | separate conversation |
+
+If the dev says a found runtime is legacy, ignore it: treat setup as new — the latest release becomes the default — and assess its pages as prior NDS work.
 
 ## Seven hard rules
 
-1. **Never edit anything under `NDS_ROOT`.** It is a read-only reference. If the dev needs to change NDS itself, flag it and stop; that's a separate conversation.
+1. **Never edit `NDS_ROOT`.** It is read-only. If NDS itself needs a change, report it and stop.
 
-2. **Never read `*.min.js` or `*.min.css`.** They are opaque. Read the matching file in `NDS_ROOT/_source/` instead. One exception: the `Version:` banner in a bundle's first lines. Read just those lines for the upgrade check.
+2. **Never read minified JS/CSS.** Use the `NDS_ROOT/_source/` twin. Exception: read only a bundle's opening comment for the `Version:` banner (P2).
 
-3. **Copy canonical markup verbatim. Never invent it.** Every component has a doc page whose `lang-html` code block holds the exact HTML to copy. Read it at `NDS_ROOT/_source/<folder>/<name>.md` — the doc source: same code blocks and attribute tables, no site chrome, a quarter of the bytes. `<folder>` is the one the catalog entry's `url` names: `components`, `utilities`, `layout`, `ui-shell`, or `core`. Not every entry sits under `components`. The built twin at `NDS_ROOT/_site/<folder>/<name>.html` is the human surface. Class names, nesting, `data-*` attributes, and ARIA roles all matter; markup from memory breaks the component.
-    - "Verbatim" covers structure, classes, `data-*`, and ARIA.
-    - Three kinds of value edits are sanctioned, and only these: (1) asset-URL rewrites: `href`/`src` pointing into the template's assets get rewritten to `NDS_ASSETS` (see "Asset references in copied markup" below); (2) content swaps: replacing placeholder text and content-bearing attribute values with the project's own; (3) modifier-class composition: adding a class documented in the component's Modifier Classes reference table onto the copied base markup — the table exists for this, and the demo's runtime toggle produces the same result.
-    - Content swap includes attribute values: link `href`s, `alt` text, and `aria-label`s are content too. So are a swapped image's `width`/`height` attributes: they carry the sample file's geometry, and keeping them forces it onto yours (the brand slot's square sample squashing a wide project logo is the classic case); set them to the new file's real pixel size. Audit all of them against the target page's language and routes, or dead docs-site links and wrong-language labels ride along silently.
-    - Layout-coupled components read wrong in isolation: side info, side menu, a form's stepper, and heroes only work inside their page wrapper chain, which the component doc's standalone block does not show. Copy these from a full page that uses them (a template or example, found via the catalogs), and use the doc page to understand what you copied. Same rule as the document head: real page as the copy source, doc page as the explainer.
-    - Inherited markup is under this rule too. The cascade has you copy whole pages, so most `.nds-*` you ship is markup you never chose; treat it exactly like markup you looked up. If you keep a wrapper, you keep its children: lifting a child out (a result count or filter chips out of `.nds-toolbar`) is inventing structure and silently forfeits behavior wired to that nesting. A wrapper's internal arrangement is often flexible; what lives inside it is not.
+3. **Copy canonical markup verbatim. Never invent it.** Copy the `lang-html` block from `_source/<folder>/<name>.md`; use `_site/<folder>/<name>.html` as the built reference. Preserve structure, classes, `data-*`, and ARIA.
 
-4. **All page content lives inside sections, laid out with NDS primitives.**
-    - Wrap every content block in `<section class="nds-content-section">`. Its internals come in tiers: minimal (title, description, and `.nds-section-body` as direct children, no wrapper), standard (adds `.nds-section-wrapper` + `.nds-section-head`, the common case), plus action and image variants. Take the tier that fits from the section doc; do not default to one.
-    - Every section lives inside `.nds-content-layout > .nds-main-content`.
-    - Inside a section body, compose with NDS layout primitives: `nds-grid` (responsive columns), `nds-flex` (ad-hoc alignment), `nds-block` (titled sub-groupings). No Bootstrap columns, no custom `display:flex` wrappers.
-    - Spacing between stacked elements comes from the primitives too, never from hand-rolled margins. Both carry a `--gap` knob: `nds-flex` defaults it to `--spacing-xl`, `nds-grid` to its own larger ladder; `.nds-section-body` provides no gap of its own, so unwrapped stacked siblings render flush. Tune with `--gap`. Note `.nds-flex` defaults to `align-items: stretch`: a standalone button in a column goes full width, so give it its own `nds-flex` row.
-    - Read the section doc (`NDS_ROOT/_source/layout/section.md`) before authoring any page: it defines tiers, action placement, image slots, and full-width breakout options.
+   Only these edits are allowed:
 
-5. **Style via knobs and tokens first; reach for `.nds-*` overrides only as a last resort.** Every NDS component exposes CSS custom properties for tuning. Use them in this order:
-    - **Component knobs** on individual elements, for per-instance tuning (`--btn-size`, `--section-*`, `--hero-*`, etc.). Set inline (`style="--btn-size: 40px"`) or via your own scoped class. Read `NDS_ROOT/_source/_sass/components/_<name>.scss` to see what knobs each component exposes (search for `var(--` lines).
-    - **Design tokens** at `:root`, for whole-system re-theming (change primary color everywhere). Rebind semantic tokens like `--background-primary` in a stylesheet loaded AFTER `nds-main.min.css`. Full set in `NDS_ROOT/_source/_sass/tokens/_semantic.scss`. If the project keeps dark mode (the theme switcher in the chrome), mirror every rebind under `:root[data-theme~="dark"]`: NDS's dark block outranks a plain `:root` declaration, so an unmirrored rebind silently reverts in dark. A project without the switcher never enters dark: nothing engages it but the user's stored toggle choice.
-    - **`.nds-*` selector overrides**: only when the above genuinely don't cover the need. Keep the override scoped (nested under your own class or `[data-*]`) and document why the knob/token path wasn't enough. Be aware: `.nds-*` class names are internals and may shift between releases, and overrides fight NDS's own state cascade (`data-state`, `:hover`, dark mode, RTL). Bugs from that often surface only on specific states, not on first render.
+   | Edit | Allowed change |
+   |---|---|
+   | Asset URL | Rewrite template `href`/`src` to `NDS_ASSETS` URLs |
+   | Content | Replace placeholder text/content attributes; reset replaced-image `width`/`height` to real dimensions |
+   | Modifier | Add classes listed in the component's Modifier Classes table |
+   | CSP knob | Under strict `style-src`, move inline `style="--…"` values to a project-scoped class in an allowed `<style>`; nonce/hash covers `<style>`, never the attribute |
 
-6. **No legacy libraries: build clean on NDS + vanilla JS.** NDS already covers what they do:
-    - Select2 → autocomplete, multiselect
-    - Summernote / TinyMCE → editor
-    - jTables / DataTables → table + sort + filter + pagination + export
-    - Font Awesome → the HGI icon set
-    - Bootstrap → the layout primitives in rule #4
-    - jQuery → plain vanilla JS (no `$`; see `NDS_ROOT/_source/_js/nds-*.js` for the shape)
-    - Your own global `site.css` / `site.js` → rule #5's styling order + the JS wiring section
+   Apply these rules at the point of copy:
 
-    Do not mix them in. Dual class systems fight each other's cascade (`.btn` vs `.nds-btn`), dual JS event models double-fire, and duplicate icon fonts waste bytes and paint slots. The project's own globals are the same fight without a brand name: element-level rules (`body`, `h1`, `input`) need no class to break the cascade. Anything not NDS's own is legacy UI, not project canon. Old NDS files with canonical names are legacy too: the runtime is never inherited from a prior attempt, it comes fresh from `NDS_ROOT` per step 2. The CSS is removed from NDS pages, never carried: they load the head unit's stylesheets only, and styling the project still needs is rebuilt deliberately under rule #5. The inherited JS is a legacy library: the custom wiring it carries (handlers, AJAX, app glue) migrates through "Replacing a legacy library: the method" and the JS wiring section, and its removal from legacy pages stays the dev's call per Workflow step 5.
+   - Keep every canonical member in order. A small dataset or minimal existing page is not a reason to remove canonical members. A matched source ships every member. Name any domain-required removal to the dev before the page is complete.
+   - Put host-framework bindings on canonical elements as attributes. Never insert framework-generated UI elements into the structure.
+   - Edit a copied script point by point against its source. Never rewrite it from scratch.
+   - Keep canonical wrappers with their children. Never lift a child out of its wrapper.
 
-    This cuts both ways: an NDS component dropped into a still-legacy page is the same cascade fight in reverse. "Just want to see how NDS looks" gets a spike: one parallel page (rule #7's pattern) with the full head unit, the runtime, and canonical markup, never a reduced head or NDS markup inside a live legacy page. A spike needs no plan; it needs the same ceremony any NDS page gets.
+   Inherited markup follows the same rule. Copy layout-coupled components (side menu/info, steppers, heroes) from a FULL page that uses them.
 
-    **Removing a legacy library is the dev's call; see Workflow step 5.** The replacement work touches unrelated pages and often surfaces hidden dependencies.
+4. **All page content uses NDS sections and layout primitives.** Read `_source/layout/section.md` first.
+   - Every content block uses `<section class="nds-content-section">` with the documented tier.
+   - Every section lives inside `.nds-content-layout > .nds-main-content`.
+   - Compose only with `nds-grid`, `nds-flex`, and `nds-block`; no Bootstrap layout or custom flex wrappers.
+   - Use primitive `--gap` for spacing, not margins. `.nds-section-body` adds no gap. Give standalone buttons their own row/full width; wrap `.nds-form` fields in a gapped container.
 
-7. **Replacing an existing UI? Propose a porting strategy and get the dev's approval before file #1.** The naming pattern has to fit their build tooling, routing, and deploy pipeline; getting it wrong on file #1 costs the same rename on every file after it.
-    - **Default proposal: parallel files.** For every page or partial you port, a NEW file alongside the original: either an `NDS/` subfolder (uppercase, e.g. `Views/Home/NDS/Index.cshtml` beside the legacy `Views/Home/Index.cshtml`) or a `.nds` filename segment (lowercase, e.g. `home.nds.cshtml`), whichever fits the host project's convention, routed through a new controller action, URL, or feature flag. Name the benefit when proposing it: both UIs serve side by side, and the untouched legacy file stays a working reference for teammates and the instant rollback path. (One exception: non-conformant prior NDS work rebuilds clean in place, not parallel; see the Workflow's prior-NDS bullets.)
-    - **Score candidate strategies on four things, in order, and show the dev the comparison.** They approve by checking it, not by knowing the stack better than you:
-        1. NDS markup lives in the stack's template/HTML files, never inside code strings. The stack's own page format (`.cshtml`, `.ejs`, plain `.html`, …) qualifies; what breaks verbatim copying is HTML embedded in a code string literal. When the stack offers no template format, put the markup in `.html` files loaded at render time, for pages as well as chrome. Quoting and escape sequences corrupt copied markup silently.
-        2. Fewest edits to existing files: zero is the mark to beat.
-        3. Side-by-side serving with cheap rollback.
-        4. Page JS co-location.
-    - **Poor fit for parallel files? Propose what fits instead.** Editing a legacy file in place happens only under a strategy the dev approved, and deleting one always needs their explicit say-so. When there's no legacy file to sit beside, write pages wherever the stack's own convention puts them.
-    - **Co-locate page-scoped JS with its page where the stack allows** (e.g. `Views/Home/NDS/index.js` next to `Views/Home/NDS/Index.cshtml`), so one page's JS never leaks into another's. Some stacks (Rails asset pipeline, ASP.NET `wwwroot/`, Next.js `public/`) enforce a separate JS root: follow the project's convention rather than fighting it. And load page JS after the chrome's script tags: deferred scripts execute in document order, so a page script placed earlier in the document runs before `nds-main.min.js` and will not see `NDS`. This hides well; code that only touches `NDS` inside a `.then()` or an event handler works by accident.
+5. **Style in this order: knobs → tokens → scoped overrides.**
+   - **Knobs:** use documented CSS variables. Find them via `var(--` in `_source/_sass/components/_<name>.scss`. Under strict `style-src`, use rule #3's CSP conversion.
+   - **Tokens:** rebind semantic tokens from `_source/_sass/tokens/_semantic.scss` after `nds-main.min.css`. If dark mode remains, mirror rebinds under `:root[data-theme~="dark"]`.
+   - **Overrides:** only when neither works; scope under a project class/`data-*` and comment why. Do not override `.nds-*` internals directly.
 
-## Workflow
+6. **No legacy UI libraries: NDS + vanilla JS only.**
 
-NDS is a UI layer. It does not choose a stack, define routes, or scaffold an app; expect the project to already exist and serve. Exists means the stack runs and serves a page: a freshly scaffolded app with no UI yet qualifies, and building its first pages is this workflow's easiest case, not an exception. No project at all? Say so and stop; that is the dev's design work, not yours.
+   | Legacy | Use |
+   |---|---|
+   | Select2 | autocomplete / multiselect |
+   | Summernote / TinyMCE | editor |
+   | jTables / DataTables | table + sort + filter + pagination + export |
+   | Font Awesome | HGI icons |
+   | Bootstrap | NDS layout primitives |
+   | jQuery | vanilla JS / NDS APIs |
+   | global `site.css` / `site.js` | rule #5 + §JS wiring |
 
-1. **Inventory first.** List the project's routes, layouts, shared partials, existing pages, and any legacy UI libraries. Map each existing page to a target via the composition cascade below (DGA template / example / custom).
-    - **Greenfield (nothing to inventory)? Plan from intent.** Ask the dev for the intended page list and map each through the same cascade: same table, the legacy-libraries column stays empty, and rule #7 never triggers. Pages the dev hasn't named don't exist; never pad the plan with a sitemap of your own invention.
-    - Structurally identical pages (the list/create/edit families repeated across entities: services, products, users) get mapped once. Pick one archetype per family and mark each sibling's NDS Target "same as <archetype>". Rows stay separate so status tracking stays per page.
-    - Views count as pages. A client-side router's views (hash routes, tabs that swap whole views) inventory as rows exactly like server routes: N legacy views = N rows. Dropping any legacy view or flow is a dev decision: propose it and record it as its own plan row with the reason, never a default.
-    - **NDS work that predates these rules: presence grants no authority; conformance decides, the dev approves.** Installing NDS IQ into a project already carrying `.nds-*` markup or NDS bundles means work these rules didn't drive: a sound adoption done without them, an old template, an unfinished pass, an unruled agent run; the files can't tell you which. Any `NDS-PLAN.md` the prior work left behind is under the same rule: report what state it claims and propose adopt or retire, never a silent resume; retired, this same inventory recreates it fresh. Canon is `NDS_ROOT`, never the project's own pages. Assess each page against its canonical source in this same inventory and propose the split with the plan — the dev's call, never a silent reclassification. Conformant pages are adopted, not rebuilt: rows at `Awaiting Verification`, step 4's passes decide, and only `Built and Verified` makes one a family archetype. A conformant install on a stale runtime routes through "Upgrading NDS" once the plan tracks it (sub-floor runtime: the upgrade is the prerequisite for any NDS work, per the floor rule above). Everything non-conformant is legacy NDS.
-    - **Legacy NDS rebuilds clean, not parallel.** Non-conformant pages rebuild fresh through rule #7's approval machinery; the old attempt is a reference for content, flow, and data structure only, never a copy source. Don't default to rule #7's parallel files here: NDS-on-NDS parallel means two installs sharing one `.nds-*` namespace and one `nds_` storage space, so every grep, copy source, and bug first needs "which NDS?" answered; a broken attempt earns none of that. The one exception is when the dev explicitly needs the old UI serving while the port runs — parallel files then, with a second assets folder, taken knowingly for those costs; the "may render worse on it" default below is not a substitute for that ask. Otherwise, propose the clean start: the old assets are not a head start (never adopt them as the runtime; step 2 replaces them in `NDS_ASSETS` wholesale), and each old page is read for its content, flow, and data structure, then rebuilt in place through the cascade. The clean start covers the attempt's whole footprint (assets, override sheets, wired scripts, the old plan, stale NDS instructions in the agent file): nothing from it survives as canon, only as reference. The approval carries the costs by name: unported pages run the new runtime until their rebuild and may render worse on it, and rollback is git, not a live parallel copy.
-    - Replacing existing UI? Propose a porting strategy for the dev's approval (rule #7) before porting file #1.
-    - If this project's instruction file carries rules that conflict with these (a mandated legacy library, a competing styling system), flag the conflict with the plan; don't silently obey either side. Prior NDS guidance is the exception to that neutrality: this file is the only NDS rule source, so older NDS instructions in the agent file (a stale pasted block from instructions v6 or earlier, hand-written NDS conventions, leftover agent notes) are the attempt's footprint; propose removing them with the plan, the dev's call.
-    - Write the result to `NDS-PLAN.md` as a table (page, route, legacy libraries, NDS target, status), opening the file with the line `Managed by NDS IQ v7`. Then stop for the dev's review. Build nothing until they approve it.
-    - The review raises project-wide decisions only: asset URL prefix, porting strategy, any prior-NDS split (above), direction/locale, and the build pacing (gate-by-gate approval, or the whole plan in one run). Page-scoped decisions (template variant, section shape, content fit) wait for that page's build session; front-loading them buries the dev on a big project. Note the open question in the page's plan row and ask when you get there.
-2. **Copy the assets in** (next section) so pages have a runtime to load.
-3. **Build the chrome** (adoption order below) and verify it renders before touching inner content.
-4. **Build pages one at a time** via the composition cascade, opening with the page's noted plan-row questions (they were deferred to now). Before writing any markup, list the page's parts — every control and region it needs, from the legacy page or the dev's brief — and match each part against `components.yml`. Parts your copy source lacks get their component from the catalog, never a substitute; a part with no catalog match is the custom case (cascade step 3). Deciding the vocabulary up front is what keeps a mid-build gap from turning into invented markup. Verify each page in the browser before starting the next, in two passes:
-    - **Behavioral pass**: load the page; NDS init warnings are `NDS`-prefixed in the console, so component errors are attributable. Then run `NDS.Init.audit()` in the console: it reports the silent failures a clean console misses, unregistered inline icons and filter/pagination containers no component claimed. (Setting `window.NDSInitConfig = { enableLogging: true }` in a script tag before the NDS scripts makes the audit run automatically and adds per-component init logging, useful while a page is under active work.) If the window will not resize for mobile checks, load the page in a same-origin iframe at mobile width; media queries evaluate against the iframe's own viewport. Interactive behavior is part of this pass: exercise what the page wires — submit, filter, advance a step. A form with required fields of more than one component type gets each type tested empty, one by one: the fields render the same required mark, but each type validates through different code, so one passing field proves nothing about the next.
-    - **Visual pass**: a clean console proves nothing about layout; unregistered icons, mis-nested wrappers, and missing gaps all render silently. Look at the page at desktop and mobile width: nothing flush that should be spaced, every icon a glyph rather than a filled box, sticky and width-constrained elements actually behaving, dark mode correct on the page content, and the page reading as one design rather than assembled parts. Measured is not seen: probes and presence checks are a useful sweep but do not satisfy this pass; a width you only measured is reported as measured, never as visually verified. Built from a template or example? Its built twin is the visual spec: open `NDS_ROOT/_site/templates/<name>.html` (or `examples/`) in the browser beside your page and compare — source code shows structure, never spacing, alignment, or proportions. Look at the twin before the build too when the composition is new to you; knowing the target look is what makes drift visible. Open the twin over HTTP, always: serve `NDS_ROOT/_site` from a quick local static server — the zip's pages use relative asset paths, so they render correctly there. Never open it as a `file://` path: the runtime's own fetches hit cross-origin walls on `file://`, so the console fills with errors the page does not really have, and much browser tooling refuses `file://` outright. A difference you chose is a content swap; a difference you did not choose is a bug to fix before the row moves.
-    - Never report a page verified from reading its code alone. Cannot see the page? First check for an automation channel the project already offers: a puppeteer/playwright harness, an e2e suite, a probe documented in the project's own agent notes. A scripted run that loads the page and captures the console plus `NDS.Init.audit()` satisfies the behavioral pass, and screenshots you actually look at satisfy the visual one. Only with no channel at all, say so and emit a checklist for the dev instead, naming the page and adding any check it specifically needs:
+   Do not mix NDS and legacy UI on the same page. NDS pages use the runtime from `NDS_ROOT`, exclude inherited legacy CSS, and migrate inherited JS through §JS wiring. Removing legacy libraries project-wide is the dev's decision.
 
-    [VERIFICATION CHECKLIST FOR DEV]
-    - [ ] Check console for `NDS`-prefixed warnings.
-    - [ ] Test layout responsiveness at < 768px viewports.
-    - [ ] No elements flush against each other that should be spaced.
-    - [ ] Every icon renders as a glyph, not a solid box.
-    - [ ] Dark mode on the page content, not just the chrome.
+   An NDS spike is ONE parallel page with the full head, runtime, and canonical markup. No plan required; all other rules apply.
 
-5. **Replacing an existing UI? Legacy-library removal is the dev's call, not yours.** Under rule #7's parallel files the legacy pages stay live, and they still need their libraries. Never remove one yourself; at most report when no ported page depends on it anymore, and leave the decision to the dev.
+7. **Replacing existing UI requires an approved porting strategy before file #1.**
+   - **Default: parallel files.** Create each NDS page beside the legacy page on a separate route/flag; keep legacy as reference and rollback. Prior non-conformant NDS rebuilds in place (§Plan).
+   - **Score the strategy:** (1) NDS markup stays in templates/HTML, never code strings; (2) minimize existing-file edits; (3) preserve side-by-side serving/rollback; (4) co-locate page JS. Show the dev the comparison; in-place edits/deletions require approval.
+   - **Page JS:** co-locate where possible and load after the chrome scripts. Inline page JS uses `<script type="module">`; never rely on inline `<script defer>`.
 
-`NDS-PLAN.md` at the project root is the migration's memory between sessions, not the app's: it tracks an adoption or porting effort while one is in flight. Starting such an effort with no plan = you are in step 1: plan and write it. Plan exists = read it before starting, update the rows you touch (a plan predating this install is prior work: step 1's bullet reports it and the dev decides adopt or retire, never a silent resume). All rows `Built and Verified` = the migration is over and the plan retires (keep or delete, the dev's call); later work on the install these rules drive (a new page, a new service, an upgrade) runs under the rules and step 4's verification with no plan required. A plan returns in two cases: an ask that is itself a multi-page migration worth tracking, or a dev-requested re-audit. A re-audit recreates the plan from the current state at any time: step 1's inventory plus the prior-NDS bullet's conformance assessment, this time run over this install's own pages. Pages that pass enter `Awaiting Verification` for step 4's passes, pages that drifted enter `Planned` with their deltas named in the row, and the repairs then run as normal plan rows under the usual pacing.
+## Install
 
-- **It tracks UI work, not project scope.** It covers what existed when it was written and gains a row when the dev names a new page. Never re-plan the project on your own.
-- **The two paths never live in it.** They are read from the anchor's declaration lines only; a copy in the plan goes stale on upgrade and contradicts the declaration. The plan records the project-wide decisions with no other home: the list the step-1 review raises.
-- **Status values are exactly** `Planned`, `In Progress`, `Awaiting Verification`, `Built and Verified`. No others; completion stays machine-checkable across sessions. Built but not browser-verified = `Awaiting Verification` + emit the checklist; only the dev's confirmation makes `Built and Verified`. Update at a full-section, page, or session boundary, not after individual line edits. Status lives in the table's Status column ONLY; a prose checklist is written once and never status-annotated; a second status system drifts, and the stale one wins on resume.
-- **The plan drives the pacing.** Under gate-by-gate pacing (the default), when a step or page completes, propose the next one from the plan and wait for the dev's go. A fresh session needs only "continue the NDS work"; which part comes next is the dev's call.
-- **The dev sets the pace, asked once at plan review**: gate-by-gate approval (default), or the whole plan in one run. One run means don't stop at the gates: resolve open questions by the defaults in this file (existing shape, data scale, hero rules), verify each page as you build it, and deliver one report at the end. Rows you verified yourself sit at `Awaiting Verification` until the dev clears that report; their confirmation, not your browser pass, makes `Built and Verified`. Update each row as its page completes, not in one batch at the end: a dropped session then resumes from the last finished page (a row still `In Progress` on resume means a half-built page: rebuild it), and the report covers every row awaiting the dev. Anything decided by default or left unverified goes in the plan and the report, never silently.
-- **`NDS-REPORT.md` (optional, project root)** collects what adoption surfaces about NDS itself: a missing method or event (the banner and grep that found nothing), canonical markup contradicting a rule, a doc that misled, a reproducible component bug. Entries name the NDS version, instructions version, and component, with a minimal generic repro; never the project's own markup, routes, names, or data. The file stays safe to share. Open it with this banner: "Findings about the NDS design system, collected during adoption. Contains no project-private information. Dev: please send to https://github.com/mazin-musleh/NDS-vanilla/issues, or privately to the maintainer, Mazin Musleh." Sending is the dev's call, never the agent's.
+**Existing runtime version wins; never follow `latest` when `NDS_ASSETS` already has one.**
 
-## What to copy INTO this project
+1. Read the opening `Version:` banners in `NDS_ASSETS/js/nds-main.min.js` and `NDS_ASSETS/css/nds-main.min.css`. They must agree; otherwise → P5.
+2. Download that exact release: `releases/download/v<version>/nds-vanilla-template-v<version>.zip`. Extract its contents flat into `NDS_ROOT`.
+3. If `NDS_ROOT/_source/` is absent (newer zips do not ship it), download the SAME tag's source zip to a temp folder outside the project and copy available `_js`, `_sass`, `components`, `utilities`, `layout`, `ui-shell`, `core`, `templates`, `examples`, `_data/content` into `NDS_ROOT/_source/`.
+4. Copy all of `NDS_ROOT/_site/assets/` into `NDS_ASSETS` unchanged. Preserve lazy-bundle and `i18n/<component>/<lang>.json` paths.
 
-- **Assets**: copy the contents of `NDS_ROOT/_site/assets/` into `NDS_ASSETS`, whole and as-is, so `NDS_ASSETS/css/`, `NDS_ASSETS/js/`, `NDS_ASSETS/i18n/`, and the rest sit directly under it: every subfolder ships, internal layout unchanged. The lazy-loaded bundles (`nds-delegated.min.js`, `nds-extras.min.js`) and the runtime-fetched i18n JSON files (`i18n/<component>/<lang>.json`, used by the accessibility panel and bilingual components) must be reachable at the same relative paths the main script assumes.
-- **Never copy `NDS_ROOT/_site/docs-assets/`.** It holds what only the documentation site loads: the showcase demo layer, the event theme skins, and the sample JSON the doc demos fetch. `assets/` is the runtime; `docs-assets/` is the showroom. A `/docs-assets/…` path in markup you copied is demo content, not a component dependency: point it at your own data or image and move on. (The one case for reaching in: you actually want an event skin, in which case copy that single `docs-assets/events/<event>/` folder and load its one script tag.)
-- **Include on every page**: the document head, copied as a unit from a real page (`NDS_ROOT/_site/index.html`) with its asset references pointed at your `NDS_ASSETS` URLs. It sequences the stylesheets, preloads, theme guard, and deferred icon loader; `NDS_ROOT/_site/ui-shell/head.html` documents every file in it and when it loads, so read it before changing anything. Do not reduce the set or reorder it. Two entries are page-specific, not part of the fixed set: the `<title>` and the hero-image preloads. Sharing the head through the stack's layout/partial mechanism is the right move where one exists: keep a per-page slot for those two, and a page that renders a hero image ships its preload (the miss regresses LCP and is invisible to both verification passes). Never hand-add `nds-delegated.min.js` or `nds-extras.min.js`: the main script's loader injects those on demand. The favicon it references is a placeholder that ships in `assets/` so the copied head renders; replace the file with the project's own icon.
-- **Asset references in copied markup**: every page or partial copied out of `NDS_ROOT` references assets relative to its own location inside the template folder. A straight copy ships broken references: rewrite them to your `NDS_ASSETS` URLs as you go.
+- Never copy `_site/docs-assets/`, except one explicitly wanted event skin and its script.
+- Empty `NDS_ASSETS` is not proof of first setup: search the project for `nds-main.min.js` and its loading layouts. Found → P5. None → install latest and report it.
+- At session start compare the `NDS_ROOT` runtime banner with `NDS_ASSETS`. Older reference → re-download the runtime's release and repopulate `_source/`; newer reference → P5.
+- Older releases remain valid canon. Populate `_source/` from the matching tag only; never substitute newer source, never raw main. A JS file without a banner remains readable: use its doc source and the file itself. Report the gap; propose the upgrade as the dev's call.
 
-## Adoption order: chrome first, inner components second
+## Plan
 
-Build the outer page skeleton before any inner content:
+NDS is a UI layer. The host project is the application that serves the UI. It may contain both frontend and backend. NDS IQ does not choose or scaffold the stack.
 
-1. **Document head**: copy verbatim from `NDS_ROOT/_site/index.html`, then rewrite its asset references to `NDS_ASSETS` URLs; `NDS_ROOT/_site/ui-shell/head.html` explains each entry. Load-bearing: preloads, FOUC guards, theme guard, icon-load gate.
-2. **Master layout**: `<html>`/`<body>` skeleton with `<header>`, `<main>`, `<footer>` slots. Inside `<main>`, wrap page content in `<div class="nds-content-layout"><div class="nds-main-content">…</div></div>`. Runtime scripts sit at the end of `<body>`, not in the head: copy the `<script defer>` tags before `</body>` from `NDS_ROOT/_site/index.html`, rewritten to your `NDS_ASSETS` URLs: `nds-main.min.js`, plus `nds-accessibility.min.js` if you keep the panel (the loader injects the delegated/extras bundles on demand but never this one). Set `<html dir>` and `lang` from the project's locale logic: a multilingual project keeps its existing locale mechanism and stamps the two attributes per rendered page; don't force a single-language choice on it. NDS derives everything live from those two attributes (`NDS.lang`, `NDS.isRTL`), region subtags like `en-US`/`ar-SA` normalize to the base language, and any non-Arabic locale falls back to English for built-in component labels.
-3. **Topbar + main navigation**: `NDS_ROOT/_site/ui-shell/topbar.html` + the mainnav section of `NDS_ROOT/_site/ui-shell/header.html`. The brand slot defaults to the project's logo image only: swap the real logo onto `.nds-brand-logo` and remove the `nds-brand-name` text span, since most production logos already carry the wordmark. Keep the text span only when the logo is a bare mark with no name in it.
-4. **Footer**: `NDS_ROOT/_site/ui-shell/footer.html`.
-5. **Accessibility panel + cookie popup**: copy from `NDS_ROOT/_site/index.html`.
-6. **Sub-hero / page hero**: `NDS_ROOT/_site/ui-shell/hero.html`, when the page carries one.
-7. **Only then** start on inner components.
+### Choose the work mode
 
-The chrome you copy is the docs site's own. Before duplicating it to page #2, apply the porting principle (composition cascade, below) to its controls and values; one miss there multiplies by page count.
+| Project state | Workflow | Plan |
+|---|---|---|
+| No host project exists | Stop NDS work. Handle project setup outside NDS IQ, then resume after the host project serves. | No NDS plan yet |
+| Host project serves; no UI exists | Greenfield: use the dev brief for pages and content, and NDS canon for structure and behavior. | Required for multiple pages. The dev may waive it for one page. |
+| Existing non-NDS UI | Port: preserve requirements and project contracts; replace UI structure with NDS canon. | Required by default. An explicit waiver permits one parallel page. |
+| Conformant NDS project; one new page | Extend: use its verified family archetype, then the composition cascade. | No full plan. Build and Verify gates still apply. |
+| Conformant NDS project; several new pages | Inventory the named pages and their shared shapes. | Required |
+| Prior NDS conformance is unknown | Assess current pages before extension. | Required |
 
-Why: `<html dir>` and body class shape how every component paints (RTL/LTR + dark). Dropmenus, modals, and drawers expect the chrome's class chains and stacking context. Pasting a component into a page with a broken shell means every rendering bug is ambiguously "component or chrome?", impossible to attribute cleanly.
+**Plan entry gate.** Choose the work mode first. When a plan applies, list routes, layouts, shared partials, pages/views, and legacy UI libraries. Each client-side view gets its own row. Map every page through the §Build composition cascade and record its chrome shape (`full`, `console`, `minimal`). For greenfield work, include only pages the dev named and leave legacy columns empty. For no-plan work, inspect only the named page, its shared layout, loaded global files, and project contracts.
 
-## Composition cascade: for any page
+Check response headers/middleware for CSP once, project-wide, and record the result in the plan or no-plan work update. No CSP found → record `no CSP`; this closes the question — skip this file's CSP rules and ask the dev nothing about CSP. CSP found → read `ui-shell/head.md` §CSP and record the required nonce (server-rendered) or hash (static host).
 
-Inside `.nds-content-layout > .nds-main-content` every NDS page is composed the same way: sections built from the primitives in rule #4. What varies is the wrapper around it: modifier classes (side-info vs side-menu layout, hero variant) and how much chrome the page carries. Most pages take the full chrome from the adoption order; standalone pages carry none (`NDS_ROOT/_site/examples/registration.html` has no topbar, header, or footer).
+Inspect every globally loaded stylesheet for element selectors (`body`, `h1`, `a`, `input`, etc.). Treat each hit as affecting every NDS page served through that entry. Record the isolation in the plan or no-plan work update.
 
-Admin consoles, back-office, and internal tools run edge-to-edge from one class: `nds-full-width` on `<body>` widens the chrome and the content layout together, no per-layout modifier. They also move the hero INSIDE `.nds-main-content` so it sits beside the side menu instead of spanning above it; see `NDS_ROOT/_source/examples/console-demo.md`.
+- **Repeated families:** map one archetype; keep sibling rows as `same as <archetype>`.
+- **Prior NDS:** assess each page against current canon. Conformant → `Awaiting Verification`; non-conformant → prior NDS that needs a rebuild. Never silently resume an inherited plan.
+- **Non-conformant prior NDS:** rebuild clean in place. Use old work only as a content, flow, and data reference. Never use it as a copy source. Remove its NDS footprint through the approved plan; rollback is git. The approval names the cost: unported pages use the new runtime before their rebuild and may render worse.
+- **Second runtime:** only by explicit dev decision; use parallel files plus a second assets folder, accepting the two-runtime cost.
+- Project-rule conflict → P5.
 
-So choosing a starting page is about matching content structure, not markup: adjust modifiers and swap content rather than rebuilding. **The porting principle: content, flow, and data structure follow the legacy app; NDS improves the UI/UX.** What NDS adds is interaction and presentation quality: sorting, filtering, export, result counts, validation chrome, responsive behavior. These are defaults to apply, not questions to ask the dev:
+When the table requires a plan, create root `NDS-PLAN.md`. Start it with `Managed by NDS IQ`. Add columns for page, route, legacy libraries, NDS target, and status. Stop before building. Ask all project-wide decisions in ONE numbered review message. Include asset URL prefix, porting strategy, prior-NDS split, CSP grant (only when the sweep found a CSP), and pacing. Give options and a recommended default for each. Record answers in the plan. Defer page-specific questions to that page's build session.
 
-- A legacy page with no hero still gets `nds-sub`, the standard title area on every content page. `nds-flat` joins it on heavy-text article and post pages where a gradient would compete with reading. The main hero slider stays reserved for home and hub pages.
-- When the closest template or example presents the content differently than the legacy page (cards where the legacy page is a table), the existing shape wins: take the example's structure and wiring, keep the legacy presentation.
-- No legacy page at all (greenfield)? The dev's brief takes its place: content and flow come from what the dev describes, shape from the closest template or example, and open content questions park in that page's plan row like any other. The no-fabrication rule below binds hardest here: a template section the brief doesn't fill gets removed, not padded.
-- Forms are the one exception to shape-following: default to TWO steps, the form itself and a review step before submit (the DGA service-form pattern), even when the legacy form was single-step. Add more steps only where the legacy flow, or the dev's described flow, already has them; never ship the template's full step count for content that doesn't exist.
-- The principle cuts both ways. Never fabricate content or data to fill a template's empty sections, and never strip legitimate UI quality (result counts, placeholders, notices, confirmation feedback) in the name of parity: shape follows the legacy, quality comes from NDS.
-- **It covers the chrome, not just page content.** The topbar, nav, and footer you copied are the docs site's own, and every control and value in them is sample data. Go control by control: does this project have that capability? If not, remove the control: an empty notification bell or a search box wired to nothing is a promise to the user that nothing fulfills. If it does, keep it and match the project's mechanism (NDS ships a login modal; a project on SSO keeps the affordance and re-points it, and the persona menu after sign-in stays), then wire its values to the project: identity from the session, counts from the API, links to your routes. Hardcoded sample identity or counts render perfectly and survive both verification passes; they fail only when a real second user sees the first one's name. Rule #3's attribute-value audit (`href`s, `alt` text, `aria-label`s) applies to the chrome too, and remove anything asserting a version, credential, registration, or affiliation the project doesn't hold.
+**The plan is cross-session memory.**
 
-Prefer official over custom, in this order. Every entry in all three catalogs (`templates.yml`, `examples.yml`, `components.yml`) carries a `use_when` field naming the job it does and the words developers use for it; match the request against `use_when`, never against titles. A title names an entry's demo subject or its internal name, not the job, so a title scan misses entries that fit. Read every `use_when` before concluding nothing matches.
+- Statuses only: `Planned`, `In Progress`, `Awaiting Verification`, `Built and Verified`. Only dev confirmation sets `Built and Verified`; status lives only in the Status column.
+- `Awaiting Verification` means every agent-owned check passed and its evidence is recorded. Any unmet required check keeps the row `In Progress` with an open checkbox.
+- Every open question/check/fix/deferred decision is a `- [ ]` item; resolve as `- [x]`, never delete. Checkboxes are not page status.
+- **Pacing:** `gate-by-gate` (default) or `whole plan`. Whole-plan mode uses file defaults, verifies each page, updates rows as pages complete, and leaves them `Awaiting Verification` until dev confirmation.
+- When all rows are verified, retire the plan. A new multi-page effort or a dev-requested re-audit recreates it from current state: passing pages enter `Awaiting Verification`, drifted pages `Planned` with their deltas named.
+- **No-plan work:** scope is one named page. State its source paths and open questions before work. The final report records verification evidence and unmet checks. If the dev waived a required plan, note the loss of cross-session memory once. In an existing non-NDS UI, the waiver permits one parallel NDS page. All Build and Verify gates still apply.
+- Optional `NDS-REPORT.md` records NDS findings only: missing APIs/events, canon/rule/doc contradictions, reproducible bugs, or rule gaps. Include NDS version, instruction version, component, generic repro; never project markup/routes/data.
 
-1. **Match a DGA page template?** Use it as-is. `NDS_ROOT/_source/_data/content/templates.yml` catalogs DGA-official full-page templates (Service, Form, Contact, Content, Help & Support, About Entity, FAQ, e-Participation, and more, every entry tagged `DGA`). Copy the whole page from `NDS_ROOT/_source/templates/<name>.md` (raw page markup; built twin at `NDS_ROOT/_site/templates/<name>.html`), swap only the placeholder content. Never re-compose your own version: the templates encode structural decisions (side-info placement, breadcrumb slots, hero variant, tab layout) a hand-composed page will get subtly wrong. This applies especially when the template is bigger than the page you need: trimming sections or steps is still swapping content; rebuilding the skeleton around kept fields is not.
-2. **No DGA match?** Check `NDS_ROOT/_source/_data/content/examples.yml` + `NDS_ROOT/_source/examples/*.md` for a closest-fit composition: dashboards, service listings, editorial hubs, patterns DGA doesn't cover.
-3. **Nothing matches?** Scaffold custom, but stay inside rule #4's structure. Study the DGA templates and examples for wiring patterns to reuse: how side-info wires to breadcrumbs, how forms space grouped fields, how `nds-block` sub-groups compose. Recognizable NDS structure beats invented structure.
+## Build
 
-These page sources are the template's own Jekyll files, and a source file is a copy source only for markup you can literally see in it. Two things stand in for markup there; both route you to the built `_site` twin, where the real markup exists:
+**Build entry gate.** Reopen the page's plan row when one exists. Before markup, record the work mode, selected archetype/template/example or custom case, built twin, and component sources. For no-plan work, state them before editing. Resolve every open source or path question before building.
 
-- **Liquid tags** — `for`/`if` markers between curly braces and percent signs, looping demo lists over sample data. Never copy a Liquid tag. Where one sits in the markup you need, copy that region from the built twin: there the loops are already rendered into real rows.
-- **Markup that is not in the source at all.** A page's hero and breadcrumb usually exist only as settings in the block between `---` lines at the top of the file (`hero_title`, `breadcrumb:`); the layout renders them into real markup at build time. Never reconstruct that markup from the settings or from memory — copy it from the built twin.
+**Chrome first, components second.** Build each required chrome shape once, then its pages. Shape references: `_source/examples/sign-in.md` / `registration.md` = minimal; `console-demo.md` = console.
 
-The rule behind both: copy markup that exists. Where the source holds a tag or a setting instead of markup, the built twin holds the markup.
+1. **Head** — copy the head from `NDS_ROOT/_site/index.html` as a unit; use `ui-shell/head.html` as reference. Rewrite asset URLs only; do not remove/reorder entries. Keep `<title>` and hero preloads page-specific. Never add `nds-delegated.min.js` or `nds-extras.min.js` manually. Replace the favicon. Under CSP, authorize the head's inline script.
+2. **Master layout** — copy the complete `<body>` from a built `_site/` page matching the required shape and swap the content; never recreate it from prose. Use `_source/layout/page-shell.md` for shapes/modifiers. Older templates: choose the matching built page by inspection and report the missing reference.
+   - Layout-affecting modifiers (`nds-full-width`, `nds-wSideMenu`, and all `page-shell.md` modifiers) must exist in initial HTML. Route-dependent modifiers are set synchronously before framework mount, never in a mount effect.
+   - Client-rendered apps mount the copied shell inside `#root`/equivalent with `display: contents` in project CSS.
+   - Put copied runtime `<script defer>` tags at the end of `<body>`: `nds-main.min.js`, plus `nds-accessibility.min.js` when its panel remains.
+   - Set both `<html lang>` and `dir`: Arabic → `ar`/`rtl`; others → `ltr`. With no locale mechanism, ship Arabic-first bilingual with the existing switcher.
+3. **Brand** — put the project logo on `.nds-brand-logo`; remove its text span unless the logo is a bare mark. Then build inner components.
 
-A template's or example's own script block is canon too. It encodes wiring the page needs — a stepper's last-step completion call, a form's reset loop — often with a comment saying why the line exists. To change its behavior, edit the copied script point by point against the original; never rewrite it from scratch from what you think the page needs. A rewrite silently drops pieces the original still needs.
+**Admin/console:** add `nds-full-width` to `<body>` and place the hero inside `.nds-main-content` beside the side menu (`console-demo.md`).
 
-One tier outranks all three once it exists: a page family's own built-and-verified archetype. When the first list page ships, its siblings copy that page and swap entity content; re-deriving each sibling from the cascade invites drift between pages that must stay identical.
+**Copied chrome ships as-is.** Chrome means the topbar, main navigation, footer, accessibility panel and its FAB, cookie popup, DGA stamp, and dark-mode toggle. Keep every self-contained piece; record removable items as plan checkboxes. Only the dev ticks them. Never infer affiliation.
 
-For individual components, always check `NDS_ROOT/_source/_data/content/components.yml` first: ~90 components ship. Use a close variant even when its name doesn't obviously match what the dev asked for. Before you hand-compose a control or fall back to a native element, run that catalog check — "NDS has no X" is a claim you may only make after it.
+Before page #2, wire project-backed controls to real session/API/route data. Remove controls the project cannot back; never ship fake identity or dead widgets.
 
-## Replacing a legacy library: the method
+### Composition cascade
 
-Rule #6 names common libraries, but the method works for any:
+Search `use_when` across `templates.yml`, `examples.yml`, and `components.yml`; match by `use_when`, never title.
 
-1. **Name the capability, not the library**: "async searchable select", "rich text editor", "sortable table fed by server data".
-2. **Search `NDS_ROOT/_source/_data/content/components.yml` for that capability** (`use_when` first, then titles, descriptions, tags). A close variant almost always exists even when no name matches.
-3. **No single-component match? It's likely a composition.** A data-grid plugin maps to table + filter + pagination + export working together. Check `examples.yml` and `NDS_ROOT/_source/examples/` for a composed pattern before concluding NDS lacks it.
-4. **Port options and callbacks through NDS events and methods** (JS wiring below); never wrap NDS to emulate the old library's API shape.
-5. **Truly no NDS coverage?** Build it vanilla inside rule #4's structure with rule #5's styling order; don't pull the legacy library back in for one widget.
+1. Matching DGA template → copy `_source/templates/<name>.md` as-is; swap content only; never rebuild its structure.
+2. No template → closest `_source/examples/*.md`.
+3. No match → custom scaffold inside hard rule #4, reusing canonical wiring patterns.
 
-## JS wiring: read the banner first
+A page family's `Built and Verified` archetype outranks the cascade; siblings copy it and swap entity content.
 
-Many NDS components ship rich programmatic APIs and DOM events. **Wire your code THROUGH them, not around them.** Consumers who hand-write listeners on `.nds-*` elements or mutate their state directly reimplement (badly) what NDS already ships, and drift on every upgrade.
+At each page start, resolve its recorded questions, list every UI part, and match each against `components.yml`. Missing parts come from their canonical component; no match → custom case. A controls bar above a table/list/grid is the Toolbar component. P1 applies before claiming NDS lacks anything.
 
-**The rule: before adding any `addEventListener` on a `.nds-*` element, or writing any `data-*` attribute an NDS component owns, read that component's banner.** Every `NDS_ROOT/_source/_js/nds-<name>.js` opens with a comment block: the component's public surface, in five fixed sections.
+Before page JS, list every intended behavior and check the component catalogs/banners. If NDS ships the behavior, use its methods/events; do not rebuild it. Apply the same rule to core helpers (§JS wiring).
 
-- **Rides** — the components this one builds on. Inherited surface is documented in the BASE component's banner, never restated in the rider's: a multiselect's portal and search hooks live in the dropmenu banner its Rides line names. Follow the edge instead of guessing.
-- **Methods** — the public calls, with signatures and one-line meanings.
-- **Events** — what it dispatches, with each event's `detail` shape.
-- **Hooks** — the `data-*` attributes and action roles it owns.
-- **Gotchas** — the traps specific to this component. Believe them.
+### Authority by concern
 
-The banner is the contract: wire through its Methods and Events, configure through its Hooks. The doc page explains usage with full markup; the banner enumerates the surface. Cross-cutting utilities — the fetch wrapper (`NDS.request`), `data-state`/`data-status` writes (`NDS.State`/`NDS.Status`), language and breakpoint facts (`NDS.lang`, `NDS.isRTL`, `NDS.breakpoints`), i18n string tables (`NDS.i18n.load`) — live in `nds-core.js`: read ITS banner the same way, and prefer those helpers over hand-rolled equivalents. That preference has a trigger moment of its own: before you hand-write a network call, a debounce, a resize listener, or a state/status DOM write anywhere in page JS — including a plain `fetch` to the project's own API — check the core banner. Writing `fetch` in page JS is a claim that core ships no wrapper; it does, and the same catalog-check discipline applies to code that applies to markup.
+The existing UI means the screens being replaced, not a separate app or repository. The project frontend and backend are layers of the host project. These sources govern different decisions:
 
-**Every request the page sends gets a visible failure path.** A rejected promise with no handler leaves the user at a dead control with no feedback — that is a broken page, and the interactive pass fails on it. Route errors somewhere the user can see: the form's own status (`NDS.Forms.setStatus`), an alert, or the component's error surface, and exercise the failure path once during verification (kill the network or point at a bad URL).
+| Concern | Authority |
+|---|---|
+| Required content, fields, order, and business outcomes | Existing UI; the dev brief when no prior UI exists |
+| Routes, views, client state, asset paths, and load order | Project frontend |
+| APIs, authentication, permissions, validation, and data rules | Project backend |
+| Shell, sections, component markup, classes, ARIA, `data-*`, and component interactions | NDS canonical sources |
 
-**Nothing there for what you need?** Going direct is fine: leave a one-line comment naming what you looked for, and an `NDS-REPORT.md` entry (see the plan section).
+A conflict between the existing UI and a backend contract is a dev decision. Report it and do not guess.
 
-Facts that hold across all of NDS:
+Search, sorting, filtering, export, counts, validation chrome, and responsive behavior are NDS UI defaults, not questions to ask. They never authorize changes to business rules or backend contracts.
 
-- **Reinitialization** (after any dynamic DOM change that adds NDS markup): `NDS.<Component>.reinit()` rescans the page and skips anything already initialized, so it is safe to call repeatedly; this is the one to reach for. `NDS.<Component>.create(el)` varies by component: some return the element's live instance, others build a second one on top of it and bind a duplicate set of listeners. The banner's Methods line says which. Use it only for an element you know is fresh — and check the banner first: not every component ships the same shape (forms, for example, has `initializeContainer` and no reinit at all).
-- **A lazily loaded namespace answers for any key.** `NDS.X.method` can be a loader stub that returns a function for anything, so a `typeof` check proves nothing about the real surface. The banner (or the grep) is how you learn what actually exists.
-- **Client- or server-driven data? Judge by scale, then by growth.** Under ~500 rows, client-side wins: fetch the set once and let table, filter, sort, and export work the full data, more capability with zero backend work. Above that, or when the dataset is small today but expected to grow, go server-driven (the pagination banner's record-slot method plus re-fetching sort/filter). When the better choice needs a backend change (a clean list endpoint, a sort parameter, a count field), propose it to the dev and make it with their approval; don't contort the page to avoid touching the server.
+- Existing pages without heroes get `nds-sub`; heavy-text pages also get `nds-flat`. Hero sliders stay on home/hub pages.
+- When required presentation differs, select a documented NDS variant first. The requirement never authorizes changes to canonical component anatomy.
+- Forms default to TWO input steps: form + review. Add more input steps only when the flow requires them. A terminal confirmation step is not an input step — keep the success step your matched source ships.
+- Greenfield work uses the dev brief. Remove unfilled template sections; never fabricate content.
 
-## Design tokens (in `NDS_ROOT/_source/_sass/`)
+**Copy rendered markup when source markup is generated.** Do not copy Liquid tags. For front-matter-generated regions or page wrappers, copy the built twin's rendered HTML/full `<body>`.
 
-Four tiers. Tiers 2–4 live in `tokens/`, one file each. Tiers 3 and 4 put the light block at the top and the `:root[data-theme~="dark"]` block at the bottom of the same file. Tier 2 carries no color, so it has no dark block.
+**Replacing a legacy library:** name the capability, search the catalogs, compose NDS components if needed, and port callbacks through NDS methods/events. Truly uncovered → vanilla inside hard rule #4; never reintroduce the legacy library for one widget.
 
-1. **Palette** (`themes/_dga.scss`, vendored, do not modify): raw color ramps, no meaning. Its values are frozen hex and never flip; dark comes from the semantic tier's dark block.
-2. **Primitives** (`tokens/_primitives.scss`): dimension vocabulary (`--spacing-md`, `--radius-sm`, typography rungs).
-3. **Semantic** (`tokens/_semantic.scss`): one name per meaning (`--background-primary`, `--text-oncolor-primary`). Rule #5 rebinds these at `:root` for whole-system theming.
-4. **Component** (`tokens/_components.scss`): per-component dials, `--{component}-{property}-{variant}-{state}`.
+**Build exit gate.** Before §Verify:
+
+- Name the canonical page source, built twin, and component sources used.
+- Confirm every page part and intended behavior was matched through the catalogs and banners.
+- Confirm structural changes fit hard rule #3's four sanctioned edits.
+- Check every `nds-hgi-*` token in page HTML and JS against `icons.yml`. Other glyphs use `<i class="hgi hgi-stroke hgi-<name>">` from `_source/_sass/_hgiRoundedStroke.scss`.
+- Under strict `style-src`, grep the page for `style="` and convert every canonical inline knob through hard rule #3's CSP edit.
+
+Record the evidence under the plan row. For no-plan work, carry it into the final report. Any unmet check stays open. A plan row stays `In Progress`; no-plan work remains unverified.
+
+## JS wiring
+
+**Use NDS APIs before direct DOM wiring.** Before adding listeners to `.nds-*` elements or writing NDS-owned `data-*`, read the component banner in `_source/_js/nds-<name>.js`:
+
+- **Rides** — base component/inherited surface.
+- **Methods** — public calls.
+- **Events** — dispatched events and `detail`.
+- **Hooks** — owned `data-*` / action roles.
+- **Gotchas** — required traps/constraints.
+
+Before hand-writing fetch, debounce, resize, or state/status DOM logic, read `nds-core.js` for `NDS.request`, `NDS.State`/`NDS.Status`, `NDS.lang`/`NDS.isRTL`/`NDS.breakpoints`, `NDS.debounce`, `NDS.i18n.load`.
+
+Every request needs a visible failure path through the form/component status or an alert; exercise it during verification.
+
+If NDS has no needed surface, direct code is allowed; comment what was checked and create/add the finding to `NDS-REPORT.md`.
+
+- After dynamic DOM changes, prefer `NDS.<Component>.reinit()`; check the banner because component lifecycle APIs differ.
+- Lazy namespace existence proves nothing; use the banner/grep to confirm methods.
+- Copied template/example page JS is canonical and follows hard rule #3.
+- Data scale: follow the existing API shape. An endpoint that returns the full set → fetch once and use client-side table/filter/sort/export. An endpoint that pages/sorts/filters server-side → wire the NDS controls to those parameters. Shape does not fit the data size (a huge set in one payload, a tiny set behind paging) → report it; backend changes are the dev's.
+
+## Verify
+
+**Verify entry gate.** Confirm the §Build exit evidence is recorded. Reopen the matching built twin before the browser passes.
+
+Never verify from code inspection. A page needs both browser passes:
+
+- **Behavioral:** load it, run `NDS.Init.audit()`, inspect NDS warnings, and exercise wired behavior including one request failure path. Also check every `nds-hgi-*` token in the page HTML and its page JS against `_source/_data/content/icons.yml`: `NDS.Init.audit()` does not see icon names inside JS strings. Submit every required field type empty, one by one: the types share one required mark but each validates through different code, so one passing field proves nothing about the next. During active work, `window.NDSInitConfig = { enableLogging: true }` may be set before NDS scripts.
+- **Visual:** serve `NDS_ROOT/_site` over HTTP (a quick static server — never `file://`, which floods the console with false errors) and compare your page against the matching built page at desktop and mobile widths. **The built twin is the visual spec:** a difference you chose is a content swap; a difference you didn't is a bug. Also inspect spacing, icons, width/sticky behavior, dark mode, and overall coherence. Measurements alone are not visual verification.
+
+**Drive both passes headlessly** with a browser your own tool loop can control. Use tooling available in the environment or project. Keep temporary tooling outside the project and never change its lockfile. Behavioral proof is the console plus audit. Visual proof is screenshots you inspect at desktop and mobile widths.
+
+**Set the viewport, never the window.** OS window minimums can clamp small widths while screenshots still crop to the requested size. This creates a false responsive failure. Use Puppeteer `page.setViewport()`, a Playwright context `viewport`, or CDP `Emulation.setDeviceMetricsOverride`. Never use `--window-size` or browser-window resize as viewport proof. No CDP-capable tool at hand? Set one up: `puppeteer-core` or Playwright in a scratch folder outside the project, pointed at the installed Chrome, is the default mobile path. Declare the viewport unmet only after that attempt fails. Before trusting a screenshot, read `window.innerWidth`; it must equal the target. A mismatch means the viewport is wrong, not the page; the pass remains unmet.
+
+Claim "cannot see the page" only after the headless attempt fails. Report the failure. An unreachable viewport remains unmet.
+
+If the attempt fails, use the first available fallback and report what remains unverified:
+
+1. Existing browser tool/harness, including authenticated sessions. Any unreachable viewport remains unmet.
+2. Smoke check: `curl -sI` for status/CSP; `curl -s` for intact head/scripts, server errors, and forbidden inline styles under strict CSP.
+3. Dev checklist:
+
+   [VERIFICATION CHECKLIST FOR DEV]
+   - [ ] Check console for `NDS`-prefixed warnings.
+   - [ ] Test responsiveness below 768px.
+   - [ ] Check expected spacing.
+   - [ ] Check every icon renders as a glyph.
+   - [ ] Check dark mode on page content.
+
+Under strict `style-src`, confirm §Build's `style=` grep ran on this page; run it if not.
+
+**Verify exit gate.** Record this evidence under the page's plan row, or in the final report for no-plan work:
+
+- `NDS.Init.audit()` result, exercised behavior, and the request failure-path result.
+- Built twin used and the inspected desktop screenshot.
+- Mobile target width, equal `window.innerWidth`, and the inspected mobile screenshot.
+- Icon, dark-mode, and strict-CSP results that apply to the page.
+- Every unmet item, if any.
+
+Every required item must be complete. An unmet item keeps a plan row `In Progress`; no-plan work reports the page as unverified. After all agent-owned checks pass, a plan row may move to `Awaiting Verification`. No-plan work reports that it awaits dev confirmation. Only dev confirmation makes the page `Built and Verified`.
 
 ## Upgrading NDS
 
-When the dev asks for an upgrade, fetching the latest zip and replacing `NDS_ROOT` yourself is sanctioned; the ask is the approval. The declared path does not change: the zip's top-level folder is named for the release it carries, so put that folder's CONTENTS at the declared path, replacing what is there. `NDS_ROOT/_site/` must still resolve directly afterwards, with no version folder nested under it — the same test as first install. Then run the steps below (they equally apply when the dev swapped the folder themselves). Upgrade covers the install these rules drive; NDS work that predates them takes Workflow step 1's conformance split first, never straight to the sweep. An update check alone is also sanctioned, on ask or when starting a larger effort: compare the runtime banner in `NDS_ASSETS/js/nds-main.min.js` against the latest release tag at the repo the `NDS_ROOT` section names, report what a newer release offers (its CHANGELOG section), and upgrade only on the dev's go. The same check covers these rules: compare the heading of the project root's `NDS-IQ.md` against raw main's copy (downloaded raw per step 4), report drift the same way, and update only on the dev's go, through step 4's guard when the runtime is behind.
+An explicit upgrade request is approval. Download latest and replace `NDS_ROOT` exactly as §Install; prior-rules work takes §Plan conformance first.
 
-1. **Compare versions**: read the `Version:` banner (first lines only) of `NDS_ROOT/_site/assets/js/nds-main.min.js` and `NDS_ASSETS/js/nds-main.min.js`. If they differ, the project runtime is stale.
-2. **Replace the runtime**: copy the new `NDS_ROOT/_site/assets/` over `NDS_ASSETS`, overwriting NDS files in place, except `img/favicon.svg`, which the project replaced: keep the project's copy. Leave files the project added under `NDS_ASSETS` untouched; get dev approval before deleting anything.
-3. **Sweep your pages**: read the `### Migrating from` sections in `NDS_ROOT/CHANGELOG.md` covering every version between the two banners, and update every page built from NDS markup for the breaking changes they list. Plan the sweep before starting it: list the applicable Migrating items in `NDS-PLAN.md` and mark which pages each touches, then update rows as you sweep; a dropped session resumes from the plan, not from memory. Report every change you make.
-4. **Update this file**: download the raw main `NDS-IQ.md` (URL in "Install and upgrade this file") straight to a file — never through a web-fetch tool: those re-render what they fetch (summarized digests, shifted headings), and a re-rendered copy is corrupt. Compare its heading's `instructions v…` against the project root copy's (a heading with no version is older). Newer → replace the project root's `NDS-IQ.md` with the download, whole: no merging, no partial patches, and the anchor is untouched — it holds only the project's two paths and does not version. In an upgrade, raw main is the right source: it is kept valid for the latest published template, which the upgrade just installed; the fresh `NDS_ROOT/NDS-IQ.md` copy (matched to the template by construction but frozen at the release cut) is the offline fallback. Runtime behind the latest release? Propose the full upgrade instead; this step delivers the file with it. The rules you are reading may be the outdated ones; where the new file disagrees, it wins.
+For an update check, compare the runtime banner with the latest release and report relevant changelog changes; upgrade only on dev approval.
 
-## Facts the docs assume
+For rules updates, compare raw main `NDS-IQ.md` content with the project-root copy. Any difference means a newer revision; install only on dev approval. An explicit update request runs step 4 directly.
 
-- **RTL is the default.** `<html dir="rtl" lang="ar">` for Arabic, `<html dir="ltr" lang="en">` for LTR. Styles use CSS logical properties: direction flips from that single attribute, no separate stylesheet.
-- **Dark mode** flips via `data-theme~="dark"` on `<html>`. No rebuild.
-- **Two icon systems, not interchangeable.** `.nds-icon.nds-hgi-<name>` is the registered inline set the default chrome uses: masks that paint before any font loads, so UI icons never flash. The set is small by design; a name outside `NDS_ROOT/_source/_data/content/icons.yml` paints as a solid box, silently. For any glyph beyond it, search the full HGI class list in `NDS_ROOT/_source/_sass/_hgiRoundedStroke.scss` and use the font class instead: `<i class="hgi hgi-stroke hgi-<name>">`, already loaded by the head unit. Before calling any page done, extract every `nds-hgi-*` token it ships, from page JS as well as HTML, and check each against `icons.yml`: nothing warns at runtime on its own: `NDS.Init.audit()` (behavioral pass) catches instances in the DOM, but tokens shipped in page JS aren't in the DOM at audit time, so the extraction sweep is what covers them.
+Use absolute paths for writes; never `cd` into `NDS_ROOT`/`NDS_ASSETS`. After each write, inspect the destination.
 
-## Reference index: where to look inside `NDS_ROOT`
-
-- `_source/components/*.md`: doc-page sources. Canonical `lang-html` markup + `data-*` tables + ARIA notes, no site chrome. **First stop for how to write a component.** (Two pages keep a demo or chip behind an include the source does not inline — `user-feedback.md`, `multiselect.md`; their built twins show the full demo.)
-- `_source/utilities/*.md` (built: `_site/utilities/*.html`): same doc format for the utility entries in `components.yml` — copy, divider, numbers, helpers, and the rest.
-- `_source/ui-shell/*.md`: the chrome doc sources, in that same format.
-- `_source/core/*.md` (built: `_site/core/*.html`): the runtime's own API docs — `refresh` (the one call after your JS adds, removes or replaces rows or cards) and `request` (the fetch wrapper). These document calls, not markup, so there is no `lang-html` block to copy.
-- `_site/components/*.html`: the built doc pages. The human surface.
-- `_site/ui-shell/*.html`: chrome docs. `head.html`, `header.html`, `topbar.html`, `footer.html`, `hero.html`, `sidemenu.html`, `sideinfo.html`.
-- `_source/layout/*.md` (built: `_site/layout/*.html`): layout primitive docs. `section`, `grid`, `flex`, `block`.
-- `_source/templates/*.md` + `_source/examples/*.md`: full-page templates + composed real-world pages, raw markup (built twins in `_site/templates/` + `_site/examples/`).
-- `_source/_data/content/*.yml`: machine-readable catalogs. `components.yml`, `templates.yml`, `examples.yml`, `icons.yml`.
-- `_source/_js/nds-<name>.js`: readable component behavior source, opening with the public-surface banner ("JS wiring" section).
-- `_source/_sass/components/_<name>.scss`: readable component styling source.
-- `_source/_sass/tokens/`: three of the four design-token tiers, one file each (primitives, semantic, components); the fourth tier, the palette, lives in `_source/_sass/themes/_dga.scss`. Dark rebinds sit at the bottom of the semantic and component tier files, under `:root[data-theme~="dark"]`.
-- `_source/_sass/_mixins.scss`: shared mixins.
+1. **Compare versions** — opening `Version:` banners in `NDS_ROOT/_site/assets/js/nds-main.min.js` and `NDS_ASSETS/js/nds-main.min.js`.
+2. **Replace runtime** — copy new `_site/assets/` over `NDS_ASSETS`; preserve project `img/favicon.svg`. Keep project-added files; deletions require dev approval.
+3. **Sweep pages** — read every `### Migrating from` section in `CHANGELOG.md` between the two banners; add affected work to `NDS-PLAN.md`, map it to pages, execute, and report. Also report useful `Added` / `Changed` / `Fixed` items for dev choice.
+4. **Update this file** — download raw main `NDS-IQ.md` with curl/the stack HTTP client, not a web-fetch tool. Accept only if line 1 starts `# NDS IQ`; otherwise discard and retry once — a second failure is reported and the installed copy stays. Replace the project-root copy whole — no merging, anchor untouched — then reread the file before continuing.
 
 ## Install and upgrade this file
 
-NDS IQ installs as two pieces:
+NDS IQ has two pieces:
 
-1. **This file**, saved as `NDS-IQ.md` at the consumer project root and committed. It is universal — every project's copy is byte-identical — so an update is a whole-file replace, never an edit. Source of truth: `https://raw.githubusercontent.com/mazin-musleh/NDS-vanilla/refs/heads/main/_includes/NDS-IQ.md` (case matters). The template zip ships the same file at `NDS_ROOT/NDS-IQ.md` as the offline copy.
-2. **The anchor**, added to the project's agent instruction file (`CLAUDE.md` / `AGENTS.md`). It carries the only per-project values — the two path declarations — plus the read trigger. It has no version; install it once and it never churns.
+1. **`NDS-IQ.md`** at project root, committed and replaced whole on update. Source: `https://raw.githubusercontent.com/mazin-musleh/NDS-vanilla/refs/heads/main/_includes/NDS-IQ.md`.
+2. **Anchor** in `CLAUDE.md` / `AGENTS.md`: the only project-specific path values plus the read trigger. Install once.
 
-The anchor is exactly this, with the two paths set to the project's real values:
+Use this anchor, setting `NDS_ASSETS` to the project's real static root:
 
 ```markdown
 ## NDS — National Design System (UI layer)
 
-- `NDS_ROOT` = `/path/to/nds-vanilla-template/`
+- `NDS_ROOT` = `.nds/`
 - `NDS_ASSETS` = `/path/to/your-project/public/assets/`
 
 All UI in this project is built with NDS. Before any UI, page, component, styling,
 or asset work — or when unsure whether a task touches NDS — read `NDS-IQ.md` at this
 project's root, top to bottom, once per session. Do no NDS work before that read.
+A compacted or summarized context starts a new session: read the file again before
+more NDS work.
 If the file is missing, stop and ask the dev.
 
 These hold even before the read:
@@ -277,8 +349,10 @@ These hold even before the read:
 - Never write `.nds-*` markup from memory — copy from the sources `NDS-IQ.md` names.
 ```
 
-**First install**: download this file raw to `NDS-IQ.md` at the project root (curl or the stack's HTTP client, never a web-fetch tool); add the anchor to the agent file with the project's real paths (paths the dev hasn't set yet stay placeholders, and the placeholder rule above blocks NDS work until they are set); commit both. Then start at Workflow step 1: inventory the project and write `NDS-PLAN.md`. Installing the file is not the deliverable; the plan the dev reviews is.
+**Anchor update:** if the compacted-context sentence is missing, add it exactly; change nothing else.
 
-**Migrating from a pasted block (instructions v6 and earlier)**: the old model pasted the whole rulebook into the agent file. Replace it: install the file and anchor per First install, carrying the pasted block's two declared path values into the anchor, then delete the pasted block — everything from its `## Design system: NDS Vanilla` heading through its `<!-- end NDS instructions -->` marker. One rule source remains: this file. Then start at Workflow step 1, the same as a first install: the pages here were built under the old rules, so they are prior NDS work and take step 1's conformance assessment before anything new lands on them.
+**First install:** download raw `NDS-IQ.md` to project root; add the anchor with `NDS_ROOT=.nds/` and the real `NDS_ASSETS` path; commit both; then run §Plan inventory and create `NDS-PLAN.md`.
 
-**Update**: "Upgrading NDS" step 4 — compare headings against raw main, replace the project root's copy whole, leave the anchor alone.
+**Migrating from pasted instructions (v6 and earlier):** install this file + anchor, carry over the two path values, delete the old pasted instruction block — everything from its `## Design system: NDS Vanilla` heading through its `<!-- end NDS instructions -->` marker — then run §Plan conformance as prior NDS work.
+
+**Update:** use §Upgrading NDS step 4.

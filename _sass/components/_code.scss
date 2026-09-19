@@ -176,6 +176,13 @@ $prose-langs: '.lang-markdown, .lang-md, .language-markdown, .language-md, .lang
       .nds-code-line {
         max-width: var(--paragraph-max-width);
       }
+
+      // A table row keeps its authored line: wrapping it hides the cell breaks,
+      // so it opts out of the prose measure and rides the block's own scroll.
+      .nds-code-table-row {
+        white-space: pre;
+        max-width: none;
+      }
     }
 
     .nds-code-line {

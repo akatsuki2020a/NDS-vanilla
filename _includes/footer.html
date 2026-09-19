@@ -17,7 +17,7 @@
                 {%- endunless %}
                 <li>
                     <a class="nds-link nds-footer-link{% if link.class %} {{ link.class }}{% endif %}" href="{{ link_url }}"
-                        {%- if link.target %} target="{{ link.target }}" rel="noopener noreferrer"{%- endif %}>
+                        {%- if link.target %} target="{{ link.target }}"{%- endif %}>
                         {%- if link.icon %}<i class="nds-icon {{ link.icon }}" aria-hidden="true"></i>{%- endif %}
                         <span class="nds-label">{{ link.label }}</span>
                     </a>
@@ -37,14 +37,14 @@
                 <span class="nds-footer-heading" id="nds-footer-iconcol-{{ forloop.index }}">{{ column.heading }}</span>
                 <div class="nds-footer-icon-row" role="group" aria-labelledby="nds-footer-iconcol-{{ forloop.index }}">
                     {%- for social in column.social_icons %}
-                    <a class="nds-btn nds-secondary-outline nds-icon-only" href="{{ social.url }}"
-                        target="_blank" rel="noopener noreferrer" aria-label="{{ social.label }}">
+                    <a class="nds-btn nds-secondary-outline nds-icon-only nds-tooltip" data-tooltip-hover="500" href="{{ social.url }}"
+                        target="_blank" title="{{ social.label }}" aria-label="{{ social.label }}">
                         <i class="nds-icon {{ social.icon }}" aria-hidden="true"></i>
                     </a>
                     {%- endfor %}
                     {%- for app in column.mobile_apps.apps %}
-                    <a class="nds-btn nds-secondary-outline nds-xl nds-icon-only"
-                        href="{{ app.url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ app.label }}">
+                    <a class="nds-btn nds-secondary-outline nds-xl nds-icon-only nds-tooltip" data-tooltip-hover="500"
+                        href="{{ app.url }}" target="_blank" title="{{ app.label }}" aria-label="{{ app.label }}">
                         <i class="nds-icon {{ app.icon }}" aria-hidden="true"></i>
                     </a>
                     {%- endfor %}
@@ -76,6 +76,31 @@
                 <div class="nds-footer-copyright">
                     <span>All Rights Reserved {{ site.title }} &copy; {{ site.time | date: '%Y' }}</span>
                 </div>
+                <div class="nds-footer-versions">
+                    {%- if site.version and site.latest_release %}
+                    {%- if site.version == site.latest_release %}
+                    <span class="nds-tag nds-xs nds-oncolor">
+                        <span class="nds-label">v{{ site.version }}</span>
+                    </span>
+                    {%- else %}
+                    {%- comment %} Dev preview: the pill is the tooltip trigger; balloon is generated and portaled {%- endcomment %}
+                    <span class="nds-tag nds-xs nds-oncolor nds-tooltip nds-term"
+                        data-tooltip-message="Documentation preview: ahead of current release v{{ site.latest_release }}"
+                        data-tooltip-hover="500">
+                        <span class="nds-label">v{{ site.version }}</span>
+                    </span>
+                    {%- endif %}
+                    {%- endif %}
+                    {%- comment %} IQ revision: version parsed from the block's own heading so it can never desync {%- endcomment %}
+                    {%- capture _iq_instr %}{% include NDS-IQ.md %}{% endcapture %}
+                    {%- assign _iq_parts = _iq_instr | split: 'instructions v' %}
+                    {%- assign _iq_v = _iq_parts[1] | split: ')' | first %}
+                    <a href="{{ 'guides/integration-quality' | relative_url }}" class="nds-tag nds-xs nds-oncolor nds-tooltip nds-term"
+                        data-tooltip-message="{{ site.nds_iq.description }}"
+                        data-tooltip-hover="500">
+                        <span class="nds-label">{{ site.nds_iq.title }} v{{ _iq_v }}</span>
+                    </a>
+                </div>
                 {%- if footer_data.bottom.policy and footer_data.bottom.policy.size > 0 %}
                 <div class="nds-footer-policy">
                     {%- for link in footer_data.bottom.policy %}
@@ -97,7 +122,7 @@
         <div class="nds-footer-logos">
             {%- for logo in footer_logos %}
             {%- if logo.url %}
-            <a href="{{ logo.url | relative_url }}"{%- if logo.url contains 'http' %} target="_blank" rel="{% if logo.nofollow %}nofollow {% endif %}noopener noreferrer"{%- endif %}>
+            <a href="{{ logo.url | relative_url }}"{%- if logo.url contains 'http' %} target="_blank"{% if logo.nofollow %} rel="nofollow"{% endif %}{%- endif %}>
                 <img{%- if logo.class %} class="{{ logo.class }}"{%- endif %} src="{{ logo.image | relative_url }}" loading="lazy" width="{{ logo.width }}"
                     height="{{ logo.height }}" alt="{{ logo.alt }}">
             </a>

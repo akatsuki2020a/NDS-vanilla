@@ -1,6 +1,7 @@
 ---
 exclude_showcase: true
 layout: page
+# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
 layout_class: nds-wSideInfo
 title: Contact Us Template
 hero_style: "nds-aside"
@@ -34,7 +35,6 @@ sidemenu_mode: false
                                 </button>
                             </div>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- Last Name -->
@@ -53,7 +53,6 @@ sidemenu_mode: false
                                 </button>
                             </div>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- Email -->
@@ -72,7 +71,6 @@ sidemenu_mode: false
                                 </button>
                             </div>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- Phone with country code prefix -->
@@ -187,7 +185,6 @@ sidemenu_mode: false
                                 </button>
                             </div>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- Subject -->
@@ -206,7 +203,6 @@ sidemenu_mode: false
                                 </button>
                             </div>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- Category -->
@@ -240,7 +236,6 @@ sidemenu_mode: false
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- How Can We Help (textarea) -->
@@ -254,7 +249,6 @@ sidemenu_mode: false
                             <textarea id="contact-message" name="message" class="nds-textarea"
                                 placeholder="Tell us a bit more about your request..." rows="5"></textarea>
                         </div>
-                        <div class="nds-form-footer" data-feedback-target hidden></div>
                     </div>
 
                     <!-- Upload files (compact browse mode) -->
@@ -286,7 +280,7 @@ sidemenu_mode: false
                                         <i class="nds-icon" aria-hidden="true"></i>
                                     </span>
                                 </span>
-                                <div class="nds-progress-circle" style="--progress-size: 24px; --progress-value: 0;">
+                                <div class="nds-progress-circle">
                                     <svg width="24" height="24" viewBox="0 0 24 24">
                                         <circle class="nds-progress-bg" cx="12" cy="12" r="10" fill="none" stroke-width="3" />
                                         <circle class="nds-progress-track" cx="12" cy="12" r="10" fill="none" stroke-width="3"
@@ -392,7 +386,7 @@ sidemenu_mode: false
                             <span class="nds-label">Location</span>
                         </dt>
                         <dd>
-                            <a href="https://maps.google.com/?q=Riyadh" target="_blank" rel="noopener" class="nds-primary">
+                            <a href="https://maps.google.com/?q=Riyadh" target="_blank" class="nds-primary">
                                 <span class="nds-label">Riyadh</span>
                             </a>
                         </dd>
@@ -403,13 +397,13 @@ sidemenu_mode: false
             <div class="nds-sideinfo-group">
                 <span class="nds-sideinfo-title">Follow us</span>
                 <div class="nds-social-links">
-                    <a href="https://x.com/" target="_blank" rel="noopener" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on X">
+                    <a href="https://x.com/" target="_blank" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on X">
                         <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
                     </a>
-                    <a href="https://linkedin.com/" target="_blank" rel="noopener" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on LinkedIn">
+                    <a href="https://linkedin.com/" target="_blank" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on LinkedIn">
                         <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
                     </a>
-                    <a href="https://instagram.com/" target="_blank" rel="noopener" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on Instagram">
+                    <a href="https://instagram.com/" target="_blank" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on Instagram">
                         <i class="hgi hgi-stroke hgi-instagram"></i>
                     </a>
                 </div>
@@ -472,7 +466,7 @@ sidemenu_mode: false
 </section>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    function initPage() {
         // Submit feedback — mock a successful submission.
         var form = document.getElementById('contact-form');
         if (form) {
@@ -514,5 +508,7 @@ sidemenu_mode: false
                 });
             });
         }
-    });
+    }
+    // Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
 </script>

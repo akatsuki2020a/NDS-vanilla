@@ -10,12 +10,23 @@
 // ==============================================
 
 .nds-swiper {
-    // --swiper-slides set by JavaScript in constructor to prevent CLS
+    // The author's knobs sit inline on the element (--max/mid/min-slides, --peek),
+    // so CSS sizes the row the moment main CSS applies — before any JS, in every
+    // browser. --slides (loader preset, then init) wins once written; it is also
+    // how the deprecated bare attributes still work, since only JS can read those.
     --swiper-total: var(--total, 1);
-    --swiper-slides: var(--slides, 1);
+    --swiper-slides: var(--slides, var(--min-slides, 1));
     --swiper-gap: var(--gap, var(--spacing-xl));
-    --swiper-peek: 0px;
-    --swiper-padding: var(--padding, 0);
+    --swiper-padding: var(--padding, 0px); // a length: it feeds calc() and max() below
+    // --_peek is the peek every formula reads: the author's --peek until JS has
+    // counted the pages, 0px once it finds a single page (nothing to peek at).
+    // Unset --peek makes it invalid, so every reader falls back to "no peek".
+    --_peek: var(--peek);
+    // Peek reserve = peek + the gap the gutter does not already give (a full gap
+    // with no gutter, none inside .nds-max-width). --peek: 0px must mean no peek
+    // as well: min(peek x 1000, ...) is the whole term for any positive peek, 0 for none.
+    --_peek-reserve: calc(var(--_peek) + min(var(--_peek) * 1000, var(--swiper-gap) - var(--swiper-padding)));
+    --swiper-peek: var(--_peek-reserve, 0px);
 
     display: flex;
     flex-direction: column;
@@ -24,15 +35,21 @@
     width: 100%;
     height: 100%;
 
-    .nds-max-width & {
-        --swiper-padding: var(--padding, var(--nds-viewport-padding));
+    @include tablet(min) { --swiper-slides: var(--slides, var(--mid-slides, 1)); }
+    @include desktop(min) { --swiper-slides: var(--slides, var(--max-slides, 1)); }
+
+    // One page has nothing to peek. JS counts (preset, then init) and leaves
+    // data-swiper-peek off; the reserve follows.
+    &:is([data-swiper-preset], [data-nds-swiper-initialized]):not([data-swiper-peek]) {
+        --_peek: 0px;
     }
 
-    // Peek width = the raw --peek px + one gap. JS sets --peek and toggles
-    // [data-swiper-peek]; doing the gap addition here keeps swiper init free
-    // of a getComputedStyle('--gap') read (a forced reflow).
-    &[data-swiper-peek] {
-        --swiper-peek: calc(var(--peek, 0px) + var(--swiper-gap));
+    // Inside .nds-max-width the row runs to the breakout's edge, the viewport on
+    // any screen narrower than the content max width, with a gutter of one gap at
+    // each end. A neighbour then ends exactly at that edge, so nothing needs
+    // clipping. The same geometry at every width: the gutter is one gap.
+    .nds-max-width & {
+        --swiper-padding: var(--padding, var(--swiper-gap));
     }
 
     // Pre-init guard for the hero variant lives in nds.critical.min.scss
@@ -48,7 +65,6 @@
 .nds-swiper-wrapper {
     display: flex;
     height: 100%;
-    width: 100%;
     gap: var(--swiper-gap);
 
     overflow-x: auto;
@@ -61,17 +77,28 @@
 
     user-select: none;
 
-    padding-inline: var(--swiper-padding);
-    scroll-padding-inline: max(var(--swiper-peek), var(--swiper-padding));
+    // The end space is a flex spacer, not padding: in RTL, Safari leaves a scroll
+    // container's inline-end padding out of the scrollable overflow, so the last
+    // slide sat flush against the viewport. A flex item is content in every
+    // engine; its negative margin swallows the gap before it, so its width is
+    // the whole space. Start padding stays padding, and the slide formula
+    // subtracts the end space so a page still ends where the padding began.
+    padding-inline: var(--swiper-padding) 0;
+    // Snap padding = the gutter, so every slide rests where slide one does.
+    scroll-padding-inline: var(--swiper-padding);
+    &::after {
+        content: "";
+        flex: 0 0 var(--swiper-padding);
+        margin-inline-start: calc(-1 * var(--swiper-gap));
+    }
+}
 
-    .nds-swiper:not(.nds-hero) & {
-        padding-inline: max(2px, var(--swiper-padding)); // 2px floor for shadow clipping
-    }
-    @include desktop(min) {
-        .nds-content-layout.nds-cardView & {
-            padding-inline: 0;
-        }
-    }
+// JS already brackets its instant jumps, but this keeps every scroll surface
+// uniform under reduced motion instead of relying on that bracket alone.
+// Top level rather than nested in the block above: a mixin's @media counts as a
+// nested rule, and Sass warns (mixed-decls) when plain declarations follow one.
+@include reduced-motion {
+    .nds-swiper-wrapper { scroll-behavior: auto; }
 }
 
 // ==============================================
@@ -79,8 +106,10 @@
 // ==============================================
 
 .nds-swiper-slide {
-    // Width = (100% − peek − gap × (slides − 1)) / slides
-    flex: 0 0 calc((100% - var(--swiper-peek) - (var(--swiper-gap) * (var(--swiper-slides, 1) - 1))) / var(--swiper-slides, 1));
+    // Width = (100% − end gutter − peek reserve − gap × (slides − 1)) / slides
+    // 100% is the wrapper's content box, which carries only the start gutter;
+    // the end gutter is the wrapper's ::after spacer, so a page subtracts it here.
+    flex: 0 0 calc((100% - var(--swiper-padding) - var(--swiper-peek) - (var(--swiper-gap) * (var(--swiper-slides, 1) - 1))) / var(--swiper-slides, 1));
     position: relative;
 
     scroll-snap-align: start;
@@ -101,14 +130,26 @@
         max-width: unset;
         --card-width: 100%;
     }
+
+    // A lazy image has no source until its slide nears the viewport, so its box
+    // shimmers until then — the same fill and pulse the cards use. The box is
+    // the author's: a sourceless <img> has no size of its own. A sized one
+    // paints the broken-image icon and its alt text; a transparent SVG as its
+    // content paints nothing, so the fill below shows.
+    img:is([data-src], [data-srcset]) {
+        content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>");
+        background: var(--nds-skeleton-fill);
+        border-radius: var(--nds-skeleton-radius);
+        @include skeleton-pulse;
+    }
 }
 
 // ==============================================
 // NAVIGATION BUTTONS
 // Arrow glyph + JS hook both come from .nds-prev / .nds-next.
-// They can sit anywhere inside .nds-swiper. Size, shape, and on-color
-// treatment are the consumer's job — apply standard button modifiers
-// (.nds-icon-only, .nds-md/.nds-sm, .nds-oncolor) directly on the button.
+// They can sit anywhere inside .nds-swiper. Size and shape are the consumer's
+// job — apply standard button modifiers (.nds-icon-only, .nds-md/.nds-sm)
+// directly on the button. On-color comes from .nds-oncolor on the swiper.
 // ==============================================
 
 .nds-swiper :is(.nds-prev, .nds-next) {
@@ -224,6 +265,23 @@
     }
 }
 
+// The arrows are buttons, and a button only matches .nds-btn.nds-oncolor on
+// itself, so the root class never reached them. Re-state the shared subtle
+// wash here, the same way content-switcher does for its tabs.
+// ponytail: subtle is the canonical arrow variant; a primary/neutral arrow
+// still adds nds-oncolor on the button itself.
+.nds-swiper.nds-oncolor :is(.nds-prev, .nds-next) {
+    --btn-bg: transparent;
+    --btn-bg-hover: var(--button-background-transparent-hovered);
+    --btn-bg-active: var(--button-background-transparent-pressed);
+    --btn-bg-selected: var(--button-background-transparent-selected);
+    --btn-bg-disabled: transparent;
+    --btn-color: var(--button-label-transparent-default-oncolor);
+    --btn-color-disabled: var(--text-default-oncolor-disabled);
+    --btn-loading-color: var(--text-oncolor-primary);
+    --btn-loading-track: var(--colors-alpha-white-20);
+}
+
 // ==============================================
 // HERO VARIANT
 // Full-bleed slider with image backgrounds.
@@ -261,6 +319,88 @@
 }
 
 // ==============================================
+// NAVIGATION VARIANT — .nds-middle
+// Arrows flank the slide row at its vertical centre; no bullets.
+// Sits on the swiper, not the nav row: it has to cancel the pre-init height
+// reservation below, which the nav row cannot reach without :has().
+//
+// Tablet and up only. The gutter is a fixed arrow width, so on a 320px phone it
+// costs a third of the track — and swipe is the primary gesture there anyway.
+// Below the breakpoint every rule here drops and the default nav row returns,
+// bullets and reservation included, so mobile falls back to a known layout
+// rather than a special case.
+// ==============================================
+
+@include tablet(min) {
+    .nds-swiper.nds-middle {
+        // Room at both ends so the arrows sit beside the slides, never over them.
+        // --_middle-inset is where each arrow lands: 0 puts it at the swiper edge,
+        // which is the gutter the padding just opened.
+        --_middle-gutter: calc(var(--btn-size, 40px) + var(--spacing-lg));
+        --_middle-inset: 0px;
+        padding-inline: var(--_middle-gutter);
+
+        // The nav overlays, so it needs no row of its own — without this the
+        // reserved height collapses when init lands, which is the CLS the
+        // reservation exists to prevent.
+        &:not([data-nds-swiper-initialized])::after {
+            content: none;
+        }
+
+        // Both wrappers drop their boxes so the buttons position against the swiper
+        // itself. Nothing spans the track, so no invisible overlay sits over the
+        // cards and no pointer-events dance is needed to undo one.
+        .nds-swiper-navigation,
+        .nds-swiper-buttons {
+            display: contents;
+        }
+
+        .nds-prev,
+        .nds-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .nds-prev {
+            inset-inline-start: var(--_middle-inset);
+        }
+
+        .nds-next {
+            inset-inline-end: var(--_middle-inset);
+        }
+
+        .nds-swiper-pagination {
+            display: none;
+        }
+
+        // Hero is full-bleed, so reserving a gutter would inset the image. Drop the
+        // padding and overlay the arrows on the slide instead, held off the screen
+        // edge by the same viewport padding the content uses. Hero's own bottom-row
+        // nav rule targets .nds-swiper-navigation, which has no box here, so it is
+        // already inert — this replaces what it used to do.
+        //
+        // Bullets stay: a hero's slide count is worth showing, and hero pins them
+        // bottom-centre where they do not collide with the arrows.
+        &.nds-hero {
+            padding-inline: 0;
+            --_middle-inset: var(--nds-viewport-padding);
+
+            // The nav row stays boxless, or it becomes the arrows' positioning
+            // ancestor and top: 50% centres them on the row instead of the slide.
+            // Pin the bullets themselves.
+            .nds-swiper-pagination {
+                display: flex;
+                justify-content: center;
+                position: absolute;
+                inset-inline: 0;
+                bottom: var(--spacing-xl);
+            }
+        }
+    }
+}
+
+// ==============================================
 // PRE-INIT SKELETON
 // ==============================================
 // Nav reservation: .nds-swiper-navigation ships [hidden] until init
@@ -268,11 +408,18 @@
 // without this the row pops in below the track when init lands after
 // the reveal. A placeholder pseudo stands in for it (the [hidden]
 // display:none !important stays authoritative); the init stamp releases
-// it, so single-page swipers shed the reservation then (bounded, rare).
+// it. 32px is the canonical nds-md nav button — the buttons' own --btn-size
+// never reaches this pseudo, so the old 40px fallback shrank every
+// multi-page swiper 8px at init. A single-page swiper keeps its nav hidden
+// at init, so the loader's data-swiper-single (same page count, written
+// pre-reveal) drops the reserve ahead of it and nothing shrinks.
 // Hero swipers are excluded — their nav overlays the slides.
-.nds-swiper:not(.nds-hero):not([data-nds-swiper-initialized])::after {
+// One :not(), not a chain: chaining stacks class-level specificity, which tied
+// this against .nds-middle's content:none below and won on source order. At one
+// level it also yields to .nds-loading's content:none — a skeleton reserves nothing.
+.nds-swiper:not(.nds-hero, [data-nds-swiper-initialized], [data-swiper-single])::after {
     content: "";
-    min-height: var(--btn-size, 40px);
+    min-height: var(--btn-size, 32px);
 }
 
 // Nav reveal gate. The bullet row is JS-built and ships [hidden] until init
@@ -282,4 +429,184 @@
 // CLS-free; --nds-crit-reveal (crit-only) flips it visible with crit.
 .nds-swiper[data-nds-swiper-initialized] .nds-swiper-navigation:not([hidden]) {
     visibility: var(--nds-crit-reveal, hidden);
+}
+
+// ==============================================
+// DECK MODE — .nds-deck
+// A .nds-swiper-deck of .nds-swiper-card buttons, one per slide in slide order,
+// beside the track. Every card stays a full square: the open one sits at the
+// front on top, each next one one strip further back and under it; the image
+// inside is shifted so the visible strip is its leading edge. A move is boxes
+// and images sliding, nothing else. JS writes --rel / --srel and data-status on each card
+// (nds-swiper.js updateDeck); the author stamps the same for first paint. While a
+// finger holds the deck, --drag carries the cards with it.
+// ==============================================
+
+.nds-swiper.nds-deck {
+    --_card: var(--deck-card, 300px);
+    --_strip: var(--deck-strip, var(--spacing-5xl));
+    --_deck-w: calc(var(--_card) + (var(--swiper-total) - 1) * var(--_strip));
+    --_deck-dur: calc(var(--nds-transition-speed) * 3s);
+    --_deck-motion: var(--_deck-dur) var(--nds-transition-effect);
+
+    // The cards ARE the move; the track only has to arrive. Left smooth, it crosses
+    // every slide in between, and updateState re-fans the deck at each crossing —
+    // so a jump of more than one slide shuffles the cards through the wrong order
+    // and back (measured: 5 deck updates for one bullet press, cards travelling 220px
+    // to end up 40px along). Arriving at once leaves exactly one fan.
+    .nds-swiper-wrapper {
+        scroll-behavior: auto;
+    }
+
+    .nds-swiper-deck {
+        position: relative;
+        width: var(--_deck-w);
+        height: var(--_card);
+        overflow: hidden;
+        // Horizontal drags belong to the deck; vertical ones still scroll the page.
+        touch-action: pan-y;
+        user-select: none;
+    }
+
+    // Every card shares one box at the front; its place is a transform, so a
+    // move is compositor-only (no layout, no repaint of the image per frame).
+    // --_dir turns a logical offset into a physical translateX.
+    --_dir: -1;
+    @include ltr {
+        --_dir: 1;
+    }
+
+    .nds-swiper-card {
+        position: absolute;
+        top: 0;
+        inset-inline-start: 0;
+        height: 100%;
+        width: var(--_card);
+        // Each card sits one strip behind the one in front and under it, so the
+        // box shows only its last strip. The image inside is shifted so that strip
+        // is the image's leading edge and the rest of the image lies outside the
+        // box. The front card is on top, the last at the bottom. Box and image
+        // both move by transform: no layout.
+        z-index: calc(20 - var(--rel, 1));
+        // The image shift rides a property the card sets, not a rule keyed on the
+        // card's status — a tag tail after [data-status] pulls every <img> on the
+        // page into one invalidation set (PERF-06).
+        --_img-x: translateX(calc(var(--_dir) * (var(--_card) - var(--_strip))));
+        transform: translateX(calc(var(--drag, 0px) + var(--_dir) * var(--rel, 1) * var(--_strip)));
+        will-change: transform;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+        overflow: hidden;
+        transition: transform var(--_deck-motion);
+
+        // Rising to the front waits for the slide to end (the card comes from
+        // behind); leaving the front sinks at once (the base rule has no delay).
+        &[data-status="active"] {
+            transform: translateX(var(--drag, 0px));
+            transition: transform var(--_deck-motion), z-index 0s var(--_deck-dur);
+            cursor: default;
+            --_img-x: none;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: var(--_img-x);
+            transition: transform var(--_deck-motion);
+            -webkit-user-drag: none;   // a mouse drag is a swipe, not an image drag
+        }
+    }
+
+    // The cards track the finger instantly; the spring back on release tweens.
+    .nds-swiper-deck.nds-dragging .nds-swiper-card {
+        transition: none;
+    }
+}
+
+// Hero: the deck fills the hero's height at its inline-end edge; the slide and
+// the nav row stop where it starts.
+@include desktop(min) {
+    .nds-swiper.nds-hero.nds-deck {
+        --_card: var(--deck-card, var(--_hero-height, 550px));
+        --_deck-reserve: calc(var(--_deck-w) + var(--spacing-2xl));
+
+        .nds-swiper-deck {
+            position: absolute;
+            inset-block: 0;
+            inset-inline-end: 0;
+            height: auto;
+        }
+
+        // Same gutter formula the slide (.nds-content-wrapper) and the nav row
+        // already use for the content column, with the deck as a third floor.
+        .nds-swiper-slide,
+        .nds-swiper-navigation {
+            padding-inline-end: max(var(--nds-viewport-padding), calc((100% - var(--nds-content-MaxWidth)) / 2), var(--_deck-reserve));
+        }
+    }
+}
+
+// Below desktop the deck stacks above the track: the open card centred, its two
+// neighbours peeking at the sides, every other card faded out. Signed --srel
+// places the fan; percentages keep it fluid.
+@include tablet(max) {
+    .nds-swiper.nds-deck {
+        .nds-swiper-deck {
+            order: -1;
+            width: 100%;
+            max-width: 651px;
+            height: auto;
+            aspect-ratio: 430 / 324;
+            margin-inline: auto;
+        }
+
+        // One box, the open card's (75.35% wide, centred). A neighbour is the same
+        // box scaled to 55% and shifted one card-step (69.17% of the deck = 91.8%
+        // of the box) to its side; both centres sit on the deck's midline, so no
+        // vertical move. Faded out beyond the neighbours.
+        .nds-swiper-card {
+            top: 0;
+            height: 100%;
+            width: 75.35%;
+            inset-inline-start: 12.33%;
+            z-index: 1;
+            opacity: 0;
+            transform: translateX(calc(var(--drag, 0px) + var(--_dir) * var(--srel, 1) * 91.8%)) scale(0.73);
+            transition: transform var(--_deck-motion), opacity var(--_deck-motion);
+
+            img {
+                transform: none;   // the whole card shows here, scaled
+            }
+
+            &[data-status] {
+                opacity: 1;
+            }
+
+            &[data-status="active"] {
+                transform: translateX(var(--drag, 0px));
+                z-index: 2;
+            }
+        }
+    }
+
+    // In a hero the deck is the first thing in the section: keep it off the top
+    // edge. The nav row flows under the text instead of pinning to the bottom.
+    .nds-swiper.nds-hero.nds-deck {
+        .nds-swiper-deck {
+            margin-block-start: var(--spacing-5xl);
+        }
+
+        .nds-swiper-navigation {
+            position: static;
+        }
+    }
+}
+
+@include reduced-motion {
+    .nds-swiper.nds-deck .nds-swiper-card {
+        transition: none;
+    }
 }

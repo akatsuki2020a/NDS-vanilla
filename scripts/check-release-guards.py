@@ -10,8 +10,9 @@ release ships green with the defect intact. That is what this checks: each case
 breaks the rules file one way and asserts the matching guard notices.
 
 Runs against the REAL repo files with the zip parts stubbed, so it needs no
-build and cuts no release. The rules file is restored in a finally block.
+build and cuts no release. The mutated file is restored in a finally block.
 """
+import html
 import io
 import os
 import re
@@ -23,16 +24,11 @@ sys.path.insert(0, os.path.join(ROOT, 'scripts'))
 import mkrelease
 
 IQ = os.path.join(ROOT, '_includes', 'NDS-IQ.md')
-VERSION = '1.7.0'   # any version at or above the file's declared floor
+VERSION = '1.7.0'   # names the stub zip's root folder and CHANGELOG section
 
-# Anchors stage() copies in — verify() checks each by name.
-ANCHORS = ('_source/_js/nds-core.js', '_source/_sass/_mixins.scss',
-           '_source/_data/content/components.yml',
-           '_source/components/multiselect.md',
-           '_source/templates/form-template.md',
-           '_source/examples/console-demo.md',
-           '_source/utilities/copy.md', '_source/layout/section.md',
-           '_source/ui-shell/head.md', '_source/core/request.md')
+# The _source/ anchors and refs verify() checks are NOT staged here: the zip
+# stopped shipping that tree, so verify() resolves them against the repo
+# working tree, which is real and unmutated during this run.
 
 
 def collect_refs(block):
@@ -43,16 +39,23 @@ def collect_refs(block):
             guides += f.read()
     refs = re.findall(r'NDS_ROOT/([^\s`)\]]+)', block + guides)
     refs += re.findall(r'`((?:_site|_source)/[^`]*)`', block + 'see `_site/index.html`')
-    return {p for p in refs if '<' not in p and '*' not in p}
+    return {p for p in refs if '<' not in p and '*' not in p
+            and not p.startswith('_source/')}
 
 
-def build_stub_zip(version, refs_from, iq_bytes=None):
+# The doc copy groups its rules under comment headings and the served gate is
+# minified, so the guard has to strip comments before comparing. Keep one here
+# or that stripping goes unexercised.
+GATE_CSS = '/* colors */ html{background-color:#fff}i.hgi-stroke{opacity:0}'
+
+
+def build_stub_zip(version, refs_from, iq_bytes=None, gate_doc=None):
     """A zip carrying every name verify() reads.
 
-    Paths come from `refs_from` (the PRE-mutation rules file): the zip is built
-    before the doc rename, which is the dead-reference case exactly. Each name
-    is written once — a duplicate entry wins on read and would blank a file the
-    guards depend on.
+    Paths come from `refs_from` (the PRE-mutation rules file), so a case that
+    renames a zip-side reference finds it missing — the dead-reference case
+    exactly. Each name is written once: a duplicate entry wins on read and
+    would blank a file the guards depend on.
     """
     pkg = f'nds-vanilla-template-v{version}/'
     with open(IQ, encoding='utf8') as f:
@@ -70,14 +73,20 @@ def build_stub_zip(version, refs_from, iq_bytes=None):
                 written.add(name)
                 z.writestr(name, data)
 
-        put(pkg + '_site/index.html', '<a href="../index.html">ok</a>')
+        # The gate guard compares index.html's inline <style> against the copy
+        # head.md prints. Both must exist or the guard cannot run at all, so the
+        # stub carries a matching pair; gate_doc stages a drifted doc side.
+        put(pkg + '_site/index.html',
+            f'<a href="../index.html">ok</a><style>{GATE_CSS}</style>')
+        put(pkg + '_site/ui-shell/head.html',
+            '<div id="panel-setup-html">&lt;style&gt;'
+            + html.escape(gate_doc if gate_doc is not None else GATE_CSS, quote=False)
+            + '&lt;/style&gt;</div><div id="panel-setup-js"></div>')
         put(pkg + 'CHANGELOG.md', f'## [{version}]\n')
         put(pkg + 'README.md', 'see `_site/index.html`\n')
         put(pkg + 'NDS-IQ.md', iq_bytes if iq_bytes is not None else block)
         for name in ('get-started', 'integration-quality'):
             put(f'{pkg}_site/guides/{name}.html', guide_html)
-        for anchor in ANCHORS:
-            put(pkg + anchor)
         for p in sorted(collect_refs(refs_from)):
             put(pkg + p.rstrip('/') + ('/' if p.endswith('/') else ''))
 
@@ -111,26 +120,15 @@ def run(mutate=None, version=VERSION):
 CASES = [
     ('baseline: the real file passes', None, VERSION, None),
 
-    ('floor sentence deleted',
-     lambda t: t.replace('Works with 1.7.0 or later.', ''), VERSION, 'floor sentence'),
+    # The rules name no template version at all — nothing sweeps this file, so
+    # a literal that lands in prose goes stale with nothing to catch it.
+    ('a version literal creeps into the rules prose',
+     lambda t: t + '\nBuilt against template 1.6.0.\n', VERSION, 'version-agnostic'),
 
-    ('floor bumped in line 3 but not the sub-floor paragraph',
-     lambda t: t.replace('Works with 1.7.0 or later.', 'Works with 1.8.0 or later.'),
-     VERSION, 'a floor bump missed a sentence'),
-
-    ('floor bumped in the paragraph but not line 3',
-     lambda t: t.replace('template 1.7.0 introduced', 'template 1.6.0 introduced'),
-     VERSION, 'a floor bump missed a sentence'),
-
-    # sweep_pairing_stamp() runs before verify(), so simulate it — otherwise
-    # the pairing check fires first and the floor comparison is never reached.
-    ('release cut below the floor the rules declare',
-     lambda t: t.replace('Validated against template 1.7.0.',
-                         'Validated against template 1.6.1.'), '1.6.1', 'below the floor'),
-
-    ('plan stamp desynced from the heading revision',
-     lambda t: t.replace('Managed by NDS IQ v7', 'Managed by NDS IQ v6'),
-     VERSION, 'plan stamp'),
+    # Versionless now — nothing compares it, so losing the phrase is the only
+    # way it breaks, and consumer plan files are stamped from it.
+    ('plan stamp phrase lost',
+     lambda t: t.replace('Managed by NDS IQ', 'Managed by IQ'), VERSION, 'plan-stamp'),
 
     ('anchor loses its read-gate line',
      lambda t: t.replace('Do no NDS work before that read.', ''), VERSION, 'anchor canon'),
@@ -139,17 +137,9 @@ CASES = [
      lambda t: t.replace('Never write `.nds-*` markup from memory', ''),
      VERSION, 'anchor canon'),
 
-    ('reference index points at a path not in the zip',
-     lambda t: t.replace('`_source/_sass/_mixins.scss`', '`_source/_sass/_gone.scss`'),
-     VERSION, 'missing from the zip'),
-
-    # A duplicate carrying the SAME number is invisible to verify() (it strips
-    # every copy before the stray scan); it goes stale on the NEXT release.
-    # The sweep's exactly-one check is the guard — exercised separately below.
-    ('duplicate pairing stamp is not verify()\'s to catch',
-     lambda t: t.replace('Works with 1.7.0 or later.',
-                         'Works with 1.7.0 or later. Validated against template 1.7.0.'),
-     VERSION, None),
+    ('reference index points at a _source/ path not in the repo tree',
+     lambda t: t.replace('`_source/_sass/tokens/_semantic.scss`', '`_source/_sass/tokens/_gone.scss`'),
+     VERSION, 'missing from the repo tree'),
 ]
 
 
@@ -164,42 +154,31 @@ def main():
             failures.append(f'{label}: expected '
                             f'{"a pass" if expect is None else repr(expect)}, got: {msg}')
 
-    # The offline copy must be the source with LF endings. This one cannot be
-    # driven from CASES: those mutate the source, and the stub zip is rebuilt
-    # from the source, so the two never diverge. Corrupt the staged copy alone.
+    # The CRLF-offline-copy case is retired: the zip no longer ships NDS-IQ.md,
+    # so there is no staged copy to corrupt and no guard left to prove.
     with open(IQ, encoding='utf8') as f:
         source = f.read()
-    zip_path = build_stub_zip(VERSION, refs_from=source,
-                              iq_bytes=source.replace('\n', '\r\n'))
-    try:
-        mkrelease.verify(zip_path, VERSION)
-        ok, detail = False, 'accepted a CRLF offline copy'
-    except SystemExit as e:
-        ok, detail = 'source with LF endings' in str(e), str(e)
-    print(f'  {"pass" if ok else "FAIL"}  zip ships a CRLF copy of the rules file')
-    if not ok:
-        failures.append(f'CRLF offline copy: {detail}')
 
-    # The duplicate stamp belongs to the sweep, which must refuse to guess
-    # which copy is authoritative.
-    with open(IQ, encoding='utf8') as f:
-        original = f.read()
-    try:
-        with open(IQ, 'w', encoding='utf8', newline='\n') as f:
-            f.write(original.replace(
-                'Works with 1.7.0 or later.',
-                'Works with 1.7.0 or later. Validated against template 1.7.0.'))
+    # head.md's copy of the inline critical gate is hand-maintained against the
+    # generated one, so it can drift — and silently had. Same shape as the CRLF
+    # case: the doc side has to be corrupted on its own.
+    # Two shapes of drift: a rule that vanished, and a rule whose VALUE moved
+    # while its selector stayed put. The second is the one a selector-only
+    # comparison waved through, so it gets its own case.
+    for label, drifted in (
+        ('a rule goes missing', GATE_CSS.replace('i.hgi-stroke', 'i.hgi-gone')),
+        ('a rule keeps its selector but changes value',
+         GATE_CSS.replace('opacity:0', 'opacity:1')),
+    ):
+        zip_path = build_stub_zip(VERSION, refs_from=source, gate_doc=drifted)
         try:
-            mkrelease.sweep_pairing_stamp(VERSION)
-            ok, detail = False, 'swept a duplicate stamp instead of refusing'
+            mkrelease.verify(zip_path, VERSION)
+            ok, detail = False, 'accepted a drifted critical gate'
         except SystemExit as e:
-            ok, detail = 'exactly one' in str(e), str(e)
-        print(f'  {"pass" if ok else "FAIL"}  sweep refuses a duplicate pairing stamp')
+            ok, detail = 'has drifted' in str(e), str(e)
+        print(f'  {"pass" if ok else "FAIL"}  critical gate drift: {label}')
         if not ok:
-            failures.append(f'sweep duplicate check: {detail}')
-    finally:
-        with open(IQ, 'w', encoding='utf8', newline='\n') as f:
-            f.write(original)
+            failures.append(f'critical gate drift ({label}): {detail}')
 
     print()
     for f in failures:

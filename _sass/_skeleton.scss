@@ -105,8 +105,8 @@ html {
         min-height: 40px;
     }
 
-    /* Hero swiper + wrapper flex skeleton; collapse to the first slide until
-       JS marks data-nds-swiper-initialized. */
+    /* Hero swiper + wrapper flex skeleton; the first-slide collapse (fold)
+       releases at the loader's data-swiper-preset, else at init. */
     :where(.nds-swiper.nds-hero, .nds-swiper-wrapper) {
         display: flex;
         height: 100%;
@@ -121,11 +121,17 @@ html {
        flex-basis formula collapses to 100% while JS hasn't written
        --slides — one card stretched across the track. The cards inside
        shimmer via their default skeleton; overflow stays clipped so the
-       row can't widen the document. Released by the swiper's own stamp. */
-    .nds-swiper:not(.nds-hero):not([data-nds-swiper-initialized]) {
+       row can't widen the document. Released by the swiper's own stamp, or
+       earlier by the loader's data-swiper-preset: it writes --slides and the
+       peek state pre-reveal (presetSwipers in nds-loader.js), so main's
+       formula sizes the row exactly as init will and init moves nothing.
+       The pin below is the no-JS fallback. :where()-wrapped: main reads the
+       slides per view from the tier attributes (_swiper.scss), so its formula
+       must beat this pin the moment main applies — before the preset lands. */
+    :where(.nds-swiper:not(.nds-hero):not([data-nds-swiper-initialized], [data-swiper-preset])) {
         overflow: hidden;
 
-        .nds-swiper-slide {
+        :where(.nds-swiper-slide) {
             // Mirrors the card's own max-width chain (cards size as 100% OF
             // the slide, so they can't size it — circular): consumer card
             // width knobs propagate to the pre-init slide automatically.
@@ -133,7 +139,8 @@ html {
         }
     }
 
-    :where(.nds-link, a):not(.nds-card):where(.nds-icon, .nds-external)::after {
+    :where(.nds-link, a):not(.nds-card, .nds-external-block):where(.nds-icon, .nds-external)::after,
+    :where(.nds-external-badge)::after {
         content: "";
         display: inline-block;
         width: 1em;
@@ -159,8 +166,8 @@ html:not([data-nds-loaded]) :where(.nds-form-control,
     visibility: hidden;
 }
 
-/* Icon gate (initial 0) lives in fold; the reveal (data-nds-icons-loaded → 1)
-   lives in _sass/_icons.scss so it lands with the nds-icons sheet.
+/* Icon gate (initial 0) lives in fold; the reveal (→ 1) is the :root block of
+   _sass/_icons.scss, so it lands in the nds-icons sheet's own style pass.
    HGI font gate (initial 0) lives in fold; the reveal
    (data-nds-fonts-loaded~="hgi-stroke-rounded" → 1) lives in
    _sass/_hgiRoundedStroke.scss. */
@@ -183,16 +190,19 @@ html:not([data-nds-loaded]) :where(.nds-form-control,
 :where([data-filter-items]:not([data-nds-filter-initialized], .nds-accordion, .nds-grid, tbody),
     .nds-auto-fill[data-filter-target]:not([data-nds-filter-initialized]),
     [data-filter-target]:not([data-nds-filter-initialized]) .nds-auto-fill,
-    .nds-paged-content:not([data-paged-initialized], .nds-grid, tbody)) {
+    .nds-paged-content:not([data-paged-initialized], :is(.nds-accordion, .nds-grid, tbody)[data-paged-split])) {
     visibility: hidden;
 }
 
 /* Held accordions, card grids and table bodies are exempt from the
-   visibility hold above: they paint their skeleton placeholders instead
-   (main — _accordion.scss / _cards.scss / _tables.scss, the same rules as
-   the .nds-loading processing state), so pre-init shows shimmer rather
-   than a blank region. The reveal already waits for main CSS, so the
-   skeleton rules are guaranteed present. Bar text is transparent and
+   visibility hold above once the loader's split has stamped them: they
+   paint their skeleton placeholders instead (main — _accordion.scss /
+   _cards.scss / _tables.scss, the same rules as the .nds-loading
+   processing state), so pre-init shows shimmer rather than a blank
+   region. Not before the split: main CSS can land ahead of the bundle,
+   and the "first 6" fallback below then painted six bars that jumped to
+   --per-page at the reveal. The reveal already waits for main CSS, so
+   the skeleton rules are guaranteed present. Bar text is transparent and
    content is hidden (boxes keep their size, so table column sizing and
    lockTableColumns are unaffected) — URL-filtered loads still can't flash
    unfiltered content. */
@@ -202,28 +212,24 @@ html:not([data-nds-loaded]) :where(.nds-form-control,
    on the page-level stamp. JS stamps data-paged-initialized on the
    paged-content once init completes (see _js/nds-pagination.js
    initializeAutoPagination); gate on that.
-   Shows the first 5 items (matches readPerPage's implicit default in
+   Shows the first 6 items (matches readPerPage's implicit default in
    _js/nds-pagination.js) until that signal lands. Without it, all items
    paint first then the content area shrinks when JS hides items past
    --per-page — visible vertical CLS. :nth-child counts among siblings of
    the actual parent (tbody or paged-content), so the index matches what
-   JS hides. Containers that set their own --per-page see a small bounded
-   shift at init (much less than all-items → first-N).
+   JS hides. The loader's split (presplitPaged in nds-loader.js) hides items
+   past the inline --per-page (else 6) itself and stamps data-paged-split,
+   so this fixed count only holds until the bundle runs, or with JS off. A
+   media-query-only --per-page sees a small bounded shift at init.
 
-   Grids and tables differ on HOW the overflow is hidden:
-   - grid/card items are removed from flow (display:none);
-   - table rows are COLLAPSED (visibility:collapse) — same height removal,
-     but the row stays in the layout tree and keeps contributing to column
-     sizing. That lets pagination lock column widths with a free read of
-     the full-content widths, with no un-hide reflow (see lockTableColumns
-     in _js/nds-pagination.js). collapse on a non-table element behaves like
-     visibility:hidden (keeps space), so it must stay table-row-scoped. */
-.nds-paged-content:not([data-paged-initialized]) .nds-page-item:not(tr):nth-child(n + 6) {
+   Table rows are display:none like grid items — not visibility:collapse.
+   Collapsed rows still lay out, so a 100-row table paid full-table layout
+   on every pre-init pass (six on console-demo). Column sizing from every
+   row survives: pagination stamps data-paged-initialized BEFORE
+   lockTableColumns reads, so the widths come from one forced full-table
+   layout, then showPage hides the off-page rows. */
+.nds-paged-content:not([data-paged-initialized], [data-paged-split]) .nds-page-item:nth-child(n + 7) {
     display: none;
-}
-
-.nds-paged-content:not([data-paged-initialized]) tr.nds-page-item:nth-child(n + 6) {
-    visibility: collapse;
 }
 
 /* Filter-target accordions (e.g. faq-template), plain (non-paged) filter
@@ -231,7 +237,8 @@ html:not([data-nds-loaded]) :where(.nds-form-control,
    this their pre-init skeleton would render the FULL item list. Shape
    them to the same first-page count; the filter's init stamp releases it.
    Table rows collapse (not display:none) so they keep feeding column
-   sizing, same as the paged rule above. */
+   sizing — a filter-only table has no width lock to re-measure at init,
+   so it still pays layout for its collapsed rows. */
 .nds-accordion[data-filter-items]:not([data-nds-filter-initialized]) .nds-accordion-item:nth-child(n + 7),
 .nds-grid[data-filter-items]:not([data-nds-filter-initialized], .nds-paged-content)>*:nth-child(n + 7) {
     display: none;
@@ -256,6 +263,9 @@ tbody[data-filter-items]:not([data-nds-filter-initialized], .nds-paged-content) 
         rgba(210, 214, 219, 0.2) 50%,
         rgba(157, 164, 174, 0.2) 100%;
     --nds-skeleton-fill: linear-gradient(var(--nds-skeleton-angle), var(--nds-skeleton-stops));
+    // The middle stop as a flat color, for placeholders drawn as hard gradient
+    // stops (a stop cannot carry a gradient) — pagination's button row.
+    --nds-skeleton-solid: rgba(210, 214, 219, 0.2);
     --nds-skeleton-radius: var(--radius-sm);
 }
 
@@ -267,6 +277,7 @@ tbody[data-filter-items]:not([data-nds-filter-initialized], .nds-paged-content) 
     --nds-skeleton-stops: rgba(77, 87, 97, 0.2) 0%,
         rgba(108, 114, 126, 0.2) 50%,
         rgba(157, 164, 174, 0.2) 100%;
+    --nds-skeleton-solid: rgba(108, 114, 126, 0.2);
 }
 
 /* ── Breadcrumb pre-collapse shape ──

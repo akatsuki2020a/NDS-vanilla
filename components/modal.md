@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.7.0"
-last_edit: "10/08/2026 - 12:31 AM"
+updated: "1.12.x"
+last_edit: "03/09/2026 - 10:10 PM"
 ---
 
 <!-- Modal Dialog -->
@@ -61,9 +61,11 @@ last_edit: "10/08/2026 - 12:31 AM"
                                 <div id="modal-basic-demo" class="nds-modal nds-card nds-stroke" role="dialog" aria-labelledby="modal-basic-title"
                                     aria-hidden="true" hidden>
                                     <div class="nds-card-header">
-                                        <span class="nds-featured-icon nds-circle" data-status="neutral">
-                                            <i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i>
-                                        </span>
+                                        <div class="nds-card-featured-icon">
+                                            <span class="nds-featured-icon nds-circle">
+                                                <i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i>
+                                            </span>
+                                        </div>
                                         <button class="nds-close nds-modal-close nds-btn nds-subtle" aria-label="Close modal">
                                             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                         </button>
@@ -84,14 +86,6 @@ last_edit: "10/08/2026 - 12:31 AM"
                                             <div class="nds-form-control">
                                                 <textarea id="textareaInput" class="nds-textarea"
                                                     placeholder="Enter your message..." rows="4"></textarea>
-                                            </div>
-                                            <div class="nds-form-footer">
-                                                <span class="nds-feedback nds-outline nds-sm">
-                                                    <span class="nds-feedback-icon">
-                                                        <i class="nds-icon" aria-hidden="true"></i>
-                                                    </span>
-                                                    <span class="nds-feedback-message"></span>
-                                                </span>
                                             </div>
                                         </div>
 
@@ -138,9 +132,11 @@ last_edit: "10/08/2026 - 12:31 AM"
 &lt;div id="modal-basic-demo" class="nds-modal nds-card nds-stroke" role="dialog" aria-labelledby="modal-basic-title"
     aria-hidden="true" hidden&gt;
   &lt;div class="nds-card-header"&gt;
-    &lt;span class="nds-featured-icon nds-circle" data-status="neutral"&gt;
-      &lt;i class="nds-icon nds-hgi-information-circle" aria-hidden="true"&gt;&lt;/i&gt;
-    &lt;/span&gt;
+    &lt;div class="nds-card-featured-icon"&gt;
+      &lt;span class="nds-featured-icon nds-circle"&gt;
+        &lt;i class="nds-icon nds-hgi-information-circle" aria-hidden="true"&gt;&lt;/i&gt;
+      &lt;/span&gt;
+    &lt;/div&gt;
     &lt;button class="nds-close nds-modal-close nds-btn nds-subtle" aria-label="Close modal"&gt;
       &lt;i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"&gt;&lt;/i&gt;
     &lt;/button&gt;
@@ -161,14 +157,6 @@ last_edit: "10/08/2026 - 12:31 AM"
         &lt;textarea id="textareaInput" class="nds-textarea"
             placeholder="Enter your message..." rows="4"&gt;&lt;/textarea&gt;
       &lt;/div&gt;
-      &lt;div class="nds-form-footer"&gt;
-        &lt;span class="nds-feedback nds-outline nds-sm"&gt;
-          &lt;span class="nds-feedback-icon"&gt;
-            &lt;i class="nds-icon" aria-hidden="true"&gt;&lt;/i&gt;
-          &lt;/span&gt;
-          &lt;span class="nds-feedback-message"&gt;&lt;/span&gt;
-        &lt;/span&gt;
-      &lt;/div&gt;
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;div class="nds-card-actions"&gt;
@@ -181,6 +169,122 @@ last_edit: "10/08/2026 - 12:31 AM"
   &lt;/div&gt;
 &lt;/div&gt;
                                         </code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nds-demo-card">
+                        <div class="demo-header">
+                            <div class="demo-action">
+                                <div class="nds-dropmenu demo-toggle-menu">
+                                    <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" data-label-prefix="Status: ">
+                                        <span class="nds-label">Status: Success</span>
+                                    </button>
+                                    <div class="nds-dropmenu-menu" hidden>
+                                        <div class="nds-dropmenu-scroll">
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
+                                                data-toggler='[["data-status=success", "#modal-status-demo", "modalStatus", "attr"], ["nds-hgi-checkmark-circle-02", ".nds-featured-icon .nds-icon", "modalStatus"]]'>
+                                                <span class="nds-label">Success</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='[["data-status=error", "#modal-status-demo", "modalStatus", "attr"], ["nds-hgi-cancel-circle", ".nds-featured-icon .nds-icon", "modalStatus"]]'>
+                                                <span class="nds-label">Error</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='[["data-status=warning", "#modal-status-demo", "modalStatus", "attr"], ["nds-hgi-alert-circle", ".nds-featured-icon .nds-icon", "modalStatus"]]'>
+                                                <span class="nds-label">Warning</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='[["data-status=info", "#modal-status-demo", "modalStatus", "attr"], ["nds-hgi-information-circle", ".nds-featured-icon .nds-icon", "modalStatus"]]'>
+                                                <span class="nds-label">Info</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="demo-container">
+                            <div class="state-demo">
+                                <button class="nds-btn nds-primary nds-lg" data-modal-target="modal-status-demo">
+                                    <span class="nds-label">Open Status Modal</span>
+                                </button>
+                                <div id="modal-status-demo" class="nds-modal nds-card nds-stroke nds-center nds-sm" data-status="success"
+                                    data-modal-static role="dialog" aria-labelledby="modal-status-title" aria-hidden="true" hidden>
+                                    <div class="nds-card-header">
+                                        <div class="nds-card-featured-icon">
+                                            <span class="nds-featured-icon nds-xl nds-circle">
+                                                <i class="nds-icon nds-hgi-checkmark-circle-02" aria-hidden="true"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="nds-card-content">
+                                        <div class="nds-card-text">
+                                            <span class="nds-card-title" id="modal-status-title">Request submitted</span>
+                                            <p class="nds-card-description">Your request reached the service. You get a message when the review is done.</p>
+                                        </div>
+                                    </div>
+                                    <div class="nds-card-actions">
+                                        <button class="nds-btn nds-primary nds-lg" data-modal-close>
+                                            <span class="nds-label">Done</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="demo-code">
+                            <div class="nds-tabs nds-code nds-divided">
+                                <div class="nds-tab-list-container nds-scroll-more">
+                                    <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                                        <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                                            aria-controls="panel-modal-status-1" id="tab-modal-status-1">
+                                            <span class="nds-tab-label">HTML</span>
+                                        </button>
+                                    </nav>
+                                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <div class="nds-tab-content">
+                                    <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-modal-status-1"
+                                        aria-labelledby="tab-modal-status-1">
+                                        <div class="nds-code-action">
+                                            <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                                <i class="nds-icon nds-hgi-copy-01"></i>
+                                            </button>
+                                        </div>
+                                        <div class="nds-expandable-content">
+                                            <code class="lang-html code">
+&lt;!-- Trigger Button --&gt;
+&lt;button class="nds-btn nds-primary nds-lg" data-modal-target="modal-status-demo"&gt;
+  &lt;span class="nds-label"&gt;Open Status Modal&lt;/span&gt;
+&lt;/button&gt;
+
+&lt;!-- Status modal: centred card, no close button, closes only on an action --&gt;
+&lt;div id="modal-status-demo" class="nds-modal nds-card nds-stroke nds-center nds-sm" data-status="success"
+    data-modal-static role="dialog" aria-labelledby="modal-status-title" aria-hidden="true" hidden&gt;
+  &lt;div class="nds-card-header"&gt;
+    &lt;div class="nds-card-featured-icon"&gt;
+      &lt;span class="nds-featured-icon nds-xl nds-circle"&gt;
+        &lt;i class="nds-icon nds-hgi-checkmark-circle-02" aria-hidden="true"&gt;&lt;/i&gt;
+      &lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="nds-card-content"&gt;
+    &lt;div class="nds-card-text"&gt;
+      &lt;span class="nds-card-title" id="modal-status-title"&gt;Request submitted&lt;/span&gt;
+      &lt;p class="nds-card-description"&gt;Your request reached the service. You get a message when
+          the review is done.&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="nds-card-actions"&gt;
+    &lt;button class="nds-btn nds-primary nds-lg" data-modal-close&gt;
+      &lt;span class="nds-label"&gt;Done&lt;/span&gt;
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+                                            </code>
                                         </div>
                                     </div>
                                 </div>
@@ -282,8 +386,9 @@ last_edit: "10/08/2026 - 12:31 AM"
                     <li>Don't use for success messages or non-blocking notifications. Use an Alert or Toast instead</li>
                     <li>For multi-step workflows inside a modal, use the <a class="nds-color" href="{{ 'components/stepper' | relative_url }}">Stepper</a> component to guide users through each stage. For workflows too complex for a modal, use a dedicated page instead</li>
                     <li>Don't stack modals. If one modal needs to open another, restructure the flow so a single modal handles the decision</li>
-                    <li>Add <code class="nds-inline-code lang-html">data-portal</code> to every menu-based control you put inside a modal: a <a class="nds-color" href="{{ 'components/dropmenu' | relative_url }}">Dropmenu</a>, a <a class="nds-color" href="{{ 'components/forms' | relative_url }}">select</a>, a <a class="nds-color" href="{{ 'components/multiselect' | relative_url }}">Multiselect</a>, an <a class="nds-color" href="{{ 'components/autocomplete' | relative_url }}">Autocomplete</a>, or a <a class="nds-color" href="{{ 'components/filter' | relative_url }}">Filter</a>. The modal card scrolls its own content and creates a stacking context, so an in-place menu is clipped at the card edge or hidden behind it. The attribute goes on the <code class="nds-inline-code lang-html">.nds-dropmenu</code> wrapper, which for a multiselect is the inner <code class="nds-inline-code lang-html">[data-multiselect-dropmenu]</code> element rather than the field root</li>
+                    <li>Menu-based controls work inside a modal with no extra attribute: a <a class="nds-color" href="{{ 'components/dropmenu' | relative_url }}">Dropmenu</a>, a <a class="nds-color" href="{{ 'components/forms' | relative_url }}">select</a>, a <a class="nds-color" href="{{ 'components/multiselect' | relative_url }}">Multiselect</a>, an <a class="nds-color" href="{{ 'components/autocomplete' | relative_url }}">Autocomplete</a>, or a <a class="nds-color" href="{{ 'components/filter' | relative_url }}">Filter</a>. The modal card scrolls its own content and creates a stacking context, so each menu detects the modal on open and moves to <code class="nds-inline-code lang-html">&lt;body&gt;</code> instead of clipping at the card edge. A menu taller than the space on either side of its trigger scrolls inside the viewport. Older markup that carries <code class="nds-inline-code lang-html">data-portal</code> on the <code class="nds-inline-code lang-html">.nds-dropmenu</code> wrapper still works — the attribute forces the same move</li>
                     <li>Choose <code class="nds-inline-code lang-html">nds-sm</code> for simple confirmation prompts with one or two buttons. Use the default size when the modal includes a short form or longer description. Use <code class="nds-inline-code lang-html">nds-lg</code> for content-heavy modals like terms of service or data previews. Use <code class="nds-inline-code lang-html">nds-full</code> for immersive tasks like image editing or document previews</li>
+                    <li>To keep a modal out of the DOM until first open, wrap it in <code class="nds-inline-code lang-html">&lt;template class="nds-modal-template"&gt;</code>. The trigger stays outside the template. The markup joins the page on the first click. One modal per template. Do not wrap a modal that holds content people should find with page search — content inside a template is invisible to search engines and Ctrl+F. Page scripts must not look the modal up at load: the element is not in the page yet. Listen on <code class="nds-inline-code lang-js">document</code> for <code class="nds-inline-code lang-js">nds:template:ready</code> instead. NDS fires it on the modal after the markup joins the page and its components are wired</li>
                     <li>Keep titles clear and contextual to the required action</li>
                     <li>Limit content to a single focused message or task</li>
                     <li>Provide explicit primary and secondary actions (Confirm/Cancel)</li>
@@ -316,6 +421,10 @@ last_edit: "10/08/2026 - 12:31 AM"
                             <td><code class="nds-inline-code lang-html">nds-full</code></td>
                             <td>Full-width modal with minimal side margins. Use for immersive tasks.</td>
                         </tr>
+                        <tr>
+                            <td><code class="nds-inline-code lang-html">nds-modal-template</code></td>
+                            <td>Set on a <code class="nds-inline-code lang-html">&lt;template&gt;</code> that wraps the modal. The modal joins the DOM on first open instead of loading with the page. See Best Practices for the rules.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -337,6 +446,14 @@ last_edit: "10/08/2026 - 12:31 AM"
                         <tr>
                             <td><code class="nds-inline-code lang-html">data-modal-close</code></td>
                             <td>Set on any element inside a modal. Closes the currently open modal when clicked.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="nds-inline-code lang-html">data-modal-static</code></td>
+                            <td>Set on the modal. Removes both dismiss paths: no <kbd>Esc</kbd> key, no backdrop click. The modal then closes only through a <code class="nds-inline-code lang-html">data-modal-close</code> control or <code class="nds-inline-code lang-js">NDS.Modal.close()</code>. Use it when the user must pick one of the actions.</td>
+                        </tr>
+                        <tr>
+                            <td><code class="nds-inline-code lang-html">data-state="open|closing"</code></td>
+                            <td>Set on the modal by JavaScript. <code class="nds-inline-code lang-html">open</code> while the modal is shown, <code class="nds-inline-code lang-html">closing</code> during the close animation, and removed once it is closed. Style off it. Do not set it by hand.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -371,6 +488,13 @@ NDS.Modal.isOpen(); // returns true if any modal is open
 // ── Re-initialize ───────────────────────────────────────
 // Call after dynamically adding new modal triggers to the page
 NDS.Modal.init();
+
+// ── Release an open modal before removing its markup ────
+// An open modal holds the backdrop and locks page scroll.
+// Remove the markup while it is open and the overlay stays,
+// the page will not scroll, and nothing is left to close it.
+NDS.Modal.destroy(viewElement);
+NDS.Init.destroy(viewElement);  // or this, which covers every component
 
 // ── Events ──────────────────────────────────────────────
 // Fired on the modal element, bubbles up to document

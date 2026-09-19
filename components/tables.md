@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.7.0"
-last_edit: "09/08/2026 - 09:52 PM"
+updated: "1.12.x"
+last_edit: "03/09/2026 - 01:35 AM"
 ---
 
 <!-- Basic Table Section -->
@@ -985,9 +985,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                     </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="nds-block">
                 <div class="nds-demo-card">
                     <div class="demo-header">
                         <div class="demo-label">Per-Column Alignment</div>
@@ -1085,7 +1083,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                     </div>
                     </div>
                 </div>
-            </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1120,7 +1118,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                     </div>
                     <div class="demo-container">
                         <div class="state-demo">
-                            <table class="nds-table" data-state="loading">
+                            <table class="nds-table nds-loading">
                                 <thead>
                                     <tr>
                                         <th>Name</th>
@@ -1173,7 +1171,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                                     </button>
                                 </div>
                                 <code class="lang-html code">
-&lt;table class="nds-table" data-state="loading"&gt;
+&lt;table class="nds-table nds-loading"&gt;
   &lt;thead&gt;
     &lt;tr&gt;
       &lt;th&gt;Name&lt;/th&gt;
@@ -1916,7 +1914,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                             <i class="hgi hgi-stroke hgi-loading-01"></i>
                             <span class="nds-label">Loading State</span>
                         </span>
-                        <p class="nds-item-desc">Add <code class="nds-inline-code lang-html">data-state="loading"</code> to show a shimmer animation across all cells while data is being fetched.</p>
+                        <p class="nds-item-desc">Add the <code class="nds-inline-code lang-html">nds-loading</code> class to show a shimmer animation across all cells while data is being fetched. JS-toggled state can call <code class="nds-inline-code lang-js">NDS.State.add(table, 'loading')</code> instead; nds-core mirrors the token onto the class.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -1986,7 +1984,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                     <thead><tr><th>Class</th><th>Description</th></tr></thead>
                     <tbody>
                         <tr><td><code class="nds-inline-code lang-html">nds-compact</code></td><td>Reduces row height to 48px. Override with <code class="nds-inline-code lang-html">--table-row-height</code> for custom values</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">nds-responsive</code></td><td>Marks the table for automatic wrapping in a horizontal-scroll container (<code class="nds-inline-code lang-html">.nds-table-wrapper</code>). Pair with <code class="nds-inline-code lang-html">--max-width</code> / <code class="nds-inline-code lang-html">--min-width</code> to tune the scroll breakpoint</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-responsive</code></td><td>Legacy marker with no effect: every table is wrapped in the horizontal-scroll container (<code class="nds-inline-code lang-html">.nds-table-wrapper</code>) automatically, with or without this class. Safe to keep or omit. Tune the scroll with <code class="nds-inline-code lang-html">--max-width</code> / <code class="nds-inline-code lang-html">--min-width</code></td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-mask</code></td><td>Applies gradient fade masks on the overflow edges when the table scrolls horizontally. Off by default. Note: mask clips descendants to the wrapper and breaks overflowing UI like dropmenus, tooltips, and popovers that escape table bounds</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-interactive</code></td><td>Enables hover background changes on rows so the table reads as clickable. Off by default to keep static data tables from suggesting interactivity</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-sortable</code></td><td>Enables column sorting. Use <code class="nds-inline-code lang-html">nds-col-header</code> with <code class="nds-inline-code lang-html">nds-sort-btn nds-icon-only</code> inside sortable <code class="nds-inline-code lang-html">&lt;th&gt;</code> elements</td></tr>
@@ -2011,7 +2009,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                         <tr><td><code class="nds-inline-code lang-html">data-state="sorted-asc"</code></td><td>Set on <code class="nds-inline-code lang-html">&lt;th&gt;</code> to mark the initial sort column as ascending</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-state="sorted-desc"</code></td><td>Set on <code class="nds-inline-code lang-html">&lt;th&gt;</code> to mark the initial sort column as descending</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-state="selected"</code></td><td>Set on <code class="nds-inline-code lang-html">&lt;tr&gt;</code> to visually highlight a selected row. JS toggles this automatically when checkboxes change</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">data-state="loading"</code></td><td>Set on <code class="nds-inline-code lang-html">&lt;table&gt;</code> to show the loading shimmer animation across all cells</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-state="loading"</code></td><td>The JS token for the loading shimmer: set it on <code class="nds-inline-code lang-html">&lt;table&gt;</code> with <code class="nds-inline-code lang-js">NDS.State.add</code>. nds-core mirrors it onto the <code class="nds-inline-code lang-html">nds-loading</code> class, which the CSS reads; use the class in markup</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-align="center|start|end"</code></td><td>Set on a <code class="nds-inline-code lang-html">&lt;th&gt;</code> to align that column: the header and every cell below it, including rows added later by sorting, filtering, or pagination</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-sort-value</code></td><td>Set on <code class="nds-inline-code lang-html">&lt;td&gt;</code> to supply an alternate value used for sorting only, when the displayed text would sort incorrectly (e.g. "Free" in a numeric column, a localized date in a text column). The cell still renders its normal content; only the sort order is affected. Not read by Export: use <code class="nds-inline-code lang-html">data-export-value</code> for that.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-loading</code> (class on <code class="nds-inline-code lang-html">&lt;tbody&gt;</code>)</td><td>Alternate loading trigger: add the <code class="nds-inline-code lang-html">nds-loading</code> class directly to <code class="nds-inline-code lang-html">&lt;tbody&gt;</code> to shimmer only the body rows while keeping the header visible. Used internally by the Filter and Pagination components during data refresh.</td></tr>
@@ -2040,7 +2038,7 @@ last_edit: "09/08/2026 - 09:52 PM"
                         <tr><td><code class="nds-inline-code lang-html">--mask-fade-distance</code></td><td>48px</td><td>Width of the gradient fade mask on scroll edges</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--table-sub-padding</code></td><td><code class="nds-inline-code lang-html">var(--spacing-xl)</code></td><td>Even inset inside a sub-row's cell. Separate from the cell padding knobs: a detail row holds a panel, not a line of text</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--table-sub-background</code></td><td><code class="nds-inline-code lang-html">var(--background-surface-sunken)</code></td><td>Background of a sub-row's cell, sunk behind the parent rows. Overriding this takes over both light and dark</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">--per-page</code></td><td>10</td><td>Number of rows shown per page when using pagination (set on <code class="nds-inline-code lang-html">nds-paged-content</code>)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--per-page</code></td><td>6</td><td>Number of rows shown per page when using pagination. Set it inline on the <code class="nds-inline-code lang-html">nds-paged-content</code> tbody so the pre-init skeleton shows the same number of rows</td></tr>
                     </tbody>
                 </table>
             </div>

@@ -76,10 +76,15 @@
             currentState.callbacks = [];
         }
 
-        // Resolve via the Font Loading API — event-driven, no polling.
+        // Resolve via the Font Loading API — promise + event, plus a bounded status poll.
         if (document.fonts && document.fonts.load && 'ready' in document.fonts) {
             const spec = '1em "' + fontName + '"';
             let settled = false;
+
+            // WebKit serializes a CSS-declared face's family WITH its quotes
+            // ('"hgi-stroke-rounded"'), so a bare compare never matched on Safari and
+            // the gate expired into fail() — icons blank on every iPhone.
+            const family = (f) => f.family.replace(/^["']|["']$/g, '');
 
             // Stamp ONLY when a real @font-face for this family has actually loaded.
             // We can't gate on document.fonts.check(): when no face matches yet — e.g.
@@ -89,7 +94,7 @@
             // is the unambiguous signal.
             const hasLoadedFace = () => {
                 let ok = false;
-                document.fonts.forEach((f) => { if (f.family === fontName && f.status === 'loaded') ok = true; });
+                document.fonts.forEach((f) => { if (family(f) === fontName && f.status === 'loaded') ok = true; });
                 return ok;
             };
             // A face for this family the browser is actively fetching. The budget
@@ -99,22 +104,47 @@
             // the timeout then kills the listener before the font can land.
             const hasPendingFace = () => {
                 let pending = false;
-                document.fonts.forEach((f) => { if (f.family === fontName && f.status === 'loading') pending = true; });
+                document.fonts.forEach((f) => { if (family(f) === fontName && f.status === 'loading') pending = true; });
                 return pending;
             };
+            // A registered face the browser never started fetching. Happens when
+            // every glyph of this family starts hidden (e.g. inside an unselected
+            // tab panel): the fetch only starts at first paint, so no load event
+            // ever fires and the window below would expire into a permanent fail.
+            const hasIdleFace = () => {
+                let idle = false;
+                document.fonts.forEach((f) => { if (family(f) === fontName && f.status === 'unloaded') idle = true; });
+                return idle;
+            };
 
-            let timer;
+            let timer, poll;
             const teardown = () => {
                 clearTimeout(timer);
+                clearInterval(poll);
                 document.fonts.removeEventListener('loadingdone', onDone);
                 document.fonts.removeEventListener('loading', onLoading);
             };
-            const onDone = () => {
-                if (settled || !hasLoadedFace()) return;
+            const settle = () => {
+                if (settled) return;
                 settled = true;
                 teardown();
                 markAsLoaded();
             };
+            const onDone = () => {
+                if (hasLoadedFace()) settle();
+            };
+            // Primary signal: load() resolves with the faces it matched once they load
+            // (an empty list while the deferred sheet hasn't applied — never stamp on
+            // that). Safari has no dependable loadingdone, so the event is the backup.
+            // Waits on each face's own promise in case an engine resolves early.
+            const kick = () => {
+                document.fonts.load(spec).then((faces) => {
+                    if (!faces.length) return;
+                    return Promise.all(faces.map((f) => f.loaded)).then(settle);
+                }).catch(() => {});
+                document.fonts.load('bold ' + spec).catch(() => {});
+            };
+            state.kick = kick;
             // Re-arm once our own face is genuinely in flight, so the budget covers
             // the download instead of the wait for the deferred sheet. Bounded by
             // the fetch itself: 'loaded' stamps, 'error' stops re-arming and the
@@ -127,22 +157,49 @@
                 clearTimeout(timer);
                 timer = setTimeout(() => {
                     if (settled) return;
-                    settled = true;
+                    if (hasLoadedFace()) { settle(); return; }
+                    // Idle face at expiry: the deferred sheet applied but no
+                    // glyph painted, so the init-time load() ran before the face
+                    // existed and nothing since has started the fetch. Force it
+                    // (load() fetches even for hidden glyphs) and wait one more
+                    // window. Bounded: after the kick the face is loading/
+                    // loaded/error — never 'unloaded' — so this fires at most
+                    // once per face.
+                    if (hasIdleFace()) {
+                        kick();
+                        arm();
+                        return;
+                    }
+                    // Still downloading: Safari fires no `loading` event to re-arm
+                    // on, so re-arm here. The fetch bounds it — loaded settles
+                    // (poll below), error falls through to fail() next window.
+                    if (hasPendingFace()) {
+                        arm();
+                        return;
+                    }
+                    // Not settled: a download that finishes after the window still
+                    // stamps through kick()'s promise — a confirmed load, not a
+                    // reveal-anyway.
                     teardown();
                     fail();
                 }, timeout);
             }
 
             // The icons' own usage starts the download once the (possibly deferred)
-            // face applies; `loadingdone` fires when it completes. load() kicks the
-            // already-present case; the immediate onDone() catches an already-loaded
-            // font (whose loadingdone may have fired before we subscribed).
+            // face applies; kick() settles on the promise, `loadingdone` on the event.
+            // The immediate onDone() catches an already-loaded font (whose loadingdone
+            // may have fired before we subscribed).
+            // The poll is the Safari path: a face that registers after the init-time
+            // load() (crit CSS applying late) resolves that promise empty, and WebKit
+            // fires neither `loading` nor a dependable `loadingdone` afterwards, so
+            // nothing else would ever see it load. Status is the unambiguous signal;
+            // the interval dies with the window.
             document.fonts.addEventListener('loadingdone', onDone);
             document.fonts.addEventListener('loading', onLoading);
             arm();
-            document.fonts.load(spec).catch(() => {});
-            document.fonts.load('bold ' + spec).catch(() => {});
+            kick();
             onDone();
+            poll = setInterval(onDone, 500);
         } else {
             // No Font Loading API (pre-2016 browser): the CJK-fallback boundary
             // can't be detected, so reveal rather than hide icons indefinitely.
@@ -152,7 +209,7 @@
 
     function initializeFontLoading() {
         // Load multiple icon fonts
-        const fontsToLoad = ['hgi-stroke-rounded'/* , 'hgi-solid-rounded' */];
+        const fontsToLoad = ['hgi-stroke-rounded'];
 
         fontsToLoad.forEach(fontName => {
             waitForFontFile(fontName, () => {
@@ -196,9 +253,18 @@
     window.addEventListener('pageshow', handlePageShow);
 
     // Global font loading API (called by nds-loader.js unified system)
+    // Start the fetch for every tracked family. The loader calls this when the icon
+    // sheet applies: a face whose glyphs all start hidden (every HGI icon inside a
+    // display:none screen) never fetches on its own, and would otherwise sit
+    // unstamped until the idle-face window above expires.
+    function load() {
+        fontStates.forEach((state) => state.kick?.());
+    }
+
     NDS.FontLoading = {
         waitForFontFile,
         init: initializeFontLoading,
+        load,
         getLoadedFonts,
         isFontLoaded
     };

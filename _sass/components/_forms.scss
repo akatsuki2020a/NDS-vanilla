@@ -32,7 +32,7 @@
         }
 
         .nds-label {
-            color: var(--form-field-text-label);
+            color: var(--_header-color-forced, var(--form-field-text-label));
             font-size: var(--typo-text-md-FS);
             line-height: var(--typo-text-md-LH);
             font-weight: var(--font-weight-medium);
@@ -59,40 +59,14 @@
     // FORM CONTAINER STATUS (data-status attribute)
     // ==============================================
 
-    // Error state - style form control border
-    &[data-status="error"] > .nds-form-control {
-        border-color: var(--form-field-border-error);
-
-        &::before {
-            background-color: var(--form-field-border-error);
-        }
-    }
-
-    // Success state
-    &[data-status="success"] > .nds-form-control {
-        border-color: var(--form-field-border-success);
-
-        &::before {
-            background-color: var(--form-field-border-success);
-        }
-    }
-
-    // Warning state
-    &[data-status="warning"] > .nds-form-control {
-        border-color: var(--form-field-border-warning);
-
-        &::before {
-            background-color: var(--form-field-border-warning);
-        }
-    }
-
-    // Info state
-    &[data-status="info"] > .nds-form-control {
-        border-color: var(--form-field-border-info);
-
-        &::before {
-            background-color: var(--form-field-border-info);
-        }
+    // The field outline is a binary error indicator — normal or red. Success,
+    // warning and info speak through the feedback text under the field instead;
+    // a coloured outline on every valid field is noise the message already carries.
+    // Read by the control's border and its ::before underline (PERF-06: no
+    // `.nds-form-control` tail after [data-status]).
+    &[data-status="error"] {
+        --_control-border-forced: var(--form-field-border-error);
+        --_control-underline-forced: var(--form-field-border-error);
     }
 
     // ==============================================
@@ -110,11 +84,8 @@
         }
 
         box-shadow: var(--shadow-md);
-
-        &,
-        ::-webkit-input-placeholder {
-            color: var(--form-field-text-focused);
-        }
+        color: var(--form-field-text-focused);
+        --_placeholder-color: var(--form-field-text-focused);
     }
 
     // Active state (not readonly)
@@ -124,13 +95,10 @@
         }
 
         border-color: var(--form-field-border-default);
-        --_form-control-bg: var(--form-field-background-darker);
+        --_form-control-bg: var(--_control-bg-forced, var(--_control-bg-active, var(--form-field-background-darker)));
         box-shadow: var(--shadow-md);
-
-        &,
-        ::-webkit-input-placeholder {
-            color: var(--form-field-text-pressed);
-        }
+        color: var(--form-field-text-pressed);
+        --_placeholder-color: var(--form-field-text-pressed);
     }
 
     // Readonly state — non-interactive across every form type. The label
@@ -140,50 +108,25 @@
     // so restore their pointer events explicitly.
     &[data-state~="readonly"] {
         pointer-events: none;
-
-        .nds-form-action {
-            pointer-events: auto;
-        }
-
-        .nds-form-control {
-            border-color: var(--border-neutral-primary);
-            background-color: transparent;
-            color: var(--form-field-text-readonly);
-
-            ::-webkit-input-placeholder {
-                color: var(--form-field-text-placeholder);
-            }
-
-            &:hover {
-                border-color: var(--border-neutral-primary);
-                color: var(--form-field-text-readonly);
-
-                ::-webkit-input-placeholder {
-                    color: var(--form-field-text-placeholder);
-                }
-            }
-        }
+        // Everything below rides custom properties from the container: a
+        // `.nds-form-control` or `input` tail here would join the shared
+        // data-state invalidation set (PERF-06).
+        --_placeholder-color: var(--form-field-text-placeholder);
+        --_control-border-forced: var(--border-neutral-primary);
+        --_control-bg-forced: transparent;
+        --_control-color-forced: var(--form-field-text-readonly);
+        --_action-events: auto;
     }
 
     // Disabled state — same non-interactivity rationale as readonly above.
     &[data-state~="disabled"] {
         pointer-events: none;
         user-select: none;
-
-        .nds-form-header .nds-label,
-        .nds-form-header .nds-info {
-            color: var(--text-default-disabled);
-        }
-
-        .nds-form-control {
-            background-color: transparent;
-            color: var(--text-default-disabled);
-            border-color: var(--border-disabled);
-
-            ::-webkit-input-placeholder {
-                color: var(--text-default-disabled);
-            }
-        }
+        --_placeholder-color: var(--text-default-disabled);
+        --_header-color-forced: var(--text-default-disabled);
+        --_control-border-forced: var(--border-disabled);
+        --_control-bg-forced: transparent;
+        --_control-color-forced: var(--text-default-disabled);
     }
 }
 
@@ -209,15 +152,34 @@
 // Custom-select option buttons carry .nds-btn, so the dropmenu's
 // .nds-dropmenu-item:not(.nds-btn) inline-padding rule skips them and
 // they render flush against the menu edge with centered text. Restore
-// left alignment + inline gutter to match native <option> behavior.
+// left alignment + a full spacing-md padding box so the two-line shape
+// (label + description) has breathing room top and bottom.
 .nds-select-option {
     justify-content: flex-start;
-    padding-inline: var(--spacing-md);
+    padding: var(--spacing-md);
+
+    // A leading icon sits with the label row, not centered against a taller
+    // label + description stack. No-op on plain-label options (the button's
+    // default align-items already sits it beside a single-row label).
+    > :is(i, svg, img) {
+        align-self: flex-start;
+    }
+
+    // .nds-option-text is the label container. Flex-column with an xs gap so
+    // an option that nests .nds-label + .nds-description stacks them with a
+    // small breather. Plain-text options (single anonymous text child) render
+    // as one row — gap only shows between siblings, so no visible change.
+    .nds-option-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
 }
 
 :is(.nds-form-container, .nds-form-group) {
     .nds-label+.nds-info {
-        color: var(--text-primary-paragraph);
+        color: var(--_header-color-forced, var(--text-primary-paragraph));
         font-size: var(--typo-text-sm-FS);
         line-height: var(--typo-text-sm-LH);
         min-width: 200px;
@@ -257,7 +219,11 @@ fieldset {
     // (via autofill-reset mixin) so the inset-shadow mask always tracks the
     // wrapper's current state bg (active/lighter/darker) instead of staying
     // pinned to --form-field-background-default.
-    --_form-control-bg: var(--form-field-background-default);
+    // readonly/disabled set the --_control-*-forced hooks on the container and the
+    // control's own declarations read them first — no `.nds-form-control` tail after
+    // [data-state] in the shared invalidation set (PERF-06).
+    --_form-control-bg: var(--_control-bg-forced, var(--form-field-background-default));
+    color: var(--_control-color-forced, inherit);
     display: flex;
     min-height: var(--_input-size);
     height: var(--_input-size);
@@ -266,7 +232,7 @@ fieldset {
     padding: var(--spacing-none) var(--spacing-md);
     border-radius: var(--_input-radius);
     gap: var(--spacing-md);
-    border: 1px solid var(--form-field-border-default);
+    border: 1px solid var(--_control-border-forced, var(--form-field-border-default));
     background-color: var(--_form-control-bg);
     position: relative;
 
@@ -307,16 +273,16 @@ fieldset {
 
     }
 
-    ::-webkit-input-placeholder {
-        color: var(--form-field-text-placeholder);
+    :is(input, textarea)::-webkit-input-placeholder {
+        color: var(--_placeholder-color, var(--form-field-text-placeholder));
     }
 
     &:hover {
-        border-color: var(--form-field-border-hovered);
+        border-color: var(--_control-border-forced, var(--form-field-border-hovered));
+        color: var(--_control-color-forced, var(--form-field-text-hovered));
 
-        &,
-        ::-webkit-input-placeholder {
-            color: var(--form-field-text-hovered);
+        :is(input, textarea)::-webkit-input-placeholder {
+            color: var(--_placeholder-color, var(--form-field-text-hovered));
         }
     }
 
@@ -329,7 +295,7 @@ fieldset {
         height: 2px;
         border-radius: 0 0 3px 3px;
         transform: translateX(-50%);
-        background-color: var(--form-field-border-pressed);
+        background-color: var(--_control-underline-forced, var(--form-field-border-pressed));
         transition: width var(--nds-transition);
         z-index: 2;
     }
@@ -351,10 +317,10 @@ fieldset {
         }
 
         box-shadow: var(--shadow-md);
+        color: var(--_control-color-forced, var(--form-field-text-focused));
 
-        &,
-        ::-webkit-input-placeholder {
-            color: var(--form-field-text-focused);
+        :is(input, textarea)::-webkit-input-placeholder {
+            color: var(--_placeholder-color, var(--form-field-text-focused));
         }
     }
 
@@ -430,8 +396,10 @@ fieldset {
         }
     }
 
-    .nds-select[data-state~="open"]>&::after {
-        transform: rotate(180deg);
+    // The caret (%select-caret-after) reads --_caret-flip; set on the host, not on
+    // the control's ::after (PERF-06).
+    @at-root .nds-select[data-state~="open"] {
+        --_caret-flip: 180deg;
     }
 
     // Custom dropdown styles for nds-select when using input instead of
@@ -444,6 +412,8 @@ fieldset {
 
     .nds-form-action {
         display: flex;
+        // readonly re-enables the action slot through this hook (PERF-06).
+        pointer-events: var(--_action-events, inherit);
         gap: var(--spacing-sm);
         flex-direction: row;
         margin-inline-end: calc(var(--spacing-md) * -1);
@@ -504,25 +474,30 @@ fieldset {
             }
         }
 
+        // The affix rules target the button-shaped widget that sits flush
+        // against the input; scoping to .nds-btn names that intent and skips
+        // whatever else lives in the affix (multiselect's prefix carries an
+        // .nds-dropmenu-menu popover as a sibling of its trigger, and that
+        // menu must keep its own rounded corners).
         &.nds-suffix {
-            >* {
+            >.nds-btn {
                 border-start-start-radius: 0;
                 border-end-start-radius: 0;
             }
 
-            >*:last-child {
+            >.nds-btn:last-child {
                 border-start-end-radius: var(--_input-radius);
                 border-end-end-radius: var(--_input-radius);
             }
         }
 
         &.nds-prefix {
-            >* {
+            >.nds-btn {
                 border-start-end-radius: 0;
                 border-end-end-radius: 0;
             }
 
-            >*:first-child {
+            >.nds-btn:first-child {
                 border-start-start-radius: var(--_input-radius);
                 border-end-start-radius: var(--_input-radius);
             }
@@ -541,22 +516,26 @@ fieldset {
 
 .nds-form-container:not(.nds-file-upload) {
     &.nds-lighter .nds-form-control {
-        --_form-control-bg: var(--form-field-background-lighter);
+        --_form-control-bg: var(--_control-bg-forced, var(--form-field-background-lighter));
     }
 
     &.nds-darker .nds-form-control {
-        --_form-control-bg: var(--form-field-background-darker);
+        --_form-control-bg: var(--_control-bg-forced, var(--form-field-background-darker));
     }
 
     // Without this, the [data-state~="active"] rule above swaps the bg to
     // --form-field-background-darker the moment the user types into a lighter field.
-    &.nds-lighter[data-state~="active"]:not([data-state~="readonly"]) > .nds-form-control {
-        --_form-control-bg: var(--form-field-background-lighter);
+    &.nds-lighter[data-state~="active"]:not([data-state~="readonly"]) {
+        --_control-bg-active: var(--form-field-background-lighter);
     }
 }
 
-.nds-form-container[data-state~="listening"] .nds-voice-input>i {
-    animation: colorCycle 1s linear infinite alternate;
+.nds-form-container[data-state~="listening"] {
+    --_voice-animation: colorCycle 1s linear infinite alternate;
+}
+
+.nds-voice-input>i {
+    animation: var(--_voice-animation, none);
 }
 
 .nds-toggle-password.show i {
@@ -610,32 +589,31 @@ fieldset {
 
     &[data-state~="disabled"] {
         opacity: 0.5;
-        pointer-events: none;
-
-        .nds-form-container {
-            pointer-events: none;
-        }
+        pointer-events: none; // inherited by every container inside
     }
 
-    &[data-status]>.nds-feedback {
-        display: flex;
+    // The message reads --_feedback-display; its colour comes from the generic
+    // [data-status] host rules in _feedback-icons.scss (PERF-06: no tails).
+    &[data-status] {
+        --_feedback-display: flex;
     }
 
-    &[data-status="error"]>.nds-feedback {
-        color: var(--text-error);
-    }
+}
 
-    &[data-status="success"]>.nds-feedback {
-        color: var(--text-success);
-    }
-
-    &[data-status="warning"]>.nds-feedback {
-        color: var(--text-warning);
-    }
-
-    &[data-status="info"]>.nds-feedback {
-        color: var(--text-info);
-    }
+// A field carries error or help — nothing else tints it. setStatus folds every
+// other status to neutral, but a hand-authored data-status on the container
+// still reaches its feedback through the ancestor rules in _feedback-icons.scss
+// ([data-status="success"] .nds-feedback). Undo it for both container types.
+// `initial` sends each knob back to the neutral default the private vars
+// already fall back to, so no neutral values are copied here.
+// Descendant, not child: a data-feedback-target puts the message a level down.
+:is(.nds-form-container, .nds-form-group)[data-status]:not([data-status="error"], [data-status="help"]) {
+    --feedback-color: initial;
+    --feedback-ring: initial;
+    --feedback-icon-color: initial;
+    --feedback-icon-stroke: initial;
+    --feedback-icon-symbol: initial;
+    --_feedback-text: initial;
 }
 
 // ==============================================

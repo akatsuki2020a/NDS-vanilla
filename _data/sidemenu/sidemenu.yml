@@ -15,6 +15,9 @@
 - label: "DGA Templates"
   has_sub: true
   children:
+    - label: "Home Page Template"
+      url: "/templates/home-template"
+      href: "/templates/home-template.html"
     - label: "Form Template"
       url: "/templates/form-template"
       href: "/templates/form-template.html"
@@ -83,6 +86,9 @@
 - label: "Events"
   has_sub: true
   children:
+    - label: "National Day 96"
+      url: "/events/national-day-96"
+      href: "/events/national-day-96.html"
     - label: "Foundation Day"
       url: "/events/foundation-day"
       href: "/events/foundation-day.html"
@@ -298,6 +304,9 @@
         - label: "Header"
           url: "/ui-shell/header"
           href: "/ui-shell/header.html"
+        - label: "Main Navigation"
+          url: "/ui-shell/mainnav"
+          href: "/ui-shell/mainnav.html"
         - label: "Document Head"
           url: "/ui-shell/head"
           href: "/ui-shell/head.html"
@@ -319,12 +328,18 @@
     - label: "Layout"
       is_group: true
       children:
+        - label: "Page Shell"
+          url: "/layout/page-shell"
+          href: "/layout/page-shell.html"
         - label: "Grid"
           url: "/layout/grid"
           href: "/layout/grid.html"
         - label: "Section"
           url: "/layout/section"
           href: "/layout/section.html"
+        - label: "Status Section"
+          url: "/layout/status-section"
+          href: "/layout/status-section.html"
         - label: "Block"
           url: "/layout/block"
           href: "/layout/block.html"

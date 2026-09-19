@@ -89,7 +89,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
-    max-width: var(--paragraph-max-width);
   }
 
   .nds-alert-title {
@@ -171,24 +170,27 @@
   // ==============================================
 
   &:not(.nds-color, .nds-inline) {
-    --card-title: initial;
+    --_card-title-base: initial;
+    // Repeated under dark: card's dark neutral rule outranks the light-only
+    // reset, so a base neutral alert kept a tinted title in dark alone.
+    @include dark { --_card-title-base: initial; }
   }
 
   &:is(.nds-color, .nds-inline) {
-    &:is(.nds-green, [data-status="success"])                        { --card-bg: var(--background-success-faint); }
-    &:is(.nds-blue,  [data-status="info"])                           { --card-bg: var(--background-info-faint); }
-    &:is(.nds-yellow,[data-status="warning"])                        { --card-bg: var(--background-warning-faint); }
-    &:is(.nds-red,   [data-status="error"], [data-status="critical"]){ --card-bg: var(--background-error-faint); }
+    &:is(.nds-green, [data-status="success"])                        { --_card-bg-base: var(--background-success-faint); }
+    &:is(.nds-blue,  [data-status="info"])                           { --_card-bg-base: var(--background-info-faint); }
+    &:is(.nds-yellow,[data-status="warning"])                        { --_card-bg-base: var(--background-warning-faint); }
+    &:is(.nds-red,   [data-status="error"], [data-status="critical"]){ --_card-bg-base: var(--background-error-faint); }
   }
 
   &.nds-inline {
-    &:is(.nds-green, [data-status="success"])                        { --card-title: var(--text-success); }
-    &:is(.nds-blue,  [data-status="info"])                           { --card-title: var(--text-info); }
-    &:is(.nds-yellow,[data-status="warning"])                        { --card-title: var(--text-warning); }
-    &:is(.nds-red,   [data-status="error"], [data-status="critical"]){ --card-title: var(--text-error); }
-    &:is(.nds-neutral,[data-status="neutral"]) {
-      --card-bg: var(--background-neutral-light);
-      @include dark { --card-bg: var(--colors-alpha-white-10); }
+    &:is(.nds-green, [data-status="success"])                        { --_card-title-base: var(--text-success); }
+    &:is(.nds-blue,  [data-status="info"])                           { --_card-title-base: var(--text-info); }
+    &:is(.nds-yellow,[data-status="warning"])                        { --_card-title-base: var(--text-warning); }
+    &:is(.nds-red,   [data-status="error"], [data-status="critical"]){ --_card-title-base: var(--text-error); }
+    &:is(.nds-neutral,.nds-gray,[data-status="neutral"]) {
+      --_card-bg-base: var(--background-neutral-light);
+      @include dark { --_card-bg-base: var(--colors-alpha-white-10); }
     }
   }
 
@@ -291,7 +293,7 @@
 :is(.nds-blue,  [data-status="info"])                            { --alert-stripe: var(--background-info);      --alert-icon-bg: var(--featuredicons-background-info-light); }
 :is(.nds-yellow,[data-status="warning"])                         { --alert-stripe: var(--background-warning);   --alert-icon-bg: var(--featuredicons-background-warning-light); }
 :is(.nds-red,   [data-status="error"], [data-status="critical"]) { --alert-stripe: var(--background-error);     --alert-icon-bg: var(--featuredicons-background-error-light); }
-:is(.nds-neutral,[data-status="neutral"])                        { --alert-stripe: var(--border-neutral-light); --alert-icon-bg: var(--featuredicons-background-neutral-light); }
+:is(.nds-neutral,.nds-gray,[data-status="neutral"])              { --alert-stripe: var(--border-neutral-light); --alert-icon-bg: var(--featuredicons-background-neutral-light); }
 
 // ==============================================
 // TOAST PLACEHOLDER CONTAINERS
@@ -360,8 +362,12 @@
 
   // JS stamps 'paused' on hover/focus/click — freeze the countdown ring in sync with the timer.
   // .nds-alert-close keeps this above the button's `animation:` shorthand, which resets play-state.
-  &[data-state~="paused"] .nds-alert-close .nds-progress-track {
-    animation-play-state: paused;
+  &[data-state~="paused"] {
+    --_toast-play: paused;
+  }
+
+  .nds-alert-close .nds-progress-track {
+    animation-play-state: var(--_toast-play, running);
   }
 
 }

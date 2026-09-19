@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.7.0"
-last_edit: "06/08/2026 - 02:16 AM"
+last_edit: "02/09/2026 - 12:00 AM"
 ---
 
 <!-- Direct Mode -->
@@ -226,7 +226,7 @@ NDS.Sort.create(document.getElementById('sortDirectRoot'), {
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initSortDirect() {
     var root = document.getElementById('sortDirectRoot');
     var items = document.getElementById('sortDirectItems');
     if (!root || !items || !window.NDS || !NDS.Sort) return;
@@ -238,7 +238,9 @@ document.addEventListener('DOMContentLoaded', function () {
         a11y: 'pressed',
         types: { price: 'number' }
     });
-});
+}
+// Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSortDirect); else initSortDirect();
 </script>
 
 <!-- Cycle Mode -->
@@ -427,7 +429,7 @@ NDS.Sort.create(root, {
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+function initSortCycle() {
     var root = document.getElementById('sortCycleRoot');
     var items = document.getElementById('sortCycleItems');
     if (!root || !items || !window.NDS || !NDS.Sort) return;
@@ -454,7 +456,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     });
-});
+}
+// Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initSortCycle); else initSortCycle();
 </script>
 
 <!-- Table Column Sort -->
@@ -707,6 +711,8 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="nds-block nds-prose">
                 <h3 class="nds-block-title">Best Practices</h3>
                 <ul>
+                    <li>Decide <strong>who owns the order</strong> before you author any trigger. One question settles it: does the server return every matching row, or one page? Every row means the client sorts — author <code class="nds-inline-code lang-html">data-sort</code> triggers as shown on this page. One page means the server sorts — author no <code class="nds-inline-code lang-html">data-sort</code> at all, and put your own control in the form instead, such as <code class="nds-inline-code lang-html">&lt;select name="sort"&gt;</code>. Your <a class="nds-color" href="{{ 'components/pagination' | relative_url }}">Pagination</a> mode is the quick tell: client-side paging means the server already sent everything.</li>
+                    <li>NDS.Sort is <strong>client-side only</strong>. It reorders the rows on the page and never asks the server for new ones. The presence of <code class="nds-inline-code lang-html">data-sort</code> is the switch, so the two approaches cannot clash. Author both and the client re-orders one server page on top of the server's own order, which looks right and is wrong across the full result set.</li>
                     <li>Reach for <strong>NDS.Sort</strong> directly only when the host widget is neither a <a class="nds-color" href="{{ 'components/filter' | relative_url }}">Filter</a> nor a <a class="nds-color" href="{{ 'components/tables' | relative_url }}">Tables</a>. Both of those wire the engine for you, and duplicating wiring causes double-init.</li>
                     <li>Pick <strong>direct mode</strong> when every sort choice is explicitly labelled (dropmenus, pill groups, radio bars). Include a reset option with an empty <code class="nds-inline-code lang-html">data-sort</code> attribute so users can return to the original order.</li>
                     <li>Pick <strong>cycle mode</strong> when a single trigger carries the state for one key (column headers, inline toggles). Users expect three clicks to return them to where they started.</li>

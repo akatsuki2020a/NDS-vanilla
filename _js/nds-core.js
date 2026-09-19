@@ -16,13 +16,13 @@
  *     NDS.onDOMAdd(sel, fn) · NDS.onDOMRemove(sel, fn) · NDS.onChildrenChange(sel, fn)
  *     NDS.onAttrChange(sel, attrs, fn) · NDS.onOutsideScroll(el, fn)
  *   scheduling
- *     NDS.debounce(fn, ms) · NDS.rafThrottle(fn) · NDS.onIdle(fn, timeout)
+ *     NDS.debounce(fn, ms) (.cancel() drops a pending call) · NDS.rafThrottle(fn) · NDS.onIdle(fn, timeout)
  *     NDS.afterPaint(fn) · NDS.onTransitionEnd(el, fn, opts) → cancel()
  *     NDS.transitionSpeed()            the token-sourced duration in ms
  *   DOM, portal-aware
  *     NDS.portal(el) / .unportal(el) / .needsPortal(el)
  *     NDS.closest(el, sel) · NDS.queryAll(root, sel) · NDS.querySelector(root, sel)
- *     NDS.resolveEl(idOrElOrSel) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
+ *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
  *     NDS.stickyHeaderBottom() · NDS.scrollBelowNav(el, opts) · NDS.scrollLock.lock/unlock
  *     NDS.gridLastRow(container) · NDS.trapFocus(getEl) · NDS.focusableSel
  *   data + text
@@ -35,7 +35,9 @@
  *     NDS.triggerEvents(el)            dispatch input + change so forms and consumers sync
  *     NDS.badge(el, count) · NDS.buildChip(value, opts) · NDS.isRowSelected(row)
  * Events:
- *   (none — core dispatches nothing of its own)
+ *   nds:template:ready    on the stamped root, bubbles — detail.id is the summoned id.
+ *                         Fires after NDS.Init.refresh wires the arrivals, so page JS
+ *                         that needs the markup binds on document and waits for it
  * Hooks:
  *   data-state    the token list NDS.State owns — space separated, matched with ~=
  *   data-status   the single value NDS.Status owns
@@ -86,15 +88,19 @@
                      || '';
 
     // ── Breakpoints (matches _mixins.scss) ─────────────────────────
-    // Usage: NDS.breakpoints.desktop → '(min-width: 960px)'
+    // Usage: NDS.breakpoints.desktop → '(width >= 960px)'
     //        window.matchMedia(NDS.breakpoints.mobile).matches
+    // Range syntax, not max-width: N - 1. A tier ending at 959px stops matching at
+    // 959.01 while the next has not started, so a viewport of 959.2 — ordinary under
+    // browser zoom — matched neither tier. `<` and `>=` on the same number are exact
+    // complements, so every width lands in exactly one tier, here and in the CSS.
     NDS.breakpoints = {
-        mobile:          '(max-width: 599px)',
-        tablet:          '(min-width: 600px)',
-        'tablet-max':    '(max-width: 960px)',
-        desktop:         '(min-width: 960px)',
-        'desktop-max':   '(max-width: 1280px)',
-        'large-desktop': '(min-width: 1280px)'
+        mobile:          '(width < 600px)',
+        tablet:          '(width >= 600px)',
+        'tablet-max':    '(width < 960px)',
+        desktop:         '(width >= 960px)',
+        'desktop-max':   '(width < 1280px)',
+        'large-desktop': '(width >= 1280px)'
     };
 
     // ── Language & Direction (live) ──────────────────────────────────
@@ -129,8 +135,14 @@
     // toggle still want raw `window.matchMedia(...).addEventListener` —
     // this getter only exposes the snapshot read.
     // Usage: if (NDS.prefersReducedMotion) callback(); else animate();
+    // Covers BOTH the OS preference and the a11y panel's reduce-motion mode. CSS
+    // handles the panel for animations, but an explicit scroll behavior:'smooth'
+    // outranks scroll-behavior, so JS-driven motion has to read the mode here.
     Object.defineProperty(NDS, 'prefersReducedMotion', {
-        get() { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+        get() {
+            return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+                document.documentElement.matches('[data-a11y~="reduce-motion"]');
+        }
     });
 
     // ── i18n ─────────────────────────────────────────────────────────
@@ -260,12 +272,22 @@
     // would never take (`retry`, `csrf` fine; `priority`, `keepalive`, `duplex`
     // would have been landmines). `signal` is claimed deliberately: it is
     // composed with the timeout rather than forwarded.
+    // Safari < 17.4 has no AbortSignal.any (and < 16 no .timeout): compose by hand
+    // there, keeping the TimeoutError / AbortError contract below.
+    // timeout:0 opts out. AbortSignal.timeout(0) would abort immediately,
+    // burning the obvious spelling for "no timeout".
+    const composeSignal = (signal, timeout) => {
+        if (AbortSignal.any) return AbortSignal.any([signal, timeout && AbortSignal.timeout(timeout)].filter(Boolean));
+        const ctrl = new AbortController();
+        if (signal?.aborted) ctrl.abort(signal.reason);
+        else signal?.addEventListener('abort', () => ctrl.abort(signal.reason), { once: true });
+        if (timeout) setTimeout(() => ctrl.abort(new DOMException('Request timed out', 'TimeoutError')), timeout);
+        return ctrl.signal;
+    };
     NDS.request = async (url, { signal, timeout = 15000, maxBytes = 1048576, json, ...init } = {}) => {
         const res = await fetch(url, {
             ...init,
-            // timeout:0 opts out. AbortSignal.timeout(0) would abort immediately,
-            // burning the obvious spelling for "no timeout".
-            signal: AbortSignal.any([signal, timeout && AbortSignal.timeout(timeout)].filter(Boolean))
+            signal: composeSignal(signal, timeout)
         });
         if (!res.ok) {
             // Best-effort body slice so the thrown Error tells the operator what
@@ -315,7 +337,9 @@
     // Usage: const fn = NDS.debounce(handler, 150)
     NDS.debounce = (fn, ms) => {
         let t;
-        return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+        const debounced = (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+        debounced.cancel = () => clearTimeout(t); // destroy paths drop the pending call
+        return debounced;
     };
 
     // ── RAF Throttle ─────────────────────────────────────────────────
@@ -390,14 +414,23 @@
     // ── Element Resize Observer ──────────────────────────────────────
     // Single ResizeObserver, multiple elements
     // Usage: const off = NDS.onElementResize(el, handler)
+    //        handler(entry) may RETURN a function: its writes. Every handler in
+    //        the batch reads first, then the writes run together — a write between
+    //        two handlers' reads forces one layout per element (34 scroll-mores
+    //        cost 68ms@6.6x that way).
     NDS.onElementResize = (() => {
         const map = new Map();
         const ro = typeof ResizeObserver !== 'undefined'
             ? new ResizeObserver(entries => {
+                const writes = [];
                 for (let i = 0; i < entries.length; i++) {
                     const fns = map.get(entries[i].target);
-                    if (fns) fns.forEach(fn => fn(entries[i]));
+                    if (fns) fns.forEach(fn => {
+                        const write = fn(entries[i]);
+                        if (typeof write === 'function') writes.push(write);
+                    });
                 }
+                for (let i = 0; i < writes.length; i++) writes[i]();
             })
             : null;
 
@@ -548,11 +581,13 @@
     // Usage: const off = NDS.onAttrChange('.nds-progress-circle', ['data-value', 'data-num'], els => { ... })
     //        // later: off();  releases the subscriber
     const attrSubs = [];
+    const attrNames = new Set();
+    let attrMo;
     NDS.onAttrChange = (sel, attrs, fn) => {
         const sub = { sel, attrs: new Set(attrs), fn };
         attrSubs.push(sub);
-        if (attrSubs.length === 1) {
-            new MutationObserver(mutations => {
+        if (!attrMo) {
+            attrMo = new MutationObserver(mutations => {
                 const changed = new Map();
                 for (let i = 0; i < mutations.length; i++) {
                     const el = mutations[i].target;
@@ -570,7 +605,15 @@
                     });
                     if (hits.length) attrSubs[s].fn(hits);
                 }
-            }).observe(document.documentElement, { attributes: true, subtree: true });
+            });
+        }
+        // attributeFilter = the union of every subscriber's names, re-observed as it
+        // grows. Without it the observer records EVERY attribute write on the page
+        // for its lifetime — class, aria, style, init stamps — and runs the callback.
+        const before = attrNames.size;
+        attrs.forEach(a => attrNames.add(a));
+        if (attrNames.size !== before) {
+            attrMo.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: [...attrNames] });
         }
         return () => { const i = attrSubs.indexOf(sub); if (i !== -1) attrSubs.splice(i, 1); };
     };
@@ -625,7 +668,11 @@
             for (let i = 0; i < removed.length; i++) _fire(_onRemove, removed[i], el);
         };
 
-        const has = (el, state) => el ? parse(el).has(state) : false;
+        // No Set for a read: has() runs per row on every selection recount.
+        const has = (el, state) => {
+            const cur = el && el.getAttribute('data-state');
+            return !!cur && !!state && (cur === state || cur.split(/\s+/).includes(state));
+        };
 
         const get = el => el ? (el.getAttribute('data-state') || '') : '';
 
@@ -661,6 +708,35 @@
 
         return { parse, add, remove, has, get, set, clear, apply, onAdd, onRemove };
     })();
+
+    // ── Token mirrors ────────────────────────────────────────────────
+    // CSS spells these tokens as a class; the data-state token stays the JS/markup
+    // input and is mirrored onto the class here. Chrome keys attribute invalidation
+    // by NAME, so every `[data-state] Y` rule feeds ONE shared set and every state
+    // write anywhere restyles each matching Y under it (PERF-06). Tokens whose CSS
+    // must reach descendants — loading's `> *`, the drawer's and upload's `.nds-btn`
+    // / `.nds-form-control` rules, the table stripe's `of` list — key on their
+    // class, whose set only they touch.
+    // The observer catches State writes and bare setAttribute alike, in a microtask —
+    // before the next paint, not inside the write. The scan covers markup that ships
+    // with a token and runs before the reveal (0.2ms at 6.6x for loading).
+    const MIRRORS = { loading: 'nds-loading', hidden: 'nds-hidden', 'has-more': 'nds-has-more', 'always-open': 'nds-always-open', dropbox: 'nds-dropbox' };
+    const _mirrored = new WeakMap();
+    const mirrorTokens = (el) => {
+        for (const token in MIRRORS) {
+            const cls = MIRRORS[token], on = NDS.State.has(el, token);
+            let mine = _mirrored.get(el);
+            if (on && !el.classList.contains(cls)) {
+                el.classList.add(cls);
+                if (!mine) _mirrored.set(el, mine = new Set());
+                mine.add(cls);
+            } else if (!on && mine && mine.has(cls)) { el.classList.remove(cls); mine.delete(cls); }
+        }
+    };
+    NDS.onAttrChange('*', ['data-state'], (els) => els.forEach(mirrorTokens));
+    const MIRROR_SEL = Object.keys(MIRRORS).map(t => `[data-state~="${t}"]`).join(',');
+    const scanTokens = () => document.querySelectorAll(MIRROR_SEL).forEach(mirrorTokens);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scanTokens, { once: true }); else scanTokens();
 
     // ── Status Management (data-status) ─────────────────────────────
     // Single-value management for data-status attribute
@@ -825,6 +901,34 @@
         const byId = document.getElementById(ref.replace(/^#/, ''));
         if (byId) return byId;
         try { return document.querySelector(ref); } catch { return null; }
+    };
+
+    // ── Template Resolver ────────────────────────────────────────────
+    // Resolve an id that may still sit inside a <template>. A modal or panel
+    // may ship template-wrapped so its nodes stay out of the DOM until first
+    // open; on a live miss this scans the page's templates, moves the owning
+    // template's content into its place, inits the arrivals via
+    // NDS.Init.refresh (loader inits are idempotent), fires a bubbling
+    // nds:template:ready {id} on the element — page JS binds there, since
+    // nothing it looked up at load existed — and returns the element.
+    // MUTATING on a template hit — open/toggle paths only; read-only lookups
+    // (isOpen, close) keep getElementById so they never move anything.
+    NDS.fromTemplate = (id) => {
+        if (!id) return null;
+        let el = document.getElementById(id);
+        if (el) return el;
+        const tpls = document.querySelectorAll('template');
+        for (let i = 0; i < tpls.length; i++) {
+            if (!tpls[i].content.getElementById(id)) continue;
+            tpls[i].replaceWith(tpls[i].content);
+            el = document.getElementById(id);
+            if (el) {
+                NDS.Init?.refresh?.(el);
+                el.dispatchEvent(new CustomEvent('nds:template:ready', { bubbles: true, detail: { id } }));
+            }
+            return el;
+        }
+        return null;
     };
 
     // ── Programmatic Input Events ────────────────────────────────────
@@ -1069,18 +1173,17 @@
 
     // ── Body Scroll Lock ───────────────────────────────────────────────
     // Locks/unlocks document scroll while preserving the visual scroll
-    // position. `lock()` captures the current pageYOffset and pins the
-    // body via `position: top: -<scrollY>px` (callers are expected to
-    // pair this with a CSS rule that sets `body { position: fixed }`
-    // when the appropriate state-token is present, e.g.
-    // `body[data-state~="backdrop"]`). `unlock()` parses the saved
-    // offset back out of the inline style, clears it, and restores
+    // position. `lock()` captures the current pageYOffset, pins the body
+    // via `top: -<scrollY>px` and stamps `data-nds-scroll-lock`, which
+    // _backdrop.scss turns into `position: fixed`. `unlock()` parses the
+    // saved offset back out of the inline style, clears both, and restores
     // scroll. Stateless: the inline style is the source of truth, so
     // calling `unlock()` when not locked is a safe no-op.
     //
-    // Does NOT touch `data-state` — callers manage backdrop / overlay
-    // state tokens themselves so the same helper serves both
-    // backdrop-coupled and standalone scroll-lock use cases.
+    // Own attribute, NOT a data-state token: `data-state` keys hundreds of
+    // rules, so flipping it on <body> restyled ~half the page (1,578
+    // elements on the home page, measured 2026-09-02). A name only one
+    // body rule uses restyles <body> alone.
     //
     // Caller responsibility: do NOT call `lock()` twice without an
     // intervening `unlock()`. The second call would capture the
@@ -1094,11 +1197,13 @@
         lock() {
             const scrollY = window.pageYOffset;
             document.body.style.top = `-${scrollY}px`;
+            document.body.setAttribute('data-nds-scroll-lock', '');
         },
         unlock() {
             if (!document.body.style.top) return;
             const scrollY = parseInt(document.body.style.top, 10) * -1;
             document.body.style.top = '';
+            document.body.removeAttribute('data-nds-scroll-lock');
             window.scrollTo(0, scrollY);
         }
     };
@@ -1362,8 +1467,10 @@
                 // The sticky nav is a top boundary only for triggers BELOW it. A
                 // trigger ABOVE the nav (e.g. a topbar dropmenu) opens a downward
                 // menu that passes in front of the nav, so the nav must not clamp
-                // it down past itself — leaving a gap below the trigger.
-                if (navRect.bottom > 0 && triggerRect.bottom > navRect.top) {
+                // it down past itself — leaving a gap below the trigger. Same for
+                // a trigger INSIDE the nav (a nav-link tooltip): its popup opens
+                // in front of the nav, and the clamp pushed it navGap below it.
+                if (navRect.bottom > 0 && triggerRect.bottom > navRect.top && !_navEl.contains(trigger)) {
                     topEdge = navRect.bottom + navGap;
                 }
             }
@@ -1392,47 +1499,57 @@
     NDS.gridLastRow = (() => {
         const SEL = '.nds-divided.nds-grid';
         const CLS = 'nds-last-row';
-        let listening = false;
 
-        function scan(container) {
-            const grids = container && container.matches?.(SEL)
+        // Reads only; returns the class writes so the pooled ResizeObserver can
+        // run every grid's reads before any write.
+        function mark(grid) {
+            const items = grid.children;
+            if (!items.length) return;
+            let first = items.length; // hidden/non-laid-out grid: no last row
+            if (grid.offsetParent) {
+                const lastTop = items[items.length - 1].offsetTop;
+                first = items.length - 1;
+                while (first > 0 && items[first - 1].offsetTop === lastTop) first--;
+            }
+            return () => { for (let i = 0; i < items.length; i++) items[i].classList.toggle(CLS, i >= first); };
+        }
+
+        // Each grid marks itself from the ResizeObserver, which delivers after
+        // layout: the offsetTop reads never force one, the first delivery is the
+        // initial scan, and a grid that reflows (items paged out, viewport
+        // resized) re-marks on its own. A scheduled first scan (idle, DCL, after
+        // the reveal paint) always raced the time-sliced inits and forced a
+        // full-page layout (~1–2s on a table page at 6.6×).
+        // A grid that leaves the DOM releases its observer entry, else an SPA
+        // that remounts grids retains every discarded one. Subscribed on the
+        // first watch so a page without grids never starts the DOM bus for it.
+        const offs = new WeakMap();
+        let releasing = false;
+        function watch(grid) {
+            if (offs.has(grid)) return;
+            offs.set(grid, NDS.onElementResize(grid, () => mark(grid)));
+            if (releasing) return;
+            releasing = true;
+            NDS.onDOMRemove(SEL, (grids) => grids.forEach((g) => { offs.get(g)?.(); offs.delete(g); }));
+        }
+
+        function gridsIn(container) {
+            return container && container.matches?.(SEL)
                 ? [container]
                 : (container || document).querySelectorAll(SEL);
-
-            for (let g = 0; g < grids.length; g++) {
-                const grid = grids[g];
-                const items = grid.children;
-                for (let i = 0; i < items.length; i++) items[i].classList.remove(CLS);
-                if (!items.length) continue;
-
-                // Skip hidden/non-laid-out grids (offsetTop is 0 for all items)
-                if (!grid.offsetParent) continue;
-
-                const lastTop = items[items.length - 1].offsetTop;
-                for (let i = items.length - 1; i >= 0; i--) {
-                    if (items[i].offsetTop === lastTop) {
-                        items[i].classList.add(CLS);
-                    } else {
-                        break;
-                    }
-                }
-            }
         }
 
+        // Explicit re-scan (marks now, so the read may force layout) and the
+        // registration path for grids added after load.
         function update(container) {
-            scan(container);
-            // Start resize listener on first call that finds grids
-            if (!listening && document.querySelector(SEL)) {
-                listening = true;
-                NDS.onResize(() => scan());
-            }
+            const grids = gridsIn(container);
+            for (let g = 0; g < grids.length; g++) { watch(grids[g]); const write = mark(grids[g]); if (write) write(); }
         }
 
-        // Defer initial scan to idle — the last-row class is cosmetic (removes
-        // bottom borders on last-row items), not critical for first paint.
-        // Reading offsetTop/offsetParent on DOMContentLoaded forced a 15ms+
-        // layout pass that competed with the critical init batch.
-        document.addEventListener('DOMContentLoaded', () => NDS.onIdle(() => update()));
+        // Observe only — no reads at load. Guarded for a bundle injected after load
+        // (SPA host), which never sees DOMContentLoaded.
+        const start = () => { const grids = gridsIn(); for (let g = 0; g < grids.length; g++) watch(grids[g]); };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 
         return { update };
     })();

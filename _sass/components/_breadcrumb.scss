@@ -17,10 +17,21 @@
 }
 
 .nds-breadcrumb>li {
-    display: flex;
-    align-items: center;
     color: var(--text-secondary-paragraph);
     // current-page crumb keeps this color; disabled-token color fails AA here
+}
+
+// nds-truncate is a :where() utility (zero specificity) — flex here beat its
+// -webkit-box and killed the clamp. Centre the clamped crumb by hand: it loses
+// align-items, and a collapsed trail's 40px ellipsis button sets the row height.
+.nds-breadcrumb>li:not(.nds-truncate) {
+    display: flex;
+    align-items: center;
+}
+
+.nds-breadcrumb>li.nds-truncate {
+    align-self: center;
+    max-width: min(100%, 45ch);
 }
 
 /* ========================================
@@ -71,7 +82,8 @@
    contributes the pulse and the post-init loading form. Released by
    data-nds-breadcrumb-initialized. */
 :is(.nds-breadcrumb-nav:not([data-nds-breadcrumb-initialized]),
-    .nds-breadcrumb-nav:is(.nds-loading, [data-state='loading'])) {
+    .nds-breadcrumb-nav.nds-loading) {
+    @include skeleton-pulse;
 
     :is(.nds-breadcrumb>li> :is(a, span), .nds-breadcrumb>li[aria-current="page"]) {
         @include skeleton-bar;
@@ -83,7 +95,6 @@
         height: 24px;
         background: var(--nds-skeleton-fill);
         border-radius: var(--nds-skeleton-radius);
-        animation: processing 1.5s ease-in-out infinite;
 
         &::after {
             content: none;

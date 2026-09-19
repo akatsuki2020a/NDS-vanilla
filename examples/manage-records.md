@@ -4,7 +4,7 @@ layout: console
 body_class: nds-full-width
 title: Manage Records
 hero_title: Service Requests
-hero_description: A records screen with create, edit and delete, expandable detail rows, filtering, sorting, pagination and export. Everything runs in the browser, so no server is needed to try it.
+hero_description: A records screen with create, edit and delete, expandable detail rows, filtering, sorting, pagination and export. Filtering, sorting, pagination, export, column visibility and per-page are client-side only, so they port as they are. Create, edit, delete and the expandable rows read and write data, so they follow the project's own data layer. The demo needs no server.
 breadcrumb:
 - ["Examples", "/examples"]
 lang: en
@@ -845,7 +845,6 @@ hideFeedback: true
                             </button>
                         </div>
                     </div>
-                    <div class="nds-form-footer" data-feedback-target hidden></div>
                 </div>
 
                 <div class="nds-form-container nds-select" id="record-service-field" data-required>
@@ -879,7 +878,6 @@ hideFeedback: true
                             </div>
                         </div>
                     </div>
-                    <div class="nds-form-footer" data-feedback-target hidden></div>
                 </div>
 
                 <div class="nds-form-container nds-date-picker" data-required>
@@ -896,7 +894,6 @@ hideFeedback: true
                         </div>
                         <input type="text" id="record-date" class="nds-input nds-date-input" placeholder="DD/MM/YYYY" data-year-before="5" data-year-after="1" required>
                     </div>
-                    <div class="nds-form-footer" data-feedback-target hidden></div>
                 </div>
 
                 <div class="nds-form-container" data-required>
@@ -908,7 +905,6 @@ hideFeedback: true
                     <div class="nds-form-control">
                         <input type="number" id="record-amount" class="nds-input" placeholder="0" min="0" step="10" required>
                     </div>
-                    <div class="nds-form-footer" data-feedback-target hidden></div>
                 </div>
 
                 <div class="nds-form-container nds-select">
@@ -934,7 +930,6 @@ hideFeedback: true
                             </div>
                         </div>
                     </div>
-                    <div class="nds-form-footer" data-feedback-target hidden></div>
                 </div>
                 </div>
                 <button class="nds-btn nds-subtle nds-md nds-show-more" type="button" aria-label="Show more">
@@ -984,7 +979,7 @@ hideFeedback: true
 </div>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initPage() {
     var table = document.getElementById('requestsTable');
     var tbody = document.getElementById('requestsTableBody');
     var form = document.getElementById('record-form');
@@ -1259,5 +1254,7 @@ hideFeedback: true
           '</tbody>' +
         '</table>';
     }
-  });
+  }
+  // Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
 </script>

@@ -74,11 +74,13 @@
             let suffix = '';
 
             if (targetStr) {
-                // Extract prefix/suffix from data-target (e.g. "$75,000", "98.6%")
-                const m = targetStr.match(/^([^\d.-]*)([-+]?\d*\.?\d+)(.*)$/);
+                // Extract prefix/suffix from data-target (e.g. "$75,000", "98.6%").
+                // Grouping separators stay inside the number capture, then get
+                // stripped — "3,742" is one value, not 3 with a ",742" suffix.
+                const m = targetStr.match(/^([^\d.-]*)([-+]?[\d,]*\.?\d+)(.*)$/);
                 if (m) {
                     prefix = m[1] || '';
-                    targetStr = m[2];
+                    targetStr = m[2].replace(/,/g, '');
                     suffix = m[3] || '';
                 }
             } else {
@@ -222,21 +224,19 @@
     }
 
     // CRITICAL: Expose global API immediately (called by unified init system)
-    if (typeof window !== 'undefined') {
-        NDS.Numbers = {
-            format,
-            formatNumbers,
-            setupCounterAnimations,
-            init() {
-                formatNumbers();
-                setupCounterAnimations();
-            },
-            reinit() {
-                formatNumbers();
-                setupCounterAnimations();
-            }
-        };
-    }
+    NDS.Numbers = {
+        format,
+        formatNumbers,
+        setupCounterAnimations,
+        init() {
+            formatNumbers();
+            setupCounterAnimations();
+        },
+        reinit() {
+            formatNumbers();
+            setupCounterAnimations();
+        }
+    };
 
     // Note: Initialization now handled by nds-loader.js unified system
 })();

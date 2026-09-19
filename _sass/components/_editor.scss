@@ -102,8 +102,12 @@
   // contenteditable=false, the textarea is readOnly — so restore the readonly
   // affordances: text selection/copy, and the source-view toggle. The
   // disabled state stays fully inert (no carve-out).
-  &[data-state~="readonly"] :is(.nds-toolbar, .nds-editor-editable, .nds-editor-source) {
-    pointer-events: auto;
+  &[data-state~="readonly"] {
+    --_editor-ro-events: auto;
+  }
+
+  :is(.nds-toolbar, .nds-editor-editable, .nds-editor-source) {
+    pointer-events: var(--_editor-ro-events, inherit);
   }
 
   // Source textarea: clip-hidden in editor mode — NOT [hidden]/display:none, which
@@ -145,6 +149,7 @@
   // own textarea shimmers as the writing surface. Interaction holds — a
   // half-alive field must not invite typing.
   &:not([data-nds-editor-initialized]) {
+    @include skeleton-pulse;
     // Box-identical swap: md-button row height + the container gap the real
     // bar gets. ponytail: one row — a wrapped mobile toolbar lands taller;
     // reserve a second row here if CLS ever flags it.

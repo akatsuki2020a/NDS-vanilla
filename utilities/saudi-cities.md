@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.2.0"
-last_edit: "01/08/2026 - 11:45 PM"
+last_edit: "02/09/2026 - 12:00 AM"
 ---
 
 <!-- Overview -->
@@ -106,7 +106,6 @@ last_edit: "01/08/2026 - 11:45 PM"
                     </button>
                   </div>
                 </div>
-                <div class="nds-form-footer" data-feedback-target hidden></div>
               </div>
             </div>
           </div>
@@ -149,7 +148,6 @@ last_edit: "01/08/2026 - 11:45 PM"
       &lt;/button&gt;
     &lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class="nds-form-footer" data-feedback-target hidden&gt;&lt;/div&gt;
 &lt;/div&gt;
                     </code>
                   </div>
@@ -193,7 +191,6 @@ last_edit: "01/08/2026 - 11:45 PM"
                     </button>
                   </div>
                 </div>
-                <div class="nds-form-footer" data-feedback-target hidden></div>
               </div>
             </div>
           </div>
@@ -325,7 +322,7 @@ const byRegion = cities.reduce((map, city) =&gt; {
 
 <script>
   // Wire up the bilingual demo programmatically.
-  document.addEventListener('DOMContentLoaded', () => {
+  function initPage() {
     const el = document.getElementById('demo-saudiCityBilingual');
     if (!el || !window.NDS || !NDS.Autocomplete) return;
     const escape = (s) => String(s).replace(/[&<>"']/g, c =>
@@ -343,5 +340,7 @@ const byRegion = cities.reduce((map, city) =&gt; {
         ` <span style="color: var(--text-secondary)">` +
         `· ${escape(item.NameAr)} · ${escape(item.Region)}</span>`
     });
-  });
+  }
+  // Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
 </script>

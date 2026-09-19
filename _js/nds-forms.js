@@ -5,7 +5,8 @@
  *   NDS.Forms.initializeContainer(el)      initialize one container
  *   NDS.Forms.initForm(form)               wire one .nds-form (submit validation)
  *   NDS.Forms.setStatus({element, status, message, permanent})   set field status
- *                                          (error/success/warning/info/neutral)
+ *                                          (a field carries 'error', 'help' or
+ *                                          nothing; anything else renders neutral)
  *   NDS.Forms.clearStatus(el)              clear it
  *   NDS.Forms.getStatus(el)                read {status, message}
  *   NDS.Forms.setState(el, name, add)      add/remove a field state ('required' also
@@ -36,6 +37,11 @@
  *   data-ajax · data-message · data-feedback-target · data-loading-slot
  *   data-target · data-autofill-apply (auto-fill containers)
  * Gotchas:
+ *   - Feedback needs no slot markup: setStatus creates the message element in the field's
+ *     container. A bare data-feedback-target element anywhere inside the container overrides
+ *     placement (a permanent position — footer below, header above); the container may instead
+ *     carry data-feedback-target="<selector>" to pick the target. Hidden targets unhide while
+ *     a message shows and re-hide when the last one clears.
  *   - Singleton shape: init() and initializeContainer() only — no reinit(), no create().
  *   - A required custom select is validated through its hidden .nds-select-value carrier:
  *     author data-required on the .nds-select container. The readonly display input is
@@ -194,6 +200,16 @@
         return null;
     }
 
+    // Keep the field's aria-describedby pointing at its CURRENT message only: strip
+    // our earlier tokens, keep the consumer's, append `id` when given.
+    function describeBy(input, id) {
+        var ids = (input.getAttribute('aria-describedby') || '').split(/\s+/)
+            .filter(function (t) { return t && t.indexOf('nds-fb-') !== 0; });
+        if (id) ids.push(id);
+        if (ids.length) input.setAttribute('aria-describedby', ids.join(' '));
+        else input.removeAttribute('aria-describedby');
+    }
+
     // ==============================================
     // STATUS MANAGEMENT API
     // ==============================================
@@ -222,8 +238,15 @@
                 return true;
             }
 
+            // A field carries error, help, or nothing. Anything else still
+            // renders its message, in the default colour with a polite announce
+            // — the outline and the message tint are error-only signals. Help
+            // is neutral gray too; it only swaps in the "?" icon.
+            if (status && status !== 'error' && status !== 'help') status = 'neutral';
+
             if (status) {
                 NDS.Status.set(container, status);
+                var feedback = null;
                 if (message) {
                     container.setAttribute('data-message', message);
 
@@ -257,16 +280,22 @@
                         style: 'outline'
                     };
                     var feedbackOptions = Object.assign({}, defaults, options, {
-                        target: target
+                        target: target,
+                        status: status
                     });
                     delete feedbackOptions.element;
-                    NDS.Feedback.create(feedbackOptions);
+                    feedback = NDS.Feedback.create(feedbackOptions);
                 }
 
                 // Accessibility
                 var input = ownField(container);
                 if (input) {
                     input.setAttribute('aria-invalid', status === 'error' ? 'true' : 'false');
+                    // Name the reason, not just the state: point the field at its message.
+                    if (feedback) {
+                        if (!feedback.id) feedback.id = NDS.uniqueId('nds-fb-');
+                        describeBy(input, feedback.id);
+                    }
                 }
             } else {
                 this.clear(container);
@@ -299,6 +328,7 @@
             var input = ownField(container);
             if (input) {
                 input.removeAttribute('aria-invalid');
+                describeBy(input, null);
             }
 
             container.dispatchEvent(new CustomEvent('nds:statusChange', {
@@ -466,7 +496,12 @@
         validateMultiselect: function(msElement, options) {
             options = options || { showMessage: true };
             var ms = msElement.closest('.nds-multiselect') || msElement;
-            return this._validateCheckedCount(ms, ms.querySelectorAll('.nds-dropmenu-menu input[type="checkbox"]'), options);
+            // Resolve the menu portal-aware, then scope to it: re-validation fires on
+            // the multiselect's change event — i.e. while the menu is open, and a multiselect
+            // in a modal/drawer/table cell has portaled it to <body> by then. A wrapper-
+            // rooted `.nds-dropmenu-menu ...` walk counts zero there and reports invalid.
+            var menu = NDS.querySelector(ms, '.nds-dropmenu-menu');
+            return this._validateCheckedCount(ms, menu ? menu.querySelectorAll('input[type="checkbox"]') : [], options);
         },
 
         // Taginput: hidden inputs are the carriers (one per committed tag).

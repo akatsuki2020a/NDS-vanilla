@@ -74,10 +74,9 @@
     --btn-color: var(--button-status-success-text) !important;
     --btn-color-hover: var(--button-status-success-text) !important;
     --_status-border: var(--button-border-success);
-
-    :is(i, .nds-icon) {
-      --nds-icon: var(--nds-icon-checkmark-circle-01);
-    }
+    // Status swaps every mask icon inside through the icon base's --nds-icon-forced
+    // hook (PERF-06: no `.nds-icon` tail after [data-status]).
+    --nds-icon-forced: var(--nds-icon-checkmark-circle-01);
   }
 
   &[data-status="error"] {
@@ -86,10 +85,7 @@
     --btn-color: var(--button-status-error-text) !important;
     --btn-color-hover: var(--button-status-error-text) !important;
     --_status-border: var(--button-border-error);
-
-    :is(i, .nds-icon) {
-      --nds-icon: var(--nds-icon-cancel-circle);
-    }
+    --nds-icon-forced: var(--nds-icon-cancel-circle);
   }
 
   &[data-status="info"] {
@@ -98,10 +94,7 @@
     --btn-color: var(--button-status-info-text) !important;
     --btn-color-hover: var(--button-status-info-text) !important;
     --_status-border: var(--button-border-info);
-
-    :is(i, .nds-icon) {
-      --nds-icon: var(--nds-icon-information-circle);
-    }
+    --nds-icon-forced: var(--nds-icon-information-circle);
   }
 
   &[data-status="warning"] {
@@ -110,10 +103,7 @@
     --btn-color: var(--button-status-warning-text) !important;
     --btn-color-hover: var(--button-status-warning-text) !important;
     --_status-border: var(--button-border-warning);
-
-    :is(i, .nds-icon) {
-      --nds-icon: var(--nds-icon-alert-circle);
-    }
+    --nds-icon-forced: var(--nds-icon-alert-circle);
   }
 
   // Status border paints only on the outline variant; --_status-border is set per status above.
@@ -541,7 +531,7 @@
     width: var(--btn-size);
     --btn-padding: 0;
 
-    &:not(.nds-loading,[data-state~="loading"])::after {
+    &:not(.nds-loading)::after {
       content: "";
       display: inline-block;
       width: var(--_btn-icon-size);
@@ -556,7 +546,7 @@
   // ICON PSEUDO-ELEMENT BUTTONS (MENU, DIRECTIONAL)
   // ==============================================
 
-  &:is(.nds-menu-btn, .nds-next, .nds-prev, .nds-up, .nds-down):not(.nds-loading,[data-state~="loading"])::after {
+  &:is(.nds-menu-btn, .nds-next, .nds-prev, .nds-up, .nds-down):not(.nds-loading)::after {
     content: "";
     display: inline-block;
     position: relative;
@@ -572,8 +562,10 @@
   &.nds-menu-btn {
     --_btn-after-size: calc(var(--_btn-icon-size) - 4px);
 
-    &:is([data-state~="opening"], [data-state~="open"], [aria-expanded="true"])::after,
-    :is([data-state~="opening"], [data-state~="open"])>&::after {
+    // Self-only. A parent-state tail would put .nds-btn in the shared data-state
+    // set (PERF-06), so a toggle whose state lives on the parent writes
+    // aria-expanded on the button instead — mainnav dropdowns, sidemenu submenus.
+    &:is([data-state~="opening"], [data-state~="open"], [aria-expanded="true"])::after {
       transform: rotate(180deg);
     }
   }
@@ -661,7 +653,7 @@
   // LOADING STATES
   // ==============================================
 
-  &:is(.nds-loading, [data-state~="loading"]) {
+  &.nds-loading {
     --loading-color: var(--_btn-loading-color);
     --loading-track: var(--_btn-loading-track);
     color: transparent !important;
@@ -671,14 +663,14 @@
   // contributes to button width. While loading it becomes the absolute
   // centered spinner, so a hidden in-flow ::before reserves the icon's
   // box and the button keeps its width.
-  &:is(.nds-ellipsis, .nds-menu-btn, .nds-next, .nds-prev, .nds-up, .nds-down):is(.nds-loading, [data-state~="loading"])::before {
+  &:is(.nds-ellipsis, .nds-menu-btn, .nds-next, .nds-prev, .nds-up, .nds-down).nds-loading::before {
     content: "";
     width: var(--_btn-icon-size);
     height: var(--_btn-icon-size);
     visibility: hidden;
   }
 
-  &.nds-menu-btn:is(.nds-loading, [data-state~="loading"])::before {
+  &.nds-menu-btn.nds-loading::before {
     width: calc(var(--_btn-icon-size) - 4px);
     height: calc(var(--_btn-icon-size) - 4px);
   }
@@ -696,7 +688,7 @@
     // Inherit button colors
     --progress-track-color: var(--_btn-loading-track, var(--colors-alpha-black-10));
     --progress-color: var(--_btn-color);
-    --progress-size: calc(var(--btn-size) - 8px);
+    --_progress-size: var(--progress-size, calc(var(--btn-size) - 8px));
 
     // Hide text/percentage display
     .nds-progress-info {
@@ -748,7 +740,7 @@
   }
 
   // Loading turns the icon into a spinner — the badge would sit on top of it.
-  &:is(.nds-loading, [data-state~="loading"]) .nds-badge {
+  &.nds-loading .nds-badge {
     display: none;
   }
 

@@ -76,8 +76,8 @@
   scss: _sass/components/_avatar.scss
 
 - title: "Block"
-  description: "Titled content grouping primitive for sub-sections inside a section body"
-  use_when: "Group a titled sub-section inside a section body: paragraphs, lists, and tables under one heading, without starting a whole new page section. Use when content needs a heading but not its own Section."
+  description: "Spacing unit for content and block components inside a section body, with an optional title"
+  use_when: "Space out the parts of a section body. Put it straight on a block component such as a stepper, tab set, or table to give it the standard gap, or wrap paragraphs, lists, and tables that belong together under one optional heading. Use when content needs separation, or a heading, but not its own Section."
   icon: '<i class="hgi hgi-stroke hgi-search-list-01"></i>'
   category: "Layout"
   tags: ["CSS"]
@@ -229,11 +229,11 @@
 
 - title: "Custom Select"
   description: "Styled single-choice dropdown with custom option markup and a JS API, built on dropmenu"
-  use_when: "A styled single-choice dropdown built on Dropmenu, for any select a native one cannot style: custom option markup, icons or descriptions in options, and a JS API (NDS.CustomSelect.create, .setValue, .clear, plus a change event). Documented inside the Forms page. For type-ahead search use Autocomplete; for several choices use Multiselect; for a plain browser-rendered dropdown use Selects."
+  use_when: "A styled single-choice dropdown built on Dropmenu, for any select a native one cannot style: custom option markup, icons or descriptions in options, and a JS API (NDS.CustomSelect.create, .setValue, .clear, plus a change event). Documented inside the Forms page. The default for any in-form choice field, whatever the option count — small fixed lists included. For type-ahead search use Autocomplete; for several choices use Multiselect; use Selects only when the dev, knowing this default, wants the browser's native control."
   icon: '<i class="hgi hgi-stroke hgi-arrow-down-01"></i>'
   category: "Forms"
   tags: ["JS", "CSS", "API"]
-  url: "/components/forms.html#selectDropdown"
+  url: "/components/forms.html#customSelect"
   js: _js/nds-customselect.js
   scss: _sass/components/_forms.scss
 
@@ -417,13 +417,12 @@
   scss: _sass/_grid.scss
 
 - title: "Header"
-  description: "Top bar and primary navigation shell with mega menus and mobile drawer"
-  use_when: "The site header: primary navigation, mega menus, logo, search, and the mobile drawer. Layout-coupled, so copy it from a full template page rather than in isolation."
+  description: "The region at the top of the page where the top bar, digital stamp panel, and main navigation compose"
+  use_when: "How the top bar, the DGA digital stamp panel, and the main navigation compose into one header region, with the full structure tree. Layout-coupled, so copy it from a full template page rather than in isolation. For the navigation bar itself, its dropdown menus and its JS API, use Main Navigation. For the government branding strip use Top Bar."
   icon: '<i class="hgi hgi-stroke hgi-navigation-01"></i>'
   category: "UI Shell"
-  tags: ["JS", "CSS", "API"]
+  tags: ["CSS"]
   url: "/ui-shell/header.html"
-  js: _js/nds-mainnav.js
 
 - title: "Hero"
   description: "Full-width page banners with slider and call-to-action"
@@ -488,6 +487,15 @@
   tags: ["CSS"]
   url: "/components/loading.html"
   scss: _sass/components/_loading.scss
+
+- title: "Main Navigation"
+  description: "Primary navigation bar with branding, mega-menu dropdowns, utility actions, and a mobile drawer"
+  use_when: "The primary navigation bar of a site: branding, top-level links, mega-menu dropdowns in column, row or multi-column layouts, utility actions, and the mobile hamburger drawer. Use for main nav, top nav, navbar, site navigation, primary menu, or mega menu requests. Documented on its own page, split out of Header. For section navigation inside a page tree use Side Menu. For the government branding strip above it use Top Bar."
+  icon: '<i class="hgi hgi-stroke hgi-menu-02"></i>'
+  category: "UI Shell"
+  tags: ["JS", "CSS", "API"]
+  url: "/ui-shell/mainnav.html"
+  js: _js/nds-mainnav.js
 
 - title: "Metric"
   description: "Dashboard tile pairing a key statistic with an inline sparkline"
@@ -566,6 +574,15 @@
   url: "/components/pagination.html"
   js: _js/nds-pagination.js
   scss: _sass/components/_pagination.scss
+
+- title: "Page Shell"
+  description: "The body structure every page shares, with the classes that switch chrome shape"
+  use_when: "Build the page skeleton before any content: the body structure, the chrome regions, and the classes that switch between the home, content page, minimal, and console shapes. Read this when you start a new page, pick a chrome shape, or mount a framework app inside NDS markup. It also names the two ways a page gets its chrome. A layout can inject the header, hero, and footer, which is what every page on this site does. Or the page composes them itself on the shell layout, so one file holds the whole page and its source reads as a complete document. Use the second when you want a standalone or full page in a single file, and copy the Home Page Template for it."
+  icon: '<i class="hgi hgi-stroke hgi-layout-01"></i>'
+  category: "Layout"
+  tags: ["CSS"]
+  url: "/layout/page-shell.html"
+  scss: _sass/layout/_content-layout.scss
 
 - title: "Panels"
   description: "Content-agnostic surface that slides in from any edge of the viewport"
@@ -689,7 +706,7 @@
 
 - title: "Selects"
   description: "Native dropdown menus for choosing from a list"
-  use_when: "A single-choice dropdown rendered by the browser itself. For a styled dropdown with custom option markup and a JS API use Custom Select; for type-ahead search use Autocomplete; for several choices use Multiselect."
+  use_when: "A single-choice dropdown rendered by the browser itself — only when the dev explicitly wants the native control (the OS picker on mobile). In-form choice fields default to Custom Select, whatever the option count: a native select beside styled NDS fields breaks the form's look. If the dev suggests a plain select to keep things simple, offer Custom Select first; use native only if the dev still wants it. For type-ahead search use Autocomplete; for several choices use Multiselect."
   icon: '<i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>'
   category: "Forms"
   tags: ["JS", "CSS"]
@@ -745,6 +762,15 @@
   tags: ["JS", "API"]
   url: "/components/sort.html"
   js: _js/nds-sort.js
+
+- title: "Status Section"
+  description: "Whole-page or inline outcome message with a status icon, a title, and one action"
+  use_when: "Report one outcome on its own page or as a section: page not found, 404, 500, access denied, request submitted, thank-you or confirmation page, payment failed, order received, form sent. A centered icon or illustration over a title, a short message, and a way out. For a message inside a form or a page region use Alert; for a chip on its own use Feedback icons."
+  icon: '<i class="hgi hgi-stroke hgi-alert-circle"></i>'
+  category: "Layout"
+  tags: ["CSS"]
+  url: "/layout/status-section.html"
+  scss: _sass/layout/_section-layout.scss
 
 - title: "Stepper"
   description: "Sequential step indicators for multi-stage workflows"

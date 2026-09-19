@@ -6,13 +6,309 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [1.12.0] - 2026-09-05
+
+### Added
+- **Swiper loop** — `data-swiper-loop` makes the row endless. Two pages of clones sit at each end, and a silent jump to the real twin when a scroll rests on a clone keeps the wrap invisible by finger, arrow or key. Clones are `aria-hidden`, inert and id-free; public indices stay real; `destroy()` drops them. Ignored when the deck has no more slides than the largest tier shows, since a page would show a slide twice. See the [Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html) page.
+- **Swiper skeleton and lazy shimmer** — `nds-loading` on a deck renders the cards as bars with the pulse, the way a loading grid does. An `img[data-src]` slide shimmers until its source lands instead of painting a blank box or the broken-image icon; the box is the author's, so give it a size. See the [Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html) page.
+- **Main nav icon-only actions name themselves in a hover tooltip** — built from the `title` the action already carries, on a native-title delay; `label-hidden` keeps the accessible name once the tooltip strips it. In hover mode a tap on a link or button runs the action instead of toggling the balloon, so a phone still reaches Search and Login. The topbar's theme switcher and dark-mode toggle, and the footer's social and app links, carry the same tooltip. See the [Main Navigation](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/mainnav.html), [Topbar](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/topbar.html) and [Footer](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/footer.html) pages.
+- **Featured icon `-forced` knobs** — `--featuredicon-bg-forced`, `--featuredicon-color-forced` and `--featuredicon-dark-bg-forced` are read ahead of the icon's own knobs, so a host such as the drawer button re-tints the icon inside it from the outside. See the [Featured Icons](https://mazin-musleh.github.io/NDS-vanilla/components/featured-icons.html) page.
+- **Tooltip keyboard toggle and `title` fallback** — a click-mode text trigger gets `role="button"` and toggles on Enter and Space; a `title` attribute is a fallback message source, stripped at init, and its balloon is built on the first open; `data-tooltip-hover="0"` is honoured instead of falling back to 120 ms; the declarative root reserves its chip box until init. See the [Tooltip](https://mazin-musleh.github.io/NDS-vanilla/components/tooltip.html) page.
+
+### Changed
+- **Swiper slides per view and peek are inline knobs CSS can read.** `slides-max`, `slides-mid`, `slides-min` and `peek` were bare attributes only JS could read, so the row waited for the deferred loader and jumped on a long page. The knobs now sit inline as `--max-slides`, `--mid-slides`, `--min-slides` and `--peek`, and main CSS sizes the row from them in every browser from the first paint; the loader also presets `--slides` before the reveal stamp, so nothing moves at init (CLS 0.15 → 0.003 with a card deck in view). The attributes still work through JS and are deprecated. JS no longer wipes an author's `--peek` or `--gap`; `--peek: 0px` means no peek. See the [Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html) page.
+- **Swiper: the max-width gutter is one gap.** The gutter was the viewport padding while the gap stayed the token, and a clip, an end-space branch, a peek-reserve term and a JS gap rule existed only to reconcile the two. The gutter is one gap at every width, the row runs to the breakout edge, a neighbour never shows in the gutters, the peek rests at the end on every page, and the last page of a peek deck shows a full mirrored peek. `nds-oncolor` on the root now reaches the arrows, so the class stacked on each arrow by hand is dropped from the canonical markup. See the [Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html) page.
+- **Loading has one CSS spelling, `.nds-loading`.** Every loading rule listed both the class and `[data-state="loading"]`, and the attribute rules ending in `> *` marked Chrome's whole `data-state` invalidation set, so every state write anywhere restyled its full subtree. CSS keys on the class alone; core mirrors the `loading` token onto it, so the documented attribute keeps working. The slider's own `data-loading` joins the class spelling and stays as a deprecated alias. See the [Loading](https://mazin-musleh.github.io/NDS-vanilla/components/loading.html) page.
+- **State styles its host.** A `[data-state]` or `[data-status]` rule no longer reaches a descendant through a tag, an attribute or a shared class; the descendant reads a custom property the stateful element sets. A `data-state` write on a 3,000-row table wrapper went from 140 ms to 0.2 ms, on a section above a 2,000-row table from 99 to 1.8 ms, on a 300-card filter region from 3.7 to 0.1 ms; 209 computed-style checks are unchanged.
+- **The scroll lock is its own attribute.** Overlays stamped `data-state="backdrop"` on `<body>`, which restyled about half the page at the end of every open and again on close, a ~500 ms freeze on a mid-range phone. The lock now writes `data-nds-scroll-lock`, which only the one body rule reads.
+- **Main nav minimal mode is a class on the nav, not `<body>`.** Only mainnav reads it, and a flip on `<body>` restyled the whole page at every breakpoint crossing (300–370 ms → 10–58 ms at 20×).
+- **The menu-button arrow follows the button's own `aria-expanded`.** The rule that rotated `.nds-menu-btn::after` from the parent's `data-state~="open"` is gone; main nav dropdown links and side menu submenu toggles carry `aria-expanded`, and NDS stamps it at init and toggles it on open and close, so copied markup needs no edit. Only custom JS that flips a parent's state and expects the child arrow to follow has to write the attribute itself. See the [Main Navigation](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/mainnav.html) and [Side Menu](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/sidemenu.html) pages.
+- **Closed main nav menus leave the render tree again.** Keeping the drawer and the dropdowns laid out while closed (1.11.0) put ~670 elements into every page's reveal recalc, the longest task 600 → 1,100 ms at 6.6× on the home page. The first open pays its own layout, 152 / 112 ms at 6.6×, under the 200 ms line.
+- **Breakpoints have one truth.** The SCSS mixins said 601/961/1281 while `NDS.breakpoints` said 600/960/1280, so CSS and JS disagreed by one pixel at every edge. Both now derive from the same three numbers, and the tablet and desktop max ranges stop overlapping the next tier. See the [Grid](https://mazin-musleh.github.io/NDS-vanilla/layout/grid.html) page.
+- **Tooltip rides the delegated bundle, not extras.** A nav-link tooltip pulled the whole extras bundle onto every page that had one; the native `title` covers the pre-init gap. In hover mode only touch taps toggle; a mouse click on a link or button trigger dismisses and the action proceeds, and any click during the hover delay cancels the pending open. The `--tooltip-*-inverse` tokens are removed; the `-default` names re-bind in the dark block. See the [Tooltip](https://mazin-musleh.github.io/NDS-vanilla/components/tooltip.html) page.
+- **The HGI `@font-face` ships in the critical CSS, and the icon sheet is requested at loader init.** A face landing after the reveal rebuilds Chrome's font cache and relays out every text box (3,075 layout objects on a table-heavy page). Nothing fetches the font until `.hgi-stroke` applies, and on a warm load the sheet's `:root` write rides the reveal's own pass. Longest task 1.27 → 1.01 s at 6.6×. See the [Head](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html) page.
+- **Skeleton: one pulse per held region, not per bar.** Blink ticks the opacity animation on the main thread, and every bar carried its own: 258 animated pseudos a frame during the pre-init hold. The pulse lives on the hold root; bars stay static. About 10 % of load blocking at 6.6×, and most run-to-run variance.
+- **Code blocks highlight on approach, not in one init sweep.** Ten blocks lexed at init was the largest style recalc on the page; each block now processes one viewport before it scrolls in, and a hidden tab panel processes on open.
+- **Pagination hides off-page rows before init and defaults to 6 per page.** Rows past page one were `visibility: collapse`, which still lays out, so a 100-row table paid full-table layout on each of six pre-init passes. The loader hides items past an inline `--per-page` before the reveal; the critical "first N" rule and `readPerPage` both say 6, so they never disagree. See the [Pagination](https://mazin-musleh.github.io/NDS-vanilla/components/pagination.html) page.
+- **The topbar date and clock skip their work while hidden.** The topbar hides the date on small and medium screens and the clock on small ones, yet every phone visit paid the Hijri `Intl.DateTimeFormat` (~19 ms) and a per-minute tick for text it never showed. A breakpoint crossing re-runs both.
+- **The main nav minimal-mode actions row is see-through** — it painted its own background with a bottom-only radius, which some design importers cannot express; the sheet behind it already carries the corners.
+- **Core does less at init.** The ResizeObserver pool runs every handler's reads first, then the writes together (34 scroll-mores: 68 → 5.5 ms at 6.6× on the first frame after reveal). The attribute observer filters by the subscribed names (records during a load 429 → 56). `State.has` no longer builds a Set per call. Link init prefilters `a[href*="//"]` before the hostname parse (a page with ~235 links: 6.9 → 3.0 ms at 6.6×). The grid last-row scan marks from the observer instead of a scheduled first read that forced a full pre-reveal layout. The unreachable `typeof window` guards are gone from nine exports.
+
+### Fixed
+- **Icons show on iPhone.** WebKit serializes a CSS-declared `FontFace.family` with its quotes, so the loaded-face scan never matched and the gate expired into the safe-hidden fail: blank icons in every iPhone browser. The compare is quote-free, a download that finishes after the window still stamps, and a face that registers late is polled while the window runs.
+- **Modal content keeps its height in Safari.** The card's `flex: 1` is a zero basis, and WebKit sizes the modal's `fit-content` column from the bases, so the content area collapsed to 0 on Safari and iPhone.
+- **`NDS.request` works on Safari before 17.4.** It composes its abort signal by hand where `AbortSignal.any` is missing; the `TimeoutError` / `AbortError` contract callers check still holds.
+- **The code highlighter no longer ends the extras bundle on Safari before 16.4.** The lexer regex builds on first use, with a lookbehind-free fallback where the guards fail to compile.
+- **RTL swiper tracks open on the first page in Safari.** WebKit lands an RTL scroll container at its end when it first overflows after a layout; the loader pins the track to the start after the reveal stamp. The end space is a flex spacer, not wrapper padding, since Safari leaves an RTL scroll container's inline-end padding out of the scrollable overflow.
+- **A nested swiper owns its own controls.** The constructor took any descendant slide and the first nav in document order, and the shared keydown took the outer deck. Arrow keys now move the deck (they called `click()` on buttons that listen for `pointerdown`). Reduced motion is honoured, since `'auto'` deferred to the smooth `scroll-behavior`. `destroy()` keeps an author's `tabindex` and clears the at-start and at-end tokens.
+- **Loop navigation always moves a full view** and targets stay in the current cycle, so a rapid click that lands on a clone no longer animates a whole cycle the wrong way. Bullets light the page whose start is at or before the lead slide.
+- **A swiper's pre-init nav reserve matches the row init keeps.** The reserve read `--btn-size` where nothing sets it, so the canonical 32px nav row shrank every multi-page swiper 8px at init; a single-page deck drops the reserve before the reveal; `.nds-middle` drops it too (it carried ~52px that collapsed at init). A single-page peek deck drops its peek geometry everywhere.
+- **Reload deep in a page lands on the saved section, not the one above.** Sections had `flex: 1`, a zero basis, so in the pre-stamp frame every section got the same height and the restored offset landed ~300px off; scroll anchoring then moved it during the hidden layout. Sections are `flex: 1 1 auto`, and the inline gate holds anchoring at `none` until main CSS restores it. Reload CLS 0.071 → 0.031.
+- **Paged skeletons paint the right count in every load order.** A paged accordion sat hidden until init while its bar rules ran unseen; another painted a sixth bar that vanished in view; the tabs skeleton turned a panel's pagination nav into a full-width plank. The split runs first thing at init, the pagination nav draws its own placeholder of six button blocks, and the nav reserve stays `display: block` (the flip back from flex was a 0.04 layout shift). See the [Loading](https://mazin-musleh.github.io/NDS-vanilla/components/loading.html) page.
+- **Every JS-driven scroll honours reduced motion.** `NDS.prefersReducedMotion` read only the OS query, so the accessibility panel's reduce-motion mode never reached JS, and eight scroll calls in main nav, tabs, scroll-more and side menu passed `behavior: 'smooth'` unconditionally.
+- **Main nav reinit no longer stacks interaction listeners.** A reinit on a kept root doubled wheel scroll and left a second document listener pair after each drag.
+- **The main nav brand logo ignores the reset's `img` max-width.**
+- **A popup triggered from inside the main nav skips the nav clamp** — its own tooltip sat 16px below the nav instead of 8px below the trigger.
+- **FAB side docks lift off the bottom edge on touch screens.** A phone's rounded corner clips a FAB half a gutter off the bottom; left and right docks double the block inset under `pointer: coarse`. See the [FAB](https://mazin-musleh.github.io/NDS-vanilla/components/fab.html) page.
+- **The external-link badge stays on the text line inside block content.** Editors emit `<a><p>…</p></a>`, and the anchor's `::after` then landed on a line of its own. The link gets `.nds-external-block` and the deepest last block `.nds-external-badge`. See the [Link](https://mazin-musleh.github.io/NDS-vanilla/components/link.html) page.
+- **An autocomplete fetch inside the debounce window is cancelled at destroy**, and a grid that leaves the DOM releases its last-row watcher, so an SPA that remounts grids stops retaining every discarded one.
+
+### Documentation
+- **[Forms](https://mazin-musleh.github.io/NDS-vanilla/components/forms.html)** — submit buttons sit in `.nds-form-actions`; a lone button as a direct grid child stretches to the column.
+- **[Grid](https://mazin-musleh.github.io/NDS-vanilla/layout/grid.html)**, **[Topbar](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/topbar.html)**, **[Hidden](https://mazin-musleh.github.io/NDS-vanilla/utilities/hidden.html)** and **[Definition List](https://mazin-musleh.github.io/NDS-vanilla/components/definition-list.html)** — the breakpoint edges are 600, 960 and 1280; the pages restated the mixin values, one pixel off.
+
+### Migrating from v1.11.0
+- Replace the runtime: copy `_site/assets/` over your assets folder.
+- **`--tooltip-background-inverse`, `--tooltip-text-heading-inverse` and `--tooltip-text-paragraph-inverse` are removed.** A value you set on one goes on the matching `-default` token under `:root[data-theme~="dark"]`.
+
+## [1.11.0] - 2026-09-02
+
+### Added
+- **National Day 96 event theme** — the third event pack, applied by one `<script>` tag. It keeps the DGA palette and the standard hero slide markup, swaps in the event photo, rotates three artworks through the section identity bars, and adds the event mark to the footer strip. See the [National Day 96](https://mazin-musleh.github.io/NDS-vanilla/events/national-day-96.html) page.
+- **`NDS.fromTemplate(id)` and the `nds:template:ready` event** — the helper finds an id asleep in a `<template>`, stamps the content into place and wakes it through `NDS.Init.refresh`, which now matches the stamped root itself and not only its descendants. The event fires on `document` after the arrivals are wired, so page JS that looks a templated surface up at load has a cue instead of bailing silently. See the [Refresh](https://mazin-musleh.github.io/NDS-vanilla/core/refresh.html) page.
+- **Modals and panels open from a `<template>`** — wrap the markup in `<template class="nds-modal-template">` or `.nds-panel-template` and the open and toggle paths stamp it in on first use. The template class keeps the loader's presence gate true on a page whose only instances are templated. See the [Modal](https://mazin-musleh.github.io/NDS-vanilla/components/modal.html) and [Panels](https://mazin-musleh.github.io/NDS-vanilla/components/panels.html) pages.
+- **Dropmenu takes a lazy authored menu** — a wrapper whose menu ships in its own `<template>` child is skipped at scan; the first trigger click stamps the markup, runs the untouched constructor on real DOM and opens. This is opt-in, not canon: it covers only menus dropmenu alone drives. See the [Dropmenu](https://mazin-musleh.github.io/NDS-vanilla/components/dropmenu.html) page.
+- **`nds:cookies:consent`** — fires on Accept and Reject with `detail.consent`, so a tool NDS knows nothing about can gate on the choice inside the same page view. Dismissing is not a choice and fires nothing. See the [Cookies](https://mazin-musleh.github.io/NDS-vanilla/components/cookies.html) page.
+- **Stepper `nds-xs` and `nds-md`, and text knobs in front of the variant** — `--stepper-title-FS`/`-LH` and `--stepper-description-FS`/`-LH` set a large label beside a small ring. See the [Stepper](https://mazin-musleh.github.io/NDS-vanilla/components/stepper.html) page.
+- **`--card-image-width`** — a row card's image asks for the width it wants instead of stretching to the line. See the [Cards](https://mazin-musleh.github.io/NDS-vanilla/components/cards.html) page.
+- **`--brand-logo-height`** — the brand logo height is a knob, 40px by default, in the nav too. See the [Header](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/header.html) page.
+- **Every event pack has a download zip** and a download button on its doc page.
+
+### Changed
+- **The cookies banner denies by default.** Closing it with the X writes `cookieConsentDismissed` for 30 minutes and applies the same denial as Reject, without recording a consent value — the popup used to return on every page load. The load-time check now denies for anything but a stored `accepted`, and accepting clears the `ga-disable` flags so it takes effect without a reload. See the [Cookies](https://mazin-musleh.github.io/NDS-vanilla/components/cookies.html) page.
+- **`.nds-card-price` becomes `.nds-card-value`** — the pattern is a value line, a price or a rate or a size, and only the name said money. The old class rides along as an alias. See the [Cards](https://mazin-musleh.github.io/NDS-vanilla/components/cards.html) page.
+- **A row card sizes off its header** — the header hugs its content, which is right for an avatar or a featured icon that carries its own size. A single container query on the card decides the line break, since nothing in flexbox can tell that a line wrapped. See the [Cards](https://mazin-musleh.github.io/NDS-vanilla/components/cards.html) page.
+- **Radial stepper text is sized per variant, off the type ladder.** The old clamps were keyed to `--stepper-size` and written in raw px, so the default 64px ring rendered a 14.4px title and a 10.9px description, and `--user-font-scale` never reached them. `nds-lg` is now 80px, not 96px. The ring gap goes flat per variant. See the [Stepper](https://mazin-musleh.github.io/NDS-vanilla/components/stepper.html) page.
+- **The sideinfo aside is a bare track; the content carries the surface.** `.nds-sideinfo` owned both the column geometry and the card surface, so a consumer could not style the companion content without fighting the track. Border, radius, shadow and padding now route to `&.nds-card, > .nds-card`, and the background became the `--card-bg` knob. The old aside-as-card pairing renders unchanged. See the [Side Info](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/sideinfo.html) page.
+- **The accessibility panel ships inert in a `<template>`** and stamps in when it is armed — about 190 DOM nodes off every page for a visitor who never opens it. A saved all-defaults state deletes its own `localStorage` key so it stops arming the boot for nothing. Bare `<aside>` markup keeps working. See the [Accessibility](https://mazin-musleh.github.io/NDS-vanilla/components/accessibility.html) page.
+- **The image viewer builds its overlay on first open** — about 50 nodes, the control listeners and the i18n fetch now wait for the first thumbnail click, so a gallery page nobody opens carries none of it. The overlay moves from z-index 1000 to the backdrop tier at 1100; it is the dimming layer and sat under the topbar. See the [Image Viewer](https://mazin-musleh.github.io/NDS-vanilla/components/ipv.html) page.
+- **The base `.nds-icon` rule is zero-specificity.** The icons sheet loads after main CSS, so `i.nds-icon`'s 1em won every tie and `.nds-avatar i` rendered a third of the size it asked for. `:where()` makes it a default a component can override.
+- **The shipped SVG and raster assets are smaller** — `assets/` drops from 37K to 18K gzipped, the Foundation Day and Hajj packs from 279K to 51K, and the National Day rasters are WebP. Every file was checked by rendering it before and after, so nothing draws differently.
+- **FAQ accordion bodies take `nds-prose`.** See the [FAQ Template](https://mazin-musleh.github.io/NDS-vanilla/templates/faq-template.html) page.
+- **The home template's hero swiper drops `nds-middle`** — that modifier centres the nav on the slide, where it overlaps the slide text. It suits a textless slider, or slides with centred text.
+
+### Fixed
+- **A component built with `create()` is now registered.** The constructor owns `el.nds{Name}`, so every expando-routed surface reaches it — pagination's public `destroy()` could not tear one down at all. Covers pagination, expandable, tabs and tables.
+- **Multiselect validation reads a portaled menu.** Re-validation fires while the menu is open, and a multiselect in a modal, drawer or table cell has portaled it to `<body>` by then, so the walk found 0 of 2 ticked boxes and reported `checked: 0` through the validation payload.
+- **Pagination survives a portaled ellipsis menu.** Four paths assumed the menu never leaves the wrapper: both click handlers read the page off `e.target`, which is the wrapper on the re-dispatch; `setActivePage` lost the active page once the menu closed; the lazy-range lookup returned null and let a builder guard fail open; and a discarded wrapper stranded its menu at `<body>`. A standalone `.nds-pagination-list` root also releases its paged-content skeleton now.
+- **Nested tabs and accordions keep their own parts.** Both slots hold arbitrary consumer content, so an outer controller claimed a nested instance's parts, and the two lists interleave differently — `tabs[i]` and `panels[i]` desynchronized. Every derivation routes through one containment guard.
+- **Dropmenu select mode only claims its own items.** A nested sub-dropmenu's item click wrote the child's value into the parent's hidden input, relabelled its trigger and fired `nds:dropmenu:selected` with the wrong item.
+- **Dropmenu stops leaking on Arrow keys** — `open()` re-entered and overwrote its subscription handles, so `close()` released only the last pair. Thirty pooled subscribers were stranded over ten open cycles.
+- **A dropmenu closed twice fires one `nds:dropmenu:closed`.** A second close re-armed the transition handle over a live one, so both fired.
+- **A hero swiper re-measures its scroll step when the slides reveal.** A hero that inits off-screen measured the step from a hidden slide and cached the wrapper's inline padding instead of the slide stride, so the nav read at-end one slide early.
+- **The mainnav show-more no longer flashes on the desktop-to-minimal flip.** A discrete `visibility` transition keeps an element painted for its duration, long enough to ride the closed drawer's transform to the top of the viewport.
+- **`nds-truncate` caps a breadcrumb crumb at 45ch.**
+- **A top-anchored toast sits under the real header.** The offset reads `NDS.stickyHeaderBottom()`, so a page with a topbar and no main nav stops falling back to a 72px nav height it does not have — measured 32px too low.
+- **Password rule chips route through `NDS.Status`** instead of writing `dataset.status` raw.
+- **An event pack's hero slide is an `<h2>`.** Every pack injected its title as an `<h1>`, so a themed page carried two.
+- **Reinit and refresh restore post-init state** — mainnav reinit re-runs under a kept root, `Filter.refresh` re-detects the search box and re-stamps its container, forms pair `aria-describedby` with the feedback message, a reopened modal no longer self-closes, the loader kicks the icon font fetch when its sheet applies, and `Chart.reinit` redraws a wiped root. From an SPA adopter's report.
+- **Core's grid scan runs when the bundle loads late.** It waited on `DOMContentLoaded`, which a bundle injected after load — an SPA host — never sees.
+- **The stepper's look-ahead line is blank during the skeleton** — its radial colour rule outranked the skeleton bar's transparent-text rule.
+- **The stranded form-field status border tokens are gone.** `--form-field-border-success`, `-warning` and `-info` survived the reduction to error and help, and nothing read them, so setting one had no effect.
+
+### Documentation
+- **[Side Menu](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/sidemenu.html)** — `nds-drawer-group` is dropped. It appears in no SCSS or JS; third-level group headers are styled structurally, which the Drawer page already documents as "no class needed". This site's own drawer opts into `nds-lined`, so a consumer copying the rendered DOM gets a rail the sample here does not show.
+- **[Cookies](https://mazin-musleh.github.io/NDS-vanilla/components/cookies.html)** — NDS signals consent, it does not block anything. The banner runs deferred, after the consumer's head snippet, and the consumer's Consent Mode default is what stops the first page view.
+- **[Refresh](https://mazin-musleh.github.io/NDS-vanilla/core/refresh.html)** — bind `nds:template:ready` on `document`, reach an instance by its `el.nds{Name}` property, and the head-diffing framework note.
+- **[Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html)** — where `nds-middle` puts the arrows on a hero. Neither the modifier table nor Best Practices said.
+- **[Accordion](https://mazin-musleh.github.io/NDS-vanilla/components/accordion.html)** — the collapse panel is role-less on purpose; naming a generic div fails an ARIA audit.
+- **[Chart](https://mazin-musleh.github.io/NDS-vanilla/components/chart.html)** and **[Modal](https://mazin-musleh.github.io/NDS-vanilla/components/modal.html)** — `chart.render()` and the modal's `data-state` are documented paths now.
+- **[Sign In](https://mazin-musleh.github.io/NDS-vanilla/examples/sign-in.html)** and **[Registration](https://mazin-musleh.github.io/NDS-vanilla/examples/registration.html)** — the auth shells are reworked: the logo is a `.nds-brand` home link, the language switch is an icon-only button in the first card header, field errors stay inline through `setStatus`, and a server rejection is created on demand with `NDS.Alert.create` instead of a hardcoded block.
+- **Page-script samples take a `readyState` guard** across the component, example and template pages — the sample runs when a router injects the markup after load, instead of waiting for a `DOMContentLoaded` that already fired.
+- **[Event pages](https://mazin-musleh.github.io/NDS-vanilla/events/national-day-96.html)** — the bare `<script>` tag leads as the canonical install, since every value has a default. The override form keeps its own tab.
+
+### Migrating from v1.10.0
+- Replace the runtime: copy `_site/assets/` over your assets folder.
+- **The cookies banner now denies by default.** Before this release, a visitor with no stored choice was not denied. If you relied on that, set your own Consent Mode default in your head snippet — NDS signals the choice, it does not block the tool.
+- **`--form-field-border-success`, `--form-field-border-warning` and `--form-field-border-info` are removed.** Nothing read them, so a value set on one never applied. `--border-success`, `--border-warning` and `--border-info` are still there.
+
+## [1.10.0] - 2026-08-25
+
+### Added
+- **Status Section** — an outcome message as a whole page or as one section: not found, submitted, failed. `data-status` colours the title and the feedback chip, and `.nds-section-icon` takes a chip or an illustration. Both 404 templates move onto it; `.nds-404` stays as an alias. See the [Status Section](https://mazin-musleh.github.io/NDS-vanilla/layout/status-section.html) page.
+- **The neutral hue takes both `.nds-gray` and `.nds-neutral`** on tags, alerts and featured icons. Featured icons take the colour classes as canon, the way tags already do. See the [Featured Icons](https://mazin-musleh.github.io/NDS-vanilla/components/featured-icons.html) and [Tags](https://mazin-musleh.github.io/NDS-vanilla/components/tags.html) pages.
+
+### Changed
+- **Running text no longer caps at `--paragraph-max-width`** — the cap sized the whole box, not the text, so an image inside a `<p>` stopped sitting centred. `.nds-section-title` takes the cap instead, with the `.nds-full` escape. See the [Prose](https://mazin-musleh.github.io/NDS-vanilla/layout/prose.html) page.
+- **Tags drop their neutral rung** — it restated the base defaults. No colour changes, and an author's own `--tag-bg` now wins on a plain tag. See the [Tags](https://mazin-musleh.github.io/NDS-vanilla/components/tags.html) page.
+
+### Fixed
+- **The mainnav's first menu open no longer stalls** — `display: none` kept the menus out of the render tree, so the first open paid layout and paint inside the interaction window. Closed menus now hide with `visibility`.
+- **Section, card and alert variants no longer clobber their own public knobs** — a variant rule on the component root wrote the documented `--section-*` or `--card-*` knob, so a consumer who set it on that element lost. Variants now retune a private `-base` name.
+- **A plain alert's title takes the text colour, not the status tint** — the reset wrote the public knob, where `initial` falls through to the base. Dark mode too.
+- **Featured icons keep their status colour in dark mode** — the `.nds-dark` rules keyed on `[data-status]` alone, so `.nds-dark.nds-green` fell back to the primary hue. `critical` joins the error row.
+- **A hero slider emits one `<h1>` per page** — every slide emitted one. Slides after the first now emit `<h2>`.
+- **`nds-truncate` clamps the current-page breadcrumb** — the list item's `flex` outranked the zero-specificity `:where(.nds-truncate)`.
+- **A bare image in prose gets the sibling gap** — direct children only, so a `<figure>` keeps its caption.
+
+### Documentation
+- **[Breadcrumb](https://mazin-musleh.github.io/NDS-vanilla/components/breadcrumb.html)** — truncation is for the current-page crumb; on a middle crumb the `::after` arrow pulls into the clamp box.
+- **[Head](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html)** — NDS needs JavaScript, with no `noscript` fallback by design. The stale v1.3.0 note points to its v1.7.0 replacement.
+- **[Prose](https://mazin-musleh.github.io/NDS-vanilla/layout/prose.html)** — `img` joins the structure tree.
+- **v1.4.0's migration heading is now `### Migrating from v1.3.0`** — the only one of 18 that missed the heading NDS IQ searches for, so an upgrade run never saw its steps. Its two missing notes are back.
+
+### Migrating from v1.9.0
+- Replace the runtime: copy `_site/assets/` over your assets folder.
+- **A hero slider's slides after the first take `<h2>`, not `<h1>`.** Change hand-authored slide content. Semantic only, nothing moves.
+
+## [1.9.0] - 2026-08-22
+
+### Added
+- **Home Page Template** — the official DGA home composition on a new `shell` layout: a main hero slider, an About row with counting figures, a Services card deck, a news deck, a partner logo strip and the last-modified line. The `shell` layout emits the document and the scripts only, so the page source shows the whole page shape in order instead of an inner fragment. See the [Home Page Template](https://mazin-musleh.github.io/NDS-vanilla/templates/home-template.html) and [Page Shell](https://mazin-musleh.github.io/NDS-vanilla/layout/page-shell.html) pages.
+- **Swiper `nds-middle`** — the arrows leave the navigation row and flank the slides at their vertical centre, with the bullets hidden. Tablet and up only: below 601px every rule drops and the normal row returns, so a phone falls back to a known layout instead of a special case. On `nds-hero` the arrows overlay at the viewport padding and the bullets pin bottom-centre. See the [Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html) page.
+- **Modal `data-modal-static`** — drops ESC and backdrop-click closing, so `[data-modal-close]` is the only way out. This is the contract `data-panel-static` already gives a panel. A centred status modal demo shows the shape. See the [Modal](https://mazin-musleh.github.io/NDS-vanilla/components/modal.html) page.
+- **Card padding knobs per axis** — `--card-padding-block` and `--card-padding-inline` each fall back to `--card-padding`, so a variant retunes one axis without overwriting both. See the [Cards](https://mazin-musleh.github.io/NDS-vanilla/components/cards.html) page.
+- **Dropmenu portals itself when an ancestor clips it** — the test is vertical clipping, not fixed-position trapping, so a menu inside a scrolling wrapper escapes on its own. `data-portal` forces the move and `data-no-portal` refuses it, for a wrapper whose CSS or DOM walks need the menu to stay a descendant. See the [Dropmenu](https://mazin-musleh.github.io/NDS-vanilla/components/dropmenu.html) page.
+- **`nds-audit.min.js`, an on-demand audit bundle** — the debug checks left the main bundle. It is never auto-injected: the loader pulls it when `enableLogging` schedules the post-init sweep, or on the first `NDS.Init.audit()` call, so a production page that never asks for it downloads zero bytes of it. That first call returns a promise while the bundle loads. Three checks ship with it — a nav link that should be marked current, a stepper control that fights its form's submit, and a framework wrapper that breaks the shell's layout chain. See the [Refresh](https://mazin-musleh.github.io/NDS-vanilla/core/refresh.html) page.
+- **NDS IQ v3.0** — the rulebook is restructured around work modes, an authority table and phase gates, and is about a third shorter than v2.2. See [NDS IQ](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
+
+### Changed
+- **Cooldown Button dropped the two states it could not observe. BREAKING.** `data-sent-title` and `data-sent-message` raised a "sent" toast on the click, so a failed request showed success beside the caller's own error toast. `data-cooldown-loading` held a spinner for a fixed count that matched no real response, and under the documented wiring it delayed the send. Both are gone, and the `nds:cooldown:loading` event with them. The page now owns the request, its `data-state="loading"` and its confirmation, all from one event. See the [Cooldown Button](https://mazin-musleh.github.io/NDS-vanilla/components/cooldown-button.html) page.
+- **Section striping is opt-in** — `.nds-main-content` takes `.nds-stripe` to tint alternating sections, and `.nds-odd` beside it flips which parity carries the tint. Striping used to be on by default for every plain layout, so a page that wanted flat sections had no way out. The opt-in also retires the `.nds-wSideMenu` exclusion, so an author who asks for stripes gets them at every width. See the [Section](https://mazin-musleh.github.io/NDS-vanilla/layout/section.html) page.
+- **Statistic card numbers inherit their weight** — the number is 48px and reads heavy on its own, so the medium-weight declaration is removed rather than lowered. This affects every statistic card.
+- **The template zip no longer ships `NDS-IQ.md`.** The rules file versions independently of the template, so a copy frozen at the release cut goes stale as soon as the next revision lands, and a runner that finds two copies has to work out which one wins. Install it from raw main, which is the source the file's own Install section already tells you to compare against.
+
+### Fixed
+- **Dropmenu flips against the space it actually has** — the sticky-nav ceiling was applied to menus that paint over the nav, so inside a modal a tall menu measured the space above it about 120px short, stayed down, and ran off the viewport with room to spare above it. The date-picker calendar clipping off the bottom of the viewport was the visible case. A menu that fits neither side now clamps and scrolls instead of overflowing, and the calendar re-places when it switches to the month or year grid.
+- **Pagination reads its ellipsis items portal-aware** — a pagination inside a modal or a scrolling wrapper now portals its menu to `<body>`, which a plain descendant walk cannot reach.
+- **Zebra striping counts visible rows only** — hidden rows kept their parity, so a filtered or paged table striped in blocks. The hide set mirrors the canonical one rather than patching filter and pagination alone.
+- **An emptied `.nds-nav-actions` drops out of the mainnav layout** — the row kept its border after it lost its last item.
+- **A centred card centres its text block and its header** — `.nds-center` reached the children but not `.nds-card-text` itself, and the header stayed pinned to the start because the `.nds-close` space-between rule sits later in source at equal specificity.
+- **Stepper stops cancelling form submits** — a submit-typed control inside a form is handed to that form: no `preventDefault`, no move. `data-stepper-control` stays an unconditional mover, and a gated step is driven by `NDS.Stepper.next()` from whatever knows the answer. See the [Stepper](https://mazin-musleh.github.io/NDS-vanilla/components/stepper.html) page.
+- **`.nds-grid` no longer stretches to its parent's height** — the row tracks already sized themselves, so the stretched box only added trailing height when the parent was taller than the content.
+- **A persona's info column centres against the avatar** — it sat top-aligned whenever the avatar was the taller of the two.
+- **A countdown label with no `{s}` placeholder warns** — the label rendered frozen with nothing to say why.
+
+### Documentation
+- **[Page Shell](https://mazin-musleh.github.io/NDS-vanilla/layout/page-shell.html)** — the console modifier's reach (inert outside `nds-*` regions, no per-route toggle), the three `--bg-*` knobs, an `nds-page-bg` row, and the `shell` layout in the shape table.
+- **[Section](https://mazin-musleh.github.io/NDS-vanilla/layout/section.html)** — the `nds-full-width` breakout row, a meaning that was documented nowhere.
+- **[Block](https://mazin-musleh.github.io/NDS-vanilla/layout/block.html)** — `nds-block` is a spacing unit, not a content grouping primitive. It sets width and `margin-block-end` only, so the class belongs straight on a stepper, a tab set or a table rather than on a wrapper around them.
+- **[Forms](https://mazin-musleh.github.io/NDS-vanilla/components/forms.html)** — the custom-select ranking now sits at the Native Select demo instead of 730 lines below it, and `nds-select` and `nds-textarea` have Modifier Classes rows naming what breaks without them.
+- **[Stepper](https://mazin-musleh.github.io/NDS-vanilla/components/stepper.html)** — all three advance paths, and horizontal paired with radial on small screens.
+- **[Document Head](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html)** and **[Hero](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/hero.html)** — the hero image preload is in the canonical head block, with the breakpoint-matching rule beside it. The hero sample matches the slider in the Home Page Template, and the photo-free recipe is replaced: keep the `<picture>` and point it at a placeholder rather than hand-setting a semantic token.
+- **[Main Navigation](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/mainnav.html)** — the `current` and `active` `data-state` meanings are separate rows.
+- **[Tags](https://mazin-musleh.github.io/NDS-vanilla/components/tags.html)** — the Tag Group example shows labels, not states. It demoed Approved / In Review / Blocked on colour classes, which contradicts the page's own rule that a state takes `data-status`.
+- **[Filter](https://mazin-musleh.github.io/NDS-vanilla/components/filter.html)** — `getInstance` and `getByTarget` hand back a promise until the delegated bundle lands; resolve through `whenReady` instead.
+- **[Cards](https://mazin-musleh.github.io/NDS-vanilla/components/cards.html)** — when `nds-card-meta` is needed, and when a bare `nds-card-tags` is enough.
+- **[Manage Records](https://mazin-musleh.github.io/NDS-vanilla/examples/manage-records.html)** — the port is split by what touches data: filtering, sorting, pagination, export, column visibility and per-page are client-side and port as they are; create, edit, delete and the expandable rows read and write.
+- **[Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html)** and **[Chart](https://mazin-musleh.github.io/NDS-vanilla/components/chart.html)** — two wrong token values and a stale palette claim corrected.
+- **The primary colour family is described by role, not by hue,** across eleven pages. A brand palette is themeable, so naming its shade in prose dates the page.
+
+### Migrating from v1.8.1
+- Replace the runtime: copy `_site/assets/` over your assets folder. It carries one new file, `nds-audit.min.js`.
+- **Cooldown Button: remove `data-sent-title`, `data-sent-message` and `data-cooldown-loading`, and stop listening for `nds:cooldown:loading`.** The attributes are inert and the event never fires. Move the confirmation into your own handler on `nds:cooldown:triggered`, which is where the request goes out, and set `data-state="loading"` on the button yourself while it is in flight. The component never sets or clears that state.
+- **Add `.nds-stripe` to `.nds-main-content` if you relied on automatic section striping.** Without it every section renders flat. Add `.nds-odd` beside it to tint the other parity.
+
+## [1.8.1] - 2026-08-18
+
+### Added
+- **`NDS.Init.audit()` reports `lang` and `dir` disagreement** — `NDS.isRTL` reads `dir` alone, so `<html lang="ar">` with no `dir` runs every direction-aware component left to right under Arabic content, with nothing else reporting it.
+- **NDS IQ v2.2** — client-rendered apps get proper coverage, direction and language are a required pair, a compacted context counts as a new session, and a matched source ships all its members. See [NDS IQ](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
+
+### Changed
+- **Field status is error and help only** — a field's outline and its message are error signals, so `setStatus` now folds `success`, `warning` and `info` to neutral on both the container and the feedback it creates. Existing calls still run; they render neutral. See the [Forms](https://mazin-musleh.github.io/NDS-vanilla/components/forms.html) page.
+- **The feedback slot is opt-in, not required** — `setStatus` inserts into the container when no `data-feedback-target` exists, so an empty hidden slot is scaffolding rather than a requirement. The empty slots were removed from canonical markup; populated slots and header placements stay.
+
+### Fixed
+- **Filter and Pagination no longer drop the URL hash** — all three URL writers rebuilt the address from path and query alone, so the first filter change or page click wiped the route of a hash-routed app.
+- **Filter reclaims a target id from a detached instance** — a view unmounted without `NDS.Init.destroy()` left its instance holding the `data-filter-target` id, so every remount was skipped and the region stayed hidden. A detached instance is now destroyed, the id freed, and one warning names the missing teardown.
+- **Inline styles removed from shipped JS** — four components wrote a custom property through a `style` attribute, which a strict Content-Security-Policy blocks. Pagination's page menu could not scroll past its first window, the editor's remove menu lost its indent, and toast progress never animated. All four now write through the CSSOM. See [Document Head](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html) for the policy notes.
+- **OTP digits paint their status** — an OTP group set to error left its digit boxes neutral while the message rendered.
+
+### Documentation
+- **[Page Shell](https://mazin-musleh.github.io/NDS-vanilla/layout/page-shell.html)** — framework wrappers and modifier timing: what a mount element and per-component wrappers do to the shell's layout, and why a layout-affecting class must be in the initial HTML.
+- **[Refresh](https://mazin-musleh.github.io/NDS-vanilla/core/refresh.html)** — the framework-view lifecycle contract: `refresh` on mount, `destroy` on unmount, no readiness check and no polling.
+- **[Forms](https://mazin-musleh.github.io/NDS-vanilla/components/forms.html)** — server-rendered errors: the loop that sets a status per field and focuses the first invalid one, including the fieldset case a group cannot focus.
+- **[Forms](https://mazin-musleh.github.io/NDS-vanilla/components/forms.html)** — where feedback goes: the slot is opt-in, and a hidden target shows and hides itself.
+- **[Password](https://mazin-musleh.github.io/NDS-vanilla/components/password.html)** — both confirm patterns: with a match chip beside strength rules, and chipless when confirm is the only check.
+
+### Migrating from v1.8.0
+- Replace the runtime: copy `_site/assets/` over your assets folder.
+- **Field status calls that used `success`, `warning` or `info` now render neutral.** The calls still run and nothing breaks; if a field relied on a green or amber outline, move that signal to page-level copy or an [Alert](https://mazin-musleh.github.io/NDS-vanilla/components/alert.html).
+- **If you copied a form's canonical markup with an empty hidden `data-feedback-target` element, you may remove it.** Leaving it in place is harmless — it renders nothing and feedback still lands there.
+
+## [1.8.0] - 2026-08-16
+
+### Added
+- **`NDS.Init.destroy(container)`** — the teardown mirror of `refresh`. It releases every component instance inside a container before that container is removed and returns the count, so a framework can free NDS state on unmount. Teardown restores a relocated node as well: a docked FAB returns to the element that authored it, a portaled dropmenu returns to its wrapper, and an open modal releases its backdrop and scroll lock, so a view removed mid-open cannot strand an overlay the app is unable to dismiss. Five components gained their own `destroy()` so the walk can reach them — see the [Refresh](https://mazin-musleh.github.io/NDS-vanilla/core/refresh.html), [FAB](https://mazin-musleh.github.io/NDS-vanilla/components/fab.html), [Modal](https://mazin-musleh.github.io/NDS-vanilla/components/modal.html), [Swiper](https://mazin-musleh.github.io/NDS-vanilla/components/swiper.html), [Table of Contents](https://mazin-musleh.github.io/NDS-vanilla/components/toc.html) and [Side Info](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/sideinfo.html) pages.
+- **Main Navigation** — `reinit()` recovers a nav that mounted after the deferred bundle ran. It is registered as a `refresh` hook and acts only when the node actually changed. Before this, a framework that rendered the chrome late left every reference null for the session: CSS painted the nav, nothing worked, and no warning appeared. See the [Main Navigation page](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/mainnav.html).
+- **Main Navigation page** — the nav is now its own reference instead of a section inside Document Header.
+- **Page Shell reference** — names the page shapes, the wrapper classes each one carries, how the side menu and side info nest, and which built page to copy for each shape. See the [Page Shell page](https://mazin-musleh.github.io/NDS-vanilla/layout/page-shell.html).
+- **NDS IQ v2.0** — §Build copies the page skeleton from a built page instead of writing it from prose, and routes to the Page Shell reference. §Verify is headless-first: one browser sets its own viewport, so the desktop and mobile passes are the same run. See the [Integration Quality guide](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
+
+### Changed
+- **Document Head** — the gated critical-CSS setup is now the default HTML tab, so anyone copying canon gets it without reading the prose first. The blocking `<link>` sits below it as the swap to make when a strict CSP cannot grant the inline block a nonce or hash. See the [Document Head page](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html).
+- **Side Menu, Document Header** — both now name the layout parent an aside needs, `nds-wSideMenu` on `.nds-content-layout`, without which the layout hides the aside. The Jekyll front-matter steps drop to site notes: a consumer project has no front matter. See the [Side Menu page](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/sidemenu.html).
+- **Hero, Main Navigation** — the Jekyll-only sections open with a site note, so a consumer knows the mechanism is this site's and not the system's.
+
+### Fixed
+- **Chart** — `initCharts` claimed any `.nds-chart` carrying `data-chart-type` even when the series comes from `NDS.Chart.create`, then threw while building the legend. It fires on plain init, so a chart built through `create` on a marked element has never worked.
+- **Filter** — `whenReady` now fires for sibling surfaces that were already ready when init ran.
+- **Tables** — `nds-responsive` is documented as what it is: a legacy marker with no effect. Every table is wrapped in the horizontal-scroll container automatically, with or without the class, and the modifier row still credited the class with the wrap. See the [Tables page](https://mazin-musleh.github.io/NDS-vanilla/components/tables.html).
+- **Block** — the doc claimed every block establishes a named CSS container. It does not. `container-type` is opt-in through `.nds-cq`, deliberately not on every block, because a container traps `position: fixed` descendants such as modals and dropmenus. See the [Block page](https://mazin-musleh.github.io/NDS-vanilla/layout/block.html).
+- **Documentation markup** — a block sweep had wrapped each definition item and each demo card in its own `.nds-block`. Definition lists lost every divider, because the item became the only child of its wrapper and `:last-child` matched every time. Showcases doubled the gap between demo cards. Four tables carried a `<div>` between `<table>` and `<thead>`, which the browser hoists out of the table.
+
+### Migrating from v1.7.2
+- Replace `assets/css/` and `assets/js/` with the new bundles.
+
+## [1.7.2] - 2026-08-15
+
+### Added
+- **NDS IQ v1.0** — the consumer rules leave beta, rewritten whole: an agent-timeline structure, five standing principles, and tables for the sanctioned edit kinds, the bans, and the states that are reported rather than resolved. 69.6K → 41.4K characters, then 40.4K after the first gated trim. See the [Integration Quality guide](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
+- **Filter** — every active criteria now reaches the server. Criteria that no control carries, such as a range filter's encoded value, are written into `.nds-filter-hidden-inputs` on each submit and keyed like the URL param, so AJAX and native GET both send them. See the [Filter page](https://mazin-musleh.github.io/NDS-vanilla/components/filter.html).
+
+### Changed
+- **Grid, Card, Scroll-more** — public knob resets drop to zero specificity through `:where()`, so a consumer stylesheet class wins whatever the load order. Before this, the deferred main CSS re-inserted at the end of `<head>` and beat any single-class consumer rule, and an external knob sheet lost every knob.
+- **Docs** — `data-status` on [Cards](https://mazin-musleh.github.io/NDS-vanilla/components/cards.html) and [Featured Icons](https://mazin-musleh.github.io/NDS-vanilla/components/featured-icons.html) declares the state the element is in, not a colour: it renders as the matching variant, but a tint with no state belongs on the colour class. Cards' modifier and data-attribute tables now name the element each entry sits on. [Sort](https://mazin-musleh.github.io/NDS-vanilla/components/sort.html) names who owns row order once the server pages the rows, and [Document Head](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html) covers inline knobs under a strict CSP.
+
+### Fixed
+- **Icon fonts** — icons no longer stay invisible when every glyph of the family starts hidden, for example inside an unselected tab panel. The browser never began the fetch, so no load event fired and the miss became permanent. The fetch is now forced once on expiry.
+- **Tabs** — a horizontal strip's own `--scroll-padding: 0` opt-out applies again, dropping an unintended 4px end padding.
+- **Filter** — `setFilterValues` and `setSearchValue` re-fetch in AJAX form mode. They previously repainted the chips, badge, and URL from new criteria without submitting, so the page stated a filter the results were never filtered by. A run of setters coalesces into one request.
+- **Filter** — the dropmenu Clear button zeroes the search box, and the change event carries a snapshot.
+- **Filter** — controls outside the submitting form are associated with it, so their criteria are no longer dropped silently.
+- **Counter** — a target written with grouping separators, such as `3,742`, counts to 3742 instead of 3.
+- **Code** — a markdown table row inside a prose block keeps its authored line instead of wrapping into what looks like a new row.
+- **Examples** — loading buttons stay clickable and abort on cancel.
+
+### Migrating from v1.7.1
+- Replace `assets/css/` and `assets/js/` with the new bundles.
+- **Filter in AJAX form mode now sends criteria your handler did not receive before.** A range filter, and any other control the component renders without a name, arrives as a hidden input keyed like its URL param. If your endpoint rejects or logs unknown parameters, accept these before upgrading.
+- **Knob resets dropped to zero specificity.** If you relied on an NDS knob reset beating your own class, your class now wins instead. Check any stylesheet that sets `--gap`, `--max-col`, or another public knob on Grid, Card, or Scroll-more.
+
+## [1.7.1] - 2026-08-12
+
+### Added
+- Custom select — an option can now carry a description line under its label, plus free decoration such as an icon or a coloured dot. The canonical shape nests `.nds-label` inside `.nds-option-text`, with an optional `.nds-description` beside it. Flat options keep working unchanged: the label reader falls back to the option text's own content, so the trigger never shows the description glued to the label. See the [Forms doc page](https://mazin-musleh.github.io/NDS-vanilla/components/forms.html#customSelect).
+- **FAQ template** — each tab's accordion paginates, five entries per page.
+- **NDS IQ v0.8** — the consumer rules became version-agnostic. They no longer require a minimum template version, `_source/` is populated from the matching release tag, the update check compares file content with a first-line check that catches a corrupt download, and the revision number is now a display indicator. Also adds a catalog check before any native element or hand-built control, a Content-Security-Policy check at install, and an adoption sweep of each release's Added, Changed, and Fixed notes during an upgrade. See the [NDS IQ guide](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
+
+### Changed
+- **Alert, Card, Definition List** — running text caps at `--paragraph-max-width`, so long copy keeps a readable line length.
+- **Dropmenu** — menus render a thin scrollbar. A classic bar is most of a compact menu's width, and `max-content` sizing ignores it, so items overflowed and clipped.
+- **Date Picker** — the dropdown no longer reserves a scrollbar gutter; the thin scrollbar above replaces it.
+- **JS source banners** — Filter and Tables now document the DOM shape their generators emit (`_buildFilterInput()` and `buildRow()`), so hand-written filter options and column-menu rows match what the component builds. Filter also documents `data-filter-submit` form mode and its two-line markup.
+- **Docs** — Pagination and Autocomplete cross-reference [Toolbar](https://mazin-musleh.github.io/NDS-vanilla/components/toolbar.html). Pagination states that the container and item markers are canonical for every mode, and cross-references `nds-empty` from its server-pagination section.
+
+### Fixed
+- **Accordion** — `destroy()` releases the container backref and the init stamp, so `create()` and `init()` rebuild the accordion instead of handing back a dead controller.
+- **Button** — a disabled button inside a button group no longer keeps an enabled-coloured inner seam.
+- **Forms** — the `.nds-prefix` and `.nds-suffix` radius override is scoped to `.nds-btn`, so it no longer reaches other prefix content.
+- **Foundation Day theme** — the mobile section-title override is scoped to its slide instead of the whole page.
+- **Filter banner** — corrected: `refresh()` skips form-mode filters whether or not they carry `data-ajax`. A `data-filter-submit` form without `data-ajax` is server-driven too, and re-scanning it would rebuild the options from the rendered rows and drop the applied filter.
+- **Release zip** — the bundled `NDS-IQ.md` copy ships with LF line endings.
+
+### Migrating from v1.7.0
+
+- Replace all runtime assets: copy `_site/assets/` from the release zip over `NDS_ASSETS/`. Every file carries the new version banner, so overwrite everything rather than merging.
+
 ## [1.7.0] - 2026-08-10
 
 ### Added
 - **Password** — new component: a password field that checks strength rules on every keystroke, confirms a retyped password matches, and blocks submit until both pass. Rule chips take a built-in rule, a `data-rule-pattern` regex, or a rule registered with `NDS.Password.addRule()`; `data-password-strength` on the container is the CSS hook for a strength meter. See the [Password doc page](https://mazin-musleh.github.io/NDS-vanilla/components/password.html).
 - **NDS.Init.refresh** — one call after a list mutates: `NDS.Init.refresh(container)` tells every live component that the container's contents changed, so filters, counters, sorting, and row controls follow the new rows. It walks the loader registry, so a component updates because it is registered, not because the caller remembered it. See the [Refresh doc page](https://mazin-musleh.github.io/NDS-vanilla/core/refresh.html).
 - **Prose** — new layout layer: a classless flowing-content region for editor and CMS output. `.nds-prose` styles bare headings, paragraphs, lists, blockquotes, tables, and `<hr>` with no per-element classes. See the [Prose doc page](https://mazin-musleh.github.io/NDS-vanilla/layout/prose.html).
-- **NDS IQ v7** — the consumer rules ship as a file, not a pasted block. `NDS-IQ.md` sits at the zip top level and on raw main, and the agent reads it on demand, once a session. Only a small anchor with the project's two paths goes into the project's own instruction file. See the [NDS IQ guide](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
+- **NDS IQ v0.7** — the consumer rules ship as a file, not a pasted block. `NDS-IQ.md` sits at the zip top level and on raw main, and the agent reads it on demand, once a session. Only a small anchor with the project's two paths goes into the project's own instruction file. See the [NDS IQ guide](https://mazin-musleh.github.io/NDS-vanilla/guides/integration-quality.html).
 - **JS source banners** — every runtime JS file opens with a public-surface banner listing its methods, events, hooks, and gotchas, so the `_source/` copy answers API questions without a full read. The release build fails on a missing or drifted banner.
 - Release zip — `_source/` now carries the raw page sources for docs, templates, and examples (`components/`, `utilities/`, `layout/`, `ui-shell/`, `core/`, `templates/`, `examples/`) beside the JS and SCSS.
 - Catalogs — every entry in `components.yml`, `templates.yml`, and `examples.yml` carries `use_when`, the job the entry does in the words developers use.
@@ -265,10 +561,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Digital stamp — z-index so an open stamp covers the content beneath.
 - Icons — the theme-toggle glyph hardcoded its fill (`#161616`) instead of `currentColor`, so it ignored `color` and stayed near-black in dark mode.
 
-### Migration
+### Migrating from v1.3.0
 
 - Multiselect — now a UI layer over a native checkbox group, so the checkboxes *are* the form value. Migrate old markup: add `name="…[]"` to each `<input class="nds-check">`, use `checked` for pre-selection, and remove the hidden CSV carrier inputs (`<input type="hidden" name="…[]">`).
 - Flex — `.nds-flex`'s default cross-axis alignment changed from `center` to `stretch`. Containers that relied on the implicit centering now stretch their children; set `--align: center` to restore the previous look.
+- Hidden — `.hidden`, `.nds-desktop-only` and `.nds-mobile-only` are removed. Replace them with `data-hidden="mobile"` / `data-hidden="tablet"` / `data-hidden="desktop"`, or the native `hidden` attribute for an always-hidden element. See the [Hidden doc page](https://mazin-musleh.github.io/NDS-vanilla/utilities/hidden.html).
+- Topbar, Mainnav, Search and Toolbar — breakpoint hiding moved out of the stylesheets and onto `data-hidden` stamps in the markup. The old rules are deleted, so copied chrome markup keeps every widget visible at every width until you re-copy it. Take the current markup from the [Topbar](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/topbar.html) and [Main Navigation](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/mainnav.html) doc pages, or add the stamps yourself.
 
 ## [1.3.0] - 2026-07-04
 
@@ -295,7 +593,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Replace the built bundles (`nds-main.min.*` and the loader-injected `nds-delegated`/`nds-extras`, plus the `nds-accessibility`/`nds-showcase`/theme bundles).
 - Token overrides — only consumers who **override or reference NDS token custom properties** in their own CSS are affected; classes and component rendering are otherwise unchanged. See the [Token Migration Reference](https://github.com/mazin-musleh/NDS-vanilla/blob/main/TOKEN-MIGRATION.md) for the full old→new name map.
 - Hero — copied hero markup with inline structural styles still works but those styles are now redundant (CSS owns them); a slide that doesn't stamp `--overlay` now renders at `0.7` (was `0.20`) — stamp an explicit value to pin it.
-- Head — v1.2.0 pages shipped an inline critical-gate `<style>` + async-loaded critical `<link>` (preload/`onload` swap + `<noscript>`). A copied `<head>` still works, but the inline snapshot can drift from the 1.3.0 crit file; the canonical, drift-proof setup is a single render-blocking `<link rel="stylesheet" href="assets/css/nds.critical.min.css">` (first paint stays theme/dark-correct). Redundant but harmless if left.
+- Head — v1.2.0 pages shipped an inline critical-gate `<style>` + async-loaded critical `<link>` (preload/`onload` swap + `<noscript>`). A copied `<head>` still works, but the inline snapshot can drift from the 1.3.0 crit file; the canonical, drift-proof setup is a single render-blocking `<link rel="stylesheet" href="assets/css/nds.critical.min.css">` (first paint stays theme/dark-correct). Redundant but harmless if left. **Superseded in 1.7.0** — every sheet now ships as a `data-nds-defer` preload that one head script converts to a real link; copy the current head from the [Document Head doc page](https://mazin-musleh.github.io/NDS-vanilla/ui-shell/head.html) rather than following this note.
 
 ## [1.2.0] - 2026-07-01
 
@@ -514,7 +812,12 @@ Replace your bundled `nds-main.min.css` and `nds-main.min.js` with the v1.0.1 ve
 - Five project-specific Claude Code skills for contributors.
 - MIT license, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY policies.
 
-[Unreleased]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.9.0...HEAD
+[1.9.0]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.8.1...v1.9.0
+[1.8.1]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.8.0...v1.8.1
+[1.8.0]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.7.2...v1.8.0
+[1.7.2]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.7.1...v1.7.2
+[1.7.1]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/mazin-musleh/NDS-vanilla/compare/v1.4.1...v1.5.0

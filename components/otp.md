@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.1.0"
-last_edit: "28/06/2026 - 01:27 PM"
+updated: "1.8.1"
+last_edit: "02/09/2026 - 12:00 AM"
 ---
 
 <!-- OTP Overview -->
@@ -338,7 +338,6 @@ last_edit: "28/06/2026 - 01:27 PM"
                                         </div>
                                     </div>
                                     <input type="hidden" class="nds-otp-value" name="otp-validate">
-                                    <div class="nds-form-footer" data-feedback-target hidden></div>
                                 </fieldset>
                                 <div class="nds-flex" style="--justify:center">
                                     <button class="nds-btn nds-primary nds-sm" id="otp-validate-btn">
@@ -349,14 +348,14 @@ last_edit: "28/06/2026 - 01:27 PM"
                                     </button>
                                 </div>
                                 <script>
-                                document.addEventListener('DOMContentLoaded', function() {
+                                function initPage() {
                                     var otpGroup = document.getElementById('otp-validate-demo');
                                     document.getElementById('otp-validate-btn').addEventListener('click', function() {
                                         var result = NDS.Forms.validateOtpGroup(otpGroup);
                                         if (!result.valid) return;
                                         var value = NDS.OTP.getValue(otpGroup);
                                         if (value === '1234') {
-                                            NDS.Forms.setStatus({ element: otpGroup, status: 'success', message: 'Code verified successfully' });
+                                            NDS.Forms.setStatus({ element: otpGroup, status: 'neutral', message: 'Code verified successfully' });
                                         } else {
                                             NDS.Forms.setStatus({ element: otpGroup, status: 'error', message: 'Invalid verification code' });
                                         }
@@ -365,7 +364,9 @@ last_edit: "28/06/2026 - 01:27 PM"
                                         NDS.OTP.clear(otpGroup);
                                         NDS.Forms.clearStatus(otpGroup);
                                     });
-                                });
+                                }
+                                // Runs on a classic load AND when this markup is injected after load (SPA, Turbo, htmx)
+                                if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage); else initPage();
                             </script>
                             </div>
                         </div>
@@ -419,7 +420,6 @@ last_edit: "28/06/2026 - 01:27 PM"
     &lt;/div&gt;
   &lt;/div&gt;
   &lt;input type="hidden" class="nds-otp-value" name="otp"&gt;
-  &lt;div class="nds-form-footer" data-feedback-target hidden&gt;&lt;/div&gt;
 &lt;/fieldset&gt;
                                     </code>
                                     </div>
@@ -441,7 +441,7 @@ document.getElementById('verify-btn').addEventListener('click', function() {
     var value = NDS.OTP.getValue(otpGroup);
 
     if (value === '1234') {
-        NDS.Forms.setStatus({ element: otpGroup, status: 'success', message: 'Code verified successfully' });
+        NDS.Forms.setStatus({ element: otpGroup, status: 'neutral', message: 'Code verified successfully' });
     } else {
         NDS.Forms.setStatus({ element: otpGroup, status: 'error', message: 'Invalid verification code' });
     }

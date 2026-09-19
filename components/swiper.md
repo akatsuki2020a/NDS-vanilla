@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.1.0"
-last_edit: "28/06/2026 - 01:27 PM"
+updated: "1.12.x"
+last_edit: "06/09/2026 - 11:38 PM"
 ---
 
 <!-- Hero Slider Demo -->
@@ -46,6 +46,10 @@ last_edit: "28/06/2026 - 01:27 PM"
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
                                 data-toggler='["nds-center", ".nds-swiper-navigation", "navCenter"]'>
                                 <span class="nds-label">Center</span>
+                            </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-middle", ".nds-swiper", "navMiddle"]'>
+                                <span class="nds-label">Middle</span>
                             </button>
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn" data-state="selected"
                                 data-toggler='["nds-oncolor", ".nds-swiper", "swiperOncolor"]'>
@@ -112,8 +116,8 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 </div>
                                 <div class="nds-swiper-navigation" hidden>
                                     <div class="nds-swiper-buttons">
-                                        <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-prev" aria-label="Previous slide"></button>
-                                        <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-next" aria-label="Next slide"></button>
+                                        <button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
+                                        <button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
                                     </div>
                                     <div class="nds-swiper-pagination nds-lg"></div>
                                 </div>
@@ -183,8 +187,8 @@ last_edit: "28/06/2026 - 01:27 PM"
     &lt;/div&gt;
     &lt;div class="nds-swiper-navigation" hidden&gt;
         &lt;div class="nds-swiper-buttons"&gt;
-            &lt;button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-prev" aria-label="Previous slide"&gt;&lt;/button&gt;
-            &lt;button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-next" aria-label="Next slide"&gt;&lt;/button&gt;
+            &lt;button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"&gt;&lt;/button&gt;
+            &lt;button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"&gt;&lt;/button&gt;
         &lt;/div&gt;
         &lt;div class="nds-swiper-pagination"&gt;&lt;/div&gt;
     &lt;/div&gt;
@@ -238,6 +242,10 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 data-toggler='["nds-center", ".nds-swiper-navigation", "navCenter"]'>
                                 <span class="nds-label">Center</span>
                             </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-middle", ".nds-swiper", "navMiddle"]'>
+                                <span class="nds-label">Middle</span>
+                            </button>
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn" data-state="selected"
                                 data-toggler='["nds-oncolor", ".nds-swiper", "swiperOncolor"]'>
                                 <span class="nds-label">On-color</span>
@@ -275,8 +283,8 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 </div>
                                 <div class="nds-swiper-navigation" hidden>
                                     <div class="nds-swiper-buttons">
-                                        <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-prev" aria-label="Previous slide"></button>
-                                        <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-next" aria-label="Next slide"></button>
+                                        <button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
+                                        <button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
                                     </div>
                                     <div class="nds-swiper-pagination nds-lg"></div>
                                 </div>
@@ -330,8 +338,8 @@ last_edit: "28/06/2026 - 01:27 PM"
     &lt;/div&gt;
     &lt;div class="nds-swiper-navigation" hidden&gt;
         &lt;div class="nds-swiper-buttons"&gt;
-            &lt;button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-prev" aria-label="Previous slide"&gt;&lt;/button&gt;
-            &lt;button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-next" aria-label="Next slide"&gt;&lt;/button&gt;
+            &lt;button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"&gt;&lt;/button&gt;
+            &lt;button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"&gt;&lt;/button&gt;
         &lt;/div&gt;
         &lt;div class="nds-swiper-pagination"&gt;&lt;/div&gt;
     &lt;/div&gt;
@@ -344,6 +352,144 @@ last_edit: "28/06/2026 - 01:27 PM"
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Deck Demo -->
+<section id="swiperDeck" class="nds-content-section nds-demo-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <h2 class="nds-section-title">Deck <span class="nds-tag nds-yellow nds-sm"><span class="nds-label">Beta</span></span></h2>
+            <p class="nds-section-description">A hero with a deck of cards beside the slides, one card per slide. The active card is at the front, the other cards fan behind it, and the front card slides back into the pile when the next one comes forward. A tap on a card goes to its slide; below the desktop breakpoint a drag across the deck follows the finger and pages on release. Below the desktop breakpoint the deck stacks above the text: the open card is centred, its two neighbours peek at the sides. Use it when every slide has its own artwork and the set is worth showing at once, as in a campaign hero.</p>
+        </div>
+        <div class="nds-section-body">
+            <div class="nds-block">
+                <div class="nds-showcase">
+                <div class="nds-demo-card">
+                    <div class="demo-header">
+                        <div class="demo-label">Hero deck — five cards, --deck-card: 320px</div>
+                    </div>
+                    <div class="demo-container">
+                        <div class="state-demo">
+                            <div class="nds-swiper nds-hero nds-oncolor nds-deck" style="--deck-card: 320px; min-height: 320px; background: linear-gradient(270deg, #1b2613, #607c4f); border-radius: 8px;">
+                                <div class="nds-swiper-wrapper">
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-section-body" style="padding-block: var(--spacing-4xl); padding-inline-start: var(--spacing-4xl);">
+                                            <h2 class="nds-section-title">Mountains</h2>
+                                            <p class="nds-section-description">The first card is open; the rest wait as strips.</p>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide" hidden>
+                                        <div class="nds-section-body" style="padding-block: var(--spacing-4xl); padding-inline-start: var(--spacing-4xl);">
+                                            <h2 class="nds-section-title">Lake</h2>
+                                            <p class="nds-section-description">Click a strip, a bullet or an arrow; on a phone, drag the deck.</p>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide" hidden>
+                                        <div class="nds-section-body" style="padding-block: var(--spacing-4xl); padding-inline-start: var(--spacing-4xl);">
+                                            <h2 class="nds-section-title">Forest</h2>
+                                            <p class="nds-section-description">The strips keep their order after the open card and wrap around.</p>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide" hidden>
+                                        <div class="nds-section-body" style="padding-block: var(--spacing-4xl); padding-inline-start: var(--spacing-4xl);">
+                                            <h2 class="nds-section-title">Coast</h2>
+                                            <p class="nds-section-description">Narrow the window: the deck moves above the text.</p>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide" hidden>
+                                        <div class="nds-section-body" style="padding-block: var(--spacing-4xl); padding-inline-start: var(--spacing-4xl);">
+                                            <h2 class="nds-section-title">Valley</h2>
+                                            <p class="nds-section-description">Five slides, five cards, same order.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="nds-swiper-deck">
+                                    <button type="button" class="nds-swiper-card" aria-label="Go to slide 1: Mountains" style="--rel: 0; --srel: 0" data-status="active"><img src="https://picsum.photos/id/1015/400/400" alt="" fetchpriority="high"></button>
+                                    <button type="button" class="nds-swiper-card" aria-label="Go to slide 2: Lake" style="--rel: 1; --srel: 1" data-status="near"><img src="https://picsum.photos/id/1018/400/400" alt="" loading="lazy"></button>
+                                    <button type="button" class="nds-swiper-card" aria-label="Go to slide 3: Forest" style="--rel: 2; --srel: 2"><img src="https://picsum.photos/id/1039/400/400" alt="" loading="lazy"></button>
+                                    <button type="button" class="nds-swiper-card" aria-label="Go to slide 4: Coast" style="--rel: 3; --srel: -2"><img src="https://picsum.photos/id/1043/400/400" alt="" loading="lazy"></button>
+                                    <button type="button" class="nds-swiper-card" aria-label="Go to slide 5: Valley" style="--rel: 4; --srel: -1" data-status="near"><img src="https://picsum.photos/id/870/400/400" alt="" loading="lazy"></button>
+                                </div>
+                                <div class="nds-swiper-navigation nds-center" hidden>
+                                    <div class="nds-swiper-buttons">
+                                        <button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
+                                        <button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
+                                    </div>
+                                    <div class="nds-swiper-pagination nds-md"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-code">
+                    <div class="nds-tabs nds-code nds-divided">
+                        <div class="nds-tab-list-container nds-scroll-more">
+                            <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                                <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                                    aria-controls="panel-deck-1" id="tab-deck-1">
+                                    <span class="nds-tab-label">HTML</span>
+                                </button>
+                            </nav>
+                            <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="nds-tab-content">
+                            <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-deck-1"
+                                aria-labelledby="tab-deck-1">
+                                <div class="nds-code-action">
+                                    <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <i class="nds-icon nds-hgi-copy-01"></i>
+                                    </button>
+                                </div>
+                                <div class="nds-expandable-content">
+                                <code class="lang-html code">
+&lt;div class="nds-swiper nds-hero nds-oncolor nds-deck" style="--total: 5"&gt;
+    &lt;div class="nds-swiper-wrapper"&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-section-body"&gt;
+                &lt;h2 class="nds-section-title"&gt;Mountains&lt;/h2&gt;
+                &lt;p class="nds-section-description"&gt;…&lt;/p&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-slide" hidden&gt;…&lt;/div&gt;
+        &lt;!-- one slide per card, same order --&gt;
+    &lt;/div&gt;
+    &lt;div class="nds-swiper-deck"&gt;
+        &lt;button type="button" class="nds-swiper-card" aria-label="Go to slide 1: Mountains" style="--rel: 0; --srel: 0" data-status="active"&gt;
+            &lt;img src="card-1.webp" alt="" fetchpriority="high"&gt;
+        &lt;/button&gt;
+        &lt;button type="button" class="nds-swiper-card" aria-label="Go to slide 2: Lake" style="--rel: 1; --srel: 1" data-status="near"&gt;
+            &lt;img src="card-2.webp" alt="" loading="lazy"&gt;
+        &lt;/button&gt;
+        &lt;!-- … --&gt;
+    &lt;/div&gt;
+    &lt;div class="nds-swiper-navigation nds-center" hidden&gt;
+        &lt;div class="nds-swiper-buttons"&gt;
+            &lt;button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"&gt;&lt;/button&gt;
+            &lt;button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-pagination nds-md"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+                            </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+            <div class="nds-block nds-prose">
+                <ul>
+                    <li>The cards map to the slides by order. Stamp each card's place for the first paint, before the script runs: <code class="nds-inline-code lang-css">--rel</code> (0, 1, 2 … in order), <code class="nds-inline-code lang-css">--srel</code> (the same, but the last cards count back: −2, −1), <code class="nds-inline-code lang-html">data-status="active"</code> on the first card and <code class="nds-inline-code lang-html">data-status="near"</code> on its two neighbours. From init the swiper owns all of it.</li>
+                    <li>Card images are square. Give the first one <code class="nds-inline-code lang-html">fetchpriority="high"</code> and the rest <code class="nds-inline-code lang-html">loading="lazy"</code>.</li>
+                    <li>A deck loops by default, the same way <code class="nds-inline-code lang-html">data-swiper-loop</code> does: the fan wraps, so the track wraps with it. Each loop clone carries <code class="nds-inline-code lang-html">data-swiper-clone</code> with its real slide's index, for content you update at runtime.</li>
+                    <li>Inside a page hero the deck fills the hero's height. Below the desktop breakpoint the deck stacks above the text, so set <code class="nds-inline-code lang-css">--hero-height: auto</code> and <code class="nds-inline-code lang-css">max-height: none</code> on the <code class="nds-inline-code lang-html">.nds-hero-section</code> there.</li>
+                    <li>The swiper fires <code class="nds-inline-code lang-js">nds:swiper:change</code> on every move. Listen to it to change anything outside the swiper with the slide, such as the section background.</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -387,8 +533,12 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 <span class="nds-label">Center</span>
                             </button>
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
-                                data-toggler='["nds-oncolor", ".nds-swiper", "swiperOncolor"]'>
-                                <span class="nds-label">On-color</span>
+                                data-toggler='["nds-middle", ".nds-swiper", "navMiddle"]'>
+                                <span class="nds-label">Middle</span>
+                            </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-loading", ".nds-swiper", "swiperLoading"]'>
+                                <span class="nds-label">Skeleton</span>
                             </button>
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
                                 data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
@@ -398,7 +548,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                     </div>
                     <div class="demo-container">
                         <div class="state-demo">
-                            <div class="nds-swiper" slides-max="4" slides-mid="3" slides-min="1" peek="0">
+                            <div class="nds-swiper" style="--max-slides:4; --mid-slides:3; --min-slides:1">
                                 <div class="nds-swiper-wrapper">
                                     <div class="nds-swiper-slide">
                                         <div class="nds-card nds-stroke nds-shadow">
@@ -483,7 +633,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 </div>
                                 <div class="nds-expandable-content">
                                 <code class="lang-html code">
-&lt;div class="nds-swiper" slides-max="4" slides-mid="3" slides-min="1" peek="0"&gt;
+&lt;div class="nds-swiper" style="--max-slides:4; --mid-slides:3; --min-slides:1"&gt;
     &lt;div class="nds-swiper-wrapper"&gt;
         &lt;div class="nds-swiper-slide"&gt;
             &lt;div class="nds-card nds-stroke nds-shadow"&gt;
@@ -560,8 +710,8 @@ last_edit: "28/06/2026 - 01:27 PM"
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Peek Mode</h2>
-            <p class="nds-section-description">Show partial next/previous slides to indicate more content. Use the
-                peek attribute to set the visible amount in pixels.
+            <p class="nds-section-description">Show part of the next slide to indicate more content. Set
+                <code class="nds-inline-code lang-html">--peek</code> to the length left showing.
             </p>
         </div>
         <div class="nds-section-body">
@@ -594,8 +744,12 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 <span class="nds-label">Center</span>
                             </button>
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
-                                data-toggler='["nds-oncolor", ".nds-swiper", "swiperOncolor"]'>
-                                <span class="nds-label">On-color</span>
+                                data-toggler='["nds-middle", ".nds-swiper", "navMiddle"]'>
+                                <span class="nds-label">Middle</span>
+                            </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-loading", ".nds-swiper", "swiperLoading"]'>
+                                <span class="nds-label">Skeleton</span>
                             </button>
                             <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
                                 data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
@@ -605,7 +759,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                     </div>
                     <div class="demo-container">
                         <div class="state-demo">
-                            <div class="nds-swiper" slides-max="3" slides-mid="2" slides-min="1" peek="40">
+                            <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px">
                                 <div class="nds-swiper-wrapper">
                                     <div class="nds-swiper-slide">
                                         <div class="nds-card nds-stroke nds-shadow">
@@ -688,7 +842,7 @@ last_edit: "28/06/2026 - 01:27 PM"
                                 </div>
                                 <div class="nds-expandable-content">
                                 <code class="lang-html code">
-&lt;div class="nds-swiper" slides-max="3" slides-mid="2" slides-min="1" peek="40"&gt;
+&lt;div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px"&gt;
     &lt;div class="nds-swiper-wrapper"&gt;
         &lt;div class="nds-swiper-slide"&gt;
             &lt;div class="nds-card nds-stroke nds-shadow"&gt;
@@ -760,6 +914,215 @@ last_edit: "28/06/2026 - 01:27 PM"
     </div>
 </section>
 
+<!-- Loop Demo -->
+<section class="nds-content-section nds-demo-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <h2 class="nds-section-title">Loop</h2>
+            <p class="nds-section-description">An endless row. The last slide is followed by the first, in both directions. Add
+                <code class="nds-inline-code lang-html">data-swiper-loop</code> to the swiper.
+            </p>
+        </div>
+        <div class="nds-section-body">
+            <div class="nds-block">
+                <div class="nds-showcase">
+                <div class="nds-demo-card">
+                    <div class="demo-header">
+                        <div class="demo-action">
+                            <div class="nds-dropmenu demo-toggle-menu">
+                                <button class="nds-btn nds-sm nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" data-label-prefix="Bullets: ">
+                                    <span class="nds-label">Bullets: Large</span>
+                                </button>
+                                <div class="nds-dropmenu-menu" hidden>
+                                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
+                                        data-toggler='[["nds-md", ".nds-swiper-pagination", "bulletSize", "remove"], ["nds-sm", ".nds-swiper-pagination", "bulletSize", "remove"], ["nds-lg", ".nds-swiper-pagination", "bulletSize", "add"]]'>
+                                        <span class="nds-label">Large</span>
+                                    </button>
+                                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                        data-toggler='[["nds-lg", ".nds-swiper-pagination", "bulletSize", "remove"], ["nds-sm", ".nds-swiper-pagination", "bulletSize", "remove"], ["nds-md", ".nds-swiper-pagination", "bulletSize", "add"]]'>
+                                        <span class="nds-label">Medium</span>
+                                    </button>
+                                    <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                        data-toggler='[["nds-lg", ".nds-swiper-pagination", "bulletSize", "remove"], ["nds-md", ".nds-swiper-pagination", "bulletSize", "remove"], ["nds-sm", ".nds-swiper-pagination", "bulletSize", "add"]]'>
+                                        <span class="nds-label">Small</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-center", ".nds-swiper-navigation", "navCenter"]'>
+                                <span class="nds-label">Center</span>
+                            </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-middle", ".nds-swiper", "navMiddle"]'>
+                                <span class="nds-label">Middle</span>
+                            </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-loading", ".nds-swiper", "swiperLoading"]'>
+                                <span class="nds-label">Skeleton</span>
+                            </button>
+                            <button class="nds-btn nds-sm nds-subtle demo-toggle-btn"
+                                data-toggler='["nds-noBg", ".demo-container", "containerBg"]'>
+                                <span class="nds-label">Remove bg</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="demo-container">
+                        <div class="state-demo">
+                            <div class="nds-swiper" data-swiper-loop style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px">
+                                <div class="nds-swiper-wrapper">
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-card nds-stroke nds-shadow">
+                                            <div class="nds-card-content">
+                                                <span class="nds-card-title">Card 1</span>
+                                                <p class="nds-card-description">Loops back to the first card.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-card nds-stroke nds-shadow">
+                                            <div class="nds-card-content">
+                                                <span class="nds-card-title">Card 2</span>
+                                                <p class="nds-card-description">Drag or use the arrows.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-card nds-stroke nds-shadow">
+                                            <div class="nds-card-content">
+                                                <span class="nds-card-title">Card 3</span>
+                                                <p class="nds-card-description">Native scroll snap.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-card nds-stroke nds-shadow">
+                                            <div class="nds-card-content">
+                                                <span class="nds-card-title">Card 4</span>
+                                                <p class="nds-card-description">RTL and LTR.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-card nds-stroke nds-shadow">
+                                            <div class="nds-card-content">
+                                                <span class="nds-card-title">Card 5</span>
+                                                <p class="nds-card-description">Keyboard and touch.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="nds-swiper-slide">
+                                        <div class="nds-card nds-stroke nds-shadow">
+                                            <div class="nds-card-content">
+                                                <span class="nds-card-title">Card 6</span>
+                                                <p class="nds-card-description">The last card, then the first again.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="nds-swiper-navigation" hidden>
+                                    <div class="nds-swiper-buttons">
+                                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button" aria-label="Previous slide"></button>
+                                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button" aria-label="Next slide"></button>
+                                    </div>
+                                    <div class="nds-swiper-pagination nds-lg"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="demo-code">
+                    <div class="nds-tabs nds-code nds-divided">
+                        <div class="nds-tab-list-container nds-scroll-more">
+                            <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
+                                <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
+                                    aria-controls="panel-loop-1" id="tab-loop-1">
+                                    <span class="nds-tab-label">HTML</span>
+                                </button>
+                            </nav>
+                            <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="nds-tab-content">
+                            <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-loop-1"
+                                aria-labelledby="tab-loop-1">
+                                <div class="nds-code-action">
+                                    <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <i class="nds-icon nds-hgi-copy-01"></i>
+                                    </button>
+                                </div>
+                                <div class="nds-expandable-content">
+                                <code class="lang-html code">
+&lt;div class="nds-swiper" data-swiper-loop style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px"&gt;
+    &lt;div class="nds-swiper-wrapper"&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-card nds-stroke nds-shadow"&gt;
+                &lt;div class="nds-card-content"&gt;
+                    &lt;span class="nds-card-title"&gt;Card 1&lt;/span&gt;
+                    &lt;p class="nds-card-description"&gt;Loops back to the first card.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-card nds-stroke nds-shadow"&gt;
+                &lt;div class="nds-card-content"&gt;
+                    &lt;span class="nds-card-title"&gt;Card 2&lt;/span&gt;
+                    &lt;p class="nds-card-description"&gt;Drag or use the arrows.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-card nds-stroke nds-shadow"&gt;
+                &lt;div class="nds-card-content"&gt;
+                    &lt;span class="nds-card-title"&gt;Card 3&lt;/span&gt;
+                    &lt;p class="nds-card-description"&gt;Native scroll snap.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-card nds-stroke nds-shadow"&gt;
+                &lt;div class="nds-card-content"&gt;
+                    &lt;span class="nds-card-title"&gt;Card 4&lt;/span&gt;
+                    &lt;p class="nds-card-description"&gt;RTL and LTR.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-card nds-stroke nds-shadow"&gt;
+                &lt;div class="nds-card-content"&gt;
+                    &lt;span class="nds-card-title"&gt;Card 5&lt;/span&gt;
+                    &lt;p class="nds-card-description"&gt;Keyboard and touch.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-slide"&gt;
+            &lt;div class="nds-card nds-stroke nds-shadow"&gt;
+                &lt;div class="nds-card-content"&gt;
+                    &lt;span class="nds-card-title"&gt;Card 6&lt;/span&gt;
+                    &lt;p class="nds-card-description"&gt;The last card, then the first again.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="nds-swiper-navigation" hidden&gt;
+        &lt;div class="nds-swiper-buttons"&gt;
+            &lt;button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button" aria-label="Previous slide"&gt;&lt;/button&gt;
+            &lt;button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button" aria-label="Next slide"&gt;&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;div class="nds-swiper-pagination"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+                            </code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Built-in Features -->
 <section id="swiperFeatures" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
@@ -788,14 +1151,21 @@ last_edit: "28/06/2026 - 01:27 PM"
                             <i class="hgi hgi-stroke hgi-layers-01"></i>
                             <span class="nds-label">Responsive Breakpoints</span>
                         </span>
-                        <p class="nds-item-desc">Three-tier slide counts (<code class="nds-inline-code lang-html">slides-max</code>, <code class="nds-inline-code lang-html">slides-mid</code>, <code class="nds-inline-code lang-html">slides-min</code>) adjust the visible slides at 960px and 600px breakpoints.</p>
+                        <p class="nds-item-desc">Three-tier slide counts (<code class="nds-inline-code lang-html">--max-slides</code>, <code class="nds-inline-code lang-html">--mid-slides</code>, <code class="nds-inline-code lang-html">--min-slides</code>) adjust the visible slides at 960px and 600px breakpoints. CSS reads them, so the row is the right size before any JS runs.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-image-02"></i>
                             <span class="nds-label">Lazy Loading</span>
                         </span>
-                        <p class="nds-item-desc">Images with <code class="nds-inline-code lang-html">data-src</code> or <code class="nds-inline-code lang-html">data-srcset</code> load automatically as slides approach the viewport, reducing initial page weight.</p>
+                        <p class="nds-item-desc">Images with <code class="nds-inline-code lang-html">data-src</code> or <code class="nds-inline-code lang-html">data-srcset</code> load automatically as slides approach the viewport, reducing initial page weight. The image box shimmers until its source lands, so give the image a size.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-arrow-left-right"></i>
+                            <span class="nds-label">RTL and LTR</span>
+                        </span>
+                        <p class="nds-item-desc">The row, the arrows and the arrow keys follow the page direction. Nothing to set.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -809,7 +1179,14 @@ last_edit: "28/06/2026 - 01:27 PM"
                             <i class="hgi hgi-stroke hgi-eye"></i>
                             <span class="nds-label">Peek Preview</span>
                         </span>
-                        <p class="nds-item-desc">Set a <code class="nds-inline-code lang-html">peek</code> value in pixels to reveal partial adjacent slides, signaling that more content is available.</p>
+                        <p class="nds-item-desc">Set <code class="nds-inline-code lang-html">--peek</code> to a length to reveal part of the next slide, which signals that more content is available.</p>
+                    </div>
+                    <div class="nds-definition-item">
+                        <span class="nds-item-title">
+                            <i class="hgi hgi-stroke hgi-repeat"></i>
+                            <span class="nds-label">Endless Loop</span>
+                        </span>
+                        <p class="nds-item-desc">Add <code class="nds-inline-code lang-html">data-swiper-loop</code> and the row never ends. Clones at both ends make the wrap invisible. Needs more slides than the largest slides-per-view count.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -844,12 +1221,15 @@ last_edit: "28/06/2026 - 01:27 PM"
                 <ul>
                     <li>Use the swiper for <strong>horizontally browsable collections</strong> like featured services, image galleries, or card carousels where showing everything at once would overwhelm the layout</li>
                     <li>Use the <strong>hero variant</strong> (<code class="nds-inline-code lang-html">nds-hero</code>) for full-width banner sliders with background images or gradient slides at the top of a page</li>
-                    <li>Use <code class="nds-inline-code lang-html">data-src</code> and <code class="nds-inline-code lang-html">data-srcset</code> for <strong>lazy loading</strong> images rather than standard <code class="nds-inline-code lang-html">src</code> to reduce initial page weight</li>
+                    <li>Use <code class="nds-inline-code lang-html">data-src</code> and <code class="nds-inline-code lang-html">data-srcset</code> for <strong>lazy loading</strong> images rather than standard <code class="nds-inline-code lang-html">src</code> to reduce initial page weight. Give each lazy image a width and height, or an aspect ratio, so its box can shimmer before the source lands</li>
                     <li>Do not use swiper for content that should be visible all at once. Use <a class="nds-color" href="{{ 'layout/grid' | relative_url }}">Grid</a> for static card layouts or <a class="nds-color" href="{{ 'components/tabs' | relative_url }}">Tabs</a> for switchable content panels</li>
                     <li>Do not place interactive form controls inside slides. Keep slide content to display elements: text, images, cards, and links</li>
-                    <li>Add <code class="nds-inline-code lang-html">peek="40"</code> when the slide count exceeds the visible slots, giving users a visual cue that more content is available</li>
+                    <li>Add <code class="nds-inline-code lang-html">--peek:40px</code> when the slide count exceeds the visible slots. It gives the reader a visual cue that more content is available</li>
+                    <li>Use <code class="nds-inline-code lang-html">data-swiper-loop</code> only when the deck has more slides than the largest slides-per-view count. With fewer, the attribute is ignored</li>
                     <li>Always include <code class="nds-inline-code lang-html">hidden</code> on <code class="nds-inline-code lang-html">.nds-swiper-navigation</code>: the navigation row ships hidden and JS reveals it only when there are multiple pages. The swiper container itself does not use <code class="nds-inline-code lang-html">hidden</code>; a CSS <code class="nds-inline-code lang-html">::after</code> placeholder on <code class="nds-inline-code lang-html">.nds-swiper:not([data-nds-swiper-initialized])</code> reserves the navigation row height before init</li>
                     <li>Keep slide heights consistent within a swiper. Mix uneven heights and the tallest slide will define the row height for all others</li>
+                    <li>Use <code class="nds-inline-code lang-html">nds-middle</code> for a wide strip the reader scans rather than reads, such as a partner or logo row, where arrows beside the slides suit the shape better than a row underneath. It applies from 600px up, so add <code class="nds-inline-code lang-html">nds-center</code> to the navigation row as well and the mobile fallback keeps the same left-dots-right arrangement</li>
+                    <li>The <code class="nds-inline-code lang-html">nds-middle</code> arrows sit over the left and right edges of the slide. Use it for textless slides, or keep the slide text centred so the arrows stay clear of the words. Slide text that runs to the edges will be crossed</li>
                     <li>Always include <code class="nds-inline-code lang-html">aria-label</code> on navigation buttons with clear directional text like "Previous slide" and "Next slide"</li>
                     <li>For <strong>full-width section breakouts</strong>, place the swiper inside a <code class="nds-inline-code lang-html">nds-section-body nds-max-width</code> container so it can span beyond the content padding</li>
                 </ul>
@@ -861,11 +1241,14 @@ last_edit: "28/06/2026 - 01:27 PM"
                     <thead><tr><th>Class</th><th>Applied to</th><th>Description</th></tr></thead>
                     <tbody>
                         <tr><td><code class="nds-inline-code lang-html">nds-hero</code></td><td><code class="nds-inline-code lang-html">.nds-swiper</code></td><td>Full-width single-slide hero mode with overlay navigation absolutely positioned at the bottom</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">nds-oncolor</code></td><td><code class="nds-inline-code lang-html">.nds-swiper</code></td><td>Adjusts pagination bullets and navigation contrast for dark or image backgrounds</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-oncolor</code></td><td><code class="nds-inline-code lang-html">.nds-swiper</code></td><td>Adjusts the bullets, the section title and the arrows for dark or image backgrounds. The arrows take the subtle on-color wash. A primary or neutral arrow still adds <code class="nds-inline-code lang-html">nds-oncolor</code> on the button itself</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-center</code></td><td><code class="nds-inline-code lang-html">.nds-swiper-navigation</code></td><td>Centers the bullets and pushes the prev/next buttons to the outer edges of the navigation row</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-middle</code></td><td><code class="nds-inline-code lang-html">.nds-swiper</code></td><td>Moves the prev/next buttons out of the navigation row to flank the slides at their vertical centre, and hides the bullets. The swiper gains an inline gutter one button wide at each end, so the arrows sit beside the slides rather than over them. Tablet and up only (600px): below that every rule drops and the normal navigation row returns, bullets included, so pair it with <code class="nds-inline-code lang-html">nds-center</code> on the row to choose the mobile arrangement. On <code class="nds-inline-code lang-html">nds-hero</code> it adapts: no gutter is reserved, since the hero is full-bleed and insetting the image would be wrong, so the arrows overlay the slide at the viewport padding, and the bullets stay pinned bottom-centre. The arrows then sit over the slide edges, so use this with textless slides, or centre the slide text to keep it clear of them</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-deck</code></td><td><code class="nds-inline-code lang-html">.nds-swiper</code></td><td>Deck mode. A <code class="nds-inline-code lang-html">.nds-swiper-deck</code> of <code class="nds-inline-code lang-html">.nds-swiper-card</code> buttons, one per slide in slide order, sits beside the track. The active card is at the front, the rest fan behind it in circular order; a tap goes to a card, a drag pages below the desktop breakpoint, and the track loops. In a hero the deck fills the hero's height at the inline-end edge; below the desktop breakpoint it stacks above the text with the two neighbours peeking. See the Deck demo</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-lg</code></td><td><code class="nds-inline-code lang-html">.nds-swiper-pagination</code></td><td>Large pagination bullets (16px). Default size when no modifier is applied</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-md</code></td><td><code class="nds-inline-code lang-html">.nds-swiper-pagination</code></td><td>Medium pagination bullets (12px)</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-sm</code></td><td><code class="nds-inline-code lang-html">.nds-swiper-pagination</code></td><td>Small pagination bullets (8px)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-loading</code></td><td><code class="nds-inline-code lang-html">.nds-swiper</code></td><td>Shows every card in the deck as a skeleton, the same bars a loading grid shows. Add it while data loads and remove it when the cards are ready</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -875,13 +1258,12 @@ last_edit: "28/06/2026 - 01:27 PM"
                 <table class="nds-table nds-responsive">
                     <thead><tr><th>Attribute</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code class="nds-inline-code lang-html">slides-max="3"</code></td><td>Slides visible at large breakpoint (viewport >= 960px). Default: 1</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">slides-mid="2"</code></td><td>Slides visible at medium breakpoint (600px to 959px). Default: 1</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">slides-min="1"</code></td><td>Slides visible at small breakpoint (viewport < 600px). Default: 1</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">peek="40"</code></td><td>Pixels of adjacent slides to reveal. Only applies when there are multiple pages. Default: 0</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-swiper-loop</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-swiper</code> for an endless row. The component clones two pages of slides at each end and jumps silently to the real slide when a scroll rests on a clone. Clones carry <code class="nds-inline-code lang-html">nds-swiper-clone</code>, <code class="nds-inline-code lang-html">aria-hidden</code> and <code class="nds-inline-code lang-html">inert</code>. Ignored when the deck has no more slides than the largest slides-per-view count. Each arrow press moves one full view. When the slide count is not a multiple of the slides per view, every wrap shifts the pages by the remainder, so the bullets can skip the last one at a wrap. While looping, <code class="nds-inline-code lang-html">data-state</code> carries no <code class="nds-inline-code lang-html">at-start</code> or <code class="nds-inline-code lang-html">at-end</code> token</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">hidden</code></td><td>Place on <code class="nds-inline-code lang-html">.nds-swiper-navigation</code> (not the container). JS re-decides visibility on every breakpoint change: removes <code class="nds-inline-code lang-html">hidden</code> when there are multiple pages, restores it when there is only one</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-nds-swiper-initialized</code></td><td>Set by JS after init completes (<code class="nds-inline-code lang-html">true</code>). Used as a CSS hook (the pre-init <code class="nds-inline-code lang-html">::after</code> height reservation is scoped to <code class="nds-inline-code lang-html">:not([data-nds-swiper-initialized])</code>) and as a guard to skip already-initialized swipers during <code class="nds-inline-code lang-js">NDS.Swiper.init()</code>. Removed by <code class="nds-inline-code lang-js">destroy()</code></td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">data-swiper-peek</code></td><td>Toggled on <code class="nds-inline-code lang-html">.nds-swiper</code> by JS when peek is active (peek &gt; 0 and multiple pages exist). Activates the CSS <code class="nds-inline-code lang-html">calc(var(--peek) + var(--swiper-gap))</code> peek-width formula in <code class="nds-inline-code lang-html">_swiper.scss</code>. Removed by <code class="nds-inline-code lang-js">destroy()</code></td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-swiper-peek</code></td><td>Toggled on <code class="nds-inline-code lang-html">.nds-swiper</code> by JS when peek is active (peek &gt; 0 and more than one page). Before JS runs, CSS reserves the peek from <code class="nds-inline-code lang-html">--peek</code> alone. JS then counts the pages, at the loader preset and again at init. A deck left without this attribute gets a zero reserve, so a deck that fits one page shows no dead space at its end. Removed by <code class="nds-inline-code lang-js">destroy()</code></td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-swiper-preset</code></td><td>Set by the loader before the reveal on every card swiper that has not initialized yet, after it writes <code class="nds-inline-code lang-html">--slides</code> and the peek state from <code class="nds-inline-code lang-html">--max-slides</code>, <code class="nds-inline-code lang-html">--mid-slides</code>, <code class="nds-inline-code lang-html">--min-slides</code> and <code class="nds-inline-code lang-html">--peek</code>. The skeleton row then shows the same slides per view that init will use, so init moves nothing. Removed by <code class="nds-inline-code lang-html">destroy()</code>.</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-swiper-single</code></td><td>Set by the loader with <code class="nds-inline-code lang-html">data-swiper-preset</code> when the slides fit one page at the current breakpoint (the same page count init uses). Drops the pre-init <code class="nds-inline-code lang-html">::after</code> nav reservation before the reveal, because init keeps the nav hidden on a single page and the row would otherwise vanish at init. Removed by <code class="nds-inline-code lang-js">destroy()</code>.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -892,15 +1274,22 @@ last_edit: "28/06/2026 - 01:27 PM"
                 <table class="nds-table nds-responsive">
                     <thead><tr><th>Property</th><th>Default</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code class="nds-inline-code lang-html">--gap</code></td><td><code class="nds-inline-code lang-html">var(--spacing-xl)</code></td><td>Gap between slides</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">--padding</code></td><td><code class="nds-inline-code lang-html">0</code></td><td>Inline padding applied to the scroll wrapper. Inside <code class="nds-inline-code lang-html">.nds-max-width</code> the default shifts to <code class="nds-inline-code lang-html">var(--nds-viewport-padding)</code> so the swiper can bleed to the viewport edge while its content stays aligned</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--max-slides</code></td><td><code class="nds-inline-code lang-html">1</code></td><td>Slides per view at the large breakpoint (viewport 960px and wider). Set it inline on <code class="nds-inline-code lang-html">.nds-swiper</code> so JS can read it too. CSS sizes the row from it the moment the main CSS applies, before any JS, in every browser</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--mid-slides</code></td><td><code class="nds-inline-code lang-html">1</code></td><td>Slides per view at the medium breakpoint (600px to 959px)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--min-slides</code></td><td><code class="nds-inline-code lang-html">1</code></td><td>Slides per view at the small breakpoint (narrower than 600px)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--peek</code></td><td>unset</td><td>Length of the next slide left showing at the end of each page, for example <code class="nds-inline-code lang-html">40px</code>. Leave it unset, or set <code class="nds-inline-code lang-html">0px</code>, for no peek. JS drops the reserve when the deck fits one page</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--gap</code></td><td><code class="nds-inline-code lang-html">var(--spacing-xl)</code></td><td>Gap between slides. Inside <code class="nds-inline-code lang-html">.nds-max-width</code> the gutter at each end of the track is one gap too, so a neighbour ends at the edge of the track</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--padding</code></td><td><code class="nds-inline-code lang-html">0px</code></td><td>Gutter at each end of the track. Inside <code class="nds-inline-code lang-html">.nds-max-width</code> the default is one gap, and the track runs to the edge of the breakout. Keep it at or below the gap. A wider gutter shows the neighbour slides in it</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-default</code></td><td><code class="nds-inline-code lang-html">var(--colors-neutral-200)</code></td><td>Inactive pagination bullet color (light theme); shifts to neutral-700 in dark mode and to translucent white on hero/on-color backgrounds</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-default-hovered</code></td><td><code class="nds-inline-code lang-html">var(--colors-neutral-300)</code></td><td>Inactive bullet hover color (one step from default: neutral-300 light, neutral-600 dark)</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-active</code></td><td><code class="nds-inline-code lang-html">var(--colors-primary-600)</code></td><td>Active pagination bullet color (light theme); shifts to green-600 in dark mode and to base white on hero/on-color backgrounds</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-active-hovered</code></td><td><code class="nds-inline-code lang-html">var(--colors-primary-700)</code></td><td>Active bullet hover color (one step darker: primary-700 light, green-700 dark)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-active</code></td><td><code class="nds-inline-code lang-html">var(--colors-primary-600)</code></td><td>Active pagination bullet color (light theme); shifts to <code class="nds-inline-code lang-css">--colors-primary-500</code> in dark mode and to base white on hero/on-color backgrounds</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-active-hovered</code></td><td><code class="nds-inline-code lang-html">var(--colors-primary-700)</code></td><td>Active bullet hover color (one step darker: <code class="nds-inline-code lang-css">--colors-primary-700</code> light, <code class="nds-inline-code lang-css">--colors-primary-600</code> dark)</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--swiper-bullet-border</code></td><td><code class="nds-inline-code lang-html">transparent</code></td><td>Border color around the pagination bullets</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--deck-card</code></td><td><code class="nds-inline-code lang-html">300px</code> (hero: the hero height)</td><td>Deck mode: size of the open card, which is square. Set it inline on <code class="nds-inline-code lang-html">.nds-swiper</code></td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--deck-strip</code></td><td><code class="nds-inline-code lang-html">var(--spacing-5xl)</code></td><td>Deck mode: width of a folded card</td></tr>
                     </tbody>
                 </table>
+                <p>The bare attributes <code class="nds-inline-code lang-html">slides-max</code>, <code class="nds-inline-code lang-html">slides-mid</code>, <code class="nds-inline-code lang-html">slides-min</code> and <code class="nds-inline-code lang-html">peek</code> still work but are deprecated. Only JS can read them, so a row authored that way keeps its old size until the loader preset runs. Use the inline properties above.</p>
             </div>
 
             <div class="nds-block nds-prose">
@@ -923,16 +1312,26 @@ swiper.slideTo(0, false); // Jump to first slide (no animation)
 swiper.goTo(4);          // Snap to a page-aligned index (clamped to bounds)
 swiper.prev();           // Go to previous page
 swiper.next();           // Go to next page
+// Loop decks: indices count real slides only. Clones are never addressed.
 
 // ── Boundary state (for CSS hooks) ──
 // The container exposes data-state as the user scrolls:
 //   data-state="at-start"          first page is showing
 //   data-state="at-end"            last page is showing
 //   data-state="at-start at-end"   only one page (no scroll possible)
+//   (a looping swiper sets neither token)
 // Style with: .nds-swiper[data-state~="at-end"] { ... }
+
+// ── Events ──
+// nds:swiper:change bubbles from the container after every move.
+el.addEventListener('nds:swiper:change', (e) => {
+  console.log('slide', e.detail.index);   // real slide index, clones never counted
+});
 
 // ── Cleanup ──
 swiper.destroy();        // Remove listeners, pagination, and reset state
+NDS.Swiper.destroy(el);  // The same teardown from the namespace. NDS.Init.destroy()
+                         // calls this for every swiper in a container it releases.
 
 // ── Factory ──
 const el = document.querySelector('.my-swiper');

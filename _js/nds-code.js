@@ -1,8 +1,8 @@
 /* NDS.Code — public surface
  * Rides: (none — base component)
  * Methods:
- *   NDS.Code.init()                          highlight every `.nds-code code` and size the
- *                                            action-bar buttons
+ *   NDS.Code.init()                          highlight each `.nds-code code` as it nears the
+ *                                            viewport and size the action-bar buttons
  *   NDS.Code.reprocessCodeElement(codeEl)    re-highlight one block after you replaced its
  *                                            text
  *   NDS.Code.detectLanguage(codeEl, source)  the language it would use for that block
@@ -52,8 +52,17 @@
     // ==============================================
 
     // Every .code-example is a tab panel inside .nds-code, so one query covers both.
+    // Each block highlights one viewport before it scrolls in, not in one init
+    // sweep: ten blocks at once was the page's largest style recalc. A block in a
+    // hidden tab panel intersects when its tab opens.
     function initializeCodeProcessing() {
-        document.querySelectorAll('.nds-code code').forEach(processCodeElement);
+        document.querySelectorAll('.nds-code code').forEach(function(codeElement) {
+            const off = NDS.onIntersect(codeElement, function(entry) {
+                if (!entry.isIntersecting) return;
+                off();
+                processCodeElement(codeElement);
+            }, { rootMargin: '100% 0px' });
+        });
         sizeActionButtons();
     }
 
@@ -70,7 +79,7 @@
     }
 
     function processCodeElement(codeElement) {
-        if (codeElement.dataset.ndsCodeProcessed === 'true') return;
+        if (codeElement.dataset.ndsCodeInitialized === 'true') return;
 
         const source = getSourceText(codeElement);
         const lang = detectLanguage(codeElement, source);
@@ -78,17 +87,23 @@
         const lines = splitTokensIntoLines(tokens);
 
         if (lines.length === 0) {
-            codeElement.dataset.ndsCodeProcessed = 'true';
+            codeElement.dataset.ndsCodeInitialized = 'true';
             return;
         }
 
+        // Prose blocks soft-wrap, which shreds a markdown table: every wrapped
+        // row restarts at column 0. Table rows opt out of the wrap and scroll
+        // instead, so the pipes stay aligned as authored.
+        const prose = lang === 'markdown' || lang === 'prompt';
+
         let html = '';
         for (let i = 0; i < lines.length; i++) {
-            html += '<span class="nds-code-line">' + renderTokens(lines[i]) + '</span>\n';
+            const row = prose && lineIsTableRow(lines[i]) ? ' nds-code-table-row' : '';
+            html += '<span class="nds-code-line' + row + '">' + renderTokens(lines[i]) + '</span>\n';
         }
         codeElement.innerHTML = html.trim();
         labelLanguage(codeElement, lang);
-        codeElement.dataset.ndsCodeProcessed = 'true';
+        codeElement.dataset.ndsCodeInitialized = 'true';
     }
 
     // ==============================================
@@ -139,7 +154,7 @@
     // textContent (bar the leading newline and trailing blanks getSourceText and
     // splitTokensIntoLines already drop), so re-reading it is idempotent.
     function reprocessCodeElement(codeElement) {
-        codeElement.dataset.ndsCodeProcessed = 'false';
+        codeElement.dataset.ndsCodeInitialized = 'false';
         processCodeElement(codeElement);
     }
 
@@ -154,8 +169,8 @@
     // ponytail: this strip (plus the trailing-blank pop in splitTokensIntoLines)
     // makes the highlighted block SHORTER than the pre-highlight paint — ~100px on
     // a long block, since `white-space: pre` renders whitespace we then discard.
-    // Harmless today: init rides extras and lands ~1s post-reveal, by which point
-    // the blocks are off-screen, so measured CLS is 0.0000-0.0055. The real fix is
+    // Harmless today: a block highlights one viewport before it scrolls in, so the
+    // shrink lands off-screen and measured CLS is 0.0000-0.0055. The real fix is
     // normalizing the authored whitespace (388 of 421 blocks open with a newline
     // and/or close on an indented line) so both strips become no-ops.
     function getSourceText(codeElement) {
@@ -242,6 +257,16 @@
         // Drop trailing blank lines (indentation before the closing </code>).
         while (lines.length > 0 && lineIsBlank(lines[lines.length - 1])) lines.pop();
         return lines;
+    }
+
+    // A markdown table row (or its `|---|---|` divider): first non-blank token
+    // text starts with a pipe.
+    function lineIsTableRow(lineTokens) {
+        for (let i = 0; i < lineTokens.length; i++) {
+            const text = lineTokens[i].value.trim();
+            if (text !== '') return text[0] === '|';
+        }
+        return false;
     }
 
     function lineIsBlank(lineTokens) {
@@ -552,7 +577,7 @@
     // One master regex, scanned left to right. Alternatives are ordered by
     // priority (a keyword inside a string is swallowed by the string branch since
     // exec jumps past the whole match). Gaps between matches are plain text.
-    const JS_TOKEN_RE = new RegExp(
+    const JS_TOKEN_SRC =
         '(\\/\\/[^\\n]*)' +                                       // 1 line comment
         '|(\\/\\*[\\s\\S]*?\\*\\/)' +                             // 2 block comment
         '|(`(?:\\\\.|[^`\\\\])*`)' +                              // 3 template literal
@@ -562,14 +587,21 @@
         // `.finally`, `x.Promise`) stays plain instead of coloring as the token.
         '|(?<!\\.)\\b(const|let|var|function|if|else|for|while|return|break|continue|switch|case|default|try|catch|finally|throw|class|extends|import|export|await|async|new|typeof|instanceof|in|of|delete|void|this|super)\\b' + // 6 keyword
         '|(?<!\\.)\\b(true|false|null|undefined|NaN|Infinity)\\b' + // 7 literal
-        '|(?<!\\.)\\b(console|window|document|Array|Object|String|Number|Boolean|Math|JSON|Date|Promise|Set|Map)\\b', // 8 builtin
-        'g'
-    );
+        '|(?<!\\.)\\b(console|window|document|Array|Object|String|Number|Boolean|Math|JSON|Date|Promise|Set|Map)\\b'; // 8 builtin
+
+    // Built on first use, not at module eval: Safari < 16.4 rejects lookbehind,
+    // and a throw here would end the bundle's script. There the guards drop and a
+    // `.catch`-style member colors as the token — a blemish, not a crash.
+    let JS_TOKEN_RE;
+    const jsTokenRe = () => JS_TOKEN_RE ||= (() => {
+        try { return new RegExp(JS_TOKEN_SRC, 'g'); }
+        catch { return new RegExp(JS_TOKEN_SRC.replace(/\(\?<!\\\.\)/g, ''), 'g'); }
+    })();
 
     const JS_GROUP_TYPE = [null, 'comment', 'comment', 'template', 'string', 'number', 'keyword', 'literal', 'builtin'];
 
     function lexJs(source) {
-        return lexByRegex(source, JS_TOKEN_RE, JS_GROUP_TYPE);
+        return lexByRegex(source, jsTokenRe(), JS_GROUP_TYPE);
     }
 
     // ==============================================

@@ -24,19 +24,37 @@
   // height until its init stamp, so the insertion doesn't shift content
   // below. Init owns the outcome: it generates the list (any total-pages
   // > 0), and a nav init leaves empty falls back to the empty-collapse
-  // above. The auto-mode sibling rule below covers [data-auto-pagination].
-  &[data-total-pages]:not([data-nds-pagination-initialized]) {
+  // above. Auto mode holds the same reserve until pagination stamps
+  // data-paged-initialized on the adjacent content.
+  // The placeholder is a centered row of six button blocks: one pseudo, a
+  // repeating gradient at button + gap steps.
+  // The list stays hidden until the stamp, so an authored list (a manual
+  // nav after paged content) or one left by destroy() never stacks under
+  // the placeholder. The flat skeleton color keeps the stops crisp.
+  // display stays block: flipping flex→block at release re-creates the box,
+  // and Chrome logs the reserve as a 0.04 layout shift even below the fold.
+  &[data-total-pages]:not([data-nds-pagination-initialized]),
+  .nds-paged-content:not([data-paged-initialized])+& {
     display: block;
     min-height: var(--_pagination-reserve);
-  }
-}
+    @include skeleton-pulse;
 
-// Auto-mode reservation: until pagination stamps data-paged-initialized on
-// the content, its adjacent nav holds its row height (and collapses after the
-// stamp if init left it empty — the single-page case).
-.nds-paged-content:not([data-paged-initialized])+.nds-pagination {
-  display: block;
-  min-height: var(--_pagination-reserve);
+    >.nds-pagination-list {
+      display: none;
+    }
+
+    &::before {
+      --_step: calc(var(--_pagination-reserve) + var(--spacing-md));
+      content: '';
+      display: block;
+      margin-inline: auto;
+      width: calc(var(--_step) * 6 - var(--spacing-md));
+      height: var(--_pagination-reserve);
+      background: repeating-linear-gradient(90deg,
+        var(--nds-skeleton-solid) 0 var(--_pagination-reserve),
+        transparent var(--_pagination-reserve) var(--_step));
+    }
+  }
 }
 
 .nds-pagination-list {
@@ -98,26 +116,17 @@
 }
 
 // ==============================================
-// NAVIGATION BUTTONS (Previous/Next)
-// ==============================================
-
-.nds-pagination-item:is(.nds-pagination-prev, .nds-pagination-next) {
-  .nds-btn {
-    aspect-ratio: 1;
-  }
-}
-
-// ==============================================
 // ELLIPSIS WITH DROPDOWN
 // ==============================================
 
-// Trigger + menu live inside `.nds-pagination-ellipsis` — the dropmenu
-// defaults to no-portal so descendant selectors are safe in both states.
+// The trigger never leaves `.nds-pagination-ellipsis`, so it stays descendant-scoped.
 .nds-pagination-ellipsis .nds-dropmenu-trigger>.nds-label {
-  display: none;
+  display: var(--_ellipsis-label-display, none);
 }
 
-.nds-pagination-ellipsis .nds-dropmenu-menu {
+// The menu portals to <body> when the pagination sits in a modal or a scrolling
+// wrapper, so it is styled by its own class — a descendant selector dies there.
+.nds-pagination-menu {
   min-width: 60px;
 
   .nds-dropmenu-item {
@@ -202,16 +211,13 @@
   width: auto;
   min-width: var(--btn-size);
   --btn-padding: initial;
-
-  >.nds-label {
-    display: block;
-  }
+  --_ellipsis-label-display: block;
 
   &::before {
     display: none;
   }
 
-  &:not(.nds-loading,[data-state~="loading"])::after {
+  &:not(.nds-loading)::after {
     position: absolute;
     transform: translateY(calc((var(--btn-size) / 2) - 2px));
   }

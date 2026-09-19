@@ -48,13 +48,27 @@
 (function() {
     'use strict';
 
+    // Own parts only. A .nds-tab-panel holds arbitrary consumer content, so a
+    // nested .nds-tabs is legal — and its tabs/panels match the same selectors.
+    // The two lists would then interleave differently (all outer tabs sit in the
+    // tablist; nested panels sit INSIDE an outer panel), desynchronizing the
+    // tabs[i] ↔ panels[i] pairing every method here depends on.
+    // Anchored on the container only when it IS the root — create() is documented
+    // to take .nds-tabs, but an unfiltered fallback beats returning nothing.
+    const ownParts = (container, selector) => {
+        const all = Array.from(container.querySelectorAll(selector));
+        return container.matches('.nds-tabs')
+            ? all.filter(el => el.closest('.nds-tabs') === container)
+            : all;
+    };
+
     class NDSTabs {
         constructor(tabsContainer) {
             this.tabsContainer = tabsContainer;
             this.scrollMore = tabsContainer.querySelector('.nds-scroll-more');
             this.tabList = tabsContainer.querySelector('.nds-tab-list');
-            this.tabs = Array.from(tabsContainer.querySelectorAll('.nds-tab:not(.nds-show-more)'));
-            this.panels = Array.from(tabsContainer.querySelectorAll('.nds-tab-panel'));
+            this.tabs = ownParts(tabsContainer, '.nds-tab:not(.nds-show-more)');
+            this.panels = ownParts(tabsContainer, '.nds-tab-panel');
             this.dragState = { active: false, startX: 0, scrollLeft: 0, hasDragged: false };
 
             if (!this.tabList || this.tabs.length === 0 || this.panels.length === 0) {
@@ -65,6 +79,9 @@
             this.abortController = new AbortController();
             this.currentTabIndex = this.findActiveTabIndex();
             this.valid = true;
+            // Registered here, not in the sweep, so every construction path —
+            // sweep, reinit() and programmatic create() — publishes el.ndsTabs.
+            tabsContainer.ndsTabs = this;
             this.init();
         }
 
@@ -107,8 +124,10 @@
 
         scrollToTarget(target) {
             if (!target) return;
+            // 'auto' defers to the list's CSS scroll-behavior, which _tabs.scss drops
+            // to auto under reduced motion — so this is a real instant scroll there.
             target.scrollIntoView({
-                behavior: 'smooth',
+                behavior: NDS.prefersReducedMotion ? 'auto' : 'smooth',
                 inline: 'center',
                 block: 'nearest'
             });
@@ -124,7 +143,7 @@
                 if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
 
                 e.preventDefault();
-                this.tabList.scrollBy({ left: e.deltaY * (NDS.isRTL ? -0.8 : 0.8), behavior: 'smooth' });
+                this.tabList.scrollBy({ left: e.deltaY * (NDS.isRTL ? -0.8 : 0.8), behavior: NDS.prefersReducedMotion ? 'auto' : 'smooth' });
             }, { passive: false, signal: this.abortController.signal });
 
             // Drag scroll.
@@ -140,7 +159,8 @@
                 this.dragState.active = false;
                 document.removeEventListener('mousemove', handleMouseMove);
                 document.removeEventListener('mouseup', handleMouseUp);
-                Object.assign(this.tabList.style, { cursor: '', userSelect: '', scrollBehavior: 'smooth' });
+                // Inline, so it outranks _tabs.scss — restore to the mode the user asked for.
+                Object.assign(this.tabList.style, { cursor: '', userSelect: '', scrollBehavior: NDS.prefersReducedMotion ? 'auto' : 'smooth' });
                 if (this.dragState.hasDragged) {
                     setTimeout(() => { this.dragState.hasDragged = false; }, 100);
                 }
@@ -155,8 +175,8 @@
                 this.dragState.hasDragged = false;
 
                 Object.assign(this.tabList.style, { cursor: 'grabbing', userSelect: 'none', scrollBehavior: 'auto' });
-                document.addEventListener('mousemove', handleMouseMove);
-                document.addEventListener('mouseup', handleMouseUp);
+                document.addEventListener('mousemove', handleMouseMove, { signal: this.abortController.signal });
+                document.addEventListener('mouseup', handleMouseUp, { signal: this.abortController.signal });
             }, { signal: this.abortController.signal });
         }
 
@@ -336,7 +356,6 @@
             // Stamp only successful constructions — late-filled tab markup stays
             // eligible for the next reinit().
             if (instance.valid) {
-                container.ndsTabs = instance;
                 container.setAttribute('data-nds-tabs-initialized', 'true');
             }
         });
@@ -345,6 +364,6 @@
     NDS.Tabs = {
         init: initializeTabs,
         reinit: initializeTabs,
-        create: (container) => new NDSTabs(container)
+        create: (container) => container.ndsTabs || new NDSTabs(container)
     };
 })();

@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.7.0"
-last_edit: "09/08/2026 - 02:18 AM"
+updated: "1.12.0"
+last_edit: "28/08/2026 - 07:47 PM"
 ---
 
 <!-- Horizontal Layout -->
@@ -432,17 +432,21 @@ NDS.Stepper.goTo('demo-stepper-horizontal', 3);</code>
                             <div class="demo-action">
                                 <div class="nds-dropmenu demo-toggle-menu">
                                     <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger">
-                                        <span class="nds-label">Default</span>
+                                        <span class="nds-label">MD (default)</span>
                                     </button>
                                     <div class="nds-dropmenu-menu" hidden>
                                         <div class="nds-dropmenu-scroll">
-                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
-                                                data-toggler='["", "#demo-stepper-radial", "stepperSize"]'>
-                                                <span class="nds-label">Default</span>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
+                                                data-toggler='["nds-xs", "#demo-stepper-radial", "stepperSize"]'>
+                                                <span class="nds-label">XS</span>
                                             </button>
                                             <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
                                                 data-toggler='["nds-sm", "#demo-stepper-radial", "stepperSize"]'>
                                                 <span class="nds-label">SM</span>
+                                            </button>
+                                            <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn" data-state="selected"
+                                                data-toggler='["nds-md", "#demo-stepper-radial", "stepperSize"]'>
+                                                <span class="nds-label">MD (default)</span>
                                             </button>
                                             <button class="nds-btn nds-subtle nds-dropmenu-item demo-toggle-btn"
                                                 data-toggler='["nds-lg", "#demo-stepper-radial", "stepperSize"]'>
@@ -1249,8 +1253,48 @@ NDS.Stepper.goTo('demo-stepper-responsive', 3);</code>
                     <li>Keep step titles short (2 to 4 words). Use the description for additional context</li>
                     <li>In radial steppers, add <code class="nds-inline-code lang-html">.nds-stepper-next</code> inside the step text to preview the upcoming step name. Omit it on the final step</li>
                     <li>Radial steppers work best with 3 to 6 steps. Fewer than 3 makes the circle progress hard to read; more than 6 makes step titles too compressed</li>
+                    <li>A horizontal stepper runs out of room on small screens. Pair it with the radial variant there: <code class="nds-inline-code lang-html">nds-radial nds-horizontal-lg</code> is radial by default and turns horizontal from the <code class="nds-inline-code lang-html">lg</code> breakpoint up. The same pairing works for vertical</li>
+                    <li>Use <code class="nds-inline-code lang-js">NDS.Stepper.next()</code> for form steps, not <code class="nds-inline-code lang-html">data-stepper-control</code>. A form step is gated by validation or by a request, and the attribute moves the stepper on every click. See Advancing the Stepper above</li>
                     <li>Always provide a unique <code class="nds-inline-code lang-html">id</code> on the stepper container so control buttons and the JS API can target it</li>
                 </ul>
+            </div>
+
+            <div class="nds-block nds-prose">
+                <h3 class="nds-block-title">Advancing the Stepper</h3>
+                <p>There are three ways to move a stepper. Pick by one question: can anything refuse the move?</p>
+                <ul>
+                    <li><strong>Nothing can refuse it</strong> &mdash; use <code class="nds-inline-code lang-html">data-stepper-control</code> on a button. The click moves the stepper, always. This fits a Back button, a demo, a walkthrough, and a <code class="nds-inline-code lang-html">goto</code> that starts the flow over. It needs no JavaScript.</li>
+                    <li><strong>Something can refuse it</strong> &mdash; call <code class="nds-inline-code lang-js">NDS.Stepper.next(id)</code> from the code that knows the answer. Validation, a request, a server check: the thing that decides is the thing that moves the stepper. <strong>Every form step is this case.</strong></li>
+                    <li><strong>The step number lives in your own state</strong> &mdash; write <code class="nds-inline-code lang-html">data-current</code> on the <code class="nds-inline-code lang-html">.nds-stepper</code>. The component watches the attribute and re-renders. This fits a server-rendered page or a framework view that already holds the step number.</li>
+                </ul>
+                <p>The stepper is a progress display. It never validates, never blocks, and never sends a request. A submit-typed button inside a form is handed to that form untouched: the stepper does not cancel the submit and does not move. Move it yourself once the form reports success.</p>
+                <div class="nds-block">
+                    <code class="lang-html code">
+&lt;!-- Back: nothing can refuse it --&gt;
+&lt;button type="button" class="nds-btn nds-secondary-outline"
+    data-stepper-control="previous" data-stepper-target="myStepper"&gt;
+  &lt;span class="nds-label"&gt;Back&lt;/span&gt;
+&lt;/button&gt;
+
+&lt;!-- Continue: validation can refuse it --&gt;
+&lt;button type="button" class="nds-btn nds-primary" id="myContinue"&gt;
+  &lt;span class="nds-label"&gt;Continue&lt;/span&gt;
+&lt;/button&gt;
+                    </code>
+                    <code class="lang-js code">
+// Continue: move only if the visible step validates. validateForm() skips
+// fields inside a hidden panel, so it checks the step on screen.
+document.getElementById('myContinue').addEventListener('click', (e) =&gt; {
+  if (NDS.Forms.validateForm(e.currentTarget).valid) NDS.Stepper.next('myStepper');
+});
+
+// Final step: move only once the request succeeds. The form carries data-ajax,
+// so Forms validates, stops the POST and fires nds:formValid.
+document.getElementById('myForm').addEventListener('nds:formValid', () =&gt; {
+  sendApplication().then(() =&gt; NDS.Stepper.next('myStepper'));
+});
+                    </code>
+                </div>
             </div>
 
             <div class="nds-block">
@@ -1263,9 +1307,11 @@ NDS.Stepper.goTo('demo-stepper-responsive', 3);</code>
                         <tr><td><code class="nds-inline-code lang-html">nds-vertical</code></td><td>Container</td><td>Switches to top-to-bottom layout with vertical connecting lines</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-radial</code></td><td>Container</td><td>Circular progress indicator showing one step at a time</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-dot</code></td><td>Container</td><td>Replaces numbered circles with 16px dots (horizontal and vertical)</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">nds-sm</code></td><td>Container</td><td>Smaller radial circle (48px, radial only)</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">nds-lg</code></td><td>Container</td><td>Larger circle size (40px linear, 96px radial)</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">nds-xl</code></td><td>Container</td><td>Extra-large circle size (48px linear, 120px radial)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-xs</code></td><td>Container</td><td>40px radial circle, 12px title, 10px description (radial only)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-sm</code></td><td>Container</td><td>48px radial circle, 14px title, 12px description (radial only)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-md</code></td><td>Container</td><td>64px radial circle, 16px title, 14px description. This is the radial default, so the class is only needed to override a size set higher up (radial only)</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-lg</code></td><td>Container</td><td>40px linear circle. Radial: 80px circle, 16px title, 14px description</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">nds-xl</code></td><td>Container</td><td>48px linear circle. Radial: 120px circle, 20px title, 14px description</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-center</code></td><td>Container</td><td>Centers step content beneath each circle (horizontal only)</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-oncolor</code></td><td>Container</td><td>Adapts colors for dark or branded backgrounds</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">nds-reverse</code></td><td>Container</td><td>Reverses vertical stepper direction so progress flows bottom-to-top (vertical only)</td></tr>
@@ -1290,7 +1336,7 @@ NDS.Stepper.goTo('demo-stepper-responsive', 3);</code>
                         <tr><td><code class="nds-inline-code lang-html">data-current</code></td><td>Set on the <code class="nds-inline-code lang-html">.nds-stepper</code> container. The active step number (starting from 1). Updating this attribute triggers an automatic UI refresh.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-total</code></td><td>Set on the <code class="nds-inline-code lang-html">.nds-stepper</code> container. Total number of steps. Updated automatically on init but can be set manually.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-step-text</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-stepper-circle</code>. Overrides the auto-generated step number with custom text.</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">data-stepper-control</code></td><td>Set on any button. Values: <code class="nds-inline-code lang-html">next</code>, <code class="nds-inline-code lang-html">previous</code>, or <code class="nds-inline-code lang-html">goto</code>. Buttons inside a stepper target their parent automatically.</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">data-stepper-control</code></td><td>Set on any button. Values: <code class="nds-inline-code lang-html">next</code>, <code class="nds-inline-code lang-html">previous</code>, or <code class="nds-inline-code lang-html">goto</code>. Buttons inside a stepper target their parent automatically. The move is unconditional: the click always moves the stepper. A submit-typed button inside a form is handed to that form instead, so the stepper neither cancels the submit nor moves &mdash; see Advancing the Stepper above.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-stepper-target</code></td><td>Set on control buttons outside a stepper. The ID of the stepper to control.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-stepper-value</code></td><td>Set on <code class="nds-inline-code lang-html">goto</code> control buttons. The step number to navigate to.</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">data-state="completed"</code></td><td>Set on <code class="nds-inline-code lang-html">.nds-stepper-step</code>. Marks the step as completed with a checkmark icon. Managed automatically by JS.</td></tr>
@@ -1316,6 +1362,10 @@ NDS.Stepper.goTo('demo-stepper-responsive', 3);</code>
                         <tr><td><code class="nds-inline-code lang-html">--stepper-text-padding</code></td><td><code class="nds-inline-code lang-html">var(--spacing-xl)</code></td><td>Gap between the step indicator and its text block</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--stepper-card-lift</code></td><td><code class="nds-inline-code lang-html">calc(var(--stepper-size) / 4)</code>, or <code class="nds-inline-code lang-html">var(--stepper-size)</code> with <code class="nds-inline-code lang-html">nds-dot</code></td><td>How far <code class="nds-inline-code lang-html">nds-cardView</code> raises each card so its first row meets the circle (vertical only). Scales with the circle, so the size classes carry it. Set it when your content starts with something taller or shorter than a title</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--gap</code></td><td>var(--spacing-xl)</td><td>Vertical gap between the step's text block and any <code class="nds-inline-code lang-html">.nds-stepper-action</code> buttons. Set on the <code class="nds-inline-code lang-html">.nds-stepper</code> container</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--stepper-title-FS</code></td><td>Set by the size class</td><td>Font size of the step title in a radial stepper. Radial text does not scale with the ring, so set this for a large title beside a small circle</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--stepper-title-LH</code></td><td>Set by the size class</td><td>Line height of the step title in a radial stepper. Set it with <code class="nds-inline-code lang-html">--stepper-title-FS</code>, so the pair stays matched</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--stepper-description-FS</code></td><td>Set by the size class</td><td>Font size of the step description and the next-step line in a radial stepper. Works the same way as <code class="nds-inline-code lang-html">--stepper-title-FS</code></td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">--stepper-description-LH</code></td><td>Set by the size class</td><td>Line height of the step description and the next-step line in a radial stepper</td></tr>
                         <tr><td><code class="nds-inline-code lang-html">--progress-size</code></td><td>var(--stepper-size)</td><td>Circle diameter for radial steppers. Inherits from <code class="nds-inline-code lang-html">--stepper-size</code>, which radial size classes override</td></tr>
                     </tbody>
                 </table>

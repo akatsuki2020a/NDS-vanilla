@@ -52,6 +52,7 @@ class JSProcessor
       'nds-showcase.js' => 'docs-assets/js',
       'nds-theme-foundation-day.js' => 'docs-assets/events/foundation_day',
       'nds-theme-hajj.js' => 'docs-assets/events/Hajj',
+      'nds-theme-national-day-96.js' => 'docs-assets/events/national_day_96',
     }
     @bundles = {
       # Critical bundle — loaded via <script defer>. Carries core, the loader,
@@ -73,7 +74,7 @@ class JSProcessor
       # drop `critical: true` from its loader registry entry (location is owned here, not the
       # registry — the build generates the namespace→bundle map from these lists).
       # nds-sort.js leads the list: it's the shared sort engine for filter/tables.
-      'nds-delegated.min.js' => ['nds-sort.js', 'nds-filter.js', 'nds-pagination.js', 'nds-swiper.js', 'nds-stepper.js', 'nds-breadcrumb.js', 'nds-accordion.js', 'nds-tabs.js', 'nds-expandable.js', 'nds-copy.js', 'nds-share.js', 'nds-modal.js', 'nds-alert.js', 'nds-cityWeather.js', 'nds-timeDate.js', 'nds-digitalStamp.js', 'nds-progress.js', 'nds-voice-input.js', 'nds-numbers.js', 'nds-user-feedback.js', 'nds-rating.js', 'nds-slider.js', 'nds-tables.js', 'nds-selection.js', 'nds-panels.js', 'nds-fab.js', 'nds-password.js'],
+      'nds-delegated.min.js' => ['nds-sort.js', 'nds-filter.js', 'nds-pagination.js', 'nds-swiper.js', 'nds-stepper.js', 'nds-breadcrumb.js', 'nds-accordion.js', 'nds-tabs.js', 'nds-expandable.js', 'nds-copy.js', 'nds-share.js', 'nds-modal.js', 'nds-alert.js', 'nds-cityWeather.js', 'nds-timeDate.js', 'nds-digitalStamp.js', 'nds-progress.js', 'nds-voice-input.js', 'nds-numbers.js', 'nds-user-feedback.js', 'nds-rating.js', 'nds-slider.js', 'nds-tables.js', 'nds-selection.js', 'nds-panels.js', 'nds-fab.js', 'nds-password.js', 'nds-tooltip.js'],
       # Extras — heavy, page-specific, zero-inbound leaf components. Injected by
       # nds-loader.js only when the page contains one of them (selector-gated), so
       # plain pages never download/parse them. May later be split into smaller
@@ -82,10 +83,32 @@ class JSProcessor
       # nds-code.js is documentation-only — no consumer site renders code blocks,
       # so it has no business in the reveal-gating bundle. Delegate-safe: _code.scss
       # reserves the line-number gutter and colours inline code with no JS.
-      'nds-extras.min.js' => ['nds-date-picker.js', 'nds-chart.js', 'nds-autocomplete.js', 'nds-ipv.js', 'nds-tooltip.js', 'nds-export.js', 'nds-upload.js', 'nds-editor.js', 'nds-code.js']
-      # NOTE: nds-accessibility.js is intentionally NOT bundled here — it
-      # builds to its own assets/js/nds-accessibility.min.js (optional add-on,
-      # loaded by a separate <script> gated on site.accessibility).
+      'nds-extras.min.js' => ['nds-date-picker.js', 'nds-chart.js', 'nds-autocomplete.js', 'nds-ipv.js', 'nds-export.js', 'nds-upload.js', 'nds-editor.js', 'nds-code.js'],
+      # Audit — debug diagnostics, its own bundle so production pages ship zero
+      # bytes of it. NEVER auto-injected (no component registry entry): the
+      # loader pulls it via the NDS.Audit lazy stub when enableLogging schedules
+      # the post-init sweep, or on the first NDS.Init.audit() call.
+      'nds-audit.min.js' => ['nds-audit.js'],
+      # Accessibility — the optional panel, its own bundle so a visitor who
+      # never opens it never downloads it. Auto-injected ONLY for a returning
+      # visitor with saved prefs (the registry entry's eager()); otherwise the
+      # loader arms the FAB and the lazy stub pulls this on the first press.
+      # No <script> tag: dropping this file is the opt-out, and loadBundle
+      # resolves on error.
+      'nds-accessibility.min.js' => ['nds-accessibility.js']
+    }
+    # Sheets a bundle owns. nds-loader.js requests these in parallel with the
+    # bundle's JS, so a lazily-loaded component's styles are not a second round
+    # trip behind its code. Keyed by bundle output name; a bundle with no sheet
+    # of its own is simply absent. A LIST, so a bundle that grows a second sheet
+    # needs no change to the manifest shape or the loader — list order is append
+    # order, which is cascade order.
+    #
+    # Declared, never inferred from the filename: nds-main.min.js would then pair
+    # with nds-main.min.css, which is head-linked and gates the reveal — the
+    # loader must never fetch that one.
+    @bundle_css = {
+      'nds-accessibility.min.js' => ['nds-accessibility.min.css'],
     }
 
     # Load config from _config.yml
@@ -147,7 +170,10 @@ class JSProcessor
   #   { 'delegated' => { 'file' => 'nds-delegated.min.js', 'ns' => [...] }, 'extras' => {...} }
   def bundle_manifest
     injected_bundles.each_with_object({}) do |(bundle_name, files), m|
-      m[bundle_key(bundle_name)] = { 'file' => bundle_name, 'ns' => scan_namespaces(files) }
+      entry = { 'file' => bundle_name, 'ns' => scan_namespaces(files) }
+      css = @bundle_css[bundle_name]
+      entry['css'] = Array(css) if css && !Array(css).empty?
+      m[bundle_key(bundle_name)] = entry
     end
   end
 
@@ -204,11 +230,19 @@ class JSProcessor
     m.nil? || m > File.mtime(out)
   end
 
+  # Basename -> real path. Sources may sit in a subfolder (_js/events/), so a
+  # name is resolved against a recursive scan, never assumed to be _js/<name>.
+  def source_path(basename)
+    @source_index ||= Dir.glob(File.join(@source_dir, '**', '*.js'))
+                         .each_with_object({}) { |p, h| h[File.basename(p)] ||= p }
+    @source_index[basename]
+  end
+
   # A standalone (non-bundled) file is stale on the same rule. Honors the
   # per-file output-dir override so self-contained themes are checked in place.
   def individual_stale?(basename)
-    src = File.join(@source_dir, basename)
-    return false unless File.exist?(src)
+    src = source_path(basename)
+    return false unless src && File.exist?(src)
     out_dir = @output_overrides[basename] || @output_dir
     out = File.join(out_dir, "#{File.basename(basename, '.js')}.min.js")
     return true unless File.exist?(out)
@@ -256,8 +290,8 @@ class JSProcessor
     # Ensure output directory exists
     FileUtils.mkdir_p(@output_dir)
 
-    # Get all JS files from source directory
-    js_files = Dir.glob(File.join(@source_dir, '*.js'))
+    # Get all JS files from source directory (recursive — event packs live in _js/events/)
+    js_files = Dir.glob(File.join(@source_dir, '**', '*.js'))
 
     # Fail fast if location (build) contradicts classification (registry).
     assert_no_critical_in_injected!
@@ -379,17 +413,21 @@ class JSProcessor
       begin
         compressed_content = compress_with_terser(original_content)
 
-        # Header comment (no timestamp — keeps git diffs stable on rebuild)
+        # Header comment (no timestamp — keeps git diffs stable on rebuild).
+        # Docs-only outputs (@output_overrides — showcase + event themes) skip the
+        # version line: they never ship to a consumer, and the stamp dirties the
+        # file on every version bump.
         project_title = @config['title'] || 'National Design System'
         version = @config['version'] || ''
         author_name = @config['author'] || 'Unknown'
         author_profile = @config['author_profile'] || ''
         license = @config['license'] || 'MIT'
         repo_url = @config['repository_url'] || 'https://github.com/mazin-musleh/NDS-vanilla'
+        docs_only = @output_overrides.key?(File.basename(file_path))
 
         header_comment = "/*!\n"
         header_comment += " * #{project_title}\n"
-        header_comment += " * Version: #{version}\n" unless version.empty?
+        header_comment += " * Version: #{version}\n" unless version.empty? || docs_only
         header_comment += " * License: #{license}\n"
         header_comment += " * Repository: #{repo_url}\n"
         header_comment += " * Author: #{author_name}\n"

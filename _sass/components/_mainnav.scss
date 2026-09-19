@@ -76,7 +76,9 @@
         white-space: nowrap;
         z-index: var(--_nav-z-brand);
 
-        :is(img, svg) {
+        // The brand logo itself follows the global --brand-logo-height knob
+        // rule (end of file); only other brand imagery keeps attribute sizing.
+        :is(img, svg):not(.nds-brand-logo) {
             height: auto;
             max-width: unset;
         }
@@ -224,6 +226,10 @@
                 i {
                     width: calc(var(--_btn-icon-size) - 4px);
                     height: calc(var(--_btn-icon-size) - 4px);
+                    // The overflow states set --_more-rotate on .nds-show-more; an
+                    // `~ .nds-show-more i` tail would join the shared data-state set (PERF-06).
+                    transform: rotate(var(--_more-rotate, 0deg));
+                    transition: transform 0.1s ease;
                 }
             }
 
@@ -266,7 +272,7 @@
             transform: translate(0, -100%);
             transition: transform var(--nds-transition);
             border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-            box-shadow: var(--shadow-md);
+            /* box-shadow: var(--shadow-md); */
 
             >.nds-content-wrapper {
                 padding-top: var(--spacing-2xl);
@@ -398,7 +404,7 @@
    DESKTOP/TABLET LAYOUT (non-minimal)
    ======================================== */
 
-body:not(.nds-minimal) .nds-main-nav {
+.nds-main-nav:not(.nds-minimal) {
     .nds-nav-item {
         .nds-nav-link {
 
@@ -454,7 +460,9 @@ body:not(.nds-minimal) .nds-main-nav {
         touch-action: pan-x;
         -webkit-overflow-scrolling: touch;
 
-        >* {
+        // >li, not >*: a universal tail puts "whole subtree" into the nds-minimal
+        // invalidation set, and a mode flip then restyles everything under the host.
+        >li {
             flex-shrink: 0;
             white-space: nowrap;
         }
@@ -466,27 +474,21 @@ body:not(.nds-minimal) .nds-main-nav {
     .nds-nav-primary[data-state~="has-more"] {
         ~.nds-show-more {
             transform: translateX(0);
-
-            i {
-                transform: rotate(90deg);
-                transition: transform 0.1s ease;
-            }
+            --_more-rotate: 90deg;
         }
 
         // At end: icon rotation
-        &[data-state~="at-end"] {
-            ~.nds-show-more i {
-                transform: rotate(270deg);
-            }
+        &[data-state~="at-end"]~.nds-show-more {
+            --_more-rotate: 270deg;
         }
 
         @include ltr {
-            ~.nds-show-more i {
-                transform: rotate(270deg);
+            ~.nds-show-more {
+                --_more-rotate: 270deg;
             }
 
-            &[data-state~="at-end"]~.nds-show-more i {
-                transform: rotate(90deg);
+            &[data-state~="at-end"]~.nds-show-more {
+                --_more-rotate: 90deg;
             }
         }
     }
@@ -544,10 +546,10 @@ body:not(.nds-minimal) .nds-main-nav {
 }
 
 /* ========================================
-   MOBILE LAYOUT (body.nds-minimal)
+   MOBILE LAYOUT (.nds-main-nav.nds-minimal)
    ======================================== */
 
-body.nds-minimal .nds-main-nav {
+.nds-main-nav.nds-minimal {
 
     .nds-mainNav-toggler {
         display: flex;
@@ -561,6 +563,7 @@ body.nds-minimal .nds-main-nav {
     .nds-collapse {
         position: absolute;
         top: var(--nds-nav-height);
+        transform: translateY(-1px); // close the subpixel gap under the bar
         inset-inline: 0;
         z-index: var(--_nav-z-dropdown);
         display: none;
@@ -574,8 +577,14 @@ body.nds-minimal .nds-main-nav {
             transition: transform var(--nds-transition);
             border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 
-            &:has(.nds-nav-actions .nds-dropdown[data-state~="open"]) .nds-nav-primary {
-                max-height: 10svh;
+            // The see-through actions row shows these corners; square off so an
+            // open action dropdown sits flush under it.
+            &:has(.nds-nav-actions .nds-dropdown[data-state~="open"]) {
+                border-radius: 0;
+
+                .nds-nav-primary {
+                    max-height: 10svh;
+                }
             }
         }
 
@@ -634,7 +643,7 @@ body.nds-minimal .nds-main-nav {
                             // via &, so the dark-theme path re-spells the ancestor chain; depth is
                             // load-bearing (theme gate + minimal-mode + primary-nav scope + specificity).
                             #{&},
-                            :root[data-theme~="dark"] body.nds-minimal .nds-main-nav .nds-nav-primary .nds-nav-item .nds-nav-link.nds-menu-btn {
+                            :root[data-theme~="dark"] .nds-main-nav.nds-minimal .nds-nav-primary .nds-nav-item .nds-nav-link.nds-menu-btn {
                                 --btn-bg-hover: var(--button-background-transparent-hovered);
                                 --btn-bg-active: var(--button-background-transparent-pressed);
                             }
@@ -709,19 +718,11 @@ body.nds-minimal .nds-main-nav {
         ~.nds-show-more {
             opacity: 1;
             visibility: visible;
-
-            /* Above nav items */
-
-            i {
-                transition: transform 0.1s ease;
-            }
         }
 
         // At end: icon rotation
-        &[data-state~="at-end"] {
-            ~.nds-show-more i {
-                transform: rotate(180deg);
-            }
+        &[data-state~="at-end"]~.nds-show-more {
+            --_more-rotate: 180deg;
         }
     }
 
@@ -748,12 +749,12 @@ body.nds-minimal .nds-main-nav {
         width: 100%;
         border-top: 1px solid var(--divider-color);
         justify-content: center;
-        background-color: var(--_nav-bg);
         z-index: var(--_nav-z-secondary);
 
-        &:not(:has([data-state~="open"])) {
-            border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-            transition: border-radius var(--nds-transition);
+        // Every item relocated out, or none authored: only placeholders remain, so
+        // the sticky row paints over nothing. Stamped by checkNavComposition().
+        &[data-nav-empty] {
+            display: none;
         }
 
         .nds-nav-item {
@@ -812,4 +813,13 @@ body.nds-minimal .nds-main-nav {
     .nds-main-nav :is(.nds-dropdown-menu, .nds-dropdown-content, .nds-collapse, .nds-collapse-content, .nds-nav-primary, .nds-nav-actions, .nds-show-more) {
         transition: none !important;
     }
+}
+
+/* Standalone brand logo (auth cards, consumer pages): height-normalized so any
+   logo aspect lands at the same scale. Inside the nav, .nds-brand's own
+   :is(img, svg) height rule outranks this and attribute sizing stays. */
+.nds-brand-logo {
+    height: var(--brand-logo-height, 40px);
+    width: auto;
+    max-width: unset; // reset's img max-width:100% would squash a wide logo in a shrinking flex parent
 }

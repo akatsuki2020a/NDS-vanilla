@@ -9,8 +9,8 @@ exclude_showcase: true
 # gzip -c assets/js/nds-main.min.js | wc -c (and delegated/extras, _site/.../nds.critical.min.css)
 bundle_sizes:
   critical_css: 10 # nds.critical.min.css
-  core_js: 39 # nds-main.min.js (loads on every page)
-  total_js: 129 # main + delegated + extras (full library, demand-loaded)
+  core_js: 41 # nds-main.min.js (loads on every page)
+  total_js: 133 # main + delegated + extras (full library, demand-loaded)
 ---
 
 <!-- Implementation Solution -->
@@ -99,7 +99,7 @@ bundle_sizes:
                     <div class="nds-alert-content">
                         <div class="nds-alert-text">
                             <span class="nds-alert-title">Important</span>
-                            <p class="nds-alert-description">The default visual identity — design tokens, colors, logos, and the digital-stamp component — is exclusive to Saudi Arabia government entities. Non-government projects must replace these with the adopting organization's own identity before deployment.</p>
+                            <p class="nds-alert-description">The default visual identity is exclusive to Saudi Arabia government entities. It covers design tokens, colors, logos, and the digital-stamp component. Non-government projects must replace these with the adopting organization's own identity before deployment.</p>
                         </div>
                         <div class="nds-alert-actions">
                             <a href="{{ '/components/themes.html' | relative_url }}" class="nds-link">Theming guide</a>
@@ -119,9 +119,9 @@ bundle_sizes:
             <p class="nds-section-brief">DGA page templates implemented as working code and ready to be adapted for deployment.</p>
             <p class="nds-section-description">Components follow the defined design tokens, typography, spacing, and interaction patterns. The templates below cover common government service screens and can be copied, populated with project content, and adapted for deployment.</p>
         </div>
-        <div class="nds-section-body  nds-max-width">
+        <div class="nds-section-body nds-max-width">
             <div class="nds-block">
-                <div class="nds-swiper" slides-max="3" slides-mid="2" slides-min="1" peek="40">
+                <div class="nds-swiper" data-swiper-loop style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:0px">
                     <div class="nds-swiper-wrapper">
                         {% for tpl in site.data.content.templates %}
                         <div class="nds-swiper-slide">
@@ -174,7 +174,7 @@ bundle_sizes:
         </div>
         <div class="nds-section-body  nds-max-width">
             <div class="nds-block">
-                <div class="nds-swiper" slides-max="3" slides-mid="2" slides-min="1" peek="40">
+                <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px">
                     <div class="nds-swiper-wrapper">
                         {% for ex in site.data.content.examples %}
                         <div class="nds-swiper-slide">
@@ -189,7 +189,7 @@ bundle_sizes:
                                 <div class="nds-card-content">
                                     <div class="nds-card-text">
                                         <span class="nds-card-title">{{ ex.title }}</span>
-                                        <p class="nds-card-description">{{ ex.description }}</p>
+                                        <p class="nds-card-description nds-truncate" style="--truncate: 2;">{{ ex.description }}</p>
                                     </div>
                                     <div class="nds-card-tags">
                                         <span class="nds-tag nds-blue nds-sm">
@@ -237,7 +237,7 @@ bundle_sizes:
         </div>
         <div class="nds-section-body  nds-max-width">
             <div class="nds-block">
-                <div class="nds-swiper" slides-max="3" slides-mid="2" slides-min="1" peek="20">
+                <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:20px">
                     <div class="nds-swiper-wrapper">
                         {% for ev in site.data.content.events %}
                         <div class="nds-swiper-slide">
@@ -455,8 +455,8 @@ bundle_sizes:
                 <h2 class="nds-section-title">Architecture & Performance</h2>
                 <p class="nds-section-description">Built with a performance-first and compatibility approach.</p>
                 <p>
-                    <a href="https://pagespeed.web.dev/analysis/https-mazin-musleh-github-io-NDS-vanilla/wkdqtygsfs?form_factor=mobile"
-                        target="_blank" rel="noopener" class="nds-color">View the PageSpeed Insights report</a>
+                    <a href="https://pagespeed.web.dev/analysis/https-mazin-musleh-github-io-NDS-vanilla/v2nxjcxqob?form_factor=mobile"
+                        target="_blank" class="nds-color">View the PageSpeed Insights report</a>
                 </p>
             </div>
         </div>
@@ -511,7 +511,7 @@ bundle_sizes:
                             <i class="hgi hgi-stroke hgi-layers-01"></i>
                             <span class="nds-label">5-Stage Reveal</span>
                         </span>
-                        <p class="nds-item-desc">First paint is divided into five render-safe stages — inline critical skeleton → critical stylesheet → main stylesheet → main JavaScript → icons and font. Each stage either renders correctly or remains hidden, preventing unstyled flashes; icons load last to stay outside the LCP window.</p>
+                        <p class="nds-item-desc">First paint is divided into five render-safe stages: inline critical skeleton → critical stylesheet → main stylesheet → main JavaScript → icons and font. Each stage either renders correctly or remains hidden, preventing unstyled flashes; icons load last to stay outside the LCP window.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">

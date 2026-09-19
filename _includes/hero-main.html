@@ -12,7 +12,7 @@ Determine hero sliders source:
 {%- assign hero_sliders = site.data.hero[hero_file_name] %}
 {%- endif %}
 <section class="nds-hero-section">
-    <div class="nds-swiper nds-hero nds-oncolor nds-full-width" style="--total: {{ hero_sliders | size }}">
+    <div class="nds-swiper nds-hero nds-oncolor nds-full-width" data-swiper-loop style="--total: {{ hero_sliders | size }}">
         <div class="nds-swiper-wrapper">
             {%- for slide in hero_sliders %}
             <div class="nds-swiper-slide nds-content-wrapper{%- if slide.class %} {{ slide.class }}{%- endif %}"{%- unless forloop.first %} hidden{%- endunless %}>
@@ -21,6 +21,9 @@ Determine hero sliders source:
                     <picture>
                         {%- if slide.src_small %}
                         <source media="(max-width: 768px)" srcset="{{ slide.src_small | relative_url }}">
+                        {%- endif %}
+                        {%- if slide.src_mid %}
+                        <source media="(max-width: 1646px)" srcset="{{ slide.src_mid | relative_url }}">
                         {%- endif %}
                         <img src="{{ slide.src | relative_url }}" class="nds-hero-image" alt=""
                             {%- if slide.position %} style="object-position: {{ slide.position }};"{%- endif %}
@@ -31,6 +34,9 @@ Determine hero sliders source:
                         {%- if slide.src_small %}
                         <source media="(max-width: 768px)" data-srcset="{{ slide.src_small | relative_url }}">
                         {%- endif %}
+                        {%- if slide.src_mid %}
+                        <source media="(max-width: 1646px)" data-srcset="{{ slide.src_mid | relative_url }}">
+                        {%- endif %}
                         <img data-src="{{ slide.src | relative_url }}" class="nds-hero-image" alt=""
                             {%- if slide.position %} style="object-position: {{ slide.position }};"{%- endif %}>
                     </picture>
@@ -40,7 +46,11 @@ Determine hero sliders source:
                 {%- assign _slide_content = slide.content | replace: '{relative_url}', site.baseurl %}
                 {%- else %}
                 {%- capture _slide_content %}
+                    {%- if forloop.first %}
                     <h1 class="nds-section-title">{{ slide.title }}</h1>
+                    {%- else %}
+                    <h2 class="nds-section-title">{{ slide.title }}</h2>
+                    {%- endif %}
                     <p class="nds-section-description">{{ slide.description }}</p>
                     {%- if slide.url and slide.url != '#' %}
                     <a href="{{ slide.url | relative_url }}" class="nds-btn nds-primary nds-oncolor nds-lg">
@@ -57,8 +67,8 @@ Determine hero sliders source:
         </div>
         <div class="nds-swiper-navigation" hidden>
             <div class="nds-swiper-buttons">
-                <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-prev" aria-label="Previous slide"></button>
-                <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-next" aria-label="Next slide"></button>
+                <button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
+                <button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
             </div>
             <div class="nds-swiper-pagination"></div>
         </div>
