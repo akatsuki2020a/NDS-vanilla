@@ -115,14 +115,15 @@
     }
 
     // Flowing-citation tier; the featured pull-quote card is .nds-quote
-    // (components/_quote.scss) — same border token family by design
-    :where(blockquote) {
+    // (components/_quote.scss) — same border token family by design.
+    // A Quote inside prose is built from the same tags, so its parts are skipped.
+    :where(blockquote:not(.nds-quote-body)) {
         padding-inline-start: var(--spacing-xl);
         border-inline-start: 3px solid var(--border-neutral-primary);
         color: var(--text-secondary-paragraph);
     }
 
-    :where(figcaption) {
+    :where(figcaption:not(.nds-quote-author)) {
         font-size: var(--typo-text-sm-FS);
         line-height: var(--typo-text-sm-LH);
         color: var(--text-secondary-paragraph);

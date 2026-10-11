@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 11:19 PM"
 ---
 
 <section id="prose-overview" class="nds-content-section nds-doc-overview">
@@ -230,8 +230,8 @@ Some elements are styled on every page, with or without `nds-prose`. Others are 
 | `hr` | Everywhere: the [Divider](../utilities/divider). Inside prose: a wider gap above and below |
 | `table` | Everywhere: the [Tables](../components/tables) style. Inside prose: a gap below |
 | `p`, `figure`, `pre` | Inside prose: a gap below |
-| `blockquote` | Inside prose: a gap below, a 3px side border and secondary text color |
-| `figcaption` | Inside prose: small, secondary text below the image |
+| `blockquote` | Inside prose: a gap below, a 3px side border and secondary text color. A [Quote](../components/quote)'s `blockquote` keeps its own look |
+| `figcaption` | Inside prose: small, secondary text below the image. A Quote's author line keeps its own look |
 {: .nds-table .nds-responsive}
 
 </div>
