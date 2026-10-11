@@ -25,7 +25,8 @@
  *   - Author a STANDARD NDS textarea field and put .nds-editor on its container. Nothing
  *     editor-specific is authored — the editing surface and the toolbar are generated.
  *   - The adopted textarea is still the form carrier and holds the sanitized HTML. Read
- *     and write THAT, not the contenteditable.
+ *     and write THAT, not the contenteditable; after a write, NDS.triggerEvents(textarea)
+ *     refills the surface. A form reset refills it too.
  *   - readonly and disabled are derived from the textarea's native attributes.
  *   - Pasted markup is reduced to the formatting vocabulary, but NDS component markup
  *     (nds-* regions) survives with a filtered class and attribute set.
@@ -921,15 +922,13 @@
             // ponytail: <p> as new-block separator — native Enter gives clean <p> per paragraph.
             try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { /* older UAs */ }
 
-            // Hydrate from the adopted textarea's value (server-filled or empty).
-            this.editable.innerHTML = sanitizeHtml(this.source.value) || '<p><br></p>';
-            this._normalizeLooseBlocks();
-            this._refreshLinks();
-            this._syncColumnAlign();
-            this._syncSource();
-            // Seed the history base — the initial value stays reachable even
-            // when hydration didn't change the value (sync early-returned).
-            if (this._histIdx < 0) this._pushHistory(false);
+            this._hydrate();
+            // A script write (announced by NDS.triggerEvents) and a form reset refill the surface.
+            // _syncSource fires only 'input', so a 'change' here is never the editor's own.
+            const reload = () => { this._hydrate(); this._updateToolbarState(); };
+            this.source.addEventListener('change', reload, { signal });
+            // The browser restores the textarea's default value only after the reset event.
+            this.source.form?.addEventListener('reset', () => setTimeout(reload), { signal });
 
             this._bindToolbar(signal);
             this._bindEditable(signal);
@@ -951,6 +950,21 @@
             this._syncImageUploadVisibility();
 
             this.root.dispatchEvent(new CustomEvent('nds:editor:ready', { detail: { instance: this }, bubbles: true }));
+        }
+
+        // Fill the surface from the adopted textarea (server-filled or empty) and
+        // start the history there.
+        _hydrate() {
+            this._history = [];
+            this._histIdx = -1;
+            this.editable.innerHTML = sanitizeHtml(this.source.value) || '<p><br></p>';
+            this._normalizeLooseBlocks();
+            this._refreshLinks();
+            this._syncColumnAlign();
+            this._syncSource();
+            // Seed the history base — the value stays reachable even when
+            // hydration didn't change it (sync early-returned).
+            if (this._histIdx < 0) this._pushHistory(false);
         }
 
         // preventDefault on mousedown keeps the editable's selection when a

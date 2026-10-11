@@ -29,8 +29,8 @@
     }
 
     .nds-sideinfo {
-        --nds-sideinfo-top-offset: 0px;
-        --_sideinfo-sticky-top: calc(var(--nds-nav-height) + var(--spacing-md) + var(--nds-sideinfo-top-offset));
+        --_sideinfo-top-offset: var(--nds-sideinfo-top-offset, 0px);
+        --_sideinfo-sticky-top: calc(var(--nds-nav-height) + var(--spacing-md) + var(--_sideinfo-top-offset));
         position: static;
         top: var(--_sideinfo-sticky-top);
         height: fit-content;
@@ -170,7 +170,7 @@
 .nds-hero-section.nds-aside + .nds-content-layout .nds-sideinfo-section .nds-sideinfo {
     @include desktop(min) {
         top: calc(var(--_sideinfo-sticky-top) + var(--nds-sideinfo-top) * -1);
-        transform: translateY(calc(var(--nds-sideinfo-top, -180px) + var(--spacing-3xl) + var(--nds-sideinfo-top-offset)));
-        margin-bottom: calc(var(--nds-sideinfo-top, -180px) + var(--spacing-3xl) + var(--nds-sideinfo-top-offset));
+        transform: translateY(calc(var(--nds-sideinfo-top, -180px) + var(--spacing-3xl) + var(--_sideinfo-top-offset)));
+        margin-bottom: calc(var(--nds-sideinfo-top, -180px) + var(--spacing-3xl) + var(--_sideinfo-top-offset));
     }
 }

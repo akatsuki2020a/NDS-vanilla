@@ -11,7 +11,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 12:32 PM"
 ---
 
 <section id="editor-overview" class="nds-content-section nds-doc-overview">
@@ -340,6 +340,8 @@ Set these on `.nds-editor`.
 {: .nds-table .nds-responsive}
 
 The running editor is also `el.ndsEditor`. File Upload events, such as `nds:upload:error`, bubble from the image popover.
+
+To set the text from a script, write the textarea's `value`, then call `NDS.triggerEvents(textarea)`. The editing surface fills from it. A form reset puts the textarea's first value back in the surface too.
 
 <script type="text/html" id="editor-js" data-canon data-lang="js">
 document.addEventListener('nds:editor:ready', function (e) {
