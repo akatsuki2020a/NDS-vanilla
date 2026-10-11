@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:19 PM"
+last_edit: "11/10/2026 - 11:15 PM"
 ---
 
 <section id="audit-overview" class="nds-content-section nds-doc-overview">
@@ -230,6 +230,7 @@ The audit reads the page, not the scripts. An old method name or an event listen
 | `icon-tag` | structure | error | A UI icon (`nds-icon nds-hgi-*`) on a tag other than `<i>`. The icon styles apply to `<i>` only, so it shows nothing |
 | `icon-only-btn` | structure | warn | A button in a field's `.nds-form-action` with an icon, no text and no `nds-icon-only`: it keeps its text padding and renders wider than tall |
 | `minimal-action-icon` | structure | error | A button with no icon in an `nds-minimal` action: on phones its label hides and it shows an empty box |
+| `prose-section-title` | structure | warn | A heading inside `nds-prose` with `nds-section-title`: it renders at the page title's size, not the text's. Prose already styles a bare `h2` to `h6` |
 | `name-on-display` | structure | error | `name` on the text box of a Custom Select or Time Picker, or on an OTP digit box. The form then sends the text it shows, not the value |
 | `nav-current` | structure | warn | A main nav link to the current page with no `data-state="current"` |
 | `id-reference` | structure | error | A `data-*-target`, `data-auto-pagination` or `data-copy-target` value that names no element. An id inside a `<template>` counts as present |

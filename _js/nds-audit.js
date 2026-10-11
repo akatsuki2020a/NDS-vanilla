@@ -698,6 +698,13 @@
             'Write it as <i class="nds-icon nds-hgi-…" aria-hidden="true">.', undefined, els.length);
     } });
 
+    // Prose styles its bare headings (_prose.scss); the section title class gives one a page-level size.
+    rule({ id: 'prose-section-title', docs: 'layout/prose.html', check(ctx) {
+        const els = ctx.find('.nds-prose .nds-section-title');
+        if (els.length) ctx.report(els[0], `nds-section-title on a heading inside nds-prose${els.length > 1 ? ` (${els.length} headings; the first is shown)` : ''}: it renders at the page title's size, not the text's.`,
+            'Remove nds-section-title: prose already styles a bare h2 to h6.', undefined, els.length);
+    } });
+
     // The visible box of a select or time field and each OTP digit hold display text; the hidden input holds the value.
     rule({ id: 'name-on-display', severity: 'error', check(ctx) {
         ctx.find('.nds-select-input[name], .nds-time-input[name], .nds-otp-container input[name]:not(.nds-otp-value)').forEach(el => {
