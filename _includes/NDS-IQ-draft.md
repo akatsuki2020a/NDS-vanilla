@@ -17,7 +17,7 @@ The project's agent file (`CLAUDE.md` / `AGENTS.md`) holds the anchor: the value
 
 **`NDS_ROOT`**: the flat contents of one template release from https://github.com/mazin-musleh/NDS-vanilla/releases. Default `.nds/` at the project root, gitignored, read-only. It is correct when `NDS_ROOT/NDS-INDEX.md` resolves directly; never keep the zip's versioned wrapper folder.
 
-**`NDS_ASSETS`**: the project's static folder for the NDS runtime; never under `NDS_ROOT`. Write it relative to the project root, as `NDS_ROOT` is: the anchor is committed and shared, so an absolute path breaks on every other machine.
+**`NDS_ASSETS`**: the project's static folder for the NDS runtime; never under `NDS_ROOT`. Write it relative to the project root, as `NDS_ROOT` is: the anchor travels with the project, so an absolute path breaks on every other machine.
 
 - Derive its folder and served URL from the stack, and confirm both with the dev as one question in the plan review, before §Setup copies the runtime (no plan: one question before the copy).
 - Placeholder path? NDS-side work waits for the answer: ask it in the plan review (no plan: ask now). Inventory and plan work continue; NDS targets stay `blocked on NDS_ROOT` until the sources resolve.
@@ -115,7 +115,7 @@ Check response headers and middleware for a Content Security Policy once, projec
 
 - **Repeated families:** map one archetype; sibling rows read `same as <archetype>`.
 - **Prior NDS:** assess each page against current canon: conformant → `Awaiting Verification`; non-conformant → rebuild. Never silently resume an inherited plan.
-- **Rebuild** clean, in place. Old work is a content, flow, and data reference, never a copy source. Remove its NDS footprint through the approved plan; rollback is git. The approval names the cost: unported pages run on the new runtime before their rebuild and may render worse.
+- **Rebuild** clean, in place. Old work is a content, flow, and data reference, never a copy source. Remove its NDS footprint through the approved plan; rollback is the dev's version control. The approval names the cost: unported pages run on the new runtime before their rebuild and may render worse.
 - **Second runtime:** only by explicit dev decision, with parallel files and a second assets folder, accepting the cost.
 
 When a plan is required, create `NDS-PLAN.md` at the project root, starting with `Managed by NDS IQ`, with columns for page, route, legacy libraries, NDS target, and status. Stop before building only for this ONE review: ask every project-wide decision (the `NDS_ASSETS` folder and URL when unconfirmed, porting strategy, prior-NDS split, CSP grant only when a CSP was found, the digital stamp, pacing), each with options and a recommended default. Ask nothing the rules already settle: the rest of the chrome and the language switcher follow §Build. Ask it in the same turn you write the plan, never in a message that offers to ask, through the host's question tool, the one that shows the dev options to pick from, when the host has one, in back-to-back calls if it caps how many questions one call holds. With no such tool, ask in one numbered message. Record the answers in the plan. The answers approve the plan: start building in the same turn, even when the plan file is written after them, with no second stop. Page-specific questions wait for that page's session (under `whole plan`: a default and an open checkbox). In every phase, the conversation asks and the plan records, and a question with options takes the question tool the same way.
@@ -255,11 +255,11 @@ An unmet item keeps the row `In Progress`; no-plan work reports the page unverif
 
 ## This file
 
-Two pieces: **`NDS-IQ.md`** at the project root, committed and replaced whole on update, from `https://raw.githubusercontent.com/mazin-musleh/NDS-vanilla/refs/heads/main/_includes/NDS-IQ.md`; and **the anchor** in `CLAUDE.md` / `AGENTS.md`, holding the only project paths and the read trigger, installed once.
+Two pieces: **`NDS-IQ.md`** at the project root, replaced whole on update, from `https://raw.githubusercontent.com/mazin-musleh/NDS-vanilla/refs/heads/main/_includes/NDS-IQ.md`; and **the anchor** in `CLAUDE.md` / `AGENTS.md`, holding the only project paths and the read trigger, installed once.
 
 **Update:** compare raw main's content with the project-root copy; any difference is a newer revision, installed on dev approval (an explicit update request is approval). Download with curl or the stack's HTTP client, never a web-fetch tool. Accept it only if line 1 starts `# NDS IQ`; otherwise discard and retry once, and after a second failure report it and keep the installed copy. Replace the root copy whole (no merging, anchor untouched), then read it again before continuing.
 
-**First install:** download the raw file to the project root, add the anchor with `NDS_ROOT=.nds/` and `NDS_ASSETS` as a placeholder until the plan review confirms it, commit both, then run the §Plan inventory, create `NDS-PLAN.md`, and ask the review. §Setup copies the runtime once the answers confirm `NDS_ASSETS`.
+**First install:** download the raw file to the project root, add the anchor with `NDS_ROOT=.nds/` and `NDS_ASSETS` as a placeholder until the plan review confirms it, then run the §Plan inventory, create `NDS-PLAN.md`, and ask the review. §Setup copies the runtime once the answers confirm `NDS_ASSETS`.
 
 The anchor, with `NDS_ASSETS` set to the project's static folder, relative to the project root:
 
