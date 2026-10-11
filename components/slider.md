@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.2.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 02:03 PM"
 ---
 
 <section id="slider-overview" class="nds-content-section nds-doc-overview">
@@ -48,7 +48,7 @@ Pick another component when:
     <div class="nds-slider-track">
       <input type="range" id="slider-budget" class="nds-slider" min="0" max="20000" step="500" value="5000">
     </div>
-    <output for="slider-budget" class="nds-slider-value">5000</output>
+    <output for="slider-budget" class="nds-slider-value nds-number-format">5000</output>
   </div>
 </div>
 </script>
@@ -61,12 +61,12 @@ Pick another component when:
     </label>
   </div>
   <div class="nds-form-control">
-    <output class="nds-slider-value nds-slider-value-min">20000</output>
+    <output class="nds-slider-value nds-slider-value-min nds-number-format">20000</output>
     <div class="nds-slider-track">
       <input type="range" class="nds-slider nds-slider-min" min="0" max="100000" step="1000" value="20000" aria-label="Lowest price">
       <input type="range" class="nds-slider nds-slider-max" min="0" max="100000" step="1000" value="60000" aria-label="Highest price">
     </div>
-    <output class="nds-slider-value nds-slider-value-max">60000</output>
+    <output class="nds-slider-value nds-slider-value-max nds-number-format">60000</output>
   </div>
 </div>
 </script>
@@ -93,8 +93,7 @@ Currency makes two changes on a `.nds-slider-value`: write both. A range slider 
 | State | Disabled | `[data-state~="disabled"]` | `.nds-slider-container` | The user cannot change the value now |
 | State | Read-only | `[data-state~="readonly"]` | `.nds-slider-container` | The user sees the value but cannot change it |
 | Stacked | Stacked (hint: The value sits above a full-width bar) | `.nds-stacked` | `.nds-slider-container` | The value moves above the bar, and the bar takes the full width. Use it for a wide value, such as a currency |
-| Currency | Currency | `.nds-number-format` | `.nds-slider-value` | Thousands separators and a currency symbol on the value |
-| Currency | Currency | `[data-currency="SAR"]` | `.nds-slider-value` | Thousands separators and a currency symbol on the value |
+| Currency | Currency | `[data-currency="SAR"]` | `.nds-slider-value` | A currency symbol on the value |
 | Loading | Loading | `.nds-loading` | `.nds-slider-container` | A skeleton while the script loads the bounds or the value |
 | Field states | Label, info, feedback | — | — | Shared by every form field. See [Forms](../components/forms) |
 {: #slider-variants-table .nds-table .nds-responsive}
@@ -123,7 +122,7 @@ By default the value sits beside the bar, and the bar takes the rest of the row.
 ### Number Format
 {: .nds-block-title}
 
-The `nds-number-format` class on the value adds thousands separators. The `data-currency` attribute adds a currency symbol. The slider formats the value again on every move. The [Numbers](../utilities/numbers) page lists the currencies.
+The `nds-number-format` class on the value adds thousands separators. Without it, the value shows as the input holds it, so a year reads `2024`. The `data-currency` attribute adds a currency symbol, with the class. The slider formats the value again on every move. The [Numbers](../utilities/numbers) page lists the currencies.
 
 ### Read-only
 {: .nds-block-title}

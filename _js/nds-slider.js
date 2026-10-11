@@ -55,7 +55,7 @@
     // Soft dependency — Slider skips locale/currency formatting when NDS.Numbers
     // (a deferred, optional sibling) isn't bundled; the output keeps the raw value.
     function formatOutput(el) {
-        if (NDS.Numbers && NDS.Numbers.format) NDS.Numbers.format(el);
+        if (el.classList.contains('nds-number-format') && NDS.Numbers && NDS.Numbers.format) NDS.Numbers.format(el);
     }
 
     // Re-format on every update: NDS.Numbers also paints the [data-currency]::after
