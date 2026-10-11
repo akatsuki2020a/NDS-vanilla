@@ -6,7 +6,7 @@ hero_description: Form fields the user types in, with the label, messages and su
 breadcrumb: [["Components", "/components"]]
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:59 PM"
+last_edit: "11/10/2026 - 09:24 AM"
 lang: en
 direction: ltr
 ---
@@ -587,7 +587,7 @@ The eye button switches the field between hidden and plain text, and its label b
 | `novalidate` | `form.nds-form` | The script sets it at start, so the browser shows no popups |
 | `data-required` | `.nds-form-container` | Marks the field required. The script adds `required` and `aria-required="true"` to the input at start. It also sets or removes this attribute when the input's `required` changes, at the next edit or `syncState()` call |
 | `data-state` | `.nds-form-container` | Write `disabled` or `readonly`, or call `setState()`: the script sets that property on every input inside. `disabled` also disables the action buttons. The script writes them too when an input is disabled or readonly. The script sets `focus`, `active` and `typing` while the user is on the field, and removes them on blur and release. It sets `open` while a native select's list is open |
-| `data-state="loading"` | `.nds-form-container` or `.nds-form-group` | Set it yourself with `NDS.State.add()`, and remove it with `NDS.State.remove()`. Shows the spinner in place of the action buttons. Written in the HTML, it shows the spinner when the script starts |
+| `data-state="loading"` | `.nds-form-container` or `.nds-form-group` | Shows the spinner in place of the action buttons. The `nds-loading` class does the same. Write either in the HTML or from a script (`NDS.State.add()`, the attribute, `classList`), and remove it the same way. Put it on the container, not on `.nds-form-control` or the input |
 | `data-status` | `.nds-form-container` | The script sets it with each message: `error`, `help` or `neutral`. Only `error` draws the red outline. `clearStatus()` and any edit to the field remove it |
 | `data-message` | `.nds-form-container` | The script writes the current message text with `data-status`. `getStatus()` reads it, and `clearStatus()` removes it |
 | `data-feedback-target` | `.nds-form-container` | A CSS selector for the element inside the field that holds its messages |

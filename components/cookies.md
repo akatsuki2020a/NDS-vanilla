@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 09:13 AM"
 ---
 
 <section id="cookies-overview" class="nds-content-section nds-doc-overview">
@@ -275,7 +275,7 @@ The close button stores no choice. The panel then does not open by itself for 30
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-- Put a "Cookie settings" trigger in the footer. Visitors expect to change their choice later.
+- Keep the "Cookie settings" trigger in the footer's policy row: the [Footer](../ui-shell/footer) canon has it. Visitors expect to change their choice later.
 - Set gtag's consent default to `denied` in `<head>`, before gtag.js loads. NDS only sends signals and cannot block a tracker. Its scripts run later, so that default is what stops the first page view from tracking.
 - Register each Google Analytics ID with `window.GA_TRACKING_ID` or `data-ga-tracking-id`, before the NDS scripts. Without it, a denial clears the cookies but Google Analytics keeps running.
 - Listen for `nds:cookies:consent` to start or stop a tool that NDS does not know, such as a vendor pixel.

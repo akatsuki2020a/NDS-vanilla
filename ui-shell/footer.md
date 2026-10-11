@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:27 PM"
+last_edit: "11/10/2026 - 09:13 AM"
 ---
 
 <section id="footer-overview" class="nds-content-section nds-doc-overview">
@@ -119,6 +119,9 @@ The main navigation belongs in the [Header](../ui-shell/header), and the navigat
           <a class="nds-link" href="#">
             <span class="nds-label">Accessibility</span>
           </a>
+          <button type="button" class="nds-link" data-cookies-toggle>
+            <span class="nds-label">Cookie settings</span>
+          </button>
         </div>
       </div>
     </div>
@@ -155,7 +158,7 @@ The main navigation belongs in the [Header](../ui-shell/header), and the navigat
 | `.nds-footer-bottom` | `.nds-footer-meta` on the start side and `.nds-footer-logos` on the end side | Yes |
 | `.nds-footer-links` | A row of underlined links, such as a site map | No |
 | `.nds-footer-legal` | `.nds-footer-copyright`, then `.nds-footer-policy` | Yes |
-| `.nds-footer-policy` | The policy links, not underlined: privacy, terms and accessibility | Yes |
+| `.nds-footer-policy` | The policy links, not underlined: privacy, terms and accessibility. Then the `button.nds-link[data-cookies-toggle]` that opens the [Cookies](../components/cookies) panel | Yes |
 | `.nds-footer-logos` | Partner and government logos, each an `<img>`, alone or in a link | No |
 {: .nds-table .nds-responsive}
 

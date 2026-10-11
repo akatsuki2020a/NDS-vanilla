@@ -126,29 +126,17 @@
     // Fields whose visible input never holds the value: required is checked on the wrapper, never stamped on the input.
     var NO_REQUIRED_STAMP = '.nds-taginput, .nds-file-upload';
 
-    NDS.State.onAdd('disabled', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.disabled = true; });
+    function _setDisabled(el, on) {
+        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.disabled = on; });
         el.querySelectorAll('.nds-form-action .nds-btn').forEach(function(btn) {
-            NDS.aria.disabled(btn, true);
-            if (btn.tagName === 'BUTTON') btn.disabled = true;
+            NDS.aria.disabled(btn, on);
+            if (btn.tagName === 'BUTTON') btn.disabled = on;
         });
-    });
+    }
 
-    NDS.State.onRemove('disabled', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.disabled = false; });
-        el.querySelectorAll('.nds-form-action .nds-btn').forEach(function(btn) {
-            NDS.aria.disabled(btn, false);
-            if (btn.tagName === 'BUTTON') btn.disabled = false;
-        });
-    });
-
-    NDS.State.onAdd('readonly', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.readOnly = true; });
-    });
-
-    NDS.State.onRemove('readonly', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.readOnly = false; });
-    });
+    function _setReadonly(el, on) {
+        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.readOnly = on; });
+    }
 
     // ── Loading state — form-scope opt-in ──────────────────────────────
     // Any consumer (autocomplete, remote-validate, custom fetch) can flip
@@ -176,7 +164,7 @@
         }
         shell = document.createElement('button');
         shell.type = 'button';
-        shell.className = 'nds-btn nds-subtle';
+        shell.className = 'nds-btn nds-subtle nds-icon-only';
         shell.hidden = true;
         shell.disabled = true;  // inert affordance — keeps it out of the tab order while loading
         shell.setAttribute('data-loading-slot', '');
@@ -186,8 +174,12 @@
         return shell;
     }
 
-    NDS.State.onAdd('loading', FORM_SCOPE, function(el) {
+    function _setLoading(el, on) {
         var fc = el.classList.contains('nds-form-control') ? el : el.querySelector('.nds-form-control');
+        if (on) _enterLoading(fc); else _exitLoading(fc);
+    }
+
+    function _enterLoading(fc) {
         if (!fc || fc._ndsLoading) return;
         var refs = fc._ndsLoading = { shell: _ensureLoadingShell(fc) };
         // Snapshot each sibling's resting hidden state, so exit restores it.
@@ -199,10 +191,9 @@
         });
         refs.shell.hidden = false;
         NDS.State.add(refs.shell, 'loading');
-    });
+    }
 
-    NDS.State.onRemove('loading', FORM_SCOPE, function(el) {
-        var fc = el.classList.contains('nds-form-control') ? el : el.querySelector('.nds-form-control');
+    function _exitLoading(fc) {
         var refs = fc && fc._ndsLoading;
         if (!refs) return;
         fc._ndsLoading = null;
@@ -213,7 +204,33 @@
         refs.rest.forEach(function(wasHidden, child) {
             child.hidden = child.classList.contains('nds-clear') ? !hasValue : wasHidden;
         });
+    }
+
+    // A field state changes inputs and buttons, so it needs script however it is written:
+    // the hooks keep NDS.State.add() synchronous, the observer catches a bare attribute,
+    // State.set() or the class. _applied holds what each field has entered, so an effect runs once and a
+    // native <input disabled> is never re-enabled by an unrelated token change.
+    var FIELD_STATES = { disabled: _setDisabled, readonly: _setReadonly, loading: _setLoading };
+    var _applied = new WeakMap();
+
+    function _syncStates(el) {
+        var cur = NDS.State.parse(el);
+        var on = _applied.get(el);
+        for (var token in FIELD_STATES) {
+            // nds-loading is the canon on every container; the token is mirrored onto it.
+            var has = cur.has(token) || (token === 'loading' && el.classList.contains('nds-loading'));
+            if (has === !!(on && on.has(token))) continue;
+            if (!on) _applied.set(el, on = new Set());
+            if (has) on.add(token); else on.delete(token);
+            FIELD_STATES[token](el, has);
+        }
+    }
+
+    Object.keys(FIELD_STATES).forEach(function(token) {
+        NDS.State.onAdd(token, FORM_SCOPE, _syncStates);
+        NDS.State.onRemove(token, FORM_SCOPE, _syncStates);
     });
+    NDS.onAttrChange(FORM_SCOPE, ['data-state', 'class'], function(els) { els.forEach(_syncStates); });
 
     // ==============================================
     // UTILITY FUNCTIONS
@@ -1252,7 +1269,7 @@
         _syncInitialState: function(input, formControl, formContainer) {
             // Container → input: propagate pre-existing data-state
             if (formContainer) {
-                NDS.State.apply(formContainer, 'disabled', 'readonly', 'loading');
+                _syncStates(formContainer);
             }
             // Input → container: sync current input state to data-state
             FieldSync.update(input, formControl, true);
@@ -1555,8 +1572,7 @@
         // do NOT propagate data-required to individual inputs — that would make
         // HTML5 validation flag each input separately.
 
-        // Propagate initial data-state to inputs via hooks
-        NDS.State.apply(group, 'disabled', 'readonly');
+        _syncStates(group);
     }
 
     // ==============================================

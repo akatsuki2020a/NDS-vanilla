@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 09:24 AM"
 ---
 
 <section id="loading-overview" class="nds-content-section nds-doc-overview">
@@ -171,7 +171,7 @@ A component that has a skeleton, such as a card, a table or tabs, replaces its t
 - Match the size to the container: `nds-xxs` or `nds-xs` in a table cell, `nds-xl` or `nds-2xl` over a whole page.
 - Use `nds-oncolor` only on a surface that is always dark or colored. In dark mode, the default and `nds-neutral` turn white on their own.
 - Do not add a size or a color class to a component that has a skeleton. It shows no spinner.
-- Do not put `nds-loading` on a form field. Form fields show their own loading look. See [Forms](../components/forms).
+- On a form field, put `nds-loading` on its `.nds-form-container`. The field shows its own spinner in place of its action buttons, not an overlay. See [Forms](../components/forms).
 
 </div>
   </div>
