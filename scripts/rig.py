@@ -2,11 +2,11 @@
 
 Run from the NDS repo root. The guide is .claude/skills/nds-iq-eval/RIGS.md.
 
-  python scripts/rig.py new <rig> [dest]       copy a baseline, git init, tag it, npm install when it has a package.json
+  python scripts/rig.py new <rig> [dest]       copy a baseline, git init, tag it, npm install or a Django venv + seed
   python scripts/rig.py stage <rig> <release>  unpack a mkrelease --preview zip to .nds/, add _source/, stamp <release>, copy the draft to NDS-IQ.md
   python scripts/rig.py reset <rig> [--save]   commit the run to a runN-date branch, back to the baseline tag
 
-<rig> is a rig number (1 sawaed, 5 library-portal, 6 citydesk, 7 grants-desk), which lives at ../nds-test-app-<N>,
+<rig> is a rig number (1 sawaed, 2 shop-licenses, 5 library-portal, 6 citydesk, 7 grants-desk), which lives at ../nds-test-app-<N>,
 or a baseline name (new) or a path (stage, reset). Baselines live in .claude/skills/nds-iq-eval/rigs/.
 """
 import datetime, io, os, re, shutil, subprocess, sys, tarfile, zipfile
@@ -18,9 +18,11 @@ OPT_OUT = ('## Memory\n\nDo not save any memory (user, feedback, project, or ref
 # How each baseline starts, and where it serves. The ports are in each app's own code.
 APPS = {'library-portal': ('npm start', 'http://localhost:3005'),
         'citydesk': ('npm start', 'http://localhost:3000'),
-        'grants-desk': ('npm run dev', 'http://localhost:5177')}
+        'grants-desk': ('npm run dev', 'http://localhost:5177'),
+        'shop-licenses': ('.venv/Scripts/python manage.py runserver 8002' if os.name == 'nt'
+                          else '.venv/bin/python manage.py runserver 8002', 'http://localhost:8002')}
 # The numbers past runs cite ("rig 5 run 8" = nds-test-app-5).
-NUMS = {'1': 'sawaed', '5': 'library-portal', '6': 'citydesk', '7': 'grants-desk'}
+NUMS = {'1': 'sawaed', '2': 'shop-licenses', '5': 'library-portal', '6': 'citydesk', '7': 'grants-desk'}
 # _source/ holds the folders NDS-INDEX's Sources line names.
 FOLDERS = re.findall(r'`([^`]+)`', re.search(r'^- \*\*Sources:\*\*.*into `_source/`:(.*)$',
                                               open('NDS-INDEX.md', encoding='utf-8').read(), re.M).group(1))
@@ -39,6 +41,19 @@ def where(rig):
     return os.path.join('..', f'nds-test-app-{rig}') if rig in NUMS else rig
 
 
+def seed(dest):
+    # A Django rig's database is gitignored, so a reset rebuilds it from the seed.
+    py = os.path.join('.venv', 'Scripts' if os.name == 'nt' else 'bin', 'python')
+    if not os.path.exists(os.path.join(dest, py + ('.exe' if os.name == 'nt' else ''))):
+        run(f'"{sys.executable}" -m venv .venv', cwd=dest)
+        run(f'{py} -m pip install -q -r requirements.txt', cwd=dest)
+    if os.path.exists(os.path.join(dest, 'db.sqlite3')):
+        os.remove(os.path.join(dest, 'db.sqlite3'))
+    shutil.rmtree(os.path.join(dest, 'media'), ignore_errors=True)
+    run(f'{py} manage.py migrate -v 0', cwd=dest)
+    run(f'{py} manage.py seed', cwd=dest)
+
+
 def new(rig, dest):
     baseline = NUMS.get(rig, rig)
     src = os.path.join(RIGS, baseline)
@@ -53,6 +68,8 @@ def new(rig, dest):
     git(dest, 'tag', 'baseline')
     if os.path.exists(os.path.join(dest, 'package.json')):  # rig 1 is a brief, no app
         run('npm install --no-audit --no-fund', cwd=dest)
+    if os.path.exists(os.path.join(dest, 'manage.py')):
+        seed(dest)
     print(f'ready: {dest}.\n  published release: paste the get-started setup prompt in a session there'
           f'\n  unreleased: python scripts/rig.py stage {rig if rig in NUMS else dest} <release> first')
     if baseline in APPS:
@@ -123,6 +140,8 @@ def reset(dest, save):
             shutil.rmtree(p, onerror=lambda f, path, e: left.append(path))
         elif os.path.exists(p):
             os.remove(p)
+    if os.path.exists(os.path.join(dest, 'manage.py')):
+        seed(dest)  # a running Django server locks db.sqlite3: stop it first
     # A server the run left on .nds/ locks it: stop that process by PID, never by name.
     print('reset to baseline' + (f'; still locked: {", ".join(left)}' if left else ''))
 

@@ -11,6 +11,7 @@ The baselines live in `rigs/`, at their clean state. Each app runs on its own po
 | Rig | Baseline | App | Run | URL |
 |---|---|---|---|---|
 | 1 | `sawaed` | No app: an empty folder with `BRIEF.md` (an Arabic volunteering site: pages, copy, fields, API) and its data | — | — |
+| 2 | `shop-licenses` | A municipality's shop license portal in Arabic and English: a finished Django backend with no templates, CSS or JS yet. `BRIEF.md`, the copy in `licenses/copy.py` | `.venv/Scripts/python manage.py runserver 8002` | `http://localhost:8002` |
 | 5 | `library-portal` | Arabic RTL public library: Express and JSON APIs, Bootstrap RTL, jQuery, DataTables, Select2, Summernote, an SSO stub, a hash-router account area | `npm start` | `http://localhost:3005` |
 | 6 | `citydesk` | English LTR municipal help desk: Express and JSON APIs, Bootstrap, jQuery, DataTables, Select2, TinyMCE, a staff back office | `npm start` | `http://localhost:3000` |
 | 7 | `grants-desk` | English staff console: a React single-page app on Vite, no backend | `npm run dev` | `http://localhost:5177` |
@@ -37,6 +38,24 @@ The traps live here, never in the rig: the agent reads everything in its folder.
 - Apply has two input steps (form, review) plus success. Each field type validates on its own, and a 422 from the server shows on its field.
 - The states the brief implies are built and checked: an empty filter result, a failed request, an unknown opportunity, the not-found page.
 - One opportunity (id 106, 2026-09-23) has already started. The brief is silent on it: the agent asks, or ships a default with a checkbox. It never drops the opportunity silently.
+
+### Rig 2: a new UI on a server that renders pages
+
+**Tests:** a greenfield build inside a running app whose server renders every page and answers in HTML: Django templates, server form errors, HTML fragments, two languages, two page shapes.
+
+`rig.py new 2` makes the venv and seeds the data; `reset` seeds it again. Accounts: `applicant`, `newcomer` (no applications), `reviewer` (staff), each with the password `<name>123`.
+
+**Dev answers:** the `NDS_ASSETS` folder the agent recommends under `static/`; the digital stamp: "No"; pacing: `whole plan`.
+
+**What a pass looks like:**
+- The chrome is written once, in a base template the pages extend, with one base per page shape: the public pages, and the console for the staff queue and review.
+- `lang` and `dir` come from the request, and the language switcher stays. Django's language switch and sign-out are POST only: the agent wires the canonical controls to a form with the CSRF token, and never swaps them for its own UI.
+- Server form errors render in NDS's error state at first paint, on the right field, in both languages. The review step runs in the browser, so the chosen files survive it.
+- The activities filter and the queue's status, search and paging are wired to the server's `?q=`, `?category=`, `?status=` and `?page=`, never filtered in the browser.
+- A fragment (`X-Fragment: 1`) swapped into the page gets its NDS components started. The agent reads the init API, and checks a swapped-in menu or tag in the browser. A 422 decision form swaps in with its errors. A 204 follows `X-Redirect`.
+- Django's messages show as NDS alerts. The 403, 404 and 500 templates are status sections.
+- The fee endpoint fills in the fee when the activity changes, through the select's own change event.
+- Every string comes from `copy.py`. The logo is a placeholder with a checkbox.
 
 ## Set up a rig
 
