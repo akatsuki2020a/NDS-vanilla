@@ -497,6 +497,15 @@
   js: _js/nds-ipv.js
   scss: _sass/components/_ipv.scss
 
+- title: "Init"
+  description: "Starts every component at load, and the calls that tell them a container changed"
+  use_when: "Page code must wait until the components on the page have started, or you added, removed, or replaced rows, cards, or list items with JavaScript and the filters, counters, or controls around them are now stale. One call updates every affected component instead of calling each one with its own argument. Reach for it on any CRUD screen, after an AJAX list swap, or whenever content arrives after page load. Server-driven lists are deliberately left alone."
+  icon: '<i class="hgi hgi-stroke hgi-refresh"></i>'
+  category: "Core"
+  tags: ["JS", "API"]
+  url: "/core/init.html"
+  js: _js/nds-loader.js
+
 - title: "Internationalization"
   description: "The text NDS components write, in one file per language that the page loads and a site can change or extend"
   use_when: "Change the text a component writes (a message, a button label, a screen reader label), add a language, or give your own component text in the page's language. The page's language comes from lang on <html>. For dates in the page's language use Date."
@@ -694,15 +703,6 @@
   url: "/components/rating.html"
   js: _js/nds-rating.js
   scss: _sass/components/_rating.scss
-
-- title: "Refresh"
-  description: "One call that tells every live component the contents of a container changed"
-  use_when: "You added, removed, or replaced rows, cards, or list items with JavaScript and the filters, counters, or controls around them are now stale. One call updates every affected component instead of calling each one with its own argument. Reach for it on any CRUD screen, after an AJAX list swap, or whenever content arrives after page load. Server-driven lists are deliberately left alone."
-  icon: '<i class="hgi hgi-stroke hgi-refresh"></i>'
-  category: "Core"
-  tags: ["JS", "API"]
-  url: "/core/refresh.html"
-  js: _js/nds-loader.js
 
 - title: "Request"
   description: "Fetch wrapper with a timeout, a response size cap, and errors you can branch on"

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:41 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="audit-overview" class="nds-content-section nds-doc-overview">
@@ -272,7 +272,7 @@ The audit reads the page, not the scripts. An old method name or an event listen
 | Global | Default | Effect |
 |---|---|---|
 | `NDS_AUDIT_RULES` | — | An array of rule definitions that every run reads. Use it to set rules in a script that runs before NDS |
-| `NDSInitConfig.enableLogging` | `false` | Runs the audit once the page has loaded. See [Refresh](../core/refresh) |
+| `NDSInitConfig.enableLogging` | `false` | Runs the audit once the page has loaded. See [Init](../core/init) |
 {: .nds-table .nds-responsive}
 
 ### Findings
@@ -324,7 +324,7 @@ The full API is in the banner of `_js/nds-audit.js`.
     <div class="nds-section-body nds-prose" markdown="1">
 
 - [Migration](../core/migration): every changed name by release, the list the migration checks read.
-- [Refresh](../core/refresh): `enableLogging` and the other loader settings.
+- [Init](../core/init): `enableLogging` and the other loader settings.
 - [Internationalization](../core/i18n): the language file that `i18n-pack` checks.
 
 </div>

@@ -1,26 +1,26 @@
 ---
 layout: page
-title: Refresh
-hero_title: Refresh - National Design System
-hero_description: Calls that tell NDS components a container changed after page load, so they wire new markup and release markup you remove
+title: Init
+hero_title: Init - National Design System
+hero_description: How NDS starts the components on a page, and the calls that tell them a container changed after load
 breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:00 PM"
+last_edit: "11/10/2026 - 03:27 PM"
 ---
 
-<section id="refresh-overview" class="nds-content-section nds-doc-overview">
+<section id="init-overview" class="nds-content-section nds-doc-overview">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Overview</h2>
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-`NDS.Init` starts every component at page load. Three of its calls keep components in step with content that changes later. `refresh(el)` tells them the contents of `el` changed. `mount(el)` tells them `el` is new markup. `destroy(el)` tells them `el` is about to go away. They are in the main bundle, so every page has them, with no init call.
+`NDS.Init` starts every component at page load. `NDS.Init.ready` tells your page code when they have all started. Three more calls keep components in step with content that changes later. `refresh(el)` tells them the contents of `el` changed. `mount(el)` tells them `el` is new markup. `destroy(el)` tells them `el` is about to go away. They are in the main bundle, so every page has them.
 
-A page whose content never changes after load needs none of them.
+A page whose content never changes after load needs none of the three calls.
 
 Pick another component when:
 
@@ -30,7 +30,7 @@ Pick another component when:
   </div>
 </section>
 
-<section id="refresh-markup" class="nds-content-section nds-doc-markup nds-demo-section">
+<section id="init-markup" class="nds-content-section nds-doc-markup nds-demo-section">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Usage</h2>
@@ -39,7 +39,7 @@ Pick another component when:
 
 Add, edit or remove rows, then make one call on the container.
 
-<script type="text/html" id="refresh-rows" data-canon data-lang="js">
+<script type="text/html" id="init-rows" data-canon data-lang="js">
 const tbody = document.getElementById('requests-table-body');
 
 // Change the rows the way your app does it
@@ -51,7 +51,7 @@ NDS.Init.refresh(tbody);
 
 Mount markup you fetched or built.
 
-<script type="text/html" id="refresh-mount" data-canon data-lang="js">
+<script type="text/html" id="init-mount" data-canon data-lang="js">
 const grid = document.getElementById('servicesGrid');
 const { data } = await NDS.request('/api/services.html');
 grid.innerHTML = data;
@@ -60,7 +60,7 @@ await NDS.Init.mount(grid);
 
 Build rows from JSON. Keep one row's markup, copied from its canon, in a `<template>` on the page. Fill each copy with `textContent` and attributes, never with an HTML string.
 
-<script type="text/html" id="refresh-template" data-canon data-lang="js">
+<script type="text/html" id="init-template" data-canon data-lang="js">
 // <template id="request-row"> holds one row's markup, copied from its canon
 const rowTemplate = document.getElementById('request-row');
 const { data } = await NDS.request('/api/requests', { json: true });
@@ -75,7 +75,7 @@ await NDS.Init.mount(tbody);
 
 Destroy a row before you remove it.
 
-<script type="text/html" id="refresh-destroy" data-canon data-lang="js">
+<script type="text/html" id="init-destroy" data-canon data-lang="js">
 NDS.Init.destroy(row);
 row.remove();
 // The filter and the counts follow the rows that are left
@@ -86,12 +86,17 @@ NDS.Init.refresh(tbody);
   </div>
 </section>
 
-<section id="refresh-behavior" class="nds-content-section nds-doc-behavior">
+<section id="init-behavior" class="nds-content-section nds-doc-behavior">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Behavior</h2>
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
+
+### Startup
+{: .nds-block-title}
+
+The loader calls `NDS.Init.initialize()` at load. The components the first screen needs start before the page shows. The rest start in idle time, some from bundles that load after the page shows. `NDS.Init.ready` resolves when the last one has started: see [Instance Lookup](#instance-lookup).
 
 ### Refresh
 {: .nds-block-title}
@@ -115,19 +120,26 @@ Only components inside `el` are reached. A filter toolbar can sit beside the gri
 ### Framework Views
 {: .nds-block-title}
 
-Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.destroy(view)` before it unmounts. Do not write a ready check, a poll or a retry for these calls. A view that mounts before NDS loads is found by NDS's own startup scan, and the `?.` skips each call while `NDS` does not exist yet.
+Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.destroy(view)` before it unmounts. Do not wait for `NDS.Init.ready`, poll or retry before these calls. A view that mounts before NDS loads is found by NDS's own startup scan, and the `?.` skips each call while `NDS` does not exist yet.
 
 </div>
   </div>
 </section>
 
-<section id="refresh-features" class="nds-content-section nds-doc-features">
+<section id="init-features" class="nds-content-section nds-doc-features">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Built-in Features</h2>
     </div>
     <div class="nds-section-body">
       <div class="nds-definition-list nds-divided nds-grid">
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-hourglass"></i>
+            <span class="nds-label">Startup Promise</span>
+          </span>
+          <p class="nds-item-desc"><code class="nds-inline-code lang-js">NDS.Init.ready</code> resolves once the last component on the page has started, the ones from late bundles included. A bundle that fails to load does not hold it.</p>
+        </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
             <i class="hgi hgi-stroke hgi-refresh"></i>
@@ -159,7 +171,7 @@ Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.d
         <div class="nds-definition-item">
           <span class="nds-item-title">
             <i class="hgi hgi-stroke hgi-package"></i>
-            <span class="nds-label">Loads No Bundles</span>
+            <span class="nds-label">Refresh Loads No Bundles</span>
           </span>
           <p class="nds-item-desc"><code class="nds-inline-code lang-js">refresh()</code> skips a component whose bundle has not loaded. That bundle scans the page when it arrives. Only <code class="nds-inline-code lang-js">mount()</code> loads bundles.</p>
         </div>
@@ -175,7 +187,7 @@ Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.d
   </div>
 </section>
 
-<section id="refresh-practices" class="nds-content-section nds-doc-practices">
+<section id="init-practices" class="nds-content-section nds-doc-practices">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Best Practices</h2>
@@ -198,7 +210,7 @@ Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.d
   </div>
 </section>
 
-<section id="refresh-api" class="nds-content-section nds-doc-api">
+<section id="init-api" class="nds-content-section nds-doc-api">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">API</h2>
@@ -224,22 +236,22 @@ Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.d
 
 A component stores its instance on the element it starts, as an `nds{Name}` property: `el.ndsAccordion`, `el.ndsChart`, `el.ndsSort`. `destroy()` releases each one it finds there, and calls `NDS.{Name}.destroy(el)` for the components that keep no such property. Filter, Sort and Upload also have `getInstance(el)`, and Filter has `getByTarget(id)` and `whenReady(el, callback)`.
 
-Most components load after the page shows, so the property is missing until the component starts. Code that runs at load waits for `NDS.Init.ready`. Markup you add later waits for `mount(el)`:
+Most components load after the page shows, so the property is missing until the component starts. Code that runs at load waits for `NDS.Init.ready`:
 
-<script type="text/html" id="refresh-ready-js" data-canon data-lang="js">
+<script type="text/html" id="init-ready-js" data-canon data-lang="js">
 NDS.Init.ready.then(function () {
   document.querySelector('#service-tabs').ndsTabs.switchTo(2);
 });
 </script>
 
-`NDS` exists only after `nds-main.min.js` runs, and it loads with `defer`. Run this code from a `defer` script placed after it, or inside a `DOMContentLoaded` listener. A plain inline `<script>` runs first and fails with `NDS is not defined`.
+`NDS` exists only after `nds-main.min.js` runs, and it loads with `defer`. Run this code from a `defer` script placed after `nds-main.min.js`, or inside a `DOMContentLoaded` listener. A plain inline `<script>` runs first and fails with `NDS is not defined`. Markup you add later waits for `mount(el)` instead.
 
 ### Data Attributes
 {: .nds-block-title}
 
 | Attribute | Element | Effect |
 |---|---|---|
-| `data-nds-auto-init="false"` | `<html>` | No component starts at load. Call `NDS.Init.initialize()` yourself |
+| `data-nds-auto-init="false"` | `<html>` | No component starts at load. Call `NDS.Init.initialize()` yourself. `NDS.Init.ready` waits for that call |
 | `data-nds-disable-all="true"` | `<html>` | `initialize()` starts no component. Call each one's `init()` yourself |
 | `data-nds-loaded` | `<html>` | The loader sets it once the main CSS has applied and the first components started. Do not set it yourself |
 {: .nds-table .nds-responsive}
@@ -264,18 +276,18 @@ Set these on `window` before the main bundle loads. A `window.NDSInitConfig` key
 
 | Method | Effect |
 |---|---|
+| `NDS.Init.initialize()` | Starts every component on the page. The loader calls it at load |
+| `NDS.Init.ready` | A promise. It resolves once every component that was on the page at load has started, including the ones from bundles that load later |
 | `NDS.Init.refresh(el)` | Tells every started component that the contents of `el` changed. Without `el`, it covers the whole page |
 | `NDS.Init.mount(el)` | Loads the bundles the markup in `el` needs, then calls `refresh(el)`. Returns a promise |
 | `NDS.Init.destroy(el)` | Releases every component instance inside `el`. Returns the number released. Without `el`, it covers the whole page |
-| `NDS.Init.initialize()` | Starts every component on the page. The loader calls it at load |
-| `NDS.Init.ready` | A promise that resolves once every component on the page at load has started, the ones that load after the page shows too |
 | `NDS.Init.audit()` | Runs the [Audit](../core/audit) and returns its findings: page problems that fail with no error, and names an NDS release changed. The first call loads the audit bundle and returns a promise of them |
 | `NDS.Init.components` | The component registry: one entry per component, with its `name`, `selector` and `init` |
 | `NDS.Init.config` | The settings in use, from the Configuration table |
 | `NDS.loadBundle(name)` | Loads one bundle, such as `'extras'`. Returns a promise. `mount()` calls it for you |
 {: .nds-table .nds-responsive}
 
-<script type="text/html" id="refresh-api-js" data-canon data-lang="js">
+<script type="text/html" id="init-api-js" data-canon data-lang="js">
 // A modal edits a row: save, swap in the new row, then refresh
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -292,7 +304,7 @@ The full API is in the banner of `_js/nds-loader.js`.
   </div>
 </section>
 
-<section id="refresh-related" class="nds-content-section nds-doc-related">
+<section id="init-related" class="nds-content-section nds-doc-related">
   <div class="nds-section-wrapper">
     <div class="nds-section-head">
       <h2 class="nds-section-title">Related</h2>

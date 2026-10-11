@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:16 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -357,7 +357,7 @@ Source: the `stepper` group in `_sass/tokens/_components.scss`.
 ### JavaScript
 {: .nds-block-title}
 
-A stepper in the page starts by itself. The instance is on the element as `el.ndsStepper`, and `NDS.Stepper.get(id)` returns it. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/refresh#instance-lookup).
+A stepper in the page starts by itself. The instance is on the element as `el.ndsStepper`, and `NDS.Stepper.get(id)` returns it. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/init#instance-lookup).
 
 | Method | Effect |
 |---|---|

@@ -101,7 +101,7 @@ One row per scenario; the full record (rules, setup, prompt, rubric, floor, leak
 | S91 | runtime-tags-follow-head-canon | c | runtime tags from the head canon; the loader adds the rest | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
 | S92 | canon-body-not-wrapper | c | new-format copy: the data-canon body, never its script wrapper | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
 | S93 | variants-composition | c | new-format option from the Variants table onto copied canon (S16 twin) | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
-| S94 | content-changes-after-load | c | after-load content → refresh.md: refresh / mount / destroy | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field · leak:C3-mild |
+| S94 | content-changes-after-load | c | after-load content → init.md: refresh / mount / destroy | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field · leak:C3-mild |
 | S95 | date-format-and-server-value | c | <html> date switches + .nds-date-value for one server format | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
 | S96 | token-override-states-and-dark | c | token override: whole state family + Override Scope dark shape | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
 | S97 | upgrade-migration-audit | c | upgrade sweep: Migrating sections + migration audit on every page | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |

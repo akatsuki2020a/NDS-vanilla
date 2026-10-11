@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="selection-overview" class="nds-content-section nds-doc-overview">
@@ -407,7 +407,7 @@ removeButton.addEventListener('click', function () {
 });
 </script>
 
-When you replace the list's content, call `NDS.Init.refresh(container)`: it updates Selection and every other component on the list, such as Pagination. See [Refresh](../core/refresh). The full API is in the banner of `_js/nds-selection.js`.
+When you replace the list's content, call `NDS.Init.refresh(container)`: it updates Selection and every other component on the list, such as Pagination. See [Init](../core/init). The full API is in the banner of `_js/nds-selection.js`.
 
 </div>
   </div>

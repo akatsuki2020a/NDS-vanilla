@@ -300,7 +300,7 @@ report.push(...await recordsPage.evaluate(async () => {
     await wait(500);
     ok('idempotent — refreshing twice leaves identical state', snap() === s1, snap() === s1 ? 'stable' : `${s1} → ${snap()}`);
     // A settled refresh re-announces the filter result once. That is documented on
-    // core/refresh.md; anything MORE than once is the overlap this suite hunts.
+    // core/init.md; anything MORE than once is the overlap this suite hunts.
     const noisy = Object.entries(events).filter(([e, n]) => n > (e === 'nds:filter:change' ? 1 : 0))
         .map(([e, n]) => `${e}x${n}`);
     ok('no unexpected events on a settled refresh (one documented filter:change allowed)',

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:16 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="accordion-overview" class="nds-content-section nds-doc-overview">
@@ -304,7 +304,7 @@ Set them on `.nds-accordion`, in its `style` attribute.
 ### JavaScript
 {: .nds-block-title}
 
-The instance lives on `.nds-accordion` as `ndsAccordion`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/refresh#instance-lookup). Item positions start at 0.
+The instance lives on `.nds-accordion` as `ndsAccordion`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/init#instance-lookup). Item positions start at 0.
 
 | Method | Effect |
 |---|---|

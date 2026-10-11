@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:16 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="rating-overview" class="nds-content-section nds-doc-overview">
@@ -287,7 +287,7 @@ Source: the `rating` group in `_sass/tokens/_components.scss`.
 ### JavaScript
 {: .nds-block-title}
 
-The instance is on the element as `el.ndsRating`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/refresh#instance-lookup).
+The instance is on the element as `el.ndsRating`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/init#instance-lookup).
 
 | Method | Effect |
 |---|---|

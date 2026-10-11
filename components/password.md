@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:16 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="password-overview" class="nds-content-section nds-doc-overview">
@@ -355,7 +355,7 @@ The chip is optional. Without it, leave out `.nds-password-rules` and the input'
 ### JavaScript
 {: .nds-block-title}
 
-The instance is on the field's `.nds-form-container` as `ndsPassword`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/refresh#instance-lookup).
+The instance is on the field's `.nds-form-container` as `ndsPassword`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/init#instance-lookup).
 
 | Method | Effect |
 |---|---|

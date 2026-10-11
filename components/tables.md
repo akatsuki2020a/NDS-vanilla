@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 01:14 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="table-overview" class="nds-content-section nds-doc-overview">
@@ -760,7 +760,7 @@ Source: the `table` group in `_sass/tokens/_components.scss`.
 | Method | Effect |
 |---|---|
 | `NDS.Tables.init()` | Starts every table and column menu that has not started yet |
-| `NDS.Tables.reinit()` | The same as `init()`. Call it after you add a new table. When only the rows change, call `NDS.Init.refresh(tbody)`: see [Refresh](../core/refresh) |
+| `NDS.Tables.reinit()` | The same as `init()`. Call it after you add a new table. When only the rows change, call `NDS.Init.refresh(tbody)`: see [Init](../core/init) |
 | `NDS.Tables.recheckWidths()` | Measures every scroll box again, after a change the script cannot see |
 | `NDS.Tables.create(table)` | Starts sorting and selection on one table, and returns its instance, or the instance it already has. Returns `null` when the table has no `<thead>` or `<tbody>` |
 | `NDS.Tables.createResponsive(table)` | Adds the scroll box to one table and returns its instance |

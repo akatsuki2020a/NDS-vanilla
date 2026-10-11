@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.1.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 07:13 PM"
+last_edit: "11/10/2026 - 03:19 PM"
 ---
 
 <section id="head-overview" class="nds-content-section nds-doc-overview">
@@ -163,7 +163,7 @@ The last choice under a strict Content Security Policy, after a nonce and a hash
 ### Framework Navigation
 {: .nds-block-title}
 
-The inline script runs once, at page load. The stylesheet links it adds and the `data-nds-loaded` stamp are not in the server HTML. A framework that compares `<head>` with the server HTML on each navigation removes them, while the gate stays, so the page hides itself until a full reload. Turbo, htmx boost and Blazor enhanced navigation work this way. Mark those links and the stamp as permanent, in the way your framework offers. If it removes them anyway, run the stylesheet loop again after each navigation and put the stamp back. Components on a new view are covered on [Refresh](../core/refresh).
+The inline script runs once, at page load. The stylesheet links it adds and the `data-nds-loaded` stamp are not in the server HTML. A framework that compares `<head>` with the server HTML on each navigation removes them, while the gate stays, so the page hides itself until a full reload. Turbo, htmx boost and Blazor enhanced navigation work this way. Mark those links and the stamp as permanent, in the way your framework offers. If it removes them anyway, run the stylesheet loop again after each navigation and put the stamp back. Components on a new view are covered on [Init](../core/init).
 
 </div>
   </div>
@@ -277,7 +277,7 @@ The inline script runs once, at page load. The stylesheet links it adds and the 
 | `data-nds-loaded` | `<html>` | The loader sets it once the main CSS has applied, and the page shows. Do not set it yourself |
 {: .nds-table .nds-responsive}
 
-The loader's window settings (`NDSInitConfig`, `NDS_ASSETS_PATH`) are on [Refresh](../core/refresh).
+The loader's window settings (`NDSInitConfig`, `NDS_ASSETS_PATH`) are on [Init](../core/init).
 
 ### Content Security Policy
 {: .nds-block-title #csp}
@@ -362,7 +362,7 @@ NDS components are not affected: their scripts set styles through the CSSOM, whi
 
 - [Page Layout](../layout/page-layout): the `<body>` that follows this head.
 - [Hero](../ui-shell/hero): the hero `<picture>` that the hero preloads match.
-- [Refresh](../core/refresh): components on content that changes after load.
+- [Init](../core/init): components on content that changes after load.
 - [Themes](../components/themes): the theme the inline script applies before the first paint.
 
 </div>

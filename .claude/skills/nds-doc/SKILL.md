@@ -26,7 +26,7 @@ A doc page has two readers. **People** browse it, try options in the builder and
 | `components/button.md` | many structures, `:not()` targets that disable bad combinations |
 | `ui-shell/topbar.md` | a shell page: a part canon framed with `data-preview="page"`, a Parts table |
 | `layout/grid.md` | a reference page: one `Example` group of whole examples |
-| `core/refresh.md` | an info page: a `Usage` section of code-only canons, no preview |
+| `core/init.md` | an info page: a `Usage` section of code-only canons, no preview |
 
 ---
 
