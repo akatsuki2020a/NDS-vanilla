@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:25 AM"
+last_edit: "11/10/2026 - 12:09 PM"
 ---
 
 <section id="refresh-overview" class="nds-content-section nds-doc-overview">
@@ -224,6 +224,14 @@ Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.d
 
 A component stores its instance on the element it starts, as an `nds{Name}` property: `el.ndsAccordion`, `el.ndsChart`, `el.ndsSort`. `destroy()` releases each one it finds there, and calls `NDS.{Name}.destroy(el)` for the components that keep no such property. Filter, Sort and Upload also have `getInstance(el)`, and Filter has `getByTarget(id)` and `whenReady(el, callback)`.
 
+Most components load after the page shows, so the property is missing until the component starts. Code that runs at load waits for `NDS.Init.ready`. Markup you add later waits for `mount(el)`:
+
+<script type="text/html" id="refresh-ready-js" data-canon data-lang="js">
+NDS.Init.ready.then(function () {
+  document.querySelector('#service-tabs').ndsTabs.switchTo(2);
+});
+</script>
+
 ### Data Attributes
 {: .nds-block-title}
 
@@ -258,6 +266,7 @@ Set these on `window` before the main bundle loads. A `window.NDSInitConfig` key
 | `NDS.Init.mount(el)` | Loads the bundles the markup in `el` needs, then calls `refresh(el)`. Returns a promise |
 | `NDS.Init.destroy(el)` | Releases every component instance inside `el`. Returns the number released. Without `el`, it covers the whole page |
 | `NDS.Init.initialize()` | Starts every component on the page. The loader calls it at load |
+| `NDS.Init.ready` | A promise that resolves once every component on the page at load has started, the ones that load after the page shows too |
 | `NDS.Init.audit()` | Runs the [Audit](../core/audit) and returns its findings: page problems that fail with no error, and names an NDS release changed. The first call loads the audit bundle and returns a promise of them |
 | `NDS.Init.components` | The component registry: one entry per component, with its `name`, `selector` and `init` |
 | `NDS.Init.config` | The settings in use, from the Configuration table |

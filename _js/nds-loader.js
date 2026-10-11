@@ -19,6 +19,8 @@
  *                              needs, then init them against it → Promise
  *   NDS.Init.destroy(el)       tear down every instance inside el before it leaves the page.
  *                              Returns how many instances it destroyed
+ *   NDS.Init.ready             Promise: every component found at load has started, late
+ *                              bundles included. Page code that runs at load waits on it
  *   NDS.loadBundle(name)       load one injected bundle on demand → Promise
  * Events:
  *   (none)
@@ -39,6 +41,7 @@
  *   - A component whose bundle has not arrived answers through a lazy stub: a method
  *     call loads the bundle and returns a Promise. A synchronous READ gets a truthy
  *     stub, so main-bundle code that reads an API synchronously keeps it in main.
+ *     Page code that runs at load waits on NDS.Init.ready; content added later, on mount().
  *   - refresh() skips a stubbed namespace on purpose — it scans the DOM when it lands.
  *     Content built after detection needs mount(), which fetches the bundle.
  *   - refresh() re-scans what stays; destroy() releases what leaves. A framework route
@@ -553,11 +556,16 @@
         });
     }
 
+    // Page code that runs at load waits on this: a late bundle's el.ndsX is missing until it inits.
+    let resolveReady;
+    const ready = new Promise((resolve) => { resolveReady = resolve; });
+
     function initializeNDS() {
         if (CONFIG.disableAll === true) {
             if (CONFIG.enableLogging) {
                 console.warn('[NDS] Initialization disabled (config.disableAll = true)');
             }
+            resolveReady();     // nothing will start, so nothing to wait for
             return;
         }
         const startTime = performance.now();
@@ -673,9 +681,17 @@
             if (criticalIndex < criticalComponents.length) {
                 yieldToBrowser(initCriticalBatch);
             } else {
+                // Each list counts down once; the last one resolves NDS.Init.ready.
+                let pending = 1 + Object.keys(injectedGroups).length;
+                const listDone = () => {
+                    if (--pending) return;
+                    logAllDone();
+                    resolveReady();
+                };
+
                 // Main's deferred list never waits on a bundle fetch or the reveal.
-                if (deferredComponents.length) drainList(deferredComponents, logAllDone);
-                else logAllDone();
+                if (deferredComponents.length) drainList(deferredComponents, listDone);
+                else listDone();
 
                 // Each bundle's group inits on its own arrival, once the string pack is in:
                 // these components write their text at init.
@@ -683,7 +699,7 @@
                 const strings = Promise.race([NDS.i18n.pack(), new Promise(r => setTimeout(r, 3000))]);
                 for (const name in injectedGroups) {
                     const group = injectedGroups[name];
-                    Promise.all([loadBundle(name), strings]).then(() => drainList(group));
+                    Promise.all([loadBundle(name), strings]).then(() => drainList(group, listDone));
                 }
 
                 stampWhenStyled();
@@ -892,6 +908,7 @@
         refresh: refreshContainer,
         mount: mountContainer,
         destroy: destroyContainer,
+        ready,
     };
 
     // Not DOMContentLoaded: DCL also waits for every OTHER defer script, which would let

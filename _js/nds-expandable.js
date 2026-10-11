@@ -299,29 +299,14 @@
         }
     }
 
-    // Auto-initialize expandable content on page load. Deferred: content is
-    // already CSS-clamped before JS runs, so the sweep buys nothing by
-    // staying on the critical path — NDS.onIdle keeps a page with many
-    // expandables from paying it as one blocking task.
-    let swept = false;
+    // Synchronous: the loader schedules init, and NDS.Init.ready promises el.ndsExpandable after it.
     function initializeExpandableContent() {
-        const sweep = () => {
-            const expandableContainers = document.querySelectorAll('.nds-expandable');
-
-            expandableContainers.forEach(container => {
-                // Skip elements rendered inside <code> tags (markup text, not live components)
-                if (container.closest('code')) {
-                    return;
-                }
-
-                // Only a valid construction stamps, so content that renders late stays eligible.
-                if (!container.hasAttribute('data-nds-expandable-initialized')) new NDSExpandable(container);
-            });
-        };
-        // Idle only at page load: a later mount follows a user action, and an idle wait
-        // (up to 2s) leaves the new box with no fade or button.
-        if (swept) sweep();
-        else { swept = true; NDS.onIdle(sweep); }
+        document.querySelectorAll('.nds-expandable').forEach(container => {
+            // Skip elements rendered inside <code> tags (markup text, not live components)
+            if (container.closest('code')) return;
+            // Only a valid construction stamps, so content that renders late stays eligible.
+            if (!container.hasAttribute('data-nds-expandable-initialized')) new NDSExpandable(container);
+        });
     }
 
     // Re-initialize when new content is added

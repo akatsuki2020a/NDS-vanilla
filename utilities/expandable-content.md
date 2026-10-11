@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 12:16 PM"
 ---
 
 <section id="expandable-overview" class="nds-content-section nds-doc-overview">
@@ -240,7 +240,7 @@ Put `nds-expand-all` on the parent of several expandable boxes. Show More on one
 ### JavaScript
 {: .nds-block-title}
 
-The instance is on the box as `el.ndsExpandable`.
+The instance is on the box as `el.ndsExpandable`. It is there once the component starts: code that runs at page load waits for [`NDS.Init.ready`](../core/refresh#instance-lookup).
 
 | Method | Effect |
 |---|---|
