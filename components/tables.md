@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:12 PM"
+last_edit: "11/10/2026 - 01:14 PM"
 ---
 
 <section id="table-overview" class="nds-content-section nds-doc-overview">
@@ -592,7 +592,7 @@ Records holds every part. To leave a part out, delete its markup and everything 
 | Actions column | the `.nds-actions-column` header cell and the cell of every row | Delete it when neither sub-rows nor the row menu stay |
 {: .nds-table .nds-responsive}
 
-Delete the count line (`.nds-toolbar-text`) when neither Selection nor Pages stays. Keep the table's `id` while the column menu or export stays.
+Keep Selection only when the page has a bulk action that acts on the selected rows; Records ships none. Delete the count line (`.nds-toolbar-text`) when neither Selection nor Pages stays. Keep the table's `id` while the column menu or export stays.
 
 </div>
   </div>
