@@ -203,6 +203,22 @@
     margin: 0; // a <p> inside .nds-prose would take the paragraph gap
 }
 
+// The value leads: the title takes the value's look and the value the title's.
+.nds-definition-list.nds-highlight-value {
+    :is(dt, .nds-item-title) {
+        font-size: var(--_dl-desc-FS);
+        color: var(--text-secondary-paragraph);
+
+        .nds-label { font-weight: var(--font-weight-regular); }
+    }
+
+    :is(dd, .nds-item-desc) {
+        font-size: var(--_dl-title-FS);
+        color: var(--text-primary-paragraph);
+        font-weight: var(--font-weight-semibold);
+    }
+}
+
 // Icon indent: always on by default, reset when tableView activates
 .nds-definition-list {
     @include dl-stacked-icon-indent;

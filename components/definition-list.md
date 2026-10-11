@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "11/10/2026 - 03:40 PM"
 ---
 
 <section id="dl-overview" class="nds-content-section nds-doc-overview">
@@ -135,7 +135,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-The Layout, Style, Size and Loading rows go on the list. The two Cards rows are one choice: add both classes to every item. Title icons are optional: leave out the `<i>` for a list without them.
+The Layout, Style, Emphasis, Size and Loading rows go on the list. The two Cards rows are one choice: add both classes to every item. Title icons are optional: leave out the `<i>` for a list without them.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
@@ -155,6 +155,7 @@ The Layout, Style, Size and Loading rows go on the list. The two Cards rows are 
 | Style | Divided | `.nds-divided` | `.nds-definition-list` | A line between items. In a table layout, the lines span both columns |
 | Style | Cards | `.nds-card` | `.nds-definition-item` | Each item in its own card |
 | Style | Cards | `.nds-stroke` | `.nds-definition-item` | The same: gives each card its border |
+| Emphasis | Highlight value | `.nds-highlight-value` | `.nds-definition-list` | The value large and bold, the title small and muted. For records the reader scans by value, such as a student's status card |
 | Size | LG (default) | — | — | A 20px icon, a large title and the largest gap |
 | Size | MD | `.nds-md` | `.nds-definition-list` | An 18px icon, a medium title, the same value size and a smaller gap |
 | Size | SM | `.nds-sm` | `.nds-definition-list` | An 18px icon, a small title, a small value and the smallest gap |
