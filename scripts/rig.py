@@ -1,12 +1,12 @@
-"""Field rigs for NDS IQ: a legacy app an agent ports to NDS with the draft rules.
+"""Field rigs for NDS IQ: an app (or a brief) an agent builds or ports to NDS with the draft rules.
 
 Run from the NDS repo root. The guide is .claude/skills/nds-iq-eval/RIGS.md.
 
-  python scripts/rig.py new <rig> [dest]       copy a baseline app, git init, tag it, npm install
+  python scripts/rig.py new <rig> [dest]       copy a baseline, git init, tag it, npm install when it has a package.json
   python scripts/rig.py stage <rig> <release>  unpack a mkrelease --preview zip to .nds/, add _source/, stamp <release>, copy the draft to NDS-IQ.md
   python scripts/rig.py reset <rig> [--save]   commit the run to a runN-date branch, back to the baseline tag
 
-<rig> is a rig number (5 library-portal, 6 citydesk, 7 grants-desk), which lives at ../nds-test-app-<N>,
+<rig> is a rig number (1 sawaed, 5 library-portal, 6 citydesk, 7 grants-desk), which lives at ../nds-test-app-<N>,
 or a baseline name (new) or a path (stage, reset). Baselines live in .claude/skills/nds-iq-eval/rigs/.
 """
 import datetime, io, os, re, shutil, subprocess, sys, tarfile, zipfile
@@ -19,8 +19,8 @@ OPT_OUT = ('## Memory\n\nDo not save any memory (user, feedback, project, or ref
 APPS = {'library-portal': ('npm start', 'http://localhost:3005'),
         'citydesk': ('npm start', 'http://localhost:3000'),
         'grants-desk': ('npm run dev', 'http://localhost:5177')}
-# The numbers past runs cite ("rig 5 run 8" = nds-test-app-5). A new baseline takes the next one.
-NUMS = {'5': 'library-portal', '6': 'citydesk', '7': 'grants-desk'}
+# The numbers past runs cite ("rig 5 run 8" = nds-test-app-5).
+NUMS = {'1': 'sawaed', '5': 'library-portal', '6': 'citydesk', '7': 'grants-desk'}
 # _source/ holds the folders NDS-INDEX's Sources line names.
 FOLDERS = re.findall(r'`([^`]+)`', re.search(r'^- \*\*Sources:\*\*.*into `_source/`:(.*)$',
                                               open('NDS-INDEX.md', encoding='utf-8').read(), re.M).group(1))
@@ -51,7 +51,8 @@ def new(rig, dest):
     git(dest, 'add', '-A')
     git(dest, '-c', 'user.name=rig', '-c', 'user.email=rig@localhost', 'commit', '-qm', f'{baseline} baseline')
     git(dest, 'tag', 'baseline')
-    run('npm install --no-audit --no-fund', cwd=dest)
+    if os.path.exists(os.path.join(dest, 'package.json')):  # rig 1 is a brief, no app
+        run('npm install --no-audit --no-fund', cwd=dest)
     print(f'ready: {dest}.\n  published release: paste the get-started setup prompt in a session there'
           f'\n  unreleased: python scripts/rig.py stage {rig if rig in NUMS else dest} <release> first')
     if baseline in APPS:
