@@ -19,8 +19,12 @@
  *                           An empty .nds-countdown-label inside a unit gets the unit word in the element's language,
  *                           and data-countdown-sizes with every form of it, so the CSS reserves the widest
  *                           A <span> root is inline text; any other root is one row of units (CSS, .nds-lg/.nds-sm),
- *                           a centered .nds-card (.nds-center) per unit bringing every card variant and knob
+ *                           a centered .nds-card (.nds-center) per unit bringing every card variant and knob,
+ *                           or plain units (number over word), as in a row card's banner
  *   [data-countdown-hide-zero]  on a unit: hidden while its value is 0 (the default markup's days)
+ *   data-countdown-hide     ids, space-separated: those elements get hidden at zero (an action that ends with the
+ *                           deadline), anywhere on the page. set() shows them again
+ *   data-countdown-show     ids, space-separated: hidden until zero, then shown (a closed message outside the root)
  *   .nds-countdown-ended    at zero it becomes the root's only content, from any depth; set() puts the rest back.
  *                           Without it the zeros stay
  *   no [data-unit] at all   the script writes the default: days with their word (hidden at 0), then hh:mm:ss
@@ -56,6 +60,18 @@
     const unitFormats = new Map();
 
     const pad = (n) => String(n).padStart(2, '0');
+
+    // The elements the root names by id: data-countdown-hide ones go at zero, data-countdown-show ones come.
+    function toggleLinked(el, ended) {
+        for (const [attr, hide] of [['data-countdown-hide', ended], ['data-countdown-show', !ended]]) {
+            for (const id of (el.getAttribute(attr) || '').split(/\s+/)) {
+                if (!id) continue;
+                const t = document.getElementById(id);
+                if (t) t.hidden = hide;
+                else console.warn(`NDS Countdown: ${attr} names no element with id "${id}"`, el);
+            }
+        }
+    }
 
     // The wall clock of epoch `t` in `tz`, as if it were UTC.
     function wallOf(t, tz) {
@@ -142,6 +158,7 @@
                 endedSwap.set(el, { nodes: Array.from(el.childNodes), done, parent: done.parentNode, next: done.nextSibling });
                 el.replaceChildren(done);
             }
+            toggleLinked(el, true);
             fire(el, 'nds:countdown:end');
         }
     }
@@ -208,6 +225,7 @@
             units.forEach((x) => { if (x.unit === top) x.value.setAttribute('data-countdown-sizes', top === 'd' ? String(v) : pad(v)); });
         }
         NDS.State.remove(el, 'ended', 'warning');
+        toggleLinked(el, false);
         items.set(el, it);
         render(el, it);
         if (items.has(el)) schedule();

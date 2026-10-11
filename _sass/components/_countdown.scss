@@ -38,7 +38,7 @@
 :where(.nds-countdown:dir(rtl)) { direction: rtl; }
 :where(.nds-countdown:dir(ltr)) { direction: ltr; }
 
-// Number sizes: the card row's values and the One card run. Sizes retune the -base values, so a public
+// Number sizes: the row's values and a card number's run. Sizes retune the -base values, so a public
 // knob always wins. LG alone clamps, so its large numbers still fit a phone row.
 .nds-countdown {
   --_countdown-value-fs-base: var(--typo-display-sm-FS);
@@ -89,7 +89,61 @@
   }
 }
 
-// One card: the whole run in a card number takes the size, the day word included.
+// Plain units (no card): the number over its word.
+.nds-countdown:not(span) > [data-unit]:not(.nds-card) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--_card-number, currentColor);
+
+  > .nds-countdown-value {
+    display: grid;
+    font-size: var(--_countdown-value-fs);
+    line-height: var(--_countdown-value-lh);
+  }
+
+  > .nds-countdown-label {
+    font-size: var(--typo-text-sm-FS);
+    line-height: var(--typo-text-sm-LH);
+  }
+}
+
+// Banner: units as wide as their content, at the start or centered with the card.
+.nds-card > .nds-countdown {
+  --_countdown-gap: var(--countdown-gap, var(--spacing-3xl));
+
+  grid-auto-columns: max-content;
+  justify-content: start;
+}
+
+.nds-card.nds-center > .nds-countdown { justify-content: center; }
+
+// A row banner: the countdown and the button sit beside the text while the card is wide enough.
+.nds-card.nds-horizontal {
+  > .nds-countdown {
+    flex: 0 0 auto;
+    align-self: center;
+  }
+
+  // The card's actions take the full width and sink to the bottom: in the row they size and center instead.
+  > .nds-countdown ~ .nds-card-actions {
+    flex-basis: auto;
+    width: auto;
+    margin-top: 0;
+    align-self: center;
+  }
+
+  // On their own lines, the countdown and the actions center in the space they get.
+  @container (width < 720px) {
+    > .nds-countdown,
+    > .nds-countdown ~ .nds-card-actions {
+      flex-basis: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// A card number holding the whole run (the session timeout): the size takes the day word too.
 .nds-card-number > .nds-countdown {
   font-size: var(--_countdown-value-fs);
   line-height: var(--_countdown-value-lh);

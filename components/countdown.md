@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 12:00 AM"
 ---
 
 <section id="countdown-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "10/10/2026 - 05:28 PM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-A countdown shows the time left until a deadline, such as the day applications close, or until a duration ends, such as a session or a one-time code. You write the units and their boxes in the markup. The script writes the numbers, and the unit word into an empty label. A `<span>` root is a run of text, on its own or in one card. A `<div>` root lays its units out in one row, with a [Card](../components/cards) for each unit.
+A countdown shows the time left until a deadline, such as the day applications close, or until a duration ends, such as a session or a one-time code. You write the units and their boxes in the markup. The script writes the numbers, and the unit word into an empty label. A `<div>` root lays its units out in one row: each number over its word in one banner card, or a [Card](../components/cards) for each unit. A `<span>` root is a run of text.
 
 Pick another component when:
 
@@ -35,12 +35,52 @@ Pick another component when:
       <h2 class="nds-section-title">Markup</h2>
     </div>
     <div class="nds-section-body">
-<script type="text/html" id="countdown-inline" data-canon data-variants="countdown-variants-table">
+<script type="text/html" id="countdown-banner" data-canon data-variants="countdown-variants-table">
+<div class="nds-card nds-stroke nds-horizontal nds-full">
+  <div class="nds-card-header">
+    <div class="nds-card-featured-icon">
+      <span class="nds-featured-icon nds-circle nds-lg">
+        <i class="hgi hgi-stroke hgi-flash"></i>
+      </span>
+    </div>
+  </div>
+  <div class="nds-card-content">
+    <div class="nds-card-text">
+      <span class="nds-card-title">Applications close soon</span>
+      <p class="nds-card-description">Submit your application before 11:59 PM on the closing day.</p>
+    </div>
+  </div>
+  <div class="nds-countdown" data-countdown="2027-12-31T23:59">
+    <div data-unit="d">
+      <span class="nds-countdown-value">--</span>
+      <span class="nds-countdown-label"></span>
+    </div>
+    <div data-unit="h">
+      <span class="nds-countdown-value">--</span>
+      <span class="nds-countdown-label"></span>
+    </div>
+    <div data-unit="m">
+      <span class="nds-countdown-value">--</span>
+      <span class="nds-countdown-label"></span>
+    </div>
+    <div data-unit="s">
+      <span class="nds-countdown-value">--</span>
+      <span class="nds-countdown-label"></span>
+    </div>
+  </div>
+  <div class="nds-card-actions">
+    <a href="#" class="nds-btn nds-primary">
+      <span class="nds-label">Apply now</span>
+    </a>
+  </div>
+</div>
+</script>
+<script type="text/html" id="countdown-inline" data-canon>
 <span class="nds-countdown" data-countdown="2027-12-31T23:59"></span>
 </script>
 <script type="text/html" id="countdown-units" data-canon>
 <span class="nds-countdown" data-countdown="2027-12-31T23:59">
-  <span class="nds-countdown-value" data-unit="h">--</span> hours and <span class="nds-countdown-value" data-unit="m">--</span> minutes
+  Applications close in <span class="nds-countdown-value" data-unit="d">--</span> days and <span class="nds-countdown-value" data-unit="h">--</span> hours.
 </span>
 </script>
 <script type="text/html" id="countdown-cards" data-canon>
@@ -79,18 +119,21 @@ Pick another component when:
   </div>
 </div>
 </script>
-<script type="text/html" id="countdown-card" data-canon>
-<div class="nds-card nds-stroke nds-center">
-  <div class="nds-card-content">
-    <div class="nds-card-text">
-      <span class="nds-card-number"><span class="nds-countdown" data-countdown="2027-12-31T23:59"></span></span>
-      <p class="nds-card-description">until applications close</p>
-    </div>
-  </div>
-</div>
-</script>
+
 <script type="text/html" id="countdown-ended" data-canon>
 <span class="nds-countdown-ended">Applications closed</span>
+</script>
+<script>
+// Doc only: the samples count to 30 days from today, so the previews never show a deadline years away.
+(function () {
+  var from = '2027-12-31T23:59', d = new Date(Date.now() + 30 * 864e5);
+  var p = function (n) { return String(n).padStart(2, '0'); };
+  var to = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T23:59';
+  document.querySelectorAll('#countdown-markup script[data-canon], #countdown-markup code, #countdown-markup [data-countdown="' + from + '"]').forEach(function (el) {
+    if (el.hasAttribute('data-countdown')) el.setAttribute('data-countdown', to);
+    else if (!el.children.length) el.textContent = el.textContent.split(from).join(to);
+  });
+})();
 </script>
     </div>
   </div>
@@ -103,14 +146,14 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-`.nds-countdown` is the root in every structure. In One card, it is the `<span>` inside the card number. Size and the card options need Cards or One card. A card option goes on every `.nds-card`. The rest of the card options are on [Cards](../components/cards). The target date is sample content: set your own deadline.
+`.nds-countdown` is the root in every structure. In Banner, it sits in the card, between the text and the actions. Size and the card options need Cards or Banner. Layout and End action need Banner. A card option goes on every `.nds-card`. The rest of the card options are on [Cards](../components/cards). The target date is sample content: set your own deadline.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
-| Structure | Inline (default) (id: inline) | — | — | The script writes the days with their word, then `hh:mm:ss`. The days hide under one day. Use it inside a sentence or a label |
-| Structure | Own units (hint: Your own words and units) (id: units) | canon `#countdown-units` | — | You write each unit and the words around it. The largest unit takes the time above it: here 2 days show as 48 hours |
-| Structure | Cards (hint: One card per unit) | canon `#countdown-cards` | — | A row of statistic cards, one per unit, in equal columns, with 8px corners (`--radius-md`). Every card variant applies. A `--card-radius` on a card beats the corners |
-| Structure | One card (hint: The whole countdown in one card) | canon `#countdown-card` | — | An inline countdown in the number of one statistic card, with a line under it |
+| Structure | Banner (default) (hint: Text, countdown and a button in one card) | — | — | A full-width row card: an icon, a title and a line of text, the numbers with their words under them, and a button. All four parts sit on one line while they fit. In a card narrower than 720px, the countdown and the actions each take their own centered line. Every card option applies |
+| Structure | Inline (id: inline) | canon `#countdown-inline` | — | The script writes the days with their word, then `hh:mm:ss`. The days hide under one day. Use it inside a sentence or a label |
+| Structure | Own units (hint: Your own words and units) (id: units) | canon `#countdown-units` | — | You write each unit and the words around it, in one sentence. At zero, an ended message replaces the whole sentence. The largest unit takes the time above it: hours alone show 2 days as 48 hours |
+| Structure | Cards (hint: One card per unit) (id: cards) | canon `#countdown-cards` | — | A row of statistic cards, one per unit, in equal columns, with 8px corners (`--radius-md`). Every card variant applies. A `--card-radius` on a card beats the corners |
 | Target | Date (default) | `[data-countdown="2027-12-31T23:59"]` | `.nds-countdown` | Counts to a deadline. A date with no offset is read in the site timezone |
 | Target | Duration (id: duration) | `[data-countdown-seconds="63"]` | `.nds-countdown` | Counts down a number of seconds from the moment the countdown starts, such as a one-time code |
 | Target | Passed (hint: A deadline that is already over) (id: passed) (demo: + ended) | `[data-countdown="2026-01-01T00:00"]` | `.nds-countdown` | A deadline in the past: the countdown is at zero and in its ended state from page load, such as a page that stays online after applications close. The builder adds the ended message with it |
@@ -129,9 +172,14 @@ Pick another component when:
 | Color | Red | `.nds-red` | `.nds-card` | Tints the numbers |
 | Color | Blue | `.nds-blue` | `.nds-card` | Tints the numbers |
 | Color | On color (hint: For a dark or photo background) | `.nds-oncolor` | `.nds-card` | For cards on a dark or photo background. It replaces the color classes, which do nothing on an on-color card |
+| Color | On color (hint: For a dark or photo background) | `.nds-oncolor` | `.nds-card-actions .nds-btn` | The button does not follow the card. Give it `.nds-oncolor` too |
 | Tinted | Tinted (hint: A light tint of the card color) | `.nds-color` | `.nds-card:not(.nds-oncolor)` | Fills each card with a light tint of its color. With no color class, the tint is the brand primary |
+| Layout | Row (default) | `.nds-horizontal` | `.nds-card.nds-full` | One row, which wraps as the Banner row says |
+| Layout | Center (hint: Every part stacked and centered) | `.nds-center` | `.nds-card.nds-full` | Stacks the icon, the text, the countdown and the button, each centered. Use it for a banner that stands alone, such as the top of a page |
 | Warning | Warning (hint: Turns red near the end) (demo: + duration) | `[data-countdown-warn="60"]` | `.nds-countdown` | The countdown turns red when 60 seconds are left. The builder picks Duration with it, 63 seconds, so the red shows after 3 seconds |
 | Ended | Ended message (hint: Text shown at zero) (id: ended) (demo: + passed) | canon `#countdown-ended` | `.nds-countdown` | The text replaces the countdown at zero. Without it, the zeros stay. The builder picks Passed with it, so the text shows at once |
+| End action | Hide at end (hint: The actions hide at zero) (not: inline, units, cards) (demo: + passed) | `[data-countdown-hide="countdown-apply"]` | `.nds-countdown` | At zero, the elements whose ids it lists get `hidden`, wherever they are on the page. Here it is the actions row, whose button has no use after the deadline. The builder picks Passed with it, so the row is gone at once |
+| End action | Hide at end (hint: The actions hide at zero) (not: inline, units, cards) (demo: + passed) | `[id="countdown-apply"]` | `.nds-card-actions` | The actions row carries the id that `data-countdown-hide` lists |
 {: #countdown-variants-table .nds-table .nds-responsive}
 
 </div>
@@ -169,6 +217,11 @@ With `data-countdown-warn`, the root gets `data-state="warning"` when that many 
 {: .nds-block-title}
 
 At zero, the root gets `data-state="ended"`. A `.nds-countdown-ended` element anywhere inside the root then becomes its only content: the units, your words and the separators leave the page. `set()` puts them back.
+
+### Linked Elements
+{: .nds-block-title}
+
+`data-countdown-hide` on the root lists element ids, separated by spaces. At zero, the script hides those elements, such as the actions row of an offer that ends with the deadline. `data-countdown-show` lists elements to show at zero instead, such as a closed message outside the countdown. The elements can be anywhere on the page. `set()` puts both back.
 
 </div>
   </div>
@@ -246,8 +299,9 @@ At zero, the root gets `data-state="ended"`. A `.nds-countdown-ended` element an
 - Show seconds only when they matter, such as in the last hour or for a one-time code. A deadline weeks away reads better in days and hours.
 - Put the deadline itself in the text near the countdown, such as "Applications close on 31 December". The countdown says how long is left, not when.
 - Add an ended message to every countdown on a live page. A row of zeros does not tell the visitor what happened.
+- Hide an action that ends with the deadline, such as Apply now: list its id in `data-countdown-hide`. After zero, the button leads nowhere.
 - Set `data-countdown-now` from the server for a deadline that has legal weight, such as a submission window.
-- Add `data-countdown-hide-zero` to the days card of a countdown that is usually under one day, such as a sale that ends tonight. The row then shows no card at 0 days.
+- Add `data-countdown-hide-zero` to the days unit of a countdown that is usually under one day, such as a sale that ends tonight. The row then shows no days at 0.
 - Keep the countdown out of `aria-live` regions. A screen reader that reads a new number every second is noise. Fire your own message from `nds:countdown:warn` or `nds:countdown:end` instead.
 
 </div>
@@ -279,6 +333,8 @@ At zero, the root gets `data-state="ended"`. A `.nds-countdown-ended` element an
 | `data-countdown-seconds` | `.nds-countdown` | A duration in seconds, counted from the moment the countdown starts. It wins over `data-countdown` |
 | `data-countdown-warn` | `.nds-countdown` | Seconds left at which the script adds `warning` to `data-state` |
 | `data-countdown-now` | `.nds-countdown`, or any element around it, such as `<html>` | The server's current time, in the format of `data-countdown`. The script reads it once, when the countdown starts |
+| `data-countdown-hide` | `.nds-countdown` | Element ids, separated by spaces. The script adds `hidden` to each at zero, and removes it when the countdown starts and on `set()`. An id with no element logs a console warning |
+| `data-countdown-show` | `.nds-countdown` | Element ids, separated by spaces. The script removes `hidden` from each at zero, and adds it when the countdown starts and on `set()`. Write `hidden` on them yourself too, so they stay hidden before the script runs. An id with no element logs a console warning |
 | `dir` | `.nds-countdown` | Fixes the direction, such as `dir="ltr"` to keep the number left of the word on an Arabic page. Without it, the script sets `dir="auto"`: digits and separators alone read left to right, and Arabic unit words read right to left. A CSS `direction` on the root works too |
 | `data-state="warning"` | `.nds-countdown` | The script adds it when the time left reaches `data-countdown-warn`. It removes it at zero and on `set()` |
 | `data-state="ended"` | `.nds-countdown` | The script adds it at zero. It removes it on `set()` |
@@ -291,11 +347,11 @@ At zero, the root gets `data-state="ended"`. A `.nds-countdown-ended` element an
 ### CSS Custom Properties
 {: .nds-block-title}
 
-Set them on the root of Cards or One card. Each one beats the size class.
+Set them on the root of Cards or Banner. Each one beats the size class.
 
 | Property | Default | Controls |
 |---|---|---|
-| `--countdown-gap` | `var(--spacing-md)` | The space between the cards |
+| `--countdown-gap` | `var(--spacing-md)`, `var(--spacing-3xl)` in Banner | The space between the units |
 | `--countdown-value-size` | `var(--typo-display-sm-FS)` | The font size of the numbers |
 | `--countdown-value-line-height` | `var(--typo-display-sm-LH)` | The line height of the numbers |
 {: .nds-table .nds-responsive}
