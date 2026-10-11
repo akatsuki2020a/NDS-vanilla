@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:09 PM"
+last_edit: "11/10/2026 - 03:00 PM"
 ---
 
 <section id="refresh-overview" class="nds-content-section nds-doc-overview">
@@ -231,6 +231,8 @@ NDS.Init.ready.then(function () {
   document.querySelector('#service-tabs').ndsTabs.switchTo(2);
 });
 </script>
+
+`NDS` exists only after `nds-main.min.js` runs, and it loads with `defer`. Run this code from a `defer` script placed after it, or inside a `DOMContentLoaded` listener. A plain inline `<script>` runs first and fails with `NDS is not defined`.
 
 ### Data Attributes
 {: .nds-block-title}
