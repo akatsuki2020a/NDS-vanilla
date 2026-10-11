@@ -2,11 +2,12 @@
 
 Run from the NDS repo root. The guide is .claude/skills/nds-iq-eval/RIGS.md.
 
-  python scripts/rig.py new <baseline> [dest]   copy a baseline app, git init, tag it, npm install
-  python scripts/rig.py stage <dest> <release>  unpack a mkrelease --preview zip to .nds/, add _source/, stamp <release>, copy the draft to NDS-IQ.md
-  python scripts/rig.py reset <dest> [--save]   commit the run to a runN-date branch, back to the baseline tag
+  python scripts/rig.py new <rig> [dest]       copy a baseline app, git init, tag it, npm install
+  python scripts/rig.py stage <rig> <release>  unpack a mkrelease --preview zip to .nds/, add _source/, stamp <release>, copy the draft to NDS-IQ.md
+  python scripts/rig.py reset <rig> [--save]   commit the run to a runN-date branch, back to the baseline tag
 
-Baselines live in .claude/skills/nds-iq-eval/rigs/. dest defaults to ../nds-rig-<baseline>.
+<rig> is a rig number (5 library-portal, 6 citydesk, 7 grants-desk), which lives at ../nds-test-app-<N>,
+or a baseline name (new) or a path (stage, reset). Baselines live in .claude/skills/nds-iq-eval/rigs/.
 """
 import datetime, io, os, re, shutil, subprocess, sys, tarfile, zipfile
 
@@ -18,7 +19,11 @@ OPT_OUT = ('## Memory\n\nDo not save any memory (user, feedback, project, or ref
 APPS = {'library-portal': ('npm start', 'http://localhost:3005'),
         'citydesk': ('npm start', 'http://localhost:3000'),
         'grants-desk': ('npm run dev', 'http://localhost:5177')}
-FOLDERS =['_js', '_sass', 'components', 'utilities', 'layout', 'ui-shell', 'core', 'templates', 'examples', '_data/content']
+# The numbers past runs cite ("rig 5 run 8" = nds-test-app-5). A new baseline takes the next one.
+NUMS = {'5': 'library-portal', '6': 'citydesk', '7': 'grants-desk'}
+# _source/ holds the folders NDS-INDEX's Sources line names.
+FOLDERS = re.findall(r'`([^`]+)`', re.search(r'^- \*\*Sources:\*\*.*into `_source/`:(.*)$',
+                                              open('NDS-INDEX.md', encoding='utf-8').read(), re.M).group(1))
 
 
 def run(cmd, cwd=None):
@@ -30,7 +35,12 @@ def git(dest, *args):
     return subprocess.run(['git', *args], cwd=dest, capture_output=True, text=True, check=True).stdout.strip()
 
 
-def new(baseline, dest):
+def where(rig):
+    return os.path.join('..', f'nds-test-app-{rig}') if rig in NUMS else rig
+
+
+def new(rig, dest):
+    baseline = NUMS.get(rig, rig)
     src = os.path.join(RIGS, baseline)
     assert os.path.isdir(src), f'no baseline {src}; have: {", ".join(os.listdir(RIGS))}'
     assert not os.path.exists(dest) or not os.listdir(dest), f'{dest} is not empty'
@@ -42,16 +52,18 @@ def new(baseline, dest):
     git(dest, '-c', 'user.name=rig', '-c', 'user.email=rig@localhost', 'commit', '-qm', f'{baseline} baseline')
     git(dest, 'tag', 'baseline')
     run('npm install --no-audit --no-fund', cwd=dest)
-    print(f'ready: {dest}. Next: python scripts/rig.py stage {dest} <release>')
+    print(f'ready: {dest}.\n  published release: paste the get-started setup prompt in a session there'
+          f'\n  unreleased: python scripts/rig.py stage {rig if rig in NUMS else dest} <release> first')
     if baseline in APPS:
         print(f'the app: cd {dest} && {APPS[baseline][0]}  ->  {APPS[baseline][1]}')
 
 
 def stage(dest, release):
+    baseline = git(dest, 'log', '-1', '--format=%s', 'baseline').removesuffix(' baseline')  # fails here on a non-rig
     nds = os.path.join(dest, '.nds')
     assert not os.path.exists(nds) or not any(f for _, _, f in os.walk(nds)), 'rig already has .nds files: reset it first'
     # The release zip itself, unpacked to .nds/ as an install extracts it.
-    run(f'python scripts/mkrelease.py --preview {release}')
+    run(f'"{sys.executable}" scripts/mkrelease.py --preview {release}')
     root = f'nds-vanilla-template-v{release}/'
     with zipfile.ZipFile(f'dist/nds-vanilla-template-v{release}.zip') as z:
         for m in z.infolist():
@@ -81,7 +93,6 @@ def stage(dest, release):
     # Put the dev site back: mkrelease's cleaner and compressor rewrote _site for the zip.
     run('bundle exec jekyll build')
     print(f'staged {dest}: {n} files stamped {release}, NDS-IQ.md is the draft')
-    baseline = git(dest, 'log', '-1', '--format=%s', 'baseline').removesuffix(' baseline')
     if baseline in APPS:
         print(f'start the app: cd {dest} && {APPS[baseline][0]}  ->  {APPS[baseline][1]}')
 
@@ -95,7 +106,7 @@ def reset(dest, save):
         git(dest, 'branch', name)
         print('saved', name)
     git(dest, 'reset', '-q', '--hard', 'baseline')
-    git(dest, 'clean', '-fdq', '-e', 'node_modules')
+    git(dest, 'clean', '-fdq', '-e', 'node_modules', '-e', '.nds')  # a lock fails clean: the loop below reports it
     left = []
     for p in ('.nds', 'NDS-IQ.md'):
         p = os.path.join(dest, p)
@@ -112,8 +123,10 @@ if __name__ == '__main__':
     if not a or a[0] not in ('new', 'stage', 'reset'):
         sys.exit(__doc__)
     if a[0] == 'new':
-        new(a[1], a[2] if len(a) > 2 else os.path.join('..', f'nds-rig-{a[1]}'))
+        new(a[1], a[2] if len(a) > 2 else where(a[1]) if a[1] in NUMS else os.path.join('..', f'nds-rig-{a[1]}'))  # a baseline name
+    elif not os.path.isdir(where(a[1])):
+        sys.exit(f'no rig at {where(a[1])}: python scripts/rig.py new {a[1]}')
     elif a[0] == 'stage':
-        stage(a[1], a[2])
+        stage(where(a[1]), a[2])
     else:
-        reset(a[1], '--save' in a)
+        reset(where(a[1]), '--save' in a)
