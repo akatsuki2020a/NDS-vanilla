@@ -1,6 +1,6 @@
 """Demo data: 12 activities, 8 districts, 4 users, 31 applications. Safe to run again."""
 import random
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -8,36 +8,25 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
+from ._descriptions import DESCRIPTIONS
 from licenses.models import Activity, Application, District, Status, StatusChange
 
 User = get_user_model()
 
-# code, ar, en, category, fee, health certificate, description ar, description en
+# code, ar, en, category, fee, health certificate (descriptions are in _descriptions.py)
 ACTIVITIES = [
-    ('RT-01', 'بقالة', 'Grocery store', 'retail', 600, False,
-     'بيع المواد الغذائية المعلبة والمنتجات اليومية للأسر.', 'Sale of packaged food and everyday household goods.'),
-    ('RT-02', 'محل عطور', 'Perfume shop', 'retail', 1200, False,
-     'بيع العطور والبخور ومستلزماتها.', 'Sale of perfumes, incense and related items.'),
-    ('RT-03', 'إكسسوارات الجوال', 'Phone accessories', 'retail', 800, False,
-     'بيع أغطية وشواحن وملحقات الهواتف الذكية.', 'Sale of phone cases, chargers and smartphone accessories.'),
-    ('FD-01', 'مخبز', 'Bakery', 'food', 1500, True,
-     'إنتاج وبيع الخبز والمعجنات الطازجة.', 'Production and sale of fresh bread and pastries.'),
-    ('FD-02', 'مقهى', 'Café', 'food', 2000, True,
-     'تقديم المشروبات الساخنة والباردة والحلويات الخفيفة.', 'Serving hot and cold drinks and light desserts.'),
-    ('FD-03', 'مطعم', 'Restaurant', 'food', 2500, True,
-     'تحضير وتقديم الوجبات داخل المحل أو للتوصيل.', 'Preparing and serving meals for dine-in or delivery.'),
-    ('SV-01', 'مغسلة ملابس', 'Laundry', 'services', 900, False,
-     'غسل وكي الملابس وتسليمها للعملاء.', 'Washing and ironing clothes and handing them back to customers.'),
-    ('SV-02', 'صالون حلاقة رجالي', "Men's barber shop", 'services', 700, False,
-     'خدمات حلاقة الشعر والعناية باللحية.', 'Haircuts and beard care.'),
-    ('SV-03', 'صيانة جوالات', 'Phone repair', 'services', 500, False,
-     'إصلاح الهواتف الذكية وتبديل الشاشات والبطاريات.', 'Smartphone repair, including screen and battery replacement.'),
-    ('CR-01', 'خياطة', 'Tailoring', 'crafts', 300, False,
-     'تفصيل وتعديل الملابس الرجالية والنسائية.', "Making and altering men's and women's clothes."),
-    ('CR-02', 'نجارة', 'Carpentry', 'crafts', 1100, False,
-     'تصنيع وإصلاح الأثاث والأبواب الخشبية.', 'Making and repairing wooden furniture and doors.'),
-    ('CR-03', 'ورشة فخار', 'Pottery workshop', 'crafts', 400, False,
-     'صناعة وبيع الأواني والتحف الفخارية.', 'Making and selling pottery vessels and decorative pieces.'),
+    ('RT-01', 'بقالة', 'Grocery store', 'retail', 600, False),
+    ('RT-02', 'محل عطور', 'Perfume shop', 'retail', 1200, False),
+    ('RT-03', 'إكسسوارات الجوال', 'Phone accessories', 'retail', 800, False),
+    ('FD-01', 'مخبز', 'Bakery', 'food', 1500, True),
+    ('FD-02', 'مقهى', 'Café', 'food', 2000, True),
+    ('FD-03', 'مطعم', 'Restaurant', 'food', 2500, True),
+    ('SV-01', 'مغسلة ملابس', 'Laundry', 'services', 900, False),
+    ('SV-02', 'صالون حلاقة رجالي', "Men's barber shop", 'services', 700, False),
+    ('SV-03', 'صيانة جوالات', 'Phone repair', 'services', 500, False),
+    ('CR-01', 'خياطة', 'Tailoring', 'crafts', 300, False),
+    ('CR-02', 'نجارة', 'Carpentry', 'crafts', 1100, False),
+    ('CR-03', 'ورشة فخار', 'Pottery workshop', 'crafts', 400, False),
 ]
 
 DISTRICTS = [
@@ -128,7 +117,8 @@ class Command(BaseCommand):
 
         activities = {row[0]: Activity.objects.create(
             code=row[0], name_ar=row[1], name_en=row[2], category=row[3], fee_sar=row[4],
-            needs_health_certificate=row[5], description_ar=row[6], description_en=row[7],
+            needs_health_certificate=row[5],
+            description_ar='\n\n'.join(DESCRIPTIONS[row[0]][0]), description_en='\n\n'.join(DESCRIPTIONS[row[0]][1]),
         ) for row in ACTIVITIES}
         districts = [District.objects.create(name_ar=ar, name_en=en) for ar, en in DISTRICTS]
 
@@ -161,6 +151,13 @@ class Command(BaseCommand):
                 created=now - timedelta(days=rng.randint(10, 150), hours=rng.randint(0, 8)),
             ))
 
+        # The inspection calendar needs at least 9 booked applications
+        scheduled = sum(p['status'] == Status.INSPECTION_SCHEDULED for p in plan)
+        waiting = [p for p in plan if p['owner'] == others and p['status'] in (Status.SUBMITTED, Status.UNDER_REVIEW)]
+        rng.shuffle(waiting)
+        for p in waiting[:max(0, 9 - scheduled)]:
+            p['status'] = Status.INSPECTION_SCHEDULED
+
         # Oldest first, so the references run in date order
         plan.sort(key=lambda p: p['created'])
         for n, p in enumerate(plan):
@@ -172,9 +169,6 @@ class Command(BaseCommand):
             )
             application.floor_plan.save(f'floor-plan-{n}.pdf', ContentFile(pdf_bytes('Floor plan')), save=False)
             application.lease_contract.save(f'lease-{n}.pdf', ContentFile(pdf_bytes('Lease contract')), save=False)
-            if p['status'] == Status.INSPECTION_SCHEDULED:
-                days_ahead = 7 if p['owner'] == applicant else rng.randint(1, 10)
-                application.inspection_date = (now + timedelta(days=days_ahead)).replace(hour=10, minute=0, second=0, microsecond=0)
             if p['status'] == Status.REJECTED:
                 application.reject_reason = rng.choice(REJECT_REASONS) if p['owner'] != applicant else REJECT_REASONS[0]
             application.save()
@@ -190,6 +184,22 @@ class Command(BaseCommand):
                 # keep the applicant's histories at 2-4 rows: a second note while the application waits
                 StatusChange.objects.create(application=application, status=Status.SUBMITTED,
                                             note='تم استلام المستندات بنجاح وبانتظار التعيين للمراجعة.', at=at)
+
+        # Inspections: Sunday to Thursday, 09:00-14:00, over this week and next (the Sunday-start week)
+        today = timezone.localdate()
+        sunday = today - timedelta(days=(today.weekday() + 1) % 7)
+        workdays = [sunday + timedelta(days=d) for d in (0, 1, 2, 3, 4, 7, 8, 9, 10, 11)]
+        booked = list(Application.objects.filter(status=Status.INSPECTION_SCHEDULED).order_by('id'))
+        mine = [a for a in booked if a.owner_id == applicant.pk]
+        slots = {a.pk: (workdays[7], 10) for a in mine}  # the applicant's: next Tuesday, 10:00
+        shared = (rng.choice(workdays), rng.randint(9, 14))  # two inspections on the same day and hour
+        rest = [a for a in booked if a.pk not in slots]
+        for i, a in enumerate(rest):
+            slots[a.pk] = shared if i < 2 else (rng.choice(workdays), rng.randint(9, 14))
+        for a in booked:
+            day, hour = slots[a.pk]
+            Application.objects.filter(pk=a.pk).update(
+                inspection_date=timezone.make_aware(datetime.combine(day, time(hour))))
 
         self.stdout.write(self.style.SUCCESS(
             f'{Activity.objects.count()} activities, {District.objects.count()} districts, '

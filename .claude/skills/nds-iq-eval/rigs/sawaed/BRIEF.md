@@ -8,6 +8,7 @@ data, not the site yet. Build the site from this brief.
 - **Audience:** the public, mostly on phones.
 - **Accounts:** none in this phase. Nobody signs in; an application is identified by its reference number.
 - **Logo:** not ready. Use a placeholder until the design team sends it.
+- **Port:** the server listens on 3001.
 - **Data:** `content/opportunities.json` holds the opportunities. The site reads them through the API below, never from the file directly.
 
 ## Pages
@@ -17,13 +18,18 @@ data, not the site yet. Build the site from this brief.
 | Home | `/` |
 | Opportunities | `/opportunities` |
 | Opportunity | `/opportunities/<id>` |
+| Calendar | `/calendar?month=<YYYY-MM>` |
+| Compare | `/compare?ids=<id>,<id>,<id>` |
 | Apply | `/apply?opportunity=<id>` |
+| Volunteer guide | `/guide` |
 | FAQ | `/faq` |
 | Contact | `/contact` |
 
 Any other route shows a "page not found" page.
 
-Main navigation: الرئيسية، الفرص التطوعية، الأسئلة الشائعة، تواصل معنا.
+Main navigation: الرئيسية، الفرص التطوعية، التقويم، دليل المتطوع، الأسئلة الشائعة، تواصل معنا.
+
+Long pages have a button to go back to the top.
 
 ### Home
 
@@ -35,6 +41,7 @@ Main navigation: الرئيسية، الفرص التطوعية، الأسئلة
   1. **اختر فرصة** — تصفح الفرص وصنفها حسب المدينة ونوع العمل.
   2. **قدم طلبك** — املأ نموذج التقديم في دقائق، وارفق سيرتك الذاتية إن رغبت.
   3. **ابدأ التطوع** — تتواصل معك الجهة المنظمة خلال خمسة أيام عمل.
+- **A map of opportunities by city** is planned for the next phase. Keep its place on the page, between the latest opportunities and How it works, clearly marked as coming.
 - A closing call to action: **لديك سؤال قبل التقديم؟** with a link to the FAQ.
 
 ### Opportunities
@@ -47,7 +54,28 @@ its page. Nine per page.
 ### Opportunity
 
 All fields of one opportunity, then a button **قدم على هذه الفرصة** → `/apply?opportunity=<id>`.
+Applications close on `apply_by`: show the time left until then, and after it the button is
+replaced by **انتهى التقديم على هذه الفرصة**.
 An unknown id shows "this opportunity is not available" with a link back to the list.
+
+### Calendar
+
+A month view: every day of the month in a week grid (Sunday first), each day showing the
+opportunities that start on it (title and city), each linking to its page. Arrows move to the
+previous and next month, and a **اليوم** button returns to this month; the month is in the URL.
+Today is marked. A day with more than two opportunities shows two and "+N" that opens the rest.
+The city and category filters from the Opportunities page apply here too. On a phone, the
+month becomes a list of the days that have opportunities.
+
+### Compare
+
+People pick up to three opportunities to compare: each opportunity on the list and on its own
+page has a **قارن** toggle. The chosen ones wait in a tray at the bottom of the screen (their
+titles, a remove button each, and **قارن الآن**), on every page, until cleared; a fourth pick is
+refused with a short message. The Compare page shows them side by side, one column each: city,
+category, on-site or remote, start date, duration, seats, organisation, requirements. Rows where
+they differ are marked. Each column ends with its apply button. With fewer than two chosen, the
+page says so and links to the list.
 
 ### Apply
 
@@ -66,8 +94,27 @@ An unknown id shows "this opportunity is not available" with a link back to the 
 | ملاحظات | optional, up to 500 characters |
 | أقر بصحة البيانات | required |
 
+Before sending, the mobile number is verified: the applicant asks for a code, gets a 6-digit
+code by SMS, and types it in. The code works for 5 minutes, and the page shows the time left. A
+new code can be requested after 60 seconds, not before.
+
 The applicant checks everything before sending. After sending, show the reference number
 and **ستتواصل معك الجهة المنظمة خلال خمسة أيام عمل.**
+
+### Volunteer guide
+
+A long reading page, with a list of its sections that follows the reader down the page. The
+sections, in order:
+
+1. **قبل أن تبدأ** — اقرأ وصف الفرصة ومتطلباتها كاملة، وتأكد أن مواعيدها تناسبك قبل التقديم.
+2. **يوم التطوع** — احضر قبل الموعد بربع ساعة، وعرف بنفسك لمشرف الفرصة، والتزم بالزي إن طلبته الجهة.
+3. **السلامة أولا** — اتبع تعليمات المشرف، ولا تعمل وحدك في الفرص الميدانية، وأبلغ عن أي إصابة فورا.
+4. **التعامل مع المستفيدين** — احترم خصوصيتهم، ولا تلتقط صورا لهم دون إذن الجهة المنظمة.
+5. **ساعات التطوع والشهادة** — يسجل المشرف ساعاتك في نهاية كل يوم، وتصدر الشهادة بعد انتهاء الفرصة.
+6. **إذا تعذر حضورك** — أبلغ الجهة المنظمة قبل الموعد بيوم على الأقل، حتى تتيح مكانك لمتطوع آخر.
+
+Between sections 2 and 3, a quote from the initiative's director, نورة السبيعي:
+**«التطوع لا يقاس بعدد الساعات، بل بالأثر الذي يتركه في الناس والمكان.»**
 
 ### FAQ
 
@@ -99,7 +146,9 @@ memory for now.
 |---|---|
 | `GET /api/opportunities` | every opportunity, as in the data file |
 | `GET /api/opportunities/<id>` | one opportunity, or 404 |
+| `POST /api/otp/send` | `{ "phone" }` → 200 `{ "expires_in": 300, "resend_in": 60 }`, or 429 `{ "retry_in": <seconds> }` when asked again too soon |
+| `POST /api/otp/verify` | `{ "phone", "code" }` → 200 `{ "token" }`, or 422 `{ "errors": { "code": "<message>" } }` when wrong or expired. Until the SMS provider is connected, the code is always `123456` |
 | `POST /api/applications` | 201 `{ "reference": "SW-2026-00001" }`, or 422 `{ "errors": { "<field>": "<message>" } }` |
 | `POST /api/contact` | 201 `{}`, or 422 `{ "errors": { "<field>": "<message>" } }` |
 
-The server checks every rule in the Apply table again. The CV comes as `multipart/form-data`.
+The server checks every rule in the Apply table again, and the `token` from the code check. The CV comes as `multipart/form-data`.

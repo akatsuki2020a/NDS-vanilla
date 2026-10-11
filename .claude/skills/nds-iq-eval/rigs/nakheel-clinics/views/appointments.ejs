@@ -1,0 +1,120 @@
+<%- include('partials/head', { css: ['https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'] }) %>
+<%- include('partials/header') %>
+    <main>
+        <section class="nds-hero-section nds-sub " aria-label="Page hero">
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" hidden>
+        <ol class="nds-breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li class="nds-truncate" aria-current="page">My Appointments</li>
+        </ol>
+    </nav>
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <div class="nds-section-action nds-minimal">
+            <div class="nds-share nds-dropmenu">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger"
+                    aria-label="Share Page">
+                    <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
+                    <span class="nds-label">Share Page</span>
+                </button>
+                <div class="nds-dropmenu-menu" hidden>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                        <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
+                        <span class="nds-label">X</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button"
+                        aria-label="Share on LinkedIn">
+                        <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
+                        <span class="nds-label">LinkedIn</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button"
+                        aria-label="Share on WhatsApp">
+                        <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
+                        <span class="nds-label">WhatsApp</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
+                        data-label="Link Copied!" data-message="Page link copied to clipboard" data-no-auto-close>
+                        <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
+                        <span class="nds-label">Copy Link</span>
+                    </button>
+                </div>
+            </div>
+            </div>
+            <h1 class="nds-section-title">My Appointments</h1>
+            <p class="nds-section-description">Appointments for <%= patient.name %> (<%= patient.mrn %>)</p>
+        </div>
+    </div>
+</section>
+<div class="nds-content-layout ">
+    <div class="nds-main-content">
+        <section id="appointmentsList" class="nds-content-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-body">
+<% if (rows.length) { %>            <table class="nds-table nds-sortable" id="appointmentsTable">
+                <thead>
+                    <tr>
+                        <th>Date and time</th>
+                        <th>
+                            <div class="nds-col-header">
+                                <span class="nds-label">Doctor</span>
+                                <div class="nds-col-actions">
+                                    <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by doctor"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="nds-col-header">
+                                <span class="nds-label">Clinic</span>
+                                <div class="nds-col-actions">
+                                    <button class="nds-btn nds-subtle nds-sort-btn nds-icon-only" aria-label="Sort by clinic"><i class="nds-icon nds-hgi-sorting-05 nds-sort-icon" aria-hidden="true"></i></button>
+                                </div>
+                            </div>
+                        </th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+<% rows.forEach(function (a) {
+     var status = { booked: 'info', completed: 'success', cancelled: 'error' }[a.status];
+     var label = a.status.charAt(0).toUpperCase() + a.status.slice(1); %>                    <tr data-appt-row="<%= a.id %>">
+                        <td><%= when(a.at) %></td>
+                        <td><a href="/doctors/<%= a.doctor.id %>" class="nds-link"><span class="nds-label"><%= a.doctor.name %></span></a></td>
+                        <td><%= a.clinic.name %></td>
+                        <td><%= a.reason %></td>
+                        <td><span class="nds-tag nds-sm" data-status="<%= status %>"><span class="nds-label"><%= label %></span></span></td>
+                        <td>
+<% if (a.status === 'booked') { %>                            <button type="button" class="nds-btn nds-destructive nds-sm" data-appt-id="<%= a.id %>" data-bs-toggle="modal" data-bs-target="#cancelModal">
+                                <span class="nds-label">Cancel</span>
+                            </button>
+<% } %>                        </td>
+                    </tr>
+<% }); %>                </tbody>
+            </table>
+<% } else { %>            <p>You have no appointments yet. <a href="/book" class="nds-link"><span class="nds-label">Book your first visit</span></a>.</p>
+<% } %>        </div>
+    </div>
+</section>
+    </div>
+</div>
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">Cancel this appointment?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">The time slot will be released and offered to other patients. You can book a new appointment at any time.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep appointment</button>
+                <button type="button" class="btn btn-danger" id="confirmCancel">Yes, cancel it</button>
+            </div>
+        </div>
+    </div>
+</div>
+    </main><!-- footer -->
+<%- include('partials/footer') %>
+<%- include('partials/scripts', { js: ['https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', '/js/appointments.js'] }) %>

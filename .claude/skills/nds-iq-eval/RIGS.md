@@ -6,19 +6,42 @@ A field rig is a real legacy app that a fresh agent session ports to NDS, or a b
 
 ## Baselines
 
-The baselines live in `rigs/`, at their clean state. Each app runs on its own port, so all of them can run at once; `rig.py` prints the start command and the link. Each baseline has one rig, named by its number: rig 5 lives at `../nds-test-app-5`, and its runs are rig 5 run 1, run 2 and so on. Rigs 5 to 7 are the starters, legacy apps to port. Rigs 1 to 4 are designed to test NDS IQ on purpose: each covers a work mode or stack the starters miss. Field rigs are not the behavior-mode rigs R1 to R4 in `SKILL.md`.
+The baselines live in `rigs/`, at their clean state. Rig N runs on port 300N, so all of them can run at once; `rig.py` prints the start command and the link. Each baseline has one rig, named by its number: rig 5 lives at `../nds-test-app-5`, and its runs are rig 5 run 1, run 2 and so on. Rigs 5 to 7 are the starters, legacy apps to port. Rigs 1 to 4 are designed to test NDS IQ on purpose: each covers a work mode or stack the starters miss. Field rigs are not the behavior-mode rigs R1 to R4 in `SKILL.md`.
 
 | Rig | Baseline | App | Run | URL |
 |---|---|---|---|---|
-| 1 | `sawaed` | No app: an empty folder with `BRIEF.md` (an Arabic volunteering site: pages, copy, fields, API) and its data | — | — |
-| 2 | `shop-licenses` | A municipality's shop license portal in Arabic and English: a finished Django backend with no templates, CSS or JS yet. `BRIEF.md`, the copy in `licenses/copy.py` | `.venv/Scripts/python manage.py runserver 8002` | `http://localhost:8002` |
+| 1 | `sawaed` | No app: an empty folder with `BRIEF.md` (an Arabic volunteering site: pages, copy, fields, API) and its data | — | `http://localhost:3001`, once the agent builds it |
+| 2 | `shop-licenses` | A municipality's shop license portal in Arabic and English: a finished Django backend with no templates, CSS or JS yet. `BRIEF.md`, the copy in `licenses/copy.py` | `.venv/Scripts/python manage.py runserver 3002` | `http://localhost:3002` |
+| 3 | `nakheel-clinics` | English clinic bookings: Express and EJS partials, built on NDS 1.0.5 by an earlier team, with its old plan and anchor. `rig.py new` copies the 1.0.5 runtime into `public/nds/` | `npm start` | `http://localhost:3003` |
+| 4 | `hiraf-store` | A Saudi crafts shop in Arabic and English: Next.js 15 App Router and Material UI 6, a strict nonce CSP, a cart, checkout, gift box builder, order tracking, and an admin console | `npm run dev` | `http://localhost:3004` |
 | 5 | `library-portal` | Arabic RTL public library: Express and JSON APIs, Bootstrap RTL, jQuery, DataTables, Select2, Summernote, an SSO stub, a hash-router account area | `npm start` | `http://localhost:3005` |
-| 6 | `citydesk` | English LTR municipal help desk: Express and JSON APIs, Bootstrap, jQuery, DataTables, Select2, TinyMCE, a staff back office | `npm start` | `http://localhost:3000` |
-| 7 | `grants-desk` | English staff console: a React single-page app on Vite, no backend | `npm run dev` | `http://localhost:5177` |
+| 6 | `citydesk` | English LTR municipal help desk: Express and JSON APIs, Bootstrap, jQuery, DataTables, Select2, TinyMCE, a staff back office | `npm start` | `http://localhost:3006` |
+| 7 | `grants-desk` | English staff console: a React single-page app on Vite, no backend | `npm run dev` | `http://localhost:3007` |
 
 ## What each rig tests
 
 The traps live here, never in the rig: the agent reads everything in its folder. Answer the agent as the dev, with the answers below.
+
+### Component coverage
+
+The plans of rigs 5 to 7 (every run to 2026-10-11) never named these components, or named them in one rig only. Rigs 1 to 4 ask for a feature that needs each one. The brief names the feature, never the component: finding it in the catalog is part of the test.
+
+| Component | Rig: the feature that needs it |
+|---|---|
+| Accordion | 1: FAQ. 4: product FAQ |
+| OTP Input, Countdown, Cooldown Button | 1: the mobile code before applying (expiry, resend after 60 s). Countdown also 1: time left to apply; 4: the flash sale |
+| Content Placeholder | 1: the map planned for Home |
+| TOC, Quote | 1: the volunteer guide. TOC also 4: the shipping policy |
+| Floating Action Button | 1, 4: back to top on long pages |
+| Multiselect | 1: skills. 4: category filter |
+| Truncate Text, Tooltip, Content Switcher | 2: board cards, icon buttons, board or list view. 4: product names, admin icons, grid or list view |
+| Expandable Content | 2: activity descriptions. 4: product description |
+| Scroll More | 2: the inspection week on a phone. 4: related products |
+| Selects (native) | 2: the queue filters on phones, which the reviewers asked for |
+| Session Timeout, Password | 2: the 15-minute idle sign-out, the login form |
+| Modal | 3: the Bootstrap modal it replaces. 4: confirmations |
+| Drawer, Rating, Currency, Image Popup Viewer, Tag Input | 4: mini-cart, ratings, prices, image zoom, notification emails |
+| Chart, Clock | 3: lab trends, the waiting-room screen |
 
 ### Rig 1: a new site from a brief
 
@@ -38,6 +61,8 @@ The traps live here, never in the rig: the agent reads everything in its folder.
 - Apply has two input steps (form, review) plus success. Each field type validates on its own, and a 422 from the server shows on its field.
 - The states the brief implies are built and checked: an empty filter result, a failed request, an unknown opportunity, the not-found page.
 - One opportunity (id 106, 2026-09-23) has already started. The brief is silent on it: the agent asks, or ships a default with a checkbox. It never drops the opportunity silently.
+- The Calendar and Compare pages match no template. They are built from NDS parts inside the page structure, with no other library and no invented CSS. Each missing part (a month grid, a compare tray) is a finding.
+- The map on Home is a marked placeholder, never an invented map.
 
 ### Rig 2: a new UI on a server that renders pages
 
@@ -56,6 +81,62 @@ The traps live here, never in the rig: the agent reads everything in its folder.
 - Django's messages show as NDS alerts. The 403, 404 and 500 templates are status sections.
 - The fee endpoint fills in the fee when the activity changes, through the select's own change event.
 - Every string comes from `copy.py`. The logo is a placeholder with a checkbox.
+- The review board and the inspection week match no template. They are built from NDS parts inside the console shape. A card moved on the board swaps in the server's card, which then starts its components; a 422 shows the move form's error on its field.
+- The 15-minute idle sign-out warns a minute ahead and posts to `accounts/extend/` with the CSRF token. The queue's phone filters are native selects, because the brief asks for the phone's own picker: the one place a native select is right.
+
+### Rig 3: an upgrade from 1.0.5, then new pages
+
+**Tests:** the Upgrade steps from a pre-index release: the v3.2 rules upgrade the template, hand over to v4, and v4 sweeps the pages. Then extending a conformant site. It also tests whether `CHANGELOG.md`'s Migrating sections and the audit's migration check cover 1.0.5 to the new release.
+
+`rig.py stage 3 2.0.0` leaves the rig as a 1.0.5 project would be: `.nds/` holds the 1.0.5 template and `NDS-IQ.md` the `IQv3.2` rules. `next-release/` holds the new template zip, its source zip and the draft rules, in place of the release page and raw main.
+
+**Start prompts,** one after the other:
+
+```
+Upgrade the NDS template to the latest release. The latest release, 2.0.0, is not published yet: take its template zip and its source zip from `next-release/`, in place of the release page and the tag. When the rules say to download raw main's `NDS-IQ.md`, copy `next-release/NDS-IQ.md` in its place.
+```
+
+```
+Build the two pages on the README's roadmap: the waiting-room display at /display, and Lab results at /results. Their APIs are ready; the README lists them.
+```
+
+**Dev answers:** the upgrade is approved; prior work: rebuild what does not conform, keep what does; the digital stamp: "No"; pacing: `whole plan`.
+
+**Planted in the 1.0.5 work** (never marked in the project):
+1. `/appointments` loads Bootstrap for its cancel modal: a legacy library mixed into an NDS page.
+2. `/clinics` cards are hand-written: an invented `nds-clinic-card` class, a bare `h3`, a bare rating span, and parts missing.
+3. `public/css/site.css` restyles NDS internals (`.nds-btn` radius, the hero title size).
+4. `/book` has a third input step, Insurance.
+5. `NDS-PLAN.md` marks every page `Built and Verified`, and lists no legacy library.
+6. The anchor in `AGENTS.md` lacks the compacted-context sentence.
+
+Two more slips, not planted, that the agent may name: `/clinics`' filters are three custom selects instead of the filter component, and the footer turns the solid project logo white, so it shows as a white box. The booking stepper moves on with empty required fields, but that is 1.0.5's own form template, copied as it was.
+
+**What a pass looks like:**
+- The v3.2 rules run the upgrade from `next-release/`, then hand over to the v4 rules. v4 starts by opening `NDS-INDEX.md`.
+- The agent reads the Migrating sections between 1.0.5 and 2.0.0, and runs the migration check on every page, not only the planted ones.
+- It never trusts the old plan: it assesses each page against the new canon, and rebuilds the ones that do not conform.
+- All six planted items are found and fixed. The anchor gets the one missing sentence, and nothing else changes in it.
+- The new runtime replaces `public/nds/`. The project's own files stay.
+- The waiting-room display matches no template and no page shape: a full-screen page with no site header or footer. The agent still takes the head canon and NDS layout primitives, and asks before it drops the chrome or names it a custom case. It updates live from the event stream, with the NDS init API for the swapped rows, and shows a lost connection.
+- Lab results extends the family. Each test's trend is a chart with its normal range, and an open range (`null` on one side) is handled. A pending result is built as a state.
+- A missing migration note is a finding in `NDS-REPORT.md`. It is also a real gap for this repo to fix.
+
+### Rig 4: a Next.js shop
+
+**Tests:** a port of a server-rendered React app: server components, hydration, client navigation, server actions, a strict nonce CSP. Also shopping, which NDS has no parts for (no cart, product card or checkout), and pages no template covers. Its `NDS-REPORT.md` is the list of shopping parts NDS lacks.
+
+**Dev answers:** porting strategy: parallel routes inside the app; the CSP grant the agent recommends (a nonce); the digital stamp: "No"; pacing: `whole plan`.
+
+**What a pass looks like:**
+- Markup lives in JSX, never in strings code assembles. Next's `Link` and `Image` go on canonical elements as attributes, or are named as a conflict; they never add UI the canon lacks.
+- Each route's page shape is in the server HTML: the shop pages and the admin console get their own classes before hydration, never in an effect.
+- NDS starts after hydration and again after each client navigation, through the documented framework rules. No hydration warning and no CSP violation in the console.
+- The NDS scripts and any inline script carry the request's nonce.
+- Server-action errors show on their fields. A declined card (`…0002`) reaches the failed state, and a thrown one (`…0003`) the error state.
+- Cart, checkout, gift box, tracking, the editable admin table, the settings save bar and the roles grid are built from NDS parts, each gap a finding, with no MUI left on a ported page.
+
+**Known in the app:** a Next 15 quirk. `notFound()` answers 404, but its body renders only after hydration (the server sends Next's error shell). The app keeps `style-src-attr 'unsafe-inline'` for `next/image` and the MUI slider; a port that drops MUI may tighten it.
 
 ## Set up a rig
 

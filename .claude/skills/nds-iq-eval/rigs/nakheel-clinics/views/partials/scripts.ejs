@@ -1,0 +1,6 @@
+    <!-- Scripts -->
+    <script defer src="/nds/js/nds-main.min.js?ver=1.0.5.e765452"></script>
+    <script defer src="/nds/js/nds-accessibility.min.js?ver=1.0.5.e765452"></script>
+<% (typeof js !== 'undefined' ? js : []).forEach(function (src) { %>    <script defer src="<%= src %>"></script>
+<% }); %></body>
+</html>

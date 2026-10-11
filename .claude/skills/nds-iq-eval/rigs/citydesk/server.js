@@ -4,7 +4,7 @@ var express = require('express');
 var path = require('path');
 
 var app = express();
-var PORT = 3000;
+var PORT = 3006;
 
 var CSP = [
   "default-src 'self'",

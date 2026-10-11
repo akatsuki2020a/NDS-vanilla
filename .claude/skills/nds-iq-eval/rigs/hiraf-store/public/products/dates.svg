@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" role="img" aria-label="تمور">
+  <rect width="800" height="800" fill="#8a5a2b"/>
+  <circle cx="400" cy="340" r="150" fill="#fff" fill-opacity=".85"/>
+  <text x="400" y="700" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-size="64" fill="#fff">تمور</text>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "name": "nakheel-clinics",
+  "version": "1.0.0",
+  "description": "Al-Nakheel Medical Clinics patient portal",
+  "main": "server.js",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2"
+  }
+}

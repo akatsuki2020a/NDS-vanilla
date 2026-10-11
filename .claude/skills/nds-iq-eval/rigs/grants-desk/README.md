@@ -14,7 +14,7 @@ npm install
 npm run dev
 ```
 
-Opens on http://localhost:5177.
+Opens on http://localhost:3007.
 
 ## Layout
 

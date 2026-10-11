@@ -1,0 +1,1244 @@
+[
+  {
+    "id": "p01",
+    "slug": "qassim-sukkari-dates",
+    "name_ar": "تمر سكري القصيم",
+    "name_en": "Qassim Sukkari Dates",
+    "category": "dates",
+    "price": 48,
+    "rating": 4.8,
+    "reviews_count": 214,
+    "stock": 120,
+    "box_slots": 2,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 40
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 85
+      }
+    ],
+    "description_ar": "تمر طري بحلاوة متوازنة من مزارع القصيم. من مزارع النخيل السعودية.",
+    "description_en": "Soft dates with a balanced sweetness from Qassim farms. From Saudi palm farms.",
+    "images": [
+      "/products/dates.svg"
+    ],
+    "badges": [
+      "bestseller"
+    ],
+    "created": "2026-10-05"
+  },
+  {
+    "id": "p02",
+    "slug": "madinah-ajwa-dates",
+    "name_ar": "عجوة المدينة",
+    "name_en": "Madinah Ajwa Dates",
+    "category": "dates",
+    "price": 95,
+    "compare_at": 120,
+    "rating": 4.9,
+    "reviews_count": 310,
+    "stock": 60,
+    "box_slots": 2,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 75
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 170
+      }
+    ],
+    "description_ar": "عجوة سوداء فاخرة من مزارع المدينة المنورة. من مزارع النخيل السعودية.",
+    "description_en": "Premium dark ajwa from Madinah orchards. From Saudi palm farms.",
+    "images": [
+      "/products/dates.svg",
+      "/products/dates.svg"
+    ],
+    "badges": [
+      "bestseller"
+    ],
+    "created": "2026-10-01"
+  },
+  {
+    "id": "p03",
+    "slug": "ahsa-khalas-dates",
+    "name_ar": "خلاص الأحساء",
+    "name_en": "Al-Ahsa Khalas Dates",
+    "category": "dates",
+    "price": 42,
+    "rating": 4.6,
+    "reviews_count": 98,
+    "stock": 0,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 35
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 75
+      }
+    ],
+    "description_ar": "تمر ذهبي ناعم تشتهر به الأحساء. من مزارع النخيل السعودية.",
+    "description_en": "Smooth golden dates Al-Ahsa is known for. From Saudi palm farms.",
+    "images": [
+      "/products/dates.svg",
+      "/products/dates.svg",
+      "/products/dates.svg"
+    ],
+    "created": "2026-09-27"
+  },
+  {
+    "id": "p04",
+    "slug": "sagai-dates",
+    "name_ar": "تمر صقعي",
+    "name_en": "Sagai Dates",
+    "category": "dates",
+    "price": 55,
+    "rating": 4.4,
+    "reviews_count": 41,
+    "stock": 3,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 45
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 100
+      }
+    ],
+    "description_ar": "تمر ذو قوام متماسك ونكهة غنية. من مزارع النخيل السعودية.",
+    "description_en": "Firm dates with a rich flavour. From Saudi palm farms.",
+    "images": [
+      "/products/dates.svg"
+    ],
+    "badges": [
+      "new"
+    ],
+    "created": "2026-09-23"
+  },
+  {
+    "id": "p05",
+    "slug": "date-paste",
+    "name_ar": "معجون التمر",
+    "name_en": "Date Paste",
+    "category": "dates",
+    "price": 22,
+    "rating": 4.2,
+    "reviews_count": 37,
+    "stock": 80,
+    "box_slots": 1,
+    "description_ar": "معجون طبيعي بلا سكر مضاف للحلويات والخبز. من مزارع النخيل السعودية.",
+    "description_en": "Natural paste with no added sugar for sweets and baking. From Saudi palm farms.",
+    "images": [
+      "/products/dates.svg",
+      "/products/dates.svg"
+    ],
+    "created": "2026-09-19"
+  },
+  {
+    "id": "p06",
+    "slug": "almond-stuffed-dates",
+    "name_ar": "تمر محشو باللوز",
+    "name_en": "Almond-Stuffed Dates",
+    "category": "dates",
+    "price": 68,
+    "compare_at": 80,
+    "rating": 4.7,
+    "reviews_count": 76,
+    "stock": 25,
+    "box_slots": 1,
+    "description_ar": "تمر مجدول محشو بلوز محمص في علبة هدايا. من مزارع النخيل السعودية.",
+    "description_en": "Medjool-style dates stuffed with roasted almonds in a gift box. From Saudi palm farms.",
+    "images": [
+      "/products/dates.svg",
+      "/products/dates.svg",
+      "/products/dates.svg"
+    ],
+    "badges": [
+      "new"
+    ],
+    "created": "2026-09-15"
+  },
+  {
+    "id": "p07",
+    "slug": "saudi-coffee-cardamom",
+    "name_ar": "قهوة سعودية بالهيل والزعفران",
+    "name_en": "Saudi Coffee with Cardamom and Saffron",
+    "category": "coffee",
+    "price": 38,
+    "rating": 4.7,
+    "reviews_count": 190,
+    "stock": 200,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 30
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 70
+      }
+    ],
+    "description_ar": "خلطة جاهزة للتحضير في الدلة. من محامص ومزارع محلية.",
+    "description_en": "A ready blend for the dallah. From local roasters and farms.",
+    "images": [
+      "/products/coffee.svg"
+    ],
+    "badges": [
+      "bestseller"
+    ],
+    "created": "2026-09-11"
+  },
+  {
+    "id": "p08",
+    "slug": "khawlani-coffee-beans",
+    "name_ar": "بن خولاني",
+    "name_en": "Khawlani Coffee Beans",
+    "category": "coffee",
+    "price": 85,
+    "rating": 4.8,
+    "reviews_count": 133,
+    "stock": 40,
+    "box_slots": 2,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 70
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 155
+      }
+    ],
+    "description_ar": "حبوب مزروعة في مدرجات جازان وتحمص عند الطلب. من محامص ومزارع محلية.",
+    "description_en": "Beans grown on Jazan terraces and roasted to order. From local roasters and farms.",
+    "images": [
+      "/products/coffee.svg",
+      "/products/coffee.svg"
+    ],
+    "badges": [
+      "bestseller"
+    ],
+    "created": "2026-09-07"
+  },
+  {
+    "id": "p09",
+    "slug": "brass-coffee-dallah",
+    "name_ar": "دلة قهوة نحاسية",
+    "name_en": "Brass Coffee Dallah",
+    "category": "coffee",
+    "price": 420,
+    "compare_at": 480,
+    "rating": 4.6,
+    "reviews_count": 52,
+    "stock": 8,
+    "box_slots": 2,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 105
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 250
+      }
+    ],
+    "description_ar": "دلة مطروقة يدويا بمقبض خشبي. من محامص ومزارع محلية.",
+    "description_en": "A hand-hammered dallah with a wooden handle. From local roasters and farms.",
+    "images": [
+      "/products/coffee.svg",
+      "/products/coffee.svg",
+      "/products/coffee.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-09-03"
+  },
+  {
+    "id": "p10",
+    "slug": "coffee-cup-set",
+    "name_ar": "طقم فناجين",
+    "name_en": "Coffee Cup Set",
+    "category": "coffee",
+    "price": 130,
+    "rating": 4.3,
+    "reviews_count": 29,
+    "stock": 3,
+    "box_slots": 2,
+    "description_ar": "ستة فناجين صغيرة مع صينية. من محامص ومزارع محلية.",
+    "description_en": "Six small cups with a tray. From local roasters and farms.",
+    "images": [
+      "/products/coffee.svg"
+    ],
+    "created": "2026-08-30"
+  },
+  {
+    "id": "p11",
+    "slug": "green-cardamom",
+    "name_ar": "هيل أخضر",
+    "name_en": "Green Cardamom",
+    "category": "coffee",
+    "price": 60,
+    "rating": 4.5,
+    "reviews_count": 88,
+    "stock": 0,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 50
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 110
+      }
+    ],
+    "description_ar": "هيل كامل الحبات برائحة قوية. من محامص ومزارع محلية.",
+    "description_en": "Whole pods with a strong aroma. From local roasters and farms.",
+    "images": [
+      "/products/coffee.svg",
+      "/products/coffee.svg"
+    ],
+    "created": "2026-08-26"
+  },
+  {
+    "id": "p12",
+    "slug": "light-roast-coffee",
+    "name_ar": "قهوة مختصة تحميص فاتح",
+    "name_en": "Light Roast Specialty Coffee",
+    "category": "coffee",
+    "price": 72,
+    "rating": 4.4,
+    "reviews_count": 64,
+    "stock": 55,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "250g",
+        "label_ar": "250 غرام",
+        "label_en": "250 g",
+        "delta": 0
+      },
+      {
+        "id": "500g",
+        "label_ar": "500 غرام",
+        "label_en": "500 g",
+        "delta": 60
+      },
+      {
+        "id": "1kg",
+        "label_ar": "1 كغ",
+        "label_en": "1 kg",
+        "delta": 130
+      }
+    ],
+    "description_ar": "نكهات فواكه وحموضة لطيفة. من محامص ومزارع محلية.",
+    "description_en": "Fruity notes with a gentle acidity. From local roasters and farms.",
+    "images": [
+      "/products/coffee.svg",
+      "/products/coffee.svg",
+      "/products/coffee.svg"
+    ],
+    "badges": [
+      "new"
+    ],
+    "created": "2026-08-22"
+  },
+  {
+    "id": "p13",
+    "slug": "cambodian-oud-chips",
+    "name_ar": "عود كمبودي",
+    "name_en": "Cambodian Oud Chips",
+    "category": "incense",
+    "price": 950,
+    "compare_at": 1100,
+    "rating": 4.9,
+    "reviews_count": 45,
+    "stock": 6,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "3g",
+        "label_ar": "3 غرام",
+        "label_en": "3 g",
+        "delta": 0
+      },
+      {
+        "id": "6g",
+        "label_ar": "6 غرام",
+        "label_en": "6 g",
+        "delta": 855
+      },
+      {
+        "id": "12g",
+        "label_ar": "12 غرام",
+        "label_en": "12 g",
+        "delta": 2470
+      }
+    ],
+    "description_ar": "قطع عود معتقة برائحة عميقة تدوم طويلا. مختار بعناية للمجالس والبيوت.",
+    "description_en": "Aged oud chips with a deep, lasting scent. Chosen with care for homes and majlis.",
+    "images": [
+      "/products/incense.svg"
+    ],
+    "created": "2026-08-18"
+  },
+  {
+    "id": "p14",
+    "slug": "royal-bakhoor",
+    "name_ar": "بخور ملكي",
+    "name_en": "Royal Bakhoor",
+    "category": "incense",
+    "price": 120,
+    "rating": 4.6,
+    "reviews_count": 77,
+    "stock": 35,
+    "box_slots": 2,
+    "variants": [
+      {
+        "id": "10g",
+        "label_ar": "10 غرام",
+        "label_en": "10 g",
+        "delta": 0
+      },
+      {
+        "id": "25g",
+        "label_ar": "25 غرام",
+        "label_en": "25 g",
+        "delta": 145
+      },
+      {
+        "id": "50g",
+        "label_ar": "50 غرام",
+        "label_en": "50 g",
+        "delta": 420
+      }
+    ],
+    "description_ar": "خلطة عود ومسك وعنبر. مختار بعناية للمجالس والبيوت.",
+    "description_en": "A blend of oud, musk and amber. Chosen with care for homes and majlis.",
+    "images": [
+      "/products/incense.svg",
+      "/products/incense.svg"
+    ],
+    "badges": [
+      "bestseller"
+    ],
+    "created": "2026-08-14"
+  },
+  {
+    "id": "p15",
+    "slug": "maamoul-bakhoor",
+    "name_ar": "بخور معمول",
+    "name_en": "Maamoul Bakhoor",
+    "category": "incense",
+    "price": 85,
+    "rating": 4.5,
+    "reviews_count": 60,
+    "stock": 40,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "10g",
+        "label_ar": "10 غرام",
+        "label_en": "10 g",
+        "delta": 0
+      },
+      {
+        "id": "25g",
+        "label_ar": "25 غرام",
+        "label_en": "25 g",
+        "delta": 100
+      },
+      {
+        "id": "50g",
+        "label_ar": "50 غرام",
+        "label_en": "50 g",
+        "delta": 300
+      }
+    ],
+    "description_ar": "أقراص بخور معمولة يدويا. مختار بعناية للمجالس والبيوت.",
+    "description_en": "Hand-pressed bakhoor discs. Chosen with care for homes and majlis.",
+    "images": [
+      "/products/incense.svg",
+      "/products/incense.svg",
+      "/products/incense.svg"
+    ],
+    "created": "2026-08-10"
+  },
+  {
+    "id": "p16",
+    "slug": "ceramic-incense-burner",
+    "name_ar": "مبخرة سيراميك",
+    "name_en": "Ceramic Incense Burner",
+    "category": "incense",
+    "price": 150,
+    "rating": 4.4,
+    "reviews_count": 33,
+    "stock": 15,
+    "box_slots": 2,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 40
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 90
+      }
+    ],
+    "description_ar": "مبخرة بزخارف محفورة تناسب المجالس. مختار بعناية للمجالس والبيوت.",
+    "description_en": "A burner with engraved patterns for the majlis. Chosen with care for homes and majlis.",
+    "images": [
+      "/products/incense.svg"
+    ],
+    "created": "2026-08-06"
+  },
+  {
+    "id": "p17",
+    "slug": "sandalwood-chips",
+    "name_ar": "خشب صندل",
+    "name_en": "Sandalwood Chips",
+    "category": "incense",
+    "price": 210,
+    "rating": 4.7,
+    "reviews_count": 41,
+    "stock": 2,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "10g",
+        "label_ar": "10 غرام",
+        "label_en": "10 g",
+        "delta": 0
+      },
+      {
+        "id": "25g",
+        "label_ar": "25 غرام",
+        "label_en": "25 g",
+        "delta": 250
+      },
+      {
+        "id": "50g",
+        "label_ar": "50 غرام",
+        "label_en": "50 g",
+        "delta": 735
+      }
+    ],
+    "description_ar": "قطع صندل ناعمة الرائحة. مختار بعناية للمجالس والبيوت.",
+    "description_en": "Chips with a soft scent. Chosen with care for homes and majlis.",
+    "images": [
+      "/products/incense.svg",
+      "/products/incense.svg"
+    ],
+    "created": "2026-08-02"
+  },
+  {
+    "id": "p18",
+    "slug": "musk-perfume-oil",
+    "name_ar": "دهن مسك",
+    "name_en": "Musk Perfume Oil",
+    "category": "incense",
+    "price": 75,
+    "rating": 4.3,
+    "reviews_count": 58,
+    "stock": 70,
+    "box_slots": 1,
+    "description_ar": "دهن مركز بلا كحول في قارورة زجاج. مختار بعناية للمجالس والبيوت.",
+    "description_en": "Alcohol-free concentrated oil in a glass vial. Chosen with care for homes and majlis.",
+    "images": [
+      "/products/incense.svg",
+      "/products/incense.svg",
+      "/products/incense.svg"
+    ],
+    "badges": [
+      "new"
+    ],
+    "created": "2026-07-29"
+  },
+  {
+    "id": "p19",
+    "slug": "clay-cooking-pot",
+    "name_ar": "قدر فخار",
+    "name_en": "Clay Cooking Pot",
+    "category": "pottery",
+    "price": 110,
+    "rating": 4.5,
+    "reviews_count": 47,
+    "stock": 22,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 30
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 65
+      }
+    ],
+    "description_ar": "قدر للطبخ البطيء على نار هادئة. صنعه حرفيون محليون.",
+    "description_en": "A pot for slow cooking over a low flame. Made by local potters.",
+    "images": [
+      "/products/pottery.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-07-25"
+  },
+  {
+    "id": "p20",
+    "slug": "traditional-water-jar",
+    "name_ar": "زير ماء",
+    "name_en": "Traditional Water Jar",
+    "category": "pottery",
+    "price": 180,
+    "compare_at": 220,
+    "rating": 4.2,
+    "reviews_count": 19,
+    "stock": 0,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 45
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 110
+      }
+    ],
+    "description_ar": "يبقي الماء باردا بشكل طبيعي. صنعه حرفيون محليون.",
+    "description_en": "Keeps water naturally cool. Made by local potters.",
+    "images": [
+      "/products/pottery.svg",
+      "/products/pottery.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-07-21"
+  },
+  {
+    "id": "p21",
+    "slug": "pottery-mug-set",
+    "name_ar": "أكواب فخار",
+    "name_en": "Pottery Mug Set",
+    "category": "pottery",
+    "price": 85,
+    "rating": 4.6,
+    "reviews_count": 66,
+    "stock": 30,
+    "box_slots": 1,
+    "description_ar": "أربعة أكواب بطلاء ترابي. صنعه حرفيون محليون.",
+    "description_en": "Four mugs with an earthy glaze. Made by local potters.",
+    "images": [
+      "/products/pottery.svg",
+      "/products/pottery.svg",
+      "/products/pottery.svg"
+    ],
+    "badges": [
+      "handmade",
+      "bestseller"
+    ],
+    "created": "2026-07-17"
+  },
+  {
+    "id": "p22",
+    "slug": "decorated-vase",
+    "name_ar": "مزهرية مزخرفة",
+    "name_en": "Decorated Vase",
+    "category": "pottery",
+    "price": 240,
+    "rating": 4.7,
+    "reviews_count": 38,
+    "stock": 12,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 60
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 145
+      }
+    ],
+    "description_ar": "مزهرية بنقوش مرسومة باليد. صنعه حرفيون محليون.",
+    "description_en": "A vase with hand-painted patterns. Made by local potters.",
+    "images": [
+      "/products/pottery.svg"
+    ],
+    "badges": [
+      "handmade",
+      "new"
+    ],
+    "created": "2026-07-13"
+  },
+  {
+    "id": "p23",
+    "slug": "serving-platter",
+    "name_ar": "صحن تقديم",
+    "name_en": "Serving Platter",
+    "category": "pottery",
+    "price": 95,
+    "rating": 3.8,
+    "reviews_count": 14,
+    "stock": 45,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 25
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 55
+      }
+    ],
+    "description_ar": "صحن واسع للولائم. صنعه حرفيون محليون.",
+    "description_en": "A wide platter for feasts. Made by local potters.",
+    "images": [
+      "/products/pottery.svg",
+      "/products/pottery.svg"
+    ],
+    "created": "2026-07-09"
+  },
+  {
+    "id": "p24",
+    "slug": "date-serving-dish",
+    "name_ar": "طبق تمر فخاري",
+    "name_en": "Pottery Date Dish",
+    "category": "pottery",
+    "price": 65,
+    "rating": 4,
+    "reviews_count": 22,
+    "stock": 3,
+    "box_slots": 1,
+    "description_ar": "طبق صغير لتقديم التمر مع القهوة. صنعه حرفيون محليون.",
+    "description_en": "A small dish for serving dates with coffee. Made by local potters.",
+    "images": [
+      "/products/pottery.svg",
+      "/products/pottery.svg",
+      "/products/pottery.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-07-05"
+  },
+  {
+    "id": "p25",
+    "slug": "palm-frond-basket",
+    "name_ar": "سلة سعف نخيل",
+    "name_en": "Palm-Frond Basket",
+    "category": "baskets",
+    "price": 70,
+    "rating": 4.6,
+    "reviews_count": 92,
+    "stock": 50,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 20
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 40
+      }
+    ],
+    "description_ar": "سلة مضفورة بسعف النخيل المحلي. ضفره حرفيون من سعف النخيل.",
+    "description_en": "A basket woven from local palm fronds. Woven by craftspeople from palm fronds.",
+    "images": [
+      "/products/baskets.svg"
+    ],
+    "badges": [
+      "handmade",
+      "bestseller"
+    ],
+    "created": "2026-07-01"
+  },
+  {
+    "id": "p26",
+    "slug": "palm-bread-tray",
+    "name_ar": "طبق خبز من السعف",
+    "name_en": "Palm Bread Tray",
+    "category": "baskets",
+    "price": 45,
+    "rating": 4.4,
+    "reviews_count": 55,
+    "stock": 65,
+    "box_slots": 1,
+    "description_ar": "طبق تقليدي يحفظ الخبز دافئا. ضفره حرفيون من سعف النخيل.",
+    "description_en": "A traditional tray that keeps bread warm. Woven by craftspeople from palm fronds.",
+    "images": [
+      "/products/baskets.svg",
+      "/products/baskets.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-06-27"
+  },
+  {
+    "id": "p27",
+    "slug": "woven-storage-box",
+    "name_ar": "صندوق تخزين مضفور",
+    "name_en": "Woven Storage Box",
+    "category": "baskets",
+    "price": 130,
+    "rating": 4.5,
+    "reviews_count": 31,
+    "stock": 18,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 35
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 80
+      }
+    ],
+    "description_ar": "صندوق بغطاء لحفظ الأغراض. ضفره حرفيون من سعف النخيل.",
+    "description_en": "A lidded box for storage. Woven by craftspeople from palm fronds.",
+    "images": [
+      "/products/baskets.svg",
+      "/products/baskets.svg",
+      "/products/baskets.svg"
+    ],
+    "created": "2026-06-23"
+  },
+  {
+    "id": "p28",
+    "slug": "palm-hand-fan",
+    "name_ar": "مروحة سعف",
+    "name_en": "Palm Hand Fan",
+    "category": "baskets",
+    "price": 18,
+    "rating": 3.9,
+    "reviews_count": 120,
+    "stock": 300,
+    "box_slots": 1,
+    "description_ar": "مروحة يدوية خفيفة. ضفره حرفيون من سعف النخيل.",
+    "description_en": "A light hand fan. Woven by craftspeople from palm fronds.",
+    "images": [
+      "/products/baskets.svg"
+    ],
+    "created": "2026-06-19"
+  },
+  {
+    "id": "p29",
+    "slug": "palm-laundry-basket",
+    "name_ar": "سلة غسيل من السعف",
+    "name_en": "Palm Laundry Basket",
+    "category": "baskets",
+    "price": 160,
+    "compare_at": 190,
+    "rating": 4.3,
+    "reviews_count": 25,
+    "stock": 9,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 40
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 95
+      }
+    ],
+    "description_ar": "سلة واسعة بمقبضين. ضفره حرفيون من سعف النخيل.",
+    "description_en": "A roomy basket with two handles. Woven by craftspeople from palm fronds.",
+    "images": [
+      "/products/baskets.svg",
+      "/products/baskets.svg"
+    ],
+    "created": "2026-06-15"
+  },
+  {
+    "id": "p30",
+    "slug": "palm-frond-mat",
+    "name_ar": "حصيرة سعف",
+    "name_en": "Palm-Frond Mat",
+    "category": "baskets",
+    "price": 85,
+    "rating": 4.2,
+    "reviews_count": 44,
+    "stock": 0,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 20
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 50
+      }
+    ],
+    "description_ar": "حصيرة للجلسات الأرضية. ضفره حرفيون من سعف النخيل.",
+    "description_en": "A mat for floor seating. Woven by craftspeople from palm fronds.",
+    "images": [
+      "/products/baskets.svg",
+      "/products/baskets.svg",
+      "/products/baskets.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-06-11"
+  },
+  {
+    "id": "p31",
+    "slug": "sadu-wool-rug",
+    "name_ar": "سجادة سدو صوف",
+    "name_en": "Sadu Wool Rug",
+    "category": "weaving",
+    "price": 640,
+    "compare_at": 720,
+    "rating": 4.9,
+    "reviews_count": 36,
+    "stock": 5,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 160
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 385
+      }
+    ],
+    "description_ar": "سجادة منسوجة على النول بأنماط بدوية. نسجه حرفيون بأنماط السدو.",
+    "description_en": "A loom-woven rug in Bedouin patterns. Woven by artisans in Sadu patterns.",
+    "images": [
+      "/products/weaving.svg"
+    ],
+    "badges": [
+      "handmade",
+      "bestseller"
+    ],
+    "created": "2026-06-07"
+  },
+  {
+    "id": "p32",
+    "slug": "sadu-cushion-cover",
+    "name_ar": "غطاء وسادة سدو",
+    "name_en": "Sadu Cushion Cover",
+    "category": "weaving",
+    "price": 95,
+    "rating": 4.6,
+    "reviews_count": 71,
+    "stock": 40,
+    "box_slots": 1,
+    "description_ar": "غطاء بسحاب مخفي مقاس 45 سم. نسجه حرفيون بأنماط السدو.",
+    "description_en": "A cover with a hidden zip, 45 cm. Woven by artisans in Sadu patterns.",
+    "images": [
+      "/products/weaving.svg",
+      "/products/weaving.svg"
+    ],
+    "badges": [
+      "handmade",
+      "new"
+    ],
+    "created": "2026-06-03"
+  },
+  {
+    "id": "p33",
+    "slug": "sadu-handbag",
+    "name_ar": "حقيبة يد سدو",
+    "name_en": "Sadu Handbag",
+    "category": "weaving",
+    "price": 260,
+    "rating": 4.5,
+    "reviews_count": 28,
+    "stock": 14,
+    "box_slots": 1,
+    "description_ar": "حقيبة مبطنة بقماش قطني. نسجه حرفيون بأنماط السدو.",
+    "description_en": "A bag lined with cotton. Woven by artisans in Sadu patterns.",
+    "images": [
+      "/products/weaving.svg",
+      "/products/weaving.svg",
+      "/products/weaving.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-05-30"
+  },
+  {
+    "id": "p34",
+    "slug": "sadu-table-runner",
+    "name_ar": "مفرش طاولة سدو",
+    "name_en": "Sadu Table Runner",
+    "category": "weaving",
+    "price": 140,
+    "rating": 4.4,
+    "reviews_count": 39,
+    "stock": 20,
+    "box_slots": 1,
+    "variants": [
+      {
+        "id": "s",
+        "label_ar": "صغير",
+        "label_en": "Small",
+        "delta": 0
+      },
+      {
+        "id": "m",
+        "label_ar": "وسط",
+        "label_en": "Medium",
+        "delta": 35
+      },
+      {
+        "id": "l",
+        "label_ar": "كبير",
+        "label_en": "Large",
+        "delta": 85
+      }
+    ],
+    "description_ar": "مفرش طويل بحواف مزينة. نسجه حرفيون بأنماط السدو.",
+    "description_en": "A long runner with decorated edges. Woven by artisans in Sadu patterns.",
+    "images": [
+      "/products/weaving.svg"
+    ],
+    "badges": [
+      "handmade"
+    ],
+    "created": "2026-05-26"
+  },
+  {
+    "id": "p35",
+    "slug": "woven-wool-belt",
+    "name_ar": "حزام صوف منسوج",
+    "name_en": "Woven Wool Belt",
+    "category": "weaving",
+    "price": 55,
+    "rating": 4.1,
+    "reviews_count": 17,
+    "stock": 2,
+    "box_slots": 1,
+    "description_ar": "حزام ثابت اللون بإبزيم معدني. نسجه حرفيون بأنماط السدو.",
+    "description_en": "A colour-fast belt with a metal buckle. Woven by artisans in Sadu patterns.",
+    "images": [
+      "/products/weaving.svg",
+      "/products/weaving.svg"
+    ],
+    "created": "2026-05-22"
+  },
+  {
+    "id": "p36",
+    "slug": "sadu-coaster-set",
+    "name_ar": "طقم حاملات أكواب سدو",
+    "name_en": "Sadu Coaster Set",
+    "category": "weaving",
+    "price": 38,
+    "rating": 3.5,
+    "reviews_count": 26,
+    "stock": 90,
+    "box_slots": 1,
+    "description_ar": "ست قطع بنقوش متنوعة. نسجه حرفيون بأنماط السدو.",
+    "description_en": "Six pieces in varied patterns. Woven by artisans in Sadu patterns.",
+    "images": [
+      "/products/weaving.svg",
+      "/products/weaving.svg",
+      "/products/weaving.svg"
+    ],
+    "created": "2026-05-18"
+  }
+]

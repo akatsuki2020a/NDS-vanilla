@@ -75,6 +75,9 @@ STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').is_dir() else 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+SESSION_COOKIE_AGE = 900  # 15 minutes idle
+SESSION_SAVE_EVERY_REQUEST = True
+
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'my_applications'
 LOGOUT_REDIRECT_URL = 'home'

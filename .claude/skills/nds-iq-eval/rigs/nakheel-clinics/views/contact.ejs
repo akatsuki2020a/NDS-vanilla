@@ -1,0 +1,389 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+    <main>
+        <section class="nds-hero-section nds-sub nds-aside" aria-label="Page hero">
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" hidden>
+        <ol class="nds-breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li class="nds-truncate" aria-current="page">Contact</li>
+        </ol>
+    </nav>
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <div class="nds-section-action nds-minimal">
+            <div class="nds-share nds-dropmenu">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger"
+                    aria-label="Share Page">
+                    <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
+                    <span class="nds-label">Share Page</span>
+                </button>
+                <div class="nds-dropmenu-menu" hidden>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                        <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
+                        <span class="nds-label">X</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button"
+                        aria-label="Share on LinkedIn">
+                        <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
+                        <span class="nds-label">LinkedIn</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button"
+                        aria-label="Share on WhatsApp">
+                        <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
+                        <span class="nds-label">WhatsApp</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
+                        data-label="Link Copied!" data-message="Page link copied to clipboard" data-no-auto-close>
+                        <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
+                        <span class="nds-label">Copy Link</span>
+                    </button>
+                </div>
+            </div>
+            </div>
+            <h1 class="nds-section-title">Contact us</h1>
+            <p class="nds-section-description">Questions about an appointment, your results or billing? Send us a message and we will reply within one working day.</p>
+        </div>
+    </div>
+</section>
+<div class="nds-content-layout nds-wSideInfo">
+    <div class="nds-main-content">
+        <section id="contactForm" class="nds-content-section nds-sideinfo-section">
+    <div class="nds-section-body">
+        <div class="nds-info-content">
+            <form id="contact-form" class="nds-form" data-ajax>
+                <div class="nds-grid" style="--max-col:2;--mid-col:2;--min-col:1;">
+                    <!-- First Name -->
+                    <div class="nds-form-container nds-darker" data-required>
+                        <div class="nds-form-header">
+                            <label for="contact-first-name">
+                                <span class="nds-label">First Name</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <input type="text" id="contact-first-name" name="firstName" class="nds-input" placeholder="Type your first name" autocomplete="given-name" required />
+                            <div class="nds-form-action">
+                                <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target hidden></div>
+                    </div>
+                    <!-- Last Name -->
+                    <div class="nds-form-container nds-darker" data-required>
+                        <div class="nds-form-header">
+                            <label for="contact-last-name">
+                                <span class="nds-label">Last Name</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <input type="text" id="contact-last-name" name="lastName" class="nds-input" placeholder="Type your last name" autocomplete="family-name" required />
+                            <div class="nds-form-action">
+                                <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target hidden></div>
+                    </div>
+                    <!-- Email -->
+                    <div class="nds-form-container nds-darker" data-required>
+                        <div class="nds-form-header">
+                            <label for="contact-email">
+                                <span class="nds-label">Email</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <input type="email" id="contact-email" name="email" class="nds-input" placeholder="name@example.com" autocomplete="email" required />
+                            <div class="nds-form-action">
+                                <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target hidden></div>
+                    </div>
+                    <!-- Phone with country code prefix -->
+                    <div class="nds-form-container nds-darker" data-required>
+                        <div class="nds-form-header">
+                            <label for="contact-phone">
+                                <span class="nds-label">Phone</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control nds-ltr">
+                            <div class="nds-form-action nds-prefix nds-dropmenu" data-select-name="country-code" data-select-value="+966">
+                                <button type="button" class="nds-btn nds-subtle nds-menu-btn nds-dropmenu-trigger">
+                                    <span class="nds-label">+966</span>
+                                </button>
+                                <div class="nds-dropmenu-menu" hidden="">
+                                    <div class="nds-dropmenu-scroll">
+                                        <!-- GCC — home region first -->
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+966" data-trigger-label="+966">
+                                            <span class="nds-label">Saudi Arabia (+966)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+971" data-trigger-label="+971">
+                                            <span class="nds-label">United Arab Emirates (+971)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+973" data-trigger-label="+973">
+                                            <span class="nds-label">Bahrain (+973)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+974" data-trigger-label="+974">
+                                            <span class="nds-label">Qatar (+974)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+965" data-trigger-label="+965">
+                                            <span class="nds-label">Kuwait (+965)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+968" data-trigger-label="+968">
+                                            <span class="nds-label">Oman (+968)</span>
+                                        </button>
+                                        <!-- Wider Arab world (alphabetical) -->
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+213" data-trigger-label="+213">
+                                            <span class="nds-label">Algeria (+213)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+20" data-trigger-label="+20">
+                                            <span class="nds-label">Egypt (+20)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+964" data-trigger-label="+964">
+                                            <span class="nds-label">Iraq (+964)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+962" data-trigger-label="+962">
+                                            <span class="nds-label">Jordan (+962)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+961" data-trigger-label="+961">
+                                            <span class="nds-label">Lebanon (+961)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+218" data-trigger-label="+218">
+                                            <span class="nds-label">Libya (+218)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+212" data-trigger-label="+212">
+                                            <span class="nds-label">Morocco (+212)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+970" data-trigger-label="+970">
+                                            <span class="nds-label">Palestine (+970)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+249" data-trigger-label="+249">
+                                            <span class="nds-label">Sudan (+249)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+963" data-trigger-label="+963">
+                                            <span class="nds-label">Syria (+963)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+216" data-trigger-label="+216">
+                                            <span class="nds-label">Tunisia (+216)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+967" data-trigger-label="+967">
+                                            <span class="nds-label">Yemen (+967)</span>
+                                        </button>
+                                        <!-- Major expat communities + global -->
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+880" data-trigger-label="+880">
+                                            <span class="nds-label">Bangladesh (+880)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+91" data-trigger-label="+91">
+                                            <span class="nds-label">India (+91)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+62" data-trigger-label="+62">
+                                            <span class="nds-label">Indonesia (+62)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+977" data-trigger-label="+977">
+                                            <span class="nds-label">Nepal (+977)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+92" data-trigger-label="+92">
+                                            <span class="nds-label">Pakistan (+92)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+63" data-trigger-label="+63">
+                                            <span class="nds-label">Philippines (+63)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+94" data-trigger-label="+94">
+                                            <span class="nds-label">Sri Lanka (+94)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+90" data-trigger-label="+90">
+                                            <span class="nds-label">Turkey (+90)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+44" data-trigger-label="+44">
+                                            <span class="nds-label">United Kingdom (+44)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="+1" data-trigger-label="+1">
+                                            <span class="nds-label">United States (+1)</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="tel" id="contact-phone" name="phone" class="nds-input nds-phone" placeholder="5X XXX XXXX" autocomplete="tel-national" inputmode="numeric" />
+                            <div class="nds-form-action">
+                                <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden="">
+                                    <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target="" hidden=""></div>
+                    </div>
+                    <!-- Subject -->
+                    <div class="nds-form-container nds-darker">
+                        <div class="nds-form-header">
+                            <label for="contact-subject">
+                                <span class="nds-label">Subject</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <input type="text" id="contact-subject" name="subject" class="nds-input" placeholder="Type your subject" />
+                            <div class="nds-form-action">
+                                <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target hidden></div>
+                    </div>
+                    <!-- Category -->
+                    <div class="nds-form-container nds-darker nds-select">
+                        <div class="nds-form-header">
+                            <label for="contact-category">
+                                <span class="nds-label">Category</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <input type="text" id="contact-category" class="nds-input nds-select-input" placeholder="Appointment question" readonly />
+                            <input type="hidden" name="category" class="nds-select-value" />
+                            <div class="nds-select-dropdown" hidden>
+                                <div class="nds-select-options">
+                                    <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="appointment">
+                                        <span class="nds-option-text">Appointment question</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="results">
+                                        <span class="nds-option-text">Lab results</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="billing">
+                                        <span class="nds-option-text">Billing and insurance</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="feedback">
+                                        <span class="nds-option-text">Feedback</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="other">
+                                        <span class="nds-option-text">Other</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target hidden></div>
+                    </div>
+                    <!-- How Can We Help (textarea) -->
+                    <div class="nds-form-container nds-darker nds-textarea" data-required>
+                        <div class="nds-form-header">
+                            <label for="contact-message">
+                                <span class="nds-label">How Can We Help?</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <textarea id="contact-message" name="message" class="nds-textarea" placeholder="Tell us a bit more about your request..." rows="5" required></textarea>
+                        </div>
+                        <div class="nds-form-footer" data-feedback-target hidden></div>
+                    </div>
+                </div>
+                <div class="nds-form-actions">
+                    <button type="submit" class="nds-btn nds-primary nds-lg">
+                        <span class="nds-label">Send message</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <aside class="nds-sideinfo nds-card nds-stroke nds-shadow" aria-label="Contact information">
+            <div class="nds-contact-group">
+                <h3 class="nds-card-title">Contact Al-Nakheel Clinics</h3>
+                <dl class="nds-definition-list">
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="nds-icon nds-hgi-smart-phone-01"></i>
+                            <span class="nds-label">Phone</span>
+                        </dt>
+                        <dd>
+                            <a href="tel:920012345" class="nds-primary">
+                                <span class="nds-label">920012345</span>
+                            </a>
+                            <button type="button" class="nds-btn nds-subtle nds-sm nds-icon-only nds-copy" data-copy="920012345" aria-label="Copy phone number">
+                                <i class="nds-icon nds-hgi-copy-01"></i>
+                            </button>
+                        </dd>
+                    </div>
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="nds-icon nds-hgi-mail-01"></i>
+                            <span class="nds-label">Email</span>
+                        </dt>
+                        <dd>
+                            <a href="mailto:care@nakheelclinics.example" class="nds-primary">
+                                <span class="nds-label">care@nakheelclinics.example</span>
+                            </a>
+                            <button type="button" class="nds-btn nds-subtle nds-sm nds-icon-only nds-copy" data-copy="care@nakheelclinics.example" aria-label="Copy email">
+                                <i class="nds-icon nds-hgi-copy-01"></i>
+                            </button>
+                        </dd>
+                    </div>
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="nds-icon nds-hgi-location-01"></i>
+                            <span class="nds-label">Location</span>
+                        </dt>
+                        <dd>
+                            <a href="https://maps.google.com/?q=Riyadh" target="_blank" rel="noopener" class="nds-primary">
+                                <span class="nds-label">Riyadh</span>
+                            </a>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+            <hr class="nds-divider" />
+            <div class="nds-contact-group">
+                <h3 class="nds-card-title">Follow us</h3>
+                <div class="nds-social-links">
+                    <a href="https://x.com/" target="_blank" rel="noopener" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on X">
+                        <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://linkedin.com/" target="_blank" rel="noopener" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on LinkedIn">
+                        <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://instagram.com/" target="_blank" rel="noopener" class="nds-btn nds-subtle nds-icon-only nds-md" aria-label="Follow us on Instagram">
+                        <i class="hgi hgi-stroke hgi-instagram"></i>
+                    </a>
+                </div>
+            </div>
+            <hr class="nds-divider" />
+            <div class="nds-contact-group">
+                <h3 class="nds-card-title">Emergency contacts</h3>
+                <dl class="nds-definition-list nds-tableView">
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="hgi hgi-stroke hgi-ambulance"></i>
+                            <span class="nds-label">Ambulance</span>
+                        </dt>
+                        <dd>
+                            <a href="tel:997" class="nds-primary">
+                                <span class="nds-label">997</span>
+                            </a>
+                            <button type="button" class="nds-btn nds-subtle nds-sm nds-icon-only nds-copy" data-copy="997" aria-label="Copy ambulance number">
+                                <i class="nds-icon nds-hgi-copy-01"></i>
+                            </button>
+                        </dd>
+                    </div>
+                    <div class="nds-definition-item">
+                        <dt>
+                            <i class="hgi hgi-stroke hgi-call-02"></i>
+                            <span class="nds-label">Health hotline</span>
+                        </dt>
+                        <dd>
+                            <a href="tel:937" class="nds-primary">
+                                <span class="nds-label">937</span>
+                            </a>
+                            <button type="button" class="nds-btn nds-subtle nds-sm nds-icon-only nds-copy" data-copy="937" aria-label="Copy health hotline number">
+                                <i class="nds-icon nds-hgi-copy-01"></i>
+                            </button>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </aside>
+    </div>
+</section>
+    </div>
+</div>
+    </main><!-- footer -->
+<%- include('partials/footer') %>
+<%- include('partials/scripts', { js: ['/js/contact.js'] }) %>

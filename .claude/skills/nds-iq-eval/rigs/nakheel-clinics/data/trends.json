@@ -1,0 +1,772 @@
+{
+  "Hemoglobin": {
+    "unit": "g/dL",
+    "range": {
+      "low": 12.0,
+      "high": 15.5
+    },
+    "points": [
+      {
+        "date": "2024-11-12",
+        "value": 11.6,
+        "flag": "low"
+      },
+      {
+        "date": "2025-04-08",
+        "value": 12.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-09-09",
+        "value": 12.6,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-01-20",
+        "value": 13.0,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 12.9,
+        "flag": "normal"
+      }
+    ]
+  },
+  "White blood cells": {
+    "unit": "10^3/µL",
+    "range": {
+      "low": 4.0,
+      "high": 11.0
+    },
+    "points": [
+      {
+        "date": "2024-11-09",
+        "value": 6.8,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-02-27",
+        "value": 6.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-06-17",
+        "value": 6.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-10-05",
+        "value": 6.0,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-02",
+        "value": 6.6,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 6.4,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Platelets": {
+    "unit": "10^3/µL",
+    "range": {
+      "low": 150.0,
+      "high": 400.0
+    },
+    "points": [
+      {
+        "date": "2024-11-09",
+        "value": 287,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-02-27",
+        "value": 257,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-06-17",
+        "value": 279,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-10-05",
+        "value": 252,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-02",
+        "value": 276,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 268,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Hematocrit": {
+    "unit": "%",
+    "range": {
+      "low": 36.0,
+      "high": 46.0
+    },
+    "points": [
+      {
+        "date": "2024-11-09",
+        "value": 41.2,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-02-27",
+        "value": 37.0,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-06-17",
+        "value": 40.0,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-10-05",
+        "value": 36.2,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-02",
+        "value": 39.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 38.5,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Total cholesterol": {
+    "unit": "mg/dL",
+    "range": {
+      "low": null,
+      "high": 200.0
+    },
+    "points": [
+      {
+        "date": "2024-11-09",
+        "value": 227,
+        "flag": "high"
+      },
+      {
+        "date": "2025-02-27",
+        "value": 204,
+        "flag": "high"
+      },
+      {
+        "date": "2025-06-17",
+        "value": 220,
+        "flag": "high"
+      },
+      {
+        "date": "2025-10-05",
+        "value": 199,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-02",
+        "value": 218,
+        "flag": "high"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 212,
+        "flag": "high"
+      }
+    ]
+  },
+  "LDL cholesterol": {
+    "unit": "mg/dL",
+    "range": {
+      "low": null,
+      "high": 130.0
+    },
+    "points": [
+      {
+        "date": "2024-11-12",
+        "value": 128,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-03-04",
+        "value": 134,
+        "flag": "high"
+      },
+      {
+        "date": "2025-07-15",
+        "value": 141,
+        "flag": "high"
+      },
+      {
+        "date": "2025-11-20",
+        "value": 133,
+        "flag": "high"
+      },
+      {
+        "date": "2026-02-24",
+        "value": 126,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 138,
+        "flag": "high"
+      }
+    ]
+  },
+  "HDL cholesterol": {
+    "unit": "mg/dL",
+    "range": {
+      "low": 50.0,
+      "high": null
+    },
+    "points": [
+      {
+        "date": "2024-11-09",
+        "value": 58,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-02-27",
+        "value": 52,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-06-17",
+        "value": 56,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-10-05",
+        "value": 51,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-02",
+        "value": 56,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 54,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Triglycerides": {
+    "unit": "mg/dL",
+    "range": {
+      "low": null,
+      "high": 150.0
+    },
+    "points": [
+      {
+        "date": "2024-11-09",
+        "value": 126,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-02-27",
+        "value": 113,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-06-17",
+        "value": 123,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-10-05",
+        "value": 111,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-02",
+        "value": 122,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 118,
+        "flag": "normal"
+      }
+    ]
+  },
+  "HbA1c": {
+    "unit": "%",
+    "range": {
+      "low": 4.0,
+      "high": 5.6
+    },
+    "points": [
+      {
+        "date": "2024-11-12",
+        "value": 5.9,
+        "flag": "high"
+      },
+      {
+        "date": "2025-02-18",
+        "value": 5.8,
+        "flag": "high"
+      },
+      {
+        "date": "2025-06-10",
+        "value": 5.7,
+        "flag": "high"
+      },
+      {
+        "date": "2025-10-21",
+        "value": 5.6,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-02-03",
+        "value": 5.5,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 5.4,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Fasting glucose": {
+    "unit": "mg/dL",
+    "range": {
+      "low": 70.0,
+      "high": 99.0
+    },
+    "points": [
+      {
+        "date": "2024-11-12",
+        "value": 104,
+        "flag": "high"
+      },
+      {
+        "date": "2025-03-04",
+        "value": 101,
+        "flag": "high"
+      },
+      {
+        "date": "2025-07-15",
+        "value": 97,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-11-20",
+        "value": 94,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 92,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Vitamin D": {
+    "unit": "ng/mL",
+    "range": {
+      "low": 30.0,
+      "high": 100.0
+    },
+    "points": [
+      {
+        "date": "2024-10-22",
+        "value": 24,
+        "flag": "low"
+      },
+      {
+        "date": "2025-01-28",
+        "value": 28,
+        "flag": "low"
+      },
+      {
+        "date": "2025-05-13",
+        "value": 36,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-09-09",
+        "value": 41,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-01-20",
+        "value": 29,
+        "flag": "low"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 17,
+        "flag": "low"
+      }
+    ]
+  },
+  "TSH": {
+    "unit": "mIU/L",
+    "range": {
+      "low": 0.4,
+      "high": 4.0
+    },
+    "points": [
+      {
+        "date": "2024-12-03",
+        "value": 4.6,
+        "flag": "high"
+      },
+      {
+        "date": "2025-04-22",
+        "value": 3.8,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-08-12",
+        "value": 3.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-12-16",
+        "value": 2.6,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-03-10",
+        "value": 2.2,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 2.1,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Free T4": {
+    "unit": "ng/dL",
+    "range": {
+      "low": 0.8,
+      "high": 1.8
+    },
+    "points": [
+      {
+        "date": "2024-12-22",
+        "value": 1.2,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-04-11",
+        "value": 1.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-07-30",
+        "value": 1.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-11-17",
+        "value": 1.0,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-03-17",
+        "value": 1.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 1.1,
+        "flag": "normal"
+      }
+    ]
+  },
+  "ALT": {
+    "unit": "U/L",
+    "range": {
+      "low": 7.0,
+      "high": 56.0
+    },
+    "points": [
+      {
+        "date": "2024-12-22",
+        "value": 26,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-04-11",
+        "value": 23,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-07-30",
+        "value": 25,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-11-17",
+        "value": 23,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-03-17",
+        "value": 25,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 24,
+        "flag": "normal"
+      }
+    ]
+  },
+  "AST": {
+    "unit": "U/L",
+    "range": {
+      "low": 10.0,
+      "high": 40.0
+    },
+    "points": [
+      {
+        "date": "2024-12-22",
+        "value": 22,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-04-11",
+        "value": 20,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-07-30",
+        "value": 22,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-11-17",
+        "value": 20,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-03-17",
+        "value": 22,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 21,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Total bilirubin": {
+    "unit": "mg/dL",
+    "range": {
+      "low": 0.1,
+      "high": 1.2
+    },
+    "points": [
+      {
+        "date": "2024-12-22",
+        "value": 0.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-04-11",
+        "value": 0.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-07-30",
+        "value": 0.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-11-17",
+        "value": 0.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-03-17",
+        "value": 0.7,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 0.7,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Albumin": {
+    "unit": "g/dL",
+    "range": {
+      "low": 3.5,
+      "high": 5.0
+    },
+    "points": [
+      {
+        "date": "2024-12-22",
+        "value": 4.6,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-04-11",
+        "value": 4.1,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-07-30",
+        "value": 4.5,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-11-17",
+        "value": 4.0,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-03-17",
+        "value": 4.4,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 4.3,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Creatinine": {
+    "unit": "mg/dL",
+    "range": {
+      "low": 0.6,
+      "high": 1.1
+    },
+    "points": [
+      {
+        "date": "2025-02-10",
+        "value": 0.9,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-05-31",
+        "value": 0.8,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-09-18",
+        "value": 0.8,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-01-06",
+        "value": 0.8,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-05-06",
+        "value": 0.8,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-09-03",
+        "value": 0.8,
+        "flag": "normal"
+      }
+    ]
+  },
+  "Urea": {
+    "unit": "mg/dL",
+    "range": {
+      "low": 15.0,
+      "high": 45.0
+    },
+    "points": [
+      {
+        "date": "2025-02-10",
+        "value": 28,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-05-31",
+        "value": 25,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-09-18",
+        "value": 27,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-01-06",
+        "value": 24,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-05-06",
+        "value": 27,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-09-03",
+        "value": 26,
+        "flag": "normal"
+      }
+    ]
+  },
+  "eGFR": {
+    "unit": "mL/min",
+    "range": {
+      "low": 90.0,
+      "high": null
+    },
+    "points": [
+      {
+        "date": "2025-02-10",
+        "value": 111,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-05-31",
+        "value": 100,
+        "flag": "normal"
+      },
+      {
+        "date": "2025-09-18",
+        "value": 108,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-01-06",
+        "value": 98,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-05-06",
+        "value": 107,
+        "flag": "normal"
+      },
+      {
+        "date": "2026-09-03",
+        "value": 104,
+        "flag": "normal"
+      }
+    ]
+  }
+}

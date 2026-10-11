@@ -114,6 +114,7 @@ class ApplicationForm(forms.ModelForm):
 
 
 class DecisionForm(forms.Form):
+    status_field = 'decision'  # the field that holds the chosen status
     decision = forms.ChoiceField()
     inspection_date = forms.DateTimeField(required=False)
     note = forms.CharField(required=False, max_length=300, widget=forms.Textarea)
@@ -130,9 +131,17 @@ class DecisionForm(forms.Form):
         self.fields['note'].help_text = COPY[lang]['review_note_help']
         self.fields['note'].error_messages['max_length'] = t('err_note_length')
 
+    def allowed(self, status):
+        return True
+
     def clean(self):
         data = super().clean()
-        decision = data.get('decision')
+        decision = data.get(self.status_field)
+        if not decision:
+            return data
+        if not self.allowed(decision):
+            self.add_error(self.status_field, t('err_move_not_allowed'))
+            return data
         if decision == Status.INSPECTION_SCHEDULED:
             when = data.get('inspection_date')
             if not when and 'inspection_date' not in self.errors:
@@ -142,3 +151,32 @@ class DecisionForm(forms.Form):
         if decision == Status.REJECTED and not data.get('note') and 'note' not in self.errors:
             self.add_error('note', t('err_note_required'))
         return data
+
+
+# status -> statuses a board card may move to
+MOVES = {
+    Status.SUBMITTED: [Status.UNDER_REVIEW],
+    Status.UNDER_REVIEW: [Status.INSPECTION_SCHEDULED, Status.REJECTED],
+    Status.INSPECTION_SCHEDULED: [Status.APPROVED, Status.REJECTED],
+}
+
+
+class MoveForm(DecisionForm):
+    """Moving a board card: DecisionForm with the status in `to`, limited to MOVES."""
+    status_field = 'to'
+    field_order = ['to', 'inspection_date', 'note']
+    to = forms.ChoiceField(choices=Status.choices)
+
+    def __init__(self, *args, application, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.application = application
+        del self.fields['decision']
+        lang = lang_code()
+        self.fields['to'].choices = [(s.value, COPY[lang][f'status_{s.value}']) for s in Status]
+        self.fields['to'].label = COPY[lang]['move_to']
+        self.fields['inspection_date'].label = COPY[lang]['move_inspection_date']
+        self.fields['note'].label = COPY[lang]['move_note']
+        self.fields['note'].help_text = COPY[lang]['move_note_help']
+
+    def allowed(self, status):
+        return status in MOVES.get(self.application.status, [])

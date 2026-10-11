@@ -1,0 +1,315 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+    <main>
+        <section class="nds-hero-section" aria-label="Hero Section">
+    <div class="nds-swiper nds-hero nds-oncolor nds-full-width" style="--total: 2">
+        <div class="nds-swiper-wrapper">
+            <div class="nds-swiper-slide nds-content-wrapper">
+                <div class="nds-hero-image-wrapper"
+                    style="--overlay:0.7; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    <picture>
+                        <source media="(max-width: 768px)" srcset="/nds/img/riyadhcenter3s.webp">
+                        <img src="/nds/img/riyadhcenter_ai.webp" class="nds-hero-image" alt=""
+                            style="width: 100%; height: 100%; object-fit: cover; object-position: center 80%; display: block;"
+                            fetchpriority="high">
+                    </picture>
+                </div>
+                <div class="nds-section-body">
+                    <h1 class="nds-section-title">Care that feels like family</h1>
+                    <p class="nds-section-description">Six specialties, four branches and doctors who take the time to listen. Book your visit online in under two minutes.</p>
+                    <div style="display:flex;gap:var(--spacing-md);flex-wrap:wrap;">
+                        <a href="/book" class="nds-btn nds-primary nds-oncolor nds-lg"><span class="nds-label">Book an appointment</span></a>
+                        <a href="/clinics" class="nds-btn nds-secondary-outline nds-oncolor nds-lg"><span class="nds-label">Find a clinic</span></a>
+                    </div>
+                </div>
+            </div>
+            <div class="nds-swiper-slide nds-content-wrapper" hidden>
+                <div class="nds-hero-image-wrapper"
+                    style="--overlay:0.6; position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+                    <picture>
+                        <img data-src="/nds/img/riyadhcenter.webp" class="nds-hero-image" alt=""
+                            style="width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block;">
+                    </picture>
+                </div>
+                <div class="nds-section-body">
+                    <h2 class="nds-section-title">Open six days a week</h2>
+                    <p class="nds-section-description">Visit us in Riyadh, Jeddah or Dammam. Evening appointments are available at every branch.</p>
+                    <a href="/contact" class="nds-btn nds-secondary-outline nds-oncolor nds-lg"><span class="nds-label">Contact us</span></a>
+                </div>
+            </div>
+        </div>
+        <div class="nds-swiper-navigation">
+            <div class="nds-swiper-buttons">
+                <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-prev"
+                    aria-label="Previous slide" hidden></button>
+                <button class="nds-btn nds-subtle nds-icon-only nds-oncolor nds-next"
+                    aria-label="Next slide" hidden></button>
+            </div>
+            <div class="nds-swiper-pagination" hidden></div>
+        </div>
+    </div>
+</section>
+<div class="nds-content-layout">
+    <div class="nds-main-content">
+        <section id="services" class="nds-content-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <h2 class="nds-section-title">How can we help?</h2>
+            <p class="nds-section-description">Everything you need for your next visit, in one place.</p>
+        </div>
+        <div class="nds-section-body">
+            <div class="nds-grid" style="--max-col:3;--mid-col:1;--min-col:1;">
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-xl">
+                                <i class="hgi hgi-stroke hgi-hospital-01"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Find a clinic</h3>
+                            <p class="nds-card-description">Search 18 clinics by specialty or branch and see the next free slot.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics" class="nds-btn nds-primary">
+                                <span class="nds-label">Browse clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-xl">
+                                <i class="hgi hgi-stroke hgi-calendar-add-01"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Book an appointment</h3>
+                            <p class="nds-card-description">Choose your doctor, pick a time and confirm in a few steps.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/book" class="nds-btn nds-primary">
+                                <span class="nds-label">Book now</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-xl">
+                                <i class="hgi hgi-stroke hgi-task-done-01"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">My appointments</h3>
+                            <p class="nds-card-description">See your upcoming and past visits, or cancel a booking.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/appointments" class="nds-btn nds-primary">
+                                <span class="nds-label">View appointments</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="specialties" class="nds-content-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <h2 class="nds-section-title">Our specialties</h2>
+            <p class="nds-section-description">Choose a specialty to see the clinics that offer it.</p>
+        </div>
+        <div class="nds-section-body">
+            <div class="nds-grid" style="--max-col:3;--mid-col:2;--min-col:1;">
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-lg">
+                                <i class="hgi hgi-stroke hgi-stethoscope-02"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Family Medicine</h3>
+                            <p class="nds-card-description">Check-ups, vaccinations and long-term care for every age.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics?specialty=Family%20Medicine" class="nds-btn nds-primary">
+                                <span class="nds-label">View clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-lg">
+                                <i class="hgi hgi-stroke hgi-baby-01"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Pediatrics</h3>
+                            <p class="nds-card-description">Growth, vaccines and illness care for newborns to teenagers.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics?specialty=Pediatrics" class="nds-btn nds-primary">
+                                <span class="nds-label">View clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-lg">
+                                <i class="hgi hgi-stroke hgi-face-id"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Dermatology</h3>
+                            <p class="nds-card-description">Skin, hair and laser treatment from specialist dermatologists.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics?specialty=Dermatology" class="nds-btn nds-primary">
+                                <span class="nds-label">View clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-lg">
+                                <i class="hgi hgi-stroke hgi-tooth"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Dentistry</h3>
+                            <p class="nds-card-description">Cleaning, fillings, braces and root canal treatment.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics?specialty=Dentistry" class="nds-btn nds-primary">
+                                <span class="nds-label">View clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-lg">
+                                <i class="hgi hgi-stroke hgi-heart-check"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Cardiology</h3>
+                            <p class="nds-card-description">Heart checks, echocardiography and rehabilitation.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics?specialty=Cardiology" class="nds-btn nds-primary">
+                                <span class="nds-label">View clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-card nds-stroke">
+                    <div class="nds-card-header">
+                        <div class="nds-card-featured-icon">
+                            <span class="nds-featured-icon nds-circle nds-lg">
+                                <i class="hgi hgi-stroke hgi-bone-01"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="nds-card-content">
+                        <div class="nds-card-text">
+                            <h3 class="nds-card-title">Orthopedics</h3>
+                            <p class="nds-card-description">Joints, fractures, spine and sports injuries.</p>
+                        </div>
+                        <div class="nds-card-actions">
+                            <a href="/clinics?specialty=Orthopedics" class="nds-btn nds-primary">
+                                <span class="nds-label">View clinics</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="why" class="nds-content-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <h2 class="nds-section-title">Why Al-Nakheel</h2>
+            <p class="nds-section-description">What patients tell us they value most.</p>
+        </div>
+        <div class="nds-section-body">
+            <div class="nds-definition-list nds-divided nds-grid" style="--max-col:2;--mid-col:1;--min-col:1; --dl-icon-size:32px; --dl-title-FS: var(--typo-text-xl-FS); --row-gap: 24px; --col-gap: 32px;">
+                <div class="nds-definition-item">
+                    <span class="nds-item-title">
+                        <i class="hgi hgi-stroke hgi-clock-01"></i>
+                        <span class="nds-label">Short waits</span>
+                    </span>
+                    <p class="nds-item-desc">Every appointment has a fixed time slot, so you are seen when you arrive and not after a queue.</p>
+                </div>
+                <div class="nds-definition-item">
+                    <span class="nds-item-title">
+                        <i class="hgi hgi-stroke hgi-user-multiple-02"></i>
+                        <span class="nds-label">Experienced doctors</span>
+                    </span>
+                    <p class="nds-item-desc">Our 24 doctors are Board-certified and many have trained abroad. Read each profile before you book.</p>
+                </div>
+                <div class="nds-definition-item">
+                    <span class="nds-item-title">
+                        <i class="hgi hgi-stroke hgi-shield-01"></i>
+                        <span class="nds-label">Insurance accepted</span>
+                    </span>
+                    <p class="nds-item-desc">Most clinics work with the main insurers. You can add your policy details while you book.</p>
+                </div>
+                <div class="nds-definition-item">
+                    <span class="nds-item-title">
+                        <i class="hgi hgi-stroke hgi-location-01"></i>
+                        <span class="nds-label">Four branches</span>
+                    </span>
+                    <p class="nds-item-desc">Two in Riyadh, one in Jeddah and one in Dammam, each with free parking.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section id="start" class="nds-content-section nds-brand">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <h2 class="nds-section-title">Ready to see a doctor?</h2>
+            <p class="nds-section-description">Booking takes less than two minutes and you can cancel any time before your visit.</p>
+        </div>
+        <div class="nds-section-body">
+            <a href="/book" class="nds-btn nds-primary nds-lg">
+                <span class="nds-label">Book an appointment</span>
+            </a>
+        </div>
+    </div>
+</section>
+    </div>
+</div>
+    </main><!-- footer -->
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>

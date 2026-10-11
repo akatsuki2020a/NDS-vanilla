@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" role="img" aria-label="Al-Nakheel Clinics">
+  <rect width="40" height="40" rx="9" fill="#166a45"/>
+  <path d="M20 33V17" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+  <path d="M20 17c-1-5-5-8-10-8 1 5 5 8 10 8zM20 17c1-5 5-8 10-8-1 5-5 8-10 8zM20 17c-4-2-7-1-9 3 4 1 7 0 9-3zM20 17c4-2 7-1 9 3-4 1-7 0-9-3z" fill="#fff"/>
+</svg>

@@ -1,0 +1,160 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+    <main>
+        <section class="nds-hero-section nds-sub " aria-label="Page hero">
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" hidden>
+        <ol class="nds-breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li class="nds-truncate" aria-current="page">Our Clinics</li>
+        </ol>
+    </nav>
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <div class="nds-section-action nds-minimal">
+            <div class="nds-share nds-dropmenu">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger"
+                    aria-label="Share Page">
+                    <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
+                    <span class="nds-label">Share Page</span>
+                </button>
+                <div class="nds-dropmenu-menu" hidden>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                        <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
+                        <span class="nds-label">X</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button"
+                        aria-label="Share on LinkedIn">
+                        <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
+                        <span class="nds-label">LinkedIn</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button"
+                        aria-label="Share on WhatsApp">
+                        <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
+                        <span class="nds-label">WhatsApp</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
+                        data-label="Link Copied!" data-message="Page link copied to clipboard" data-no-auto-close>
+                        <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
+                        <span class="nds-label">Copy Link</span>
+                    </button>
+                </div>
+            </div>
+            </div>
+            <h1 class="nds-section-title">Our Clinics</h1>
+            <p class="nds-section-description">Find a clinic by specialty or branch and see the next free slot</p>
+        </div>
+    </div>
+</section>
+<div class="nds-content-layout ">
+    <div class="nds-main-content">
+        <section id="clinicsList" class="nds-content-section">
+    <div class="nds-section-wrapper">
+        <div class="nds-form-container nds-search-box" id="clinicSearch">
+            <div class="nds-search-content">
+                <div class="nds-form-control">
+                    <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
+                    <input id="filterSearch" type="text" class="nds-search-input" name="search" autocomplete="on" placeholder="Search clinics..." />
+                    <div class="nds-form-action">
+                        <button class="nds-btn nds-subtle nds-clear" hidden><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
+                        <button class="nds-btn nds-subtle nds-voice-input"><i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i></button>
+                    </div>
+                </div>
+                <button class="nds-btn nds-primary nds-search-btn" type="button">
+                    <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
+                    <span class="nds-label">Search</span>
+                </button>
+            </div>
+        </div>
+        <div class="nds-grid" id="clinicFilters" style="--max-col:3;--mid-col:3;--min-col:1;">
+            <div class="nds-form-container nds-select">
+                <div class="nds-form-header">
+                    <label for="clinicSpecialty">
+                        <span class="nds-label">Specialty</span>
+                    </label>
+                </div>
+                <div class="nds-form-control">
+                    <input type="text" id="clinicSpecialty" class="nds-input nds-select-input" placeholder="All specialties" readonly />
+                    <input type="hidden" name="specialty" class="nds-select-value" />
+                    <div class="nds-select-dropdown" hidden>
+                        <div class="nds-select-options">
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="">
+                                <span class="nds-option-text">All specialties</span>
+                            </button>
+<%_ specialties.forEach(function (s) { -%>
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="<%= s %>">
+                                <span class="nds-option-text"><%= s %></span>
+                            </button>
+<%_ }); -%>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-form-footer" data-feedback-target hidden></div>
+            </div>
+            <div class="nds-form-container nds-select">
+                <div class="nds-form-header">
+                    <label for="clinicBranch">
+                        <span class="nds-label">Branch</span>
+                    </label>
+                </div>
+                <div class="nds-form-control">
+                    <input type="text" id="clinicBranch" class="nds-input nds-select-input" placeholder="All branches" readonly />
+                    <input type="hidden" name="branch" class="nds-select-value" />
+                    <div class="nds-select-dropdown" hidden>
+                        <div class="nds-select-options">
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="">
+                                <span class="nds-option-text">All branches</span>
+                            </button>
+<%_ branches.forEach(function (b) { -%>
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="<%= b %>">
+                                <span class="nds-option-text"><%= b %></span>
+                            </button>
+<%_ }); -%>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-form-footer" data-feedback-target hidden></div>
+            </div>
+            <div class="nds-form-container nds-select">
+                <div class="nds-form-header">
+                    <label for="clinicSort">
+                        <span class="nds-label">Sort by</span>
+                    </label>
+                </div>
+                <div class="nds-form-control">
+                    <input type="text" id="clinicSort" class="nds-input nds-select-input" placeholder="Best match" readonly />
+                    <input type="hidden" name="sort" class="nds-select-value" />
+                    <div class="nds-select-dropdown" hidden>
+                        <div class="nds-select-options">
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="">
+                                <span class="nds-option-text">Best match</span>
+                            </button>
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="-rating">
+                                <span class="nds-option-text">Rating: high to low</span>
+                            </button>
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="rating">
+                                <span class="nds-option-text">Rating: low to high</span>
+                            </button>
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="next_slot">
+                                <span class="nds-option-text">Earliest slot</span>
+                            </button>
+                            <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="name">
+                                <span class="nds-option-text">Name (A-Z)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-form-footer" data-feedback-target hidden></div>
+            </div>
+        </div>
+        <div class="nds-section-body">
+            <p class="clinic-count" id="clinicCount" role="status" aria-live="polite"></p>
+            <div id="clinicList" class="nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;"></div>
+            <nav class="nds-pagination" id="clinicPager" aria-label="Pagination" hidden></nav>
+        </div>
+    </div>
+</section>
+    </div>
+</div>
+    </main><!-- footer -->
+<%- include('partials/footer') %>
+<%- include('partials/scripts', { js: ['/js/clinics.js'] }) %>

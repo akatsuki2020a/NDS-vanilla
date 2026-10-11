@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" role="img" aria-label="فخار">
+  <rect width="800" height="800" fill="#b5653a"/>
+  <path d="M320 180h160v60c120 40 140 140 100 240-20 50-60 70-90 70H310c-30 0-70-20-90-70-40-100-20-200 100-240z" fill="#fff" fill-opacity=".85"/>
+  <text x="400" y="700" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-size="64" fill="#fff">فخار</text>
+</svg>

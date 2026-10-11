@@ -1,0 +1,32 @@
+[
+  {
+    "id": "dates",
+    "name_ar": "تمور",
+    "name_en": "Dates"
+  },
+  {
+    "id": "coffee",
+    "name_ar": "قهوة",
+    "name_en": "Coffee"
+  },
+  {
+    "id": "incense",
+    "name_ar": "بخور وعود",
+    "name_en": "Incense and Oud"
+  },
+  {
+    "id": "pottery",
+    "name_ar": "فخار",
+    "name_en": "Pottery"
+  },
+  {
+    "id": "baskets",
+    "name_ar": "سلال وسعف",
+    "name_en": "Palm Baskets"
+  },
+  {
+    "id": "weaving",
+    "name_ar": "سدو ونسيج",
+    "name_en": "Sadu Weaving"
+  }
+]
