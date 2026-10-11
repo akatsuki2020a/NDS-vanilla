@@ -148,6 +148,8 @@ Cleared at the 1.12.0 release (2026-09-05). That release shipped the swiper loop
 - **Release notes, Dropmenu — Fixed:** `data-search` no longer hides the footer buttons (Apply, Reset) when they do not match the query: it narrows only the items in `.nds-dropmenu-scroll`.
 
 - **Release notes, Filter — Fixed:** a form-mode filter without `data-ajax` now submits the form when a chip is removed, on the menu's Reset and on `reset()`; before, it only cleared the chips over results the server had still filtered. A generated radio group now submits as `filter-{name}`, like checkbox and switch groups; before, its key ended in a random id the server could not read. `data-search` on a filter menu now narrows the generated options; before, a group built from a placeholder never got searchable rows, so the search box hid nothing.
+- **Release notes, Slider — Fixed (Migration):** only a value with `nds-number-format` gets thousands separators, as the docs said; every value got them, so a filter's year range read `1,990`. Add the class to a value that needs separators.
+- **Release notes, Filter — Fixed:** `setFilterValues()` works on a group whose menu was never opened; it did nothing.
 - **Release notes, Filter — Added:** a group with no `data-filter-type` that holds your own range slider (`.nds-slider-container`) is a range filter on that slider.
 
 - **Release notes, Saudi Cities — Removed:** the Saudi Cities page is gone. `docs-assets/data/saudi-cities.json` stays as demo data for the Form Template.
