@@ -65,7 +65,7 @@ When the run ends, open a session in this repo and ask for a review of the rig's
 python scripts/rig.py reset 5 --save
 ```
 
-`--save` commits the run, without `.nds/`, to the next `runN-<date>` branch. The reset goes back to the `baseline` tag and removes `.nds/` and `NDS-IQ.md` when a run left them. An unreleased run stages again before the next run.
+`--save` commits the run, without `.nds/`, to the next `runN-<date>` branch. The reset goes back to `main` at the `baseline` tag, deletes any branch the agent made (its commits are in the run branch when you save), and removes `.nds/` and `NDS-IQ.md` when a run left them. An unreleased run stages again before the next run.
 
 ## Gotchas
 

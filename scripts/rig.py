@@ -47,7 +47,7 @@ def new(rig, dest):
     shutil.copytree(src, dest, dirs_exist_ok=True)
     with open(os.path.join(dest, 'CLAUDE.md'), 'w', encoding='utf-8', newline='\n') as f:
         f.write(OPT_OUT)
-    git(dest, 'init', '-q')
+    git(dest, 'init', '-q', '-b', 'main')
     git(dest, 'add', '-A')
     git(dest, '-c', 'user.name=rig', '-c', 'user.email=rig@localhost', 'commit', '-qm', f'{baseline} baseline')
     git(dest, 'tag', 'baseline')
@@ -101,11 +101,19 @@ def reset(dest, save):
     if save:
         runs = re.findall(r'^run(\d+)-', git(dest, 'branch', '--list', 'run*', '--format=%(refname:short)'), re.M)
         name = f'run{max(map(int, runs), default=0) + 1}-{datetime.date.today().isoformat()}'
-        git(dest, 'add', '-A', '--', '.', ':!.nds')  # the staged template is rebuilt each run
+        # The staged template is rebuilt each run. An install may gitignore it, and a pathspec
+        # naming an ignored path fails the add, so drop it from the index instead.
+        git(dest, 'add', '-A')
+        git(dest, 'rm', '-r', '-q', '--cached', '--ignore-unmatch', '.nds')
         git(dest, '-c', 'user.name=rig', '-c', 'user.email=rig@localhost', 'commit', '-qm', f'{name} result', '--allow-empty')
         git(dest, 'branch', name)
         print('saved', name)
-    git(dest, 'reset', '-q', '--hard', 'baseline')
+    # The agent may leave its own branch checked out: back to main at the baseline, and only
+    # main and the saved runs stay.
+    git(dest, 'checkout', '-q', '-f', '-B', 'main', 'baseline')
+    for b in git(dest, 'branch', '--format=%(refname:short)').split():
+        if b != 'main' and not re.match(r'run\d+-', b):
+            git(dest, 'branch', '-q', '-D', b)
     git(dest, 'clean', '-fdq', '-e', 'node_modules', '-e', '.nds')  # a lock fails clean: the loop below reports it
     left = []
     for p in ('.nds', 'NDS-IQ.md'):
