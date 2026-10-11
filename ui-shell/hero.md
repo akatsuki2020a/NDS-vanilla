@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 12:41 PM"
+last_edit: "11/10/2026 - 08:46 PM"
 ---
 
 <section id="hero-overview" class="nds-content-section nds-doc-overview">
@@ -298,6 +298,8 @@ The structures are the shapes the site uses. For another mix of the head parts, 
 | Background | Tint (default) (not: profile) (hint: A light brand tint with an inner shadow) | — | `.nds-hero-section.nds-sub` | A light tint of the brand primary, with a shadow inside its edges |
 | Background | Image (not: profile) | `--hero-image: url('../assets/img/riyadhcenter_ai.webp')` | `.nds-hero-section.nds-sub` | A photo on the end side, which fades into the tint toward the title. For a page with its own photo |
 | Background | Flat (not: profile) (hint: The page background, with no tint, shadow or image) | `.nds-flat` | `.nds-hero-section.nds-sub` | The page background, with no tint, shadow or image. For an article or a form, where the content starts right under the title |
+| No share | No share (hint: A page with no Share menu) | `remove` | `.nds-section-action:not(.nds-wrap):has(> .nds-share)` | Leave out Share, for a page with no public link, such as a console. Where Share is alone in its `.nds-section-action`, remove that element too |
+| No share | No share (hint: A page with no Share menu) | `remove` | `.nds-share` | Leave out Share, for a page with no public link, such as a console. Where Share is alone in its `.nds-section-action`, remove that element too |
 {: #hero-variants-table .nds-table .nds-responsive}
 
 </div>
@@ -374,7 +376,7 @@ The main hero shows one slide at a time, and the Swiper script moves between the
 
 - Use the main hero on the home page and on the home page of a sub-site. Every other page uses the sub hero.
 - Keep the description to one or two sentences. The hero says where the reader is. The content comes after it.
-- Put one or two buttons in the action row. In the title action, put Share and at most one main button, such as the start of a service.
+- Put one or two buttons in the action row. In the title action, put Share and at most one main button, such as the start of a service. Share is optional: leave it out on a page with no public link, such as a console.
 - Give the first slide's image `fetchpriority="high"`. It is the largest paint on the home page.
 - Preload the first slide's image in the `<head>`, with one `<link rel="preload" as="image">` for each `source`. Copy the `media` of each `source` exactly, or the browser loads one file and paints another. Each page preloads only its own hero image. See [Head](../ui-shell/head).
 - Give each later slide's `img` a `data-src`, and each of its `source` elements a `data-srcset`. A plain `srcset` loads at once.
