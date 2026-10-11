@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:12 PM"
+last_edit: "11/10/2026 - 04:32 PM"
 ---
 
 <section id="time-picker-overview" class="nds-content-section nds-doc-overview">
@@ -160,7 +160,7 @@ Any other character stays as written. `ss` adds a Second list, and `A` or `a` ad
             <i class="hgi hgi-stroke hgi-keyboard"></i>
             <span class="nds-label">Type or Pick</span>
           </span>
-          <p class="nds-item-desc">The user can type the time. The picker reads it when the user leaves the field, and writes it back in the format: <code class="nds-inline-code lang-html">9:30</code> becomes <code class="nds-inline-code lang-html">09:30</code>. AM and PM are read in Arabic or English.</p>
+          <p class="nds-item-desc">The user can type the time, in Latin or Arabic digits. The digits fill the format as they are typed: the separator appears on its own, <code class="nds-inline-code lang-html">9</code> becomes <code class="nds-inline-code lang-html">09:</code>, and <code class="nds-inline-code lang-html">2:</code> becomes <code class="nds-inline-code lang-html">02:</code>. <code class="nds-inline-code lang-html">a</code> or <code class="nds-inline-code lang-html">p</code>, <code class="nds-inline-code lang-html">ص</code> or <code class="nds-inline-code lang-html">م</code>, adds AM or PM. A pasted time is read at once in any common form: <code class="nds-inline-code lang-html">2:30 PM</code> shows as <code class="nds-inline-code lang-html">14:30</code> in a 24-hour field. An edit in the middle is read when the user leaves the field.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -245,6 +245,7 @@ Any other character stays as written. `ss` adds a Second list, and `A` or `a` ad
 | `data-state~="disabled"`, `data-state~="readonly"` | `.nds-time-picker` | Set it yourself. See Disabled and Read-only |
 | `data-state~="open"` | `.nds-time-picker` | The script sets it when the panel opens, and removes it when the panel closes. No NDS style reads it: it is for your CSS |
 | `data-min-time`, `data-max-time` | `.nds-time-input` | The first and the last time the user can pick, in 24-hour form. See Time Bounds |
+| `inputmode` | `.nds-time-input` | The script sets `decimal` when the format has no AM/PM, so a phone shows a number pad. Its `.` key types the separator. Write your own `inputmode` to keep it |
 {: .nds-table .nds-responsive}
 
 ### Keyboard

@@ -23,6 +23,12 @@
  * Gotchas:
  *   - The visible input is DISPLAY ("02:30 م") and is typeable; the hidden .nds-time-value
  *     carries the stable 24h string and is the one that submits. Read getValue().
+ *   - Typing at the end is shaped to the format: digits only, separators added, a/p
+ *     (or the Arabic letters) for AM/PM. A mid-text edit is left as written. 24h formats
+ *     get inputmode="decimal" unless the input sets its own. A typed separator after one
+ *     digit pads it ("2:" → "02:"); any non-digit counts, so the keypad's "." works.
+ *   - A paste commits at once when it reads as a time in any clock or digits ("2:30 PM"
+ *     into HH:mm → 14:30); anything else waits for the blur's error.
  *   - Bounds are 24h whatever data-format says, matching <input type="time"> min/max.
  *   - The panel builds on FIRST OPEN. setValue()/getValue()/clear() work before that —
  *     the picks are held in JS, and the unit pickers are seeded from them when built.
@@ -158,6 +164,59 @@
         return h * 3600 + min * 60 + sec;
     }
 
+    // Any common way to write a time, whatever the field's format: "1430", "14.30", "2:30 PM",
+    // "٢:٣٠ م". Reads a paste, and a typed value the format's own parse rejects.
+    const LOOSE = new RegExp('^(\\d{1,2})[:.]?(\\d{2})(?:[:.](\\d{2}))?\\s*' + MERIDIEM + '?$');
+    function parseLoose(text) {
+        const m = LOOSE.exec(String(text || '').replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15).trim());
+        if (!m) return null;
+        let h = +m[1];
+        const min = +m[2], sec = m[3] ? +m[3] : 0;
+        if (m[4]) {
+            if (h < 1 || h > 12) return null;
+            h = (h % 12) + (isPM(m[4]) ? 12 : 0);
+        } else if (h > 23) return null;
+        if (min > 59 || sec > 59) return null;
+        return h * 3600 + min * 60 + sec;
+    }
+
+    // The one key typed for each meridiem, in both languages.
+    const MER_KEY = { a: 'am', A: 'am', 'ص': 'am', p: 'pm', P: 'pm', 'م': 'pm' };
+
+    // Typing at the end → the format's shape: digits fill the units, separators appear on
+    // their own, a meridiem key fills AM/PM. A single digit is padded when no unit can start
+    // with it ("9" → "09:") or when a separator follows it ("2:" → "02:"). Stops at the
+    // first unit not typed yet.
+    function shapeTyped(text, format, hour12) {
+        const s = String(text).replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15);
+        // Digit positions that a typed separator closes.
+        let digits = '';
+        const closed = new Set();
+        for (let k = 0; k < s.length; k++) {
+            if (/\d/.test(s[k])) digits += s[k];
+            else if (/\d/.test(s[k - 1])) closed.add(digits.length - 1);
+        }
+        // The last one: a typed "p" after a shown "AM" switches it.
+        const mer = MER_KEY[[...s].reverse().find((c) => MER_KEY[c])];
+        let out = '', i = 0;
+        for (const piece of format.split(/(HH|H|hh|h|mm|ss|A|a)/)) {
+            if (!piece) continue;
+            if (piece === 'A' || piece === 'a') {
+                if (!mer) break;
+                out += piece === 'a' ? strings.t(mer).toLowerCase() : strings.t(mer);
+            } else if (TOKEN_PATTERNS[piece]) {
+                if (i >= digits.length) break;
+                const maxFirst = /^[Hh]/.test(piece) ? (hour12 ? 1 : 2) : 5;
+                const unit = +digits[i] > maxFirst || closed.has(i) ? '0' + digits[i++] : digits.slice(i, i += 2);
+                out += unit;
+                if (unit.length < 2) break;
+            } else {
+                out += piece;
+            }
+        }
+        return out;
+    }
+
     // Nearest still-enabled option to a value that just went out of bounds.
     function nearestEnabled(options, current) {
         const live = Array.from(options).filter((o) => !o.disabled);
@@ -291,8 +350,31 @@
             // input so the validity stamp lands before forms' document-level
             // change delegation reads it.
             this.elements.input.addEventListener('change', () => {
+                this._shaped = false;
                 if (this._committing) return;
                 this.readTyped();
+            }, { signal });
+
+            // Typing only, at the end: a delete or a mid-text edit keeps what the user wrote,
+            // so Backspace can remove an added separator and the caret never jumps.
+            const input = this.elements.input;
+            // decimal, not numeric: its keypad has a separator key, and forms blocks non-digits under numeric.
+            if (!/[Aa]/.test(this.format) && !input.hasAttribute('inputmode')) input.inputMode = 'decimal';
+            input.addEventListener('input', (e) => {
+                // A pasted time in any common form commits at once, in the field's format.
+                if (e.inputType === 'insertFromPaste') {
+                    const parsed = parseTyped(input.value, this.format);
+                    const secs = parsed === null ? parseLoose(input.value) : parsed;
+                    if (secs !== null && this._inBounds(secs, secs)) this._adopt(secs);
+                    return;
+                }
+                if (e.inputType !== 'insertText' || e.isComposing || input.selectionEnd !== input.value.length) return;
+                const shaped = shapeTyped(input.value, this.format, this.hour12);
+                if (shaped !== input.value) { input.value = shaped; this._shaped = true; }
+            }, { signal });
+            // WebKit sends no change on blur when a script wrote the last edit: send it here.
+            input.addEventListener('blur', () => {
+                if (this._shaped) input.dispatchEvent(new Event('change', { bubbles: true }));
             }, { signal });
         }
 
@@ -497,7 +579,8 @@
         readTyped() {
             const raw = this.elements.input.value.trim();
             if (!raw) { this.clear(); return; }
-            const secs = parseTyped(raw, this.format);
+            const parsed = parseTyped(raw, this.format);
+            const secs = parsed === null ? parseLoose(raw) : parsed;
             if (secs === null || !this._inBounds(secs, secs)) { this._validateInput(); return; }
             this._adopt(secs);
         }

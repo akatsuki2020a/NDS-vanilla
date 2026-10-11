@@ -73,7 +73,7 @@ function literalAfter(src, marker) {
 
 // Arabic the components READ, not write: typed input accepted on every page.
 const INPUT_TOKENS = {
-    'nds-time-picker.js': ['const MERIDIEM =', 'const isPM ='],   // "2:30 م" parses on an English page too
+    'nds-time-picker.js': ['const MERIDIEM =', 'const isPM =', 'const MER_KEY ='],   // "2:30 م" parses on an English page too
 };
 const ARABIC_LETTER = /[ء-ي]/;   // letters only: Arabic-Indic digit ranges in regexes pass
 for (const f of readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'))) {
