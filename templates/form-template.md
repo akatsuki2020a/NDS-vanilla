@@ -459,12 +459,12 @@ sidemenu_mode: false
         const requiredNotice = document.querySelector('#form-template .nds-note');
         const formSection = document.getElementById('form-template');
 
-        function showPanel(step) {
+        function showPanel(step, last) {
             panels.forEach(p => {
                 p.hidden = parseInt(p.dataset.formStep) !== step;
             });
             // The success panel has no required fields, so hide the notice there.
-            if (requiredNotice) requiredNotice.hidden = step === 4;
+            if (requiredNotice) requiredNotice.hidden = step === last;
             const panel = document.querySelector('#form-template [data-form-step]:not([hidden])');
             // Scroll to the form section top, not the panel. The section sits above
             // all the dynamic content (notice, panels, mobile stepper strip), so its
@@ -521,17 +521,20 @@ sidemenu_mode: false
         document.addEventListener('nds:stepper:change', (e) => {
             if (e.target.id !== 'form-stepper') return;
             const step = e.detail.currentStep;
-            const panelStep = Math.min(step, 4);
+            // The last step is the success panel and the one before it the review,
+            // so adding a step needs only its panel and its stepper item.
+            const last = e.detail.totalSteps;
+            const panelStep = Math.min(step, last);
 
-            showPanel(panelStep);
-            if (panelStep === 3) populateReview();
-            if (panelStep === 4) {
+            showPanel(panelStep, last);
+            if (panelStep === last - 1) populateReview();
+            if (panelStep === last) {
                 const ref = document.getElementById('ft-reference');
                 if (ref) ref.textContent = generateReference();
                 // Deferred so the second change event does not fire mid-handler.
                 // It is a no-op once the last step is already completed, so this
                 // settles after one extra pass.
-                if (step === 4) queueMicrotask(() => { NDS.Stepper.next('form-stepper'); });
+                if (step === last) queueMicrotask(() => { NDS.Stepper.next('form-stepper'); });
             }
         });
 
