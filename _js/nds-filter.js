@@ -2837,6 +2837,8 @@
         }
 
         setFilterValues(filterName, values) {
+            // A group in a menu never opened has no inputs yet.
+            this.buildDeferredFilters();
             const filterData = this.filterInputs[filterName];
             if (!filterData) return;
 
