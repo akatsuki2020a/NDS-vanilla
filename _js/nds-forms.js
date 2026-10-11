@@ -1138,10 +1138,22 @@
             if (c && c.formContainer) NDS.State.add(c.formContainer, 'typing');
         });
 
-        // Numeric-only enforcement for inputmode="numeric"
+        // Numeric-only enforcement for inputmode="numeric". Arabic digits (an Arabic keyboard or
+        // keypad) go in as 0-9 instead of being blocked.
         doc.addEventListener('beforeinput', function(e) {
             var c = resolveControl(e.target);
-            if (c && c.input.getAttribute('inputmode') === 'numeric' && e.data && /\D/.test(e.data)) e.preventDefault();
+            if (!c || c.input.getAttribute('inputmode') !== 'numeric' || !e.data) return;
+            var latin = e.data.replace(/[٠-٩۰-۹]/g, function (d) { return d.charCodeAt(0) & 15; });
+            if (latin === e.data && !/\D/.test(latin)) return;
+            e.preventDefault();
+            if (/\D/.test(latin)) return;
+            var input = c.input;
+            // A script insert skips maxlength, so trim to it here.
+            if (input.maxLength >= 0) latin = latin.slice(0, Math.max(0, input.maxLength - input.value.length + (input.selectionEnd - input.selectionStart)));
+            if (!latin) return;
+            // A type="number" input has no selection API: the digit stays blocked there, as before.
+            try { input.setRangeText(latin, input.selectionStart, input.selectionEnd, 'end'); } catch (_) { return; }
+            input.dispatchEvent(new InputEvent('input', { inputType: e.inputType, data: latin, bubbles: true }));
         });
 
         // Strip Arabic characters from password fields. Capture phase: runs before the field's own

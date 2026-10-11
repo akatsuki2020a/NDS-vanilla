@@ -6,7 +6,7 @@ hero_description: Form fields the user types in, with the label, messages and su
 breadcrumb: [["Components", "/components"]]
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 09:24 AM"
+last_edit: "11/10/2026 - 04:25 PM"
 lang: en
 direction: ltr
 ---
@@ -596,7 +596,7 @@ The eye button switches the field between hidden and plain text, and its label b
 | `data-permanent` | `.nds-feedback` in the feedback target | A message hides it instead of removing it. It comes back when the message clears |
 | `data-error-message` | the `<input>`, `<textarea>` or `<select>` | Replaces every message the field shows when a check fails |
 | `data-error-message` | `.nds-form-group`, or the container of a field that keeps its value in a hidden input (custom select, multiselect, tag input, upload) | The message for that field's own check |
-| `inputmode="numeric"` | the `<input>` | The script blocks a typed character that is not a digit |
+| `inputmode="numeric"` | the `<input>` | The script blocks a typed character that is not a digit. Arabic digits go in as `0` to `9` |
 | `min`, `max`, `step` | the input of a number field | The range and the step of the minus and plus buttons |
 | `autofocus` | the `<input>`, `<textarea>` or `<select>` | The script focuses the field again at start, without a scroll |
 | `data-loading-slot` | a button in `.nds-form-action` | The button that shows the spinner while the field loads. Without one, the script adds one |
