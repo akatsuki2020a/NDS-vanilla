@@ -683,6 +683,14 @@
             'Add nds-icon-only to the button.', undefined, els.length);
     } });
 
+    // On phones nds-minimal hides every label in the action (_section-layout.scss), so a button with no icon is an empty box.
+    rule({ id: 'minimal-action-icon', severity: 'error', docs: 'ui-shell/hero.html', check(ctx) {
+        const els = ctx.find(':is(.nds-section-head > .nds-section-action.nds-minimal, .nds-section-head > .nds-section-action.nds-minimal > .nds-dropmenu) > .nds-btn, .nds-btn.nds-minimal')
+            .filter(b => !b.querySelector('i, svg, img'));
+        if (els.length) ctx.report(els[0], `a button with no icon in an nds-minimal action${els.length > 1 ? ` (${els.length} buttons; the first is shown)` : ''}: on phones its label hides and it shows an empty box.`,
+            'Give it a leading icon, as the hero canon does, or take nds-minimal off the action.', undefined, els.length);
+    } });
+
     // The icon styles key on <i> (_icons.scss), so the same classes on any other tag paint nothing.
     rule({ id: 'icon-tag', severity: 'error', docs: 'components/icons.html', check(ctx) {
         const els = ctx.find('.nds-icon[class*="nds-hgi-"]:not(i)');
