@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.6.0"
 updated: "1.12.0"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 04:08 PM"
 ---
 
 <section id="request-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "10/10/2026 - 05:28 PM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-`NDS.request(url, options)` calls `fetch` and returns a promise of `{ isJson, data }`. It handles the response only. Your code builds the request, shows the loading state and writes the result into the page.
+`NDS.request(url, options)` calls `fetch` and returns a promise of `{ isJson, data }`. It handles the response only. Your code builds the request, shows the loading state and writes the result into the page. It does not return the response headers or the final URL after a redirect. Call `fetch` yourself when you need them.
 
 It is in the main bundle, so every page has it, with no init call. Every NDS component that loads data uses it, except File Upload.
 

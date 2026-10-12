@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "2.0.0"
 updated: "2.0.0"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 04:08 PM"
 ---
 
 <section id="session-timeout-overview" class="nds-content-section nds-doc-overview">
@@ -118,6 +118,8 @@ The clock starts when `init()` runs, because the request that served the page re
 {: .nds-block-title}
 
 At the end, the script fires `nds:session:end`. With `logout`, the page then goes to that URL. Without it, the ended modal opens. Call `preventDefault()` on the event to do neither. The warning then closes, and the next step is yours. If the user goes back to the page after the redirect, the script goes to the logout URL again.
+
+A server that signs out only on a POST, such as one that needs a CSRF token, gets no `logout`. Call `preventDefault()` on `nds:session:end` and send the POST there. Without `logout`, the warning shows no Sign out link.
 
 </div>
   </div>
