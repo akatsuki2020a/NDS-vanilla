@@ -43,6 +43,8 @@
     position: relative;
     width: 100%;
     min-height: 200px;
+    // The set min-height drops flex's content minimum, so a flex column (a modal) shrank the box under its SVG.
+    flex-shrink: 0;
     font-family: var(--nds-font-family, 'IBM Plex Sans Arabic', sans-serif);
 }
 
@@ -100,10 +102,15 @@
 .nds-chart-svg {
     display: block;
     width: 100%;
-    height: auto;
     // Browsers default <svg> to overflow:hidden, which clips spotlight halos and
     // hover dots near the plot edges. Allow them to render past the viewBox.
     overflow: visible;
+}
+
+// Only the pie scales with its width. A bar or line SVG keeps its drawn height: with `auto`
+// its width and height attributes set a ratio, so a wider box made it taller until the redraw.
+.nds-chart-svg[viewBox] {
+    height: auto;
 }
 
 // ── Grid & Axes ───────────────────────────────────────────────

@@ -154,6 +154,8 @@
             this._activeHover = null;
             this.abortController = new AbortController();
             this._setupDelegation();
+            // Holds the drawing's height until the first render, so a chart mounted into a live view does not collapse for two frames.
+            if (!el.firstElementChild) { this._heldMin = el.style.minHeight; el.style.minHeight = this.opts.height + 'px'; }
             // The first render is triggered by the ResizeObserver's initial
             // delivery (_setupResize): it reads clientWidth post-layout and
             // schedules render() off a rAF, so construction never forces a
@@ -193,6 +195,7 @@
             if (this.renderAbortController) { this.renderAbortController.abort(); this.renderAbortController = null; }
             if (this._offResize) { this._offResize(); this._offResize = null; }
             this.el.innerHTML = '';
+            if (this._heldMin != null) this.el.style.minHeight = this._heldMin;
             // Drop the init sentinel with the instance: leaving it on makes teardown
             // one-way — the init sweep skips a stamped element, so a view that unmounts
             // and mounts again gets an emptied chart no instance will ever claim.
@@ -423,6 +426,7 @@
             if (this.renderAbortController) this.renderAbortController.abort();
             this.renderAbortController = new AbortController();
             this.el.innerHTML = '';
+            if (this._heldMin != null) { this.el.style.minHeight = this._heldMin; this._heldMin = null; }
             this.el.classList.add('nds-chart');
             this.el.setAttribute('data-chart-type', this.opts.type);
 
