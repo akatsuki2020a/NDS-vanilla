@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.2.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 11:09 AM"
 ---
 
 <section id="tokens-overview" class="nds-content-section nds-doc-overview">
@@ -244,7 +244,7 @@ To change a token on every page, set it in your own stylesheet, loaded after `nd
             <i class="hgi hgi-stroke hgi-accessibility"></i>
             <span class="nds-label">Font Sizing</span>
           </span>
-          <p class="nds-item-desc">Every font size and line height multiplies by <code class="nds-inline-code lang-css">--user-font-scale</code>, which the <a href="../components/accessibility">Accessibility</a> panel sets.</p>
+          <p class="nds-item-desc">Every font size and line height multiplies by <code class="nds-inline-code lang-css">--user-font-scale</code>, which the <a href="../components/accessibility">Accessibility</a> panel sets on <code class="nds-inline-code lang-html">&lt;html&gt;</code>. It works there only: the tokens resolve on the root.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">

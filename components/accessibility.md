@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.5"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 11:09 AM"
 ---
 
 <section id="accessibility-overview" class="nds-content-section nds-doc-overview">
@@ -596,7 +596,7 @@ The panel reads its text from `assets/i18n/accessibility/en.json` and `ar.json`.
 
 | Property | Default | Controls |
 |---|---|---|
-| `--user-font-scale` | `1` | The scale of every `--typo-*` token. The `font-step-*` tokens set it |
+| `--user-font-scale` | `1` | The scale of every `--typo-*` token. Set it on `<html>`: the tokens resolve there, so on another element it changes nothing. The `font-step-*` tokens set it |
 | `--user-line-height` | `normal` | The line height of body text. The script writes it on `<html>` |
 | `--user-letter-spacing` | `0` | The letter spacing of body text. The script writes it on `<html>` |
 | `--user-word-spacing` | `0` | The word spacing of body text. The script writes it on `<html>` |
