@@ -384,10 +384,13 @@
             });
         }
 
-        _renderXLabels(svg, catLabels, xPositions, L, xStrategy) {
+        // edges: the first and last points sit on the plot's edges (a line chart), so their flat labels
+        // run inward from the point instead of centring over it and spilling past the SVG.
+        _renderXLabels(svg, catLabels, xPositions, L, xStrategy, edges = false) {
             const { step = 1, rotate = 0 } = xStrategy || {};
             const baseY = L.padTop + L.plotH;
             const y = rotate ? baseY + 14 : baseY + 30;
+            const last = catLabels.length - 1;
 
             catLabels.forEach((label, i) => {
                 if (step > 1 && i % step !== 0) return;
@@ -396,7 +399,7 @@
                 const attrs = { x, y, class: 'nds-chart-axis-label' };
 
                 if (rotate === 0) {
-                    attrs['text-anchor'] = 'middle';
+                    attrs['text-anchor'] = (edges && last > 0 && (i === 0 ? 'start' : i === last && 'end')) || 'middle';
                 } else {
                     attrs['text-anchor'] = 'end';
                     attrs.transform = `rotate(${L.isRTL ? rotate : -rotate} ${x} ${y})`;
@@ -962,7 +965,7 @@
             }
 
             if (this.opts.xaxis?.show) {
-                this._renderXLabels(svg, catLabels, xPositions, L, xStrategy);
+                this._renderXLabels(svg, catLabels, xPositions, L, xStrategy, true);
             }
 
             wrap.appendChild(svg);
