@@ -63,7 +63,9 @@
  *     picked suggestion (mechanism and carve-outs in the autocomplete banner).
  *   - .nds-national-id and .nds-iban stamp setCustomValidity on input (and at init), so the
  *     checksum fails the field through checkValidity like any native rule. A pattern on the same
- *     input is redundant; data-error-message still wins.
+ *     input is redundant.
+ *   - data-error-message on a field is the pattern's message only; on a group, the message
+ *     when nothing is picked. Every other failure keeps its own message.
  *   - A blank setCustomValidity(' ') blocks the submit and outlines the field with no message:
  *     for a component that shows the cause itself (password's red chips). It beats native messages.
  *   - A readonly checkbox, radio or switch cannot change: Forms cancels the click that Space
@@ -497,10 +499,6 @@
 
     var Validator = {
         getMessage: function(input) {
-            if (input.hasAttribute('data-error-message')) {
-                return input.getAttribute('data-error-message');
-            }
-
             var validity = input.validity;
 
             // A blank custom message: the component shows the cause itself (password's red chips).
@@ -523,7 +521,8 @@
             } else if (validity.rangeOverflow) {
                 return strings.t('range_over', { n: input.max });
             } else if (validity.patternMismatch) {
-                return strings.t('pattern');
+                // The one vague default: data-error-message says what the pattern asks for.
+                return input.getAttribute('data-error-message') || strings.t('pattern');
             } else if (validity.customError) {
                 // setCustomValidity stamp — already localized by the stamping
                 // component (e.g. date-picker format/bounds).
@@ -540,10 +539,12 @@
         // Shared tail for group validators: apply the data-error-message
         // override, dispatch the showMessage status update, and return the
         // merged result. Each validator supplies its distinct validity/message
-        // computation, then hands off here.
-        _finishGroupValidation: function(group, options, isValid, message, extra) {
+        // computation, then hands off here. `empty`: nothing is picked. The
+        // override is the group's required wording, so a count limit or a
+        // pending upload keeps its own message.
+        _finishGroupValidation: function(group, options, isValid, message, extra, empty) {
             var customMessage = group.getAttribute('data-error-message');
-            if (!isValid && customMessage) message = customMessage;
+            if (!isValid && empty && customMessage) message = customMessage;
 
             if (options.showMessage) {
                 if (!isValid) StatusManager.set({ element: group, status: 'error', message: message });
@@ -569,7 +570,7 @@
                 message = strings.t(below ? 'select_at_least' : 'select_at_most', { n: below ? minChecked : maxChecked });
             }
 
-            return this._finishGroupValidation(group, options, isValid, message, { checked: checkedCount, min: minChecked, max: maxChecked });
+            return this._finishGroupValidation(group, options, isValid, message, { checked: checkedCount, min: minChecked, max: maxChecked }, checkedCount === 0);
         },
 
         validateCheckboxGroup: function(groupElement, options) {
@@ -589,7 +590,7 @@
             var isValid = !isRequired || isSelected;
             var message = isValid ? '' : strings.t('select_option');
 
-            return this._finishGroupValidation(group, options, isValid, message, { selected: isSelected });
+            return this._finishGroupValidation(group, options, isValid, message, { selected: isSelected }, !isSelected);
         },
 
         // Rating: the stars are buttons, not form controls, so the score lives on
@@ -608,7 +609,7 @@
             var isValid = !isRequired || value > 0;
             var message = isValid ? '' : strings.t('rating_required');
 
-            return this._finishGroupValidation(group, options, isValid, message, { rating: value });
+            return this._finishGroupValidation(group, options, isValid, message, { rating: value }, value === 0);
         },
 
         // Multiselect: option checkboxes are the source of truth (no hidden
@@ -636,7 +637,7 @@
             var count = ti.querySelectorAll('.nds-form-control > input[type="hidden"]').length;
             var isValid = !hasRequired || count > 0;
             var message = isValid ? '' : strings.t('tag_required');
-            return this._finishGroupValidation(ti, options, isValid, message, { count: count });
+            return this._finishGroupValidation(ti, options, isValid, message, { count: count }, count === 0);
         },
 
         // Upload: the script empties the file input after each pick, so required
@@ -651,7 +652,7 @@
             var pending = !!up.querySelector('.nds-file-list .nds-file-item:is([data-state~="uploading"], [data-state~="processing"])');
             var isValid = !pending && (!hasRequired || count > 0);
             var message = isValid ? '' : strings.t(pending ? 'upload_pending' : 'file_required');
-            return this._finishGroupValidation(up, options, isValid, message, { count: count, pending: pending });
+            return this._finishGroupValidation(up, options, isValid, message, { count: count, pending: pending }, !pending && count === 0);
         },
 
         // Custom select: the visible .nds-select-input is readonly — barred
@@ -665,7 +666,7 @@
             var hasRequired = container.hasAttribute('data-required') || container.classList.contains('nds-required');
             var isValid = !hasRequired || !!(carrier && carrier.value.trim());
             var message = isValid ? '' : strings.t('select_option');
-            return this._finishGroupValidation(container, options, isValid, message, { value: carrier ? carrier.value : '' });
+            return this._finishGroupValidation(container, options, isValid, message, { value: carrier ? carrier.value : '' }, true);
         },
 
         // Dropmenu picker (data-select-name): the pick lives in a hidden carrier,
@@ -677,7 +678,7 @@
                 function(el) { return el.closest('.nds-dropmenu') === dm; });
             var isValid = !!(carrier && carrier.value.trim());
             var message = isValid ? '' : strings.t('select_option');
-            return this._finishGroupValidation(dm, options, isValid, message, { value: carrier ? carrier.value : '' });
+            return this._finishGroupValidation(dm, options, isValid, message, { value: carrier ? carrier.value : '' }, true);
         },
 
         // Autocomplete strict: data-strict says typed text must match a picked
@@ -707,7 +708,8 @@
             var isValid = isAllFilled;
             var message = isValid ? '' : strings.t('otp_incomplete', { n: inputs.length });
 
-            return this._finishGroupValidation(group, options, isValid, message, { filled: isAllFilled });
+            return this._finishGroupValidation(group, options, isValid, message, { filled: isAllFilled },
+                inputs.every(function(i) { return !i.value; }));
         },
 
         // Validate plain field containers (text/email/number/select/textarea).

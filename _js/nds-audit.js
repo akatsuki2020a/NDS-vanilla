@@ -713,6 +713,17 @@
         });
     } });
 
+    // data-error-message has one job per host (nds-forms.js getMessage, _finishGroupValidation): a field's
+    // pattern, a group's "nothing picked". On a host that can never fail that way it never shows.
+    rule({ id: 'error-message-unused', docs: 'components/forms.html', check(ctx) {
+        ctx.find('input[data-error-message]:not([pattern]), textarea[data-error-message], select[data-error-message]').forEach(el =>
+            ctx.report(el, 'data-error-message on a field with no pattern: it shows only when the value does not match pattern, so it never shows.',
+                'Add the pattern it describes, or remove it: every other check has its own message.'));
+        ctx.find(':is(.nds-form-group:not(.nds-otp-group), .nds-select, .nds-multiselect, .nds-taginput, .nds-file-upload)[data-error-message]:not([data-required], .nds-required, [data-min-checked])').forEach(el =>
+            ctx.report(el, 'data-error-message on a group that may be left empty: it shows only when nothing is picked, so it never shows.',
+                'Add data-required, or remove it: the count limits and a file still uploading have their own messages.'));
+    } });
+
     rule({ id: 'content-layout-once', group: 'page', docs: 'layout/page-layout.html', check(ctx) {
         const all = ctx.find('.nds-content-layout');
         if (all.length > 1) ctx.report(all[1], `${all.length} .nds-content-layout elements on one page: the page grid is set once.`,

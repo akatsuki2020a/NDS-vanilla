@@ -6,7 +6,7 @@ hero_description: Form fields the user types in, with the label, messages and su
 breadcrumb: [["Components", "/components"]]
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 04:25 PM"
+last_edit: "12/10/2026 - 09:34 AM"
 lang: en
 direction: ltr
 ---
@@ -540,7 +540,7 @@ The eye button switches the field between hidden and plain text, and its label b
 - Write `data-required` on the container, not `required` on the input. The container then shows the asterisk before the script loads.
 - Add `nds-textarea` to a textarea's container, and `nds-select` to a native select's container. Without them, the textarea keeps the single-line height, and the select shows two arrows.
 - Use [Custom Select](../components/custom-select) for a choice in a form. Use the native Select only when the design asks for the phone's own picker.
-- Set `data-error-message` on the input when the default message does not say what is wrong, such as for `pattern`. It replaces every message that field shows.
+- Set `data-error-message` on an input with a `pattern`, to say what format it asks for. It shows only when the value does not match the pattern; every other check has its own message.
 - Put a unit, a currency or a short code in a prefix or suffix. The slot also takes a button or a [Dropmenu](../components/dropmenu), such as an amount with a currency picker.
 - Use MD only where space is short, such as a table filter. Keep one size in one form.
 - Put a form's Submit and Back buttons in `.nds-form-actions`, after the fields. The singular `.nds-form-action` is the button slot inside one field.
@@ -594,8 +594,8 @@ The eye button switches the field between hidden and plain text, and its label b
 | `data-feedback-target` | an element inside `.nds-form-container`, usually `.nds-form-footer` | Messages go in it, instead of right after the input row. A hidden one shows while a message is in it |
 | `hidden` | `.nds-form-container`, `.nds-form-group` or `.nds-form-action` | The script removes it at start. Write it to keep a field out of view until its state is set |
 | `data-permanent` | `.nds-feedback` in the feedback target | A message hides it instead of removing it. It comes back when the message clears |
-| `data-error-message` | the `<input>`, `<textarea>` or `<select>` | Replaces every message the field shows when a check fails |
-| `data-error-message` | `.nds-form-group`, or the container of a field that keeps its value in a hidden input (custom select, multiselect, tag input, upload) | The message for that field's own check |
+| `data-error-message` | an `<input>` with a `pattern` | The message when the value does not match the pattern. `NDS.Init.audit()` flags it on a field with no `pattern` |
+| `data-error-message` | `.nds-form-group`, or the container of a field that keeps its value in a hidden input (custom select, multiselect, tag input, upload) | The message when nothing is picked. A count limit, a half-filled code and a file still uploading keep their own messages. `NDS.Init.audit()` flags it on a group that may be left empty |
 | `inputmode="numeric"` | the `<input>` | The script blocks a typed character that is not a digit. Arabic digits go in as `0` to `9` |
 | `min`, `max`, `step` | the input of a number field | The range and the step of the minus and plus buttons |
 | `autofocus` | the `<input>`, `<textarea>` or `<select>` | The script focuses the field again at start, without a scroll |

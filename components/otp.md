@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 09:00 AM"
 ---
 
 <section id="otp-overview" class="nds-content-section nds-doc-overview">
@@ -239,7 +239,7 @@ For another code length, copy a box, give it a unique `id`, and number the `aria
 | Attribute | Element | Effect |
 |---|---|---|
 | `data-required` | `.nds-otp-group` | A form submit checks that every box holds a digit. It also adds the required mark to the legend |
-| `data-error-message` | `.nds-otp-group` | The message that shows when the check fails, in place of the default message |
+| `data-error-message` | `.nds-otp-group` | Replaces the message when every box is empty. A code with some digits missing keeps the default message |
 | `data-status` | `.nds-otp-group` | The forms script writes it. `error` turns every box red. To set it yourself, call `NDS.Forms.setStatus()` |
 {: .nds-table .nds-responsive}
 

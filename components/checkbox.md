@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 09:00 AM"
 ---
 
 <section id="checkbox-overview" class="nds-content-section nds-doc-overview">
@@ -222,7 +222,7 @@ A row on `.nds-check` (every `<input>`) or `.nds-check-container` changes every 
 | `data-required` | `.nds-check-container` of a single checkbox, or `.nds-check-group` | The checkbox must be checked, or the group needs one option checked, before the form submits. It adds the required mark to the label or the legend |
 | `data-min-checked` | `.nds-check-group` | The fewest options that must be checked. The message reads "Please select at least 2 options" |
 | `data-max-checked` | `.nds-check-group` | The most options that may be checked. The message reads "Please select no more than 3 options" |
-| `data-error-message` | `.nds-check-group` | Replaces the default message |
+| `data-error-message` | `.nds-check-group` | Replaces the message when nothing is checked. The `data-min-checked` and `data-max-checked` messages stay |
 | `data-state~="disabled"` | `.nds-check-container`, `.nds-check-group` | Disables the option, or every option in the group. A group also turns half transparent |
 | `data-state~="readonly"` | `.nds-check-container` | The option cannot change. The tile shows a border only |
 | `data-state~="indeterminate"` | `.nds-check-container` | Set by `NDS.Forms.setIndeterminate()`. Do not set it yourself |
