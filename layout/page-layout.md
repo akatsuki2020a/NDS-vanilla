@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.8.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 07:03 PM"
+last_edit: "12/10/2026 - 06:56 PM"
 ---
 
 <section id="page-layout-overview" class="nds-content-section nds-doc-overview">
@@ -516,6 +516,8 @@ A section that paints its own background is never striped, but it still counts: 
 ### Console
 
 `nds-full-width` on `body` sets `--nds-content-max-width` to 100%, so the header, the content and the footer reach the screen edges. The content layout also removes its own gutters, except in card view. The hero is in `nds-content`, beside the side menu.
+
+A console has no side info, because the side menu holds the side column. What a standard page shows in side info goes at the top of the first section instead. For the [Form Template](../templates/form-template), that is the stepper above the form: leave out `nds-vertical` so the steps sit in a row, and keep `nds-radial-sm` for phones.
 
 ### Minimal Page
 
