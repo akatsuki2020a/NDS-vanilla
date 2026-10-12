@@ -2,13 +2,13 @@
 layout: page
 title: Migration
 hero_title: Migration - National Design System
-hero_description: Every class, attribute, id, custom property, window setting and event that an NDS release renamed or removed, with what to write instead
+hero_description: Every class, attribute, id, custom property, window setting, event and URL parameter that an NDS release renamed or removed, with what to write instead
 breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:12 PM"
+last_edit: "12/10/2026 - 12:18 PM"
 ---
 
 <section id="migration-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "10/10/2026 - 11:12 PM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-This page lists each class, attribute, id, custom property, window setting and event that changed since 1.0.0, with what to write instead. The [Audit](../core/audit) reads the same list, so the page and the audit always agree.
+This page lists each class, attribute, id, custom property, window setting, event and URL parameter that changed since 1.0.0, with what to write instead. The [Audit](../core/audit) reads the same list, so the page and the audit always agree.
 
 Pick another component when:
 
@@ -78,7 +78,7 @@ Pick another component when:
                 </div>
                 <hr class="nds-divider">
                 <div data-filter="kind" data-filter-type="checkbox" data-filter-legend="Kind"
-                  data-filter-values='{"class":"Class","attribute":"Attribute","id":"Id","property":"Custom property","global":"Window setting","event":"Event"}' data-no-auto-close>
+                  data-filter-values='{"class":"Class","attribute":"Attribute","id":"Id","property":"Custom property","global":"Window setting","event":"Event","param":"URL parameter"}' data-no-auto-close>
                 </div>
               </div>
               <div class="nds-dropmenu-footer">
@@ -155,10 +155,10 @@ Some names changed only on one component. The line under such a name gives its p
 
 Some old custom properties were declared but never read by NDS. Setting one changed nothing. The table marks them, and the audit reports them as info: set the new name for the change you meant.
 
-### Events and Methods
+### Events, URL Parameters and Methods
 {: .nds-block-title}
 
-An event name shows in the table, but the audit cannot find it: a page does not show which events your scripts listen for. Old JavaScript method names are in `CHANGELOG.md`, in the Migrating section of each release.
+An event name or a URL parameter shows in the table, but the audit cannot find it: a page does not show which events your scripts listen for, or which parameters your server reads. Old JavaScript method names are in `CHANGELOG.md`, in the Migrating section of each release.
 
 </div>
   </div>

@@ -821,12 +821,13 @@
                 hasParams = true;
             }
 
-            // Sort URL params (?sort=…&dir=…) are owned by NDS.Sort (see setupSort);
-            // it reads them in its init which runs after applyUrlParams completes.
+            // Sort URL params (?sort=…&order=…) are owned by NDS.Sort (see setupSort) when the
+            // filter has sort buttons; it reads them in its init, after applyUrlParams.
+            const sorted = this.queryAll('[data-sort]').length > 0;
 
             // Apply dynamic filter params — plain input names as URL keys
             for (const [key, value] of params.entries()) {
-                if (key === searchParamName || key === 'sort' || key === 'dir') continue;
+                if (key === searchParamName || (sorted && (key === 'sort' || key === 'order'))) continue;
 
                 if (this.filterInputs[key]) {
                     if (this.filterInputs[key].type === 'range') {
@@ -903,7 +904,7 @@
             const searchParamName = this.getSearchInputName();
 
             // Managed param keys: this filter's own search + filter names.
-            // Sort/dir are owned by NDS.Sort and preserved untouched here.
+            // Sort/order are owned by NDS.Sort and preserved untouched here.
             // Other filters' params (distinct names) are also left untouched.
             const managedKeys = new Set([searchParamName]);
             for (const key of Object.keys(this.filterInputs)) {
@@ -1051,11 +1052,12 @@
                 items: () => this.items,
                 reorderIn: this.targetContainer,
                 triggers: () => this.queryAll('[data-sort]'),
-                mode: 'direct',
+                // As markup wiring reads it (NDS.Sort.init): one cycle trigger makes the set cycle.
+                mode: this.queryAll('[data-sort][data-sort-mode="cycle"]').length ? 'cycle' : 'direct',
                 a11y: 'pressed',
                 accessor: (item, key) => item.getAttribute('data-sort-' + key),
                 keyFrom: (trigger) => trigger.getAttribute('data-sort') || '',
-                urlSync: { keyParam: 'sort', dirParam: 'dir' },
+                urlSync: { keyParam: 'sort', orderParam: 'order' },
                 onChange: ({ orderedItems }) => {
                     this.items = orderedItems;
                     this.updatePagination();

@@ -212,7 +212,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Side Menu** — the `--toggle-height` knob is renamed `--nds-sidemenu-toggle-height`, and `--toggle-transform` is removed. No aliases.
 - **Status Section** — `.nds-404` is removed: use `.nds-status-section`.
 - **Stepper** — `NDS.Stepper.setFallback()` and `getFallback()` are removed: write `nds-vertical` or `nds-radial` on the stepper instead. The `nds-horizontal-lg`, `nds-vertical-lg` and `nds-radial-lg` classes are removed: the layout class is the desktop layout, and `-sm` / `-md` set phones and tablets. `nds-radial nds-vertical-lg` becomes `nds-vertical nds-radial-sm nds-radial-md`. The deprecated `NDS.Stepper._applyLayout()` and `NDS.Stepper._stamp()` are removed: call `NDS.Stepper.init()`.
-- **Tables** — the `nds:table:sort` event. Listen for `nds:sort:change` on the table: `detail.key` is the column index and `detail.dir` the direction.
+- **Tables** — the `nds:table:sort` event. Listen for `nds:sort:change` on the table: `detail.key` is the column index and `detail.order` the order.
 - **Tables** — `table-actions`, `actions-column` and `checkbox-column` are renamed `nds-table-actions`, `nds-actions-column` and `nds-checkbox-column`. No aliases.
 - **Tables** — `nds-mask` (the scroll-edge fade) and its `--mask-fade-distance` knob are removed, with no replacement: delete the class. The scroll box still writes `has-more`, `at-start` and `at-end` in its `data-state`.
 - **Tags** — normal tags no longer take `nds-inverted` or `nds-ghost`, and status tags no longer take `nds-outline`. An icon-only tag now keeps its `.nds-label` readable by screen readers; existing icon-only markup renders the same, and adding a label to it is recommended, not required.

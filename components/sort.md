@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 12:08 PM"
 ---
 
 <section id="sort-overview" class="nds-content-section nds-doc-overview">
@@ -20,7 +20,7 @@ last_edit: "10/10/2026 - 05:28 PM"
 
 Sort reorders the items of a list when the user picks a trigger. Each trigger names its list with `data-sort-target`, and each item carries its sort values in `data-sort-{key}` attributes. Sort has two modes:
 
-- Direct mode: each trigger sets one key and one direction. Use it for the options of a dropmenu.
+- Direct mode: each trigger sets one key and one order. Use it for the options of a dropmenu.
 - Cycle mode: one trigger steps through ascending, descending and the original order. Use it for one button per key.
 
 [Filter](../components/filter) and [Tables](../components/tables) start Sort for their own sort buttons.
@@ -58,19 +58,19 @@ The triggers sit in a [Toolbar](../components/toolbar) above the list. The list 
               <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
               <span class="nds-label">Default order</span>
             </button>
-            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="name" data-sort-dir="asc">
+            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="name" data-sort-order="asc">
               <i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i>
               <span class="nds-label">Name A to Z</span>
             </button>
-            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="name" data-sort-dir="desc">
+            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="name" data-sort-order="desc">
               <i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i>
               <span class="nds-label">Name Z to A</span>
             </button>
-            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="price" data-sort-dir="asc">
+            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="price" data-sort-order="asc">
               <i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i>
               <span class="nds-label">Price low to high</span>
             </button>
-            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="price" data-sort-dir="desc">
+            <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort-target="sort-services" data-sort="price" data-sort-order="desc">
               <i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i>
               <span class="nds-label">Price high to low</span>
             </button>
@@ -237,7 +237,7 @@ The triggers sit in a [Toolbar](../components/toolbar) above the list. The list 
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
-| Structure | Direct (default) (hint: Each menu item sets one key and one direction) | — | — | A dropmenu of sort choices in a [Toolbar](../components/toolbar). Each item fixes one key and one direction |
+| Structure | Direct (default) (hint: Each menu item sets one key and one order) | — | — | A dropmenu of sort choices in a [Toolbar](../components/toolbar). Each item fixes one key and one order |
 | Structure | Cycle (hint: Each click steps through up, down and the original order) | canon `#sort-cycle` | — | One button per key, with `data-sort-mode="cycle"`. Each click steps its key through ascending, descending and the original order, and its `.nds-sort-icon` turns to match |
 {: #sort-variants-table .nds-table .nds-responsive}
 
@@ -260,7 +260,7 @@ The script wires every list that a `data-sort-target` names, after the page firs
 ### Direct Mode
 {: .nds-block-title}
 
-Each trigger fixes its own key and direction, so every choice has a label. A trigger with an empty `data-sort` restores the authored order. Set `data-sort-dir` to `asc` or `desc`. Without it the trigger sorts ascending and never toggles.
+Each trigger fixes its own key and order, so every choice has a label. A trigger with an empty `data-sort` restores the authored order. Set `data-sort-order` to `asc` or `desc`. Without it the trigger sorts ascending and never toggles.
 
 ### Cycle Mode
 {: .nds-block-title}
@@ -270,12 +270,12 @@ One trigger holds the state for one key: the first click sorts ascending, the se
 ### Initial State
 {: .nds-block-title}
 
-When the server sends the items already sorted, write `data-state="sorted-asc"` or `"sorted-desc"` on the trigger of that order. Sort records the state without moving the items, and the next click goes on from that state. In `create()`, `initialState: { key, dir }` does the same, and wins over the markup. Either one wins over `urlSync`.
+When the server sends the items already sorted, write `data-state="sorted-asc"` or `"sorted-desc"` on the trigger of that order. Sort records the state without moving the items, and the next click goes on from that state. In `create()`, `initialState: { key, order }` does the same, and wins over the markup. A sort in the URL (`urlSync`) wins over both: Sort applies it and moves the state to its trigger, so a shared link opens in its own order.
 
 ### URL Persistence
 {: .nds-block-title}
 
-In `create()`, set `urlSync: { keyParam, dirParam }` and the sort key and direction go in the query string: `urlSync: { keyParam: 'sort', dirParam: 'dir' }` writes `?sort=price&dir=desc`. Ascending writes no direction, and other parameters stay. Sort reads them on `create()` and writes them on every change. Use it on list pages where users share links or reload. Markup wiring leaves the URL alone: a [Filter](../components/filter) keeps the sort of its own buttons in the URL.
+In `create()`, set `urlSync: { keyParam, orderParam }` and the sort key and order go in the query string: `urlSync: { keyParam: 'sort', orderParam: 'order' }` writes `?sort=price&order=desc`. Ascending writes no `order`, and other parameters stay. The URL counts only when its key is one of the triggers' keys, so another use of the same parameter, such as a server's own sort select, is left alone. Sort removes only values it could have written: a site's own `?order=12345` stays. Sort reads them on `create()` and writes them on every change. Use it on list pages where users share links or reload. Markup wiring leaves the URL alone: a [Filter](../components/filter) keeps the sort of its own buttons in the URL, as `sort` and `order`.
 
 </div>
   </div>
@@ -305,7 +305,7 @@ In `create()`, set `urlSync: { keyParam, dirParam }` and the sort key and direct
         <div class="nds-definition-item">
           <span class="nds-item-title">
             <i class="hgi hgi-stroke hgi-sort-by-down-02"></i>
-            <span class="nds-label">Direction Icon</span>
+            <span class="nds-label">Sort Icon</span>
           </span>
           <p class="nds-item-desc">An icon with <code class="nds-inline-code lang-html">nds-sort-icon</code> in a trigger turns up or down with the sort, and back when the sort is cleared. No script of yours swaps it.</p>
         </div>
@@ -391,7 +391,7 @@ Sort ships in the delegated bundle, which the loader injects after first paint. 
 |---|---|---|
 | `data-sort-target` | a trigger | The `id` of the list it sorts. The script wires each list it names. |
 | `data-sort` | a trigger | The sort key. Empty: restore the original order. |
-| `data-sort-dir` | a direct mode trigger | `asc` or `desc`. Missing means `asc`. |
+| `data-sort-order` | a direct mode trigger | `asc` or `desc`. Missing means `asc`. |
 | `data-sort-mode` | a trigger with `data-sort-target` | `cycle` puts every trigger of that list in cycle mode. Missing means direct mode. |
 | `data-state~="sorted-asc"`, `"sorted-desc"` | the active trigger, or its table header with `a11y: 'sort'` | The script sets it after each sort, and removes it when another sort runs or the sort is cleared. Write it at load when the items arrive in that order: Sort records the state and does not move them. |
 | `data-state~="selected"` | the active trigger | With `a11y: 'pressed'`, the default. The script sets it with `aria-pressed="true"` after each sort. When another trigger is active or the sort is cleared, it removes it and sets `aria-pressed="false"`. |
@@ -413,11 +413,11 @@ Markup wiring is a `create()` call on the list with the defaults below: `items` 
 | `NDS.Sort.getInstance(root)` | Returns the instance of the root, or `null`. `root` is an element or a selector. |
 | `NDS.Sort.detectType(values, dateFormat)` | Returns `'number'`, `'date'` or `'string'`. `dateFormat` is the format a date in the values uses: the site's when you leave it out. |
 | `NDS.Sort.parseValue(raw, type, dateFormat)` | Returns the value as the type sorts it. |
-| `NDS.Sort.compare(a, b, type, dir, dateFormat)` | Returns a negative, zero or positive number. |
-| `sort.apply(key, dir)` | Sorts now. A `null` key restores the original order. |
+| `NDS.Sort.compare(a, b, type, order, dateFormat)` | Returns a negative, zero or positive number. |
+| `sort.apply(key, order)` | Sorts now. A `null` key restores the original order. |
 | `sort.reset()` | Restores the original order. |
 | `sort.refresh()` | Sorts the items again by the active key. Does nothing when no sort is active. |
-| `sort.getState()` | Returns `{ key, dir }`. |
+| `sort.getState()` | Returns `{ key, order }`. |
 | `sort.destroy()` | Removes the listeners. |
 {: .nds-table .nds-responsive}
 
@@ -434,14 +434,14 @@ The `create()` options:
 | `accessor` | reads `data-sort-{key}` | A function `(item, key) => value` that returns the raw value. |
 | `keyFrom` | reads `data-sort` | A function from a trigger to its key. An empty key restores the original order. |
 | `types` | `{}` | The type of a key: `'number'`, `'date'` or `'string'`. Replaces detection for that key. |
-| `initialState` | `null` | `{ key, dir }`. Records the state without moving items. Wins over a `sorted-asc` or `sorted-desc` state in the markup. |
-| `urlSync` | `false` | `{ keyParam, dirParam }`. Reads and writes the query string. |
-| `onChange` | none | A function `({ key, dir, orderedItems, state })`, called after every sort and before the event. |
+| `initialState` | `null` | `{ key, order }`. Records the state without moving items. Wins over a `sorted-asc` or `sorted-desc` state in the markup. |
+| `urlSync` | `false` | `{ keyParam, orderParam }`. Reads and writes the query string. |
+| `onChange` | none | A function `({ key, order, orderedItems, state })`, called after every sort and before the event. |
 {: .nds-table .nds-responsive}
 
 | Event | Fired on | Detail |
 |---|---|---|
-| `nds:sort:change` | the root, bubbles | `{ key, dir, orderedItems, sort }`, after every sort, reset and `apply()`. |
+| `nds:sort:change` | the root, bubbles | `{ key, order, orderedItems, sort }`, after every sort, reset and `apply()`. |
 {: .nds-table .nds-responsive}
 
 <script type="text/html" id="sort-api-js" data-canon data-lang="js">
@@ -449,15 +449,15 @@ const sort = NDS.Sort.create(document.getElementById('list'), {
   items: '.row',
   triggers: '[data-sort]',
   types: { added: 'date' },
-  initialState: { key: 'added', dir: 'desc' },
-  urlSync: { keyParam: 'sort', dirParam: 'dir' }
+  initialState: { key: 'added', order: 'desc' },
+  urlSync: { keyParam: 'sort', orderParam: 'order' }
 });
 
 sort.apply('price', 'desc');
 sort.reset();
 
 document.addEventListener('nds:sort:change', (e) => {
-  const { key, dir, orderedItems } = e.detail;
+  const { key, order, orderedItems } = e.detail;
 });
 </script>
 

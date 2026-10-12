@@ -161,8 +161,8 @@
             return s && s.key != null ? s.key : -1;
         }
 
-        getSortDirection() {
-            return this.sort?.getState().dir || null;
+        getSortOrder() {
+            return this.sort?.getState().order || null;
         }
 
         resetSort() {

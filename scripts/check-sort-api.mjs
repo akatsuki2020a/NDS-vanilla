@@ -13,16 +13,16 @@ const li = (attrs, text) => `<li ${attrs}>${text}</li>`;
 const FIX = `
 <div id="fx-markup">
   <button type="button" id="m1-reset" data-sort-target="m1" data-sort>Reset</button>
-  <button type="button" id="m1-asc" data-sort-target="m1" data-sort="n" data-sort-dir="asc">Up</button>
-  <button type="button" id="m1-desc" data-sort-target="m1" data-sort="n" data-sort-dir="desc">Down</button>
-  <button type="button" id="m1-nodir" data-sort-target="m1" data-sort="n">No dir</button>
+  <button type="button" id="m1-asc" data-sort-target="m1" data-sort="n" data-sort-order="asc">Up</button>
+  <button type="button" id="m1-desc" data-sort-target="m1" data-sort="n" data-sort-order="desc">Down</button>
+  <button type="button" id="m1-noorder" data-sort-target="m1" data-sort="n">No order</button>
   <ul id="m1">${li('data-sort-n="3"', 'c')}${li('data-sort-n="1"', 'a')}${li('data-sort-n="2"', 'b')}</ul>
 
   <button type="button" id="m2-a" data-sort-target="m2" data-sort="n">A</button>
   <button type="button" id="m2-b" data-sort-target="m2" data-sort="t" data-sort-mode="cycle">B</button>
   <ul id="m2">${li('data-sort-n="2" data-sort-t="y"', 'y2')}${li('data-sort-n="1" data-sort-t="z"', 'z1')}${li('data-sort-n="3" data-sort-t="x"', 'x3')}</ul>
 
-  <button type="button" id="m3-desc" data-sort-target="m3" data-sort="n" data-sort-dir="desc" data-state="sorted-desc">Down</button>
+  <button type="button" id="m3-desc" data-sort-target="m3" data-sort="n" data-sort-order="desc" data-state="sorted-desc">Down</button>
   <ul id="m3">${li('data-sort-n="9"', '9')}${li('data-sort-n="5"', '5')}${li('data-sort-n="1"', '1')}</ul>
 
   <button type="button" id="m4-t" data-sort-target="a:b.c" data-sort="n">odd id</button>
@@ -43,13 +43,13 @@ const FIX = `
   <div class="nds-dropmenu" id="m8-menu">
     <button type="button" class="nds-btn nds-dropmenu-trigger"><i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i><span class="nds-label">Sort</span></button>
     <div class="nds-dropmenu-menu" hidden><div class="nds-dropmenu-scroll">
-      <button type="button" class="nds-btn nds-dropmenu-item" id="m8-up" data-sort-target="m8" data-sort="n" data-sort-dir="asc"><i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i></button>
-      <button type="button" class="nds-btn nds-dropmenu-item" id="m8-down" data-sort-target="m8" data-sort="n" data-sort-dir="desc"><i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i></button>
+      <button type="button" class="nds-btn nds-dropmenu-item" id="m8-up" data-sort-target="m8" data-sort="n" data-sort-order="asc"><i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i></button>
+      <button type="button" class="nds-btn nds-dropmenu-item" id="m8-down" data-sort-target="m8" data-sort="n" data-sort-order="desc"><i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i></button>
     </div></div>
   </div>
   <ul id="m8">${li('data-sort-n="2"', '2')}${li('data-sort-n="1"', '1')}</ul>
 </div>
-<button type="button" id="far" data-sort-target="m1" data-sort="n" data-sort-dir="desc" hidden>far away</button>`;
+<button type="button" id="far" data-sort-target="m1" data-sort="n" data-sort-order="desc" hidden>far away</button>`;
 
 const browser = await launch();
 const results = [];
@@ -89,9 +89,9 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
     out.m1Wired = !!document.getElementById('m1').ndsSort?._markup && document.getElementById('m1').hasAttribute('data-nds-sort-initialized');
     click('m1-desc');
     out.m1Desc = [T('m1'), st('m1-desc'), document.getElementById('m1-desc').getAttribute('aria-pressed'), st('m1-asc'), document.getElementById('m1-asc').getAttribute('aria-pressed')];
-    click('m1-nodir'); out.m1NoDir1 = [T('m1'), st('m1-nodir')];
-    click('m1-nodir'); out.m1NoDir2 = T('m1');
-    click('m1-reset'); out.m1Reset = [T('m1'), st('m1-nodir'), JSON.stringify(document.getElementById('m1').ndsSort.getState())];
+    click('m1-noorder'); out.m1NoOrder1 = [T('m1'), st('m1-noorder')];
+    click('m1-noorder'); out.m1NoOrder2 = T('m1');
+    click('m1-reset'); out.m1Reset = [T('m1'), st('m1-noorder'), JSON.stringify(document.getElementById('m1').ndsSort.getState())];
     document.getElementById('far').click(); out.farTrigger = T('m1');
     key('m1-asc', 'Enter'); out.enter = T('m1');
     key('m1-desc', ' '); out.space = T('m1');
@@ -146,12 +146,12 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
     const L = root => [...root.querySelectorAll('.row')].map(e => e.textContent).join(',');
 
     // items/triggers as selector; onChange before event; event detail
-    const r1 = mk('<button class="t" data-sort="p" data-sort-dir="desc">p</button>' + rows);
+    const r1 = mk('<button class="t" data-sort="p" data-sort-order="desc">p</button>' + rows);
     const order = []; let detail, changeArg;
     r1.addEventListener('nds:sort:change', e => { order.push('event'); detail = e.detail; });
     const s1 = NDS.Sort.create(r1, { items: '.row', triggers: '.t', onChange: a => { order.push('onChange'); changeArg = a; } });
     r1.querySelector('.t').click();
-    out.c1 = [L(r1), order.join('>'), detail.key, detail.dir, detail.orderedItems.length, detail.sort === s1, changeArg.key, changeArg.dir, JSON.stringify(changeArg.state), changeArg.orderedItems.length];
+    out.c1 = [L(r1), order.join('>'), detail.key, detail.order, detail.orderedItems.length, detail.sort === s1, changeArg.key, changeArg.order, JSON.stringify(changeArg.state), changeArg.orderedItems.length];
     out.sameInstance = NDS.Sort.create(r1, { mode: 'cycle' }) === s1 && s1.opts.mode === 'direct';
     r1.id = 'r1x';
     out.getInstance = [NDS.Sort.getInstance(r1) === s1, NDS.Sort.getInstance('#r1x') === s1, NDS.Sort.getInstance(document.body), NDS.Sort.create(null)];
@@ -167,7 +167,7 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
 
     // items as NodeList / array / function, triggers outside the root via function, reorderIn
     const r2 = mk('<button class="t2" data-sort="p">p</button>' + rows);
-    const outside = mk('<button id="outside-t" data-sort="p" data-sort-dir="desc">o</button>');
+    const outside = mk('<button id="outside-t" data-sort="p" data-sort-order="desc">o</button>');
     const s2 = NDS.Sort.create(r2, { items: [...r2.querySelectorAll('.row')], triggers: () => [r2.querySelector('.t2'), outside.firstChild] });
     outside.firstChild.click(); out.arrayItems = L(r2);
     const r3 = mk(rows);
@@ -197,21 +197,43 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
     r6.querySelector('.t6').click();
     out.a11yNone = [r6.querySelector('.t6').getAttribute('aria-pressed'), r6.querySelector('.t6').getAttribute('data-state')];
 
-    // initialState wins over markup; markup seed wins over urlSync
-    const r7 = mk('<button class="t7" data-sort="p" data-sort-dir="desc" data-state="sorted-desc">p</button>' + rows);
-    const s7 = NDS.Sort.create(r7, { items: '.row', triggers: '.t7', initialState: { key: 'd', dir: 'asc' } });
+    // initialState wins over markup; urlSync wins over the markup seed and moves the state
+    const r7 = mk('<button class="t7" data-sort="p" data-sort-order="desc" data-state="sorted-desc">p</button>' + rows);
+    const s7 = NDS.Sort.create(r7, { items: '.row', triggers: '.t7', initialState: { key: 'd', order: 'asc' } });
     out.initialWins = [JSON.stringify(s7.getState()), L(r7)];
-    const r8 = mk('<button class="t8" data-sort="p" data-sort-dir="asc" data-state="sorted-asc">p</button>' + rows);
-    const s8 = NDS.Sort.create(r8, { items: '.row', triggers: '.t8', urlSync: { keyParam: 'sk', dirParam: 'sd' } });
-    out.seedOverUrl = [JSON.stringify(s8.getState()), L(r8)];
+    const r8 = mk('<button class="t8" data-sort="n" data-sort-order="asc" data-state="sorted-asc">n</button><ul><li class="row" data-sort-n="1">1</li><li class="row" data-sort-n="3">3</li><li class="row" data-sort-n="2">2</li></ul>');
+    const s8 = NDS.Sort.create(r8, { items: '.row', triggers: '.t8', urlSync: { keyParam: 'sk', orderParam: 'sd' } });
+    out.seedOverUrl = [JSON.stringify(s8.getState()), L(r8), r8.querySelector('.t8').getAttribute('data-state') || ''];
 
-    // urlSync: read on create, write, ascending drops dir, other params stay
+    // urlSync: read on create, write, ascending drops order, other params stay
     const r9 = mk('<button class="t9" data-sort="n">n</button><ul><li class="row" data-sort-n="1">1</li><li class="row" data-sort-n="3">3</li><li class="row" data-sort-n="2">2</li></ul>');
-    const s9 = NDS.Sort.create(r9, { items: '.row', triggers: '.t9', urlSync: { keyParam: 'sk', dirParam: 'sd' } });
+    const s9 = NDS.Sort.create(r9, { items: '.row', triggers: '.t9', urlSync: { keyParam: 'sk', orderParam: 'sd' } });
     out.urlRead = [L(r9), JSON.stringify(s9.getState())];
     s9.apply('n', 'asc'); out.urlAsc = location.search;
     s9.apply('n', 'desc'); out.urlDesc = location.search;
     s9.reset(); out.urlReset = location.search;
+
+    // URL guards: a key no trigger has never wins, values Sort did not write survive, the order is normalized
+    history.replaceState({}, '', location.pathname + '?sk=zzz&sd=12345&keep=1#frag');
+    const r10 = mk('<button class="t10" data-sort="p" data-sort-order="desc" data-state="sorted-desc">p</button>' + rows);
+    const s10 = NDS.Sort.create(r10, { items: '.row', triggers: '.t10', urlSync: { keyParam: 'sk', orderParam: 'sd' } });
+    out.urlForeignKey = JSON.stringify(s10.getState());
+    s10.reset(); out.urlForeignKept = location.search + location.hash;
+    s10.apply('p', 'asc'); out.urlForeignOrderKept = location.search + location.hash;
+    history.replaceState({}, '', location.pathname + '?sk=p&sd=DESC');
+    const r11 = mk('<button class="t11" data-sort="p">p</button>' + rows);
+    const s11 = NDS.Sort.create(r11, { items: '.row', triggers: '.t11', urlSync: { keyParam: 'sk', orderParam: 'sd' } });
+    out.urlUpper = [JSON.stringify(s11.getState()), L(r11)];
+    s11.apply('p', 'bogus'); out.badOrder = JSON.stringify(s11.getState());
+    // A trigger's order in another case still marks it; resetting one sort keeps another sort's order
+    const r12 = mk('<button class="t12" data-sort="p" data-sort-order="DESC">p</button>' + rows);
+    NDS.Sort.create(r12, { items: '.row', triggers: '.t12' });
+    r12.querySelector('.t12').click();
+    out.upperTrigger = [L(r12), r12.querySelector('.t12').getAttribute('aria-pressed')];
+    history.replaceState({}, '', location.pathname + '?sk=b&sd=desc');
+    const r13 = mk('<button class="t13" data-sort="a">a</button>' + rows);
+    const s13 = NDS.Sort.create(r13, { items: '.row', triggers: '.t13', urlSync: { keyParam: 'sk', orderParam: 'sd' } });
+    s13.reset(); out.otherSortKept = location.search;
 
     await NDS.Init.audit();
     return out;
@@ -224,9 +246,9 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
   E('compare asc/desc/numeric text', r.compare, [-1, 1, -1]);
   E('markup: list wired + stamp', r.m1Wired, true);
   E('markup direct: sort, state, aria-pressed on/off', r.m1Desc, ['c,b,a', 'sorted-desc selected', 'true', '', 'false']);
-  E('markup: trigger with no dir sorts asc', r.m1NoDir1, ['a,b,c', 'selected sorted-asc']);
-  E('markup: trigger with no dir never toggles', r.m1NoDir2, 'a,b,c');
-  E('markup: empty data-sort resets + clears state', r.m1Reset, ['c,a,b', '', '{"key":null,"dir":null}']);
+  E('markup: trigger with no order sorts asc', r.m1NoOrder1, ['a,b,c', 'selected sorted-asc']);
+  E('markup: trigger with no order never toggles', r.m1NoOrder2, 'a,b,c');
+  E('markup: empty data-sort resets + clears state', r.m1Reset, ['c,a,b', '', '{"key":null,"order":null}']);
   E('markup: trigger far from the list', r.farTrigger, 'c,b,a');
   E('keyboard Enter', r.enter, 'a,b,c');
   E('keyboard Space', r.space, 'c,b,a');
@@ -235,7 +257,7 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
   E('cycle: 2nd click desc', r.m2c2, ['x3,y2,z1', 'selected sorted-desc']);
   E('cycle: other key starts asc, old state cleared', r.m2Other, ['x3,y2,z1', '', 'sorted-asc selected']);
   E('cycle: 3rd click restores', r.m2c3, ['y2,z1,x3', '']);
-  E('seed: state read, no reorder, aria', r.m3Seed, ['9,5,1', '{"key":"n","dir":"desc"}', 'sorted-desc selected', 'true']);
+  E('seed: state read, no reorder, aria', r.m3Seed, ['9,5,1', '{"key":"n","order":"desc"}', 'sorted-desc selected', 'true']);
   E('odd id (CSS.escape)', r.m4, '1,2');
   E('trigger in <code> not wired', r.m5Wired, false);
   E('dropmenu trigger icon sync', r.m8Icon, 'nds-icon nds-hgi-sort-by-down-02');
@@ -246,11 +268,11 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
   E('Init.destroy(view) releases list', r.destroy, [true, false, false]);
   E('after destroy: click does nothing', r.afterDestroy, '2,1');
   E('Init.refresh re-wires', r.rewired, '1,2');
-  E('create: selector forms, onChange>event, detail, onChange arg', r.c1, ['c,b,a', 'onChange>event', 'p', 'desc', 3, true, 'p', 'desc', '{"key":"p","dir":"desc"}', 3]);
+  E('create: selector forms, onChange>event, detail, onChange arg', r.c1, ['c,b,a', 'onChange>event', 'p', 'desc', 3, true, 'p', 'desc', '{"key":"p","order":"desc"}', 3]);
   E('create twice: same instance, options ignored', r.sameInstance, true);
   E('getInstance el/selector/none, create(null)', r.getInstance, [true, true, null, null]);
-  E('apply + getState', r.apply, ['a,b,c', '{"key":"p","dir":"asc"}']);
-  E('apply(null) restores', r.applyNull, ['c,a,b', '{"key":null,"dir":null}']);
+  E('apply + getState', r.apply, ['a,b,c', '{"key":"p","order":"asc"}']);
+  E('apply(null) restores', r.applyNull, ['c,a,b', '{"key":null,"order":null}']);
   E('date detection DD/MM/YYYY', r.dateSort, 'b,c,a');
   E('reset()', r.reset, 'c,a,b');
   E('refresh() no-op with no sort', r.refreshNoop, 0);
@@ -262,12 +284,19 @@ const ok = (name, pass, got) => results.push({ name, pass, got });
   E("a11y 'sort' cleared", r.a11ySort3, ['none', '', '']);
   E('types removed: detection as number', r.typesNumber, 'a,c,b');
   E("a11y 'none' writes no aria / state token", r.a11yNone, [null, 'sorted-asc']);
-  E('initialState wins over markup seed, no reorder', r.initialWins, ['{"key":"d","dir":"asc"}', 'c,a,b']);
-  E('markup seed wins over urlSync', r.seedOverUrl, ['{"key":"p","dir":"asc"}', 'c,a,b']);
-  E('urlSync read on create (?sk=n&sd=desc)', r.urlRead, ['3,2,1', '{"key":"n","dir":"desc"}']);
-  E('urlSync asc drops dir, keeps other params', r.urlAsc, '?sk=n&keep=1');
+  E('initialState wins over markup seed, no reorder', r.initialWins, ['{"key":"d","order":"asc"}', 'c,a,b']);
+  E('urlSync wins over markup seed', r.seedOverUrl, ['{"key":"n","order":"desc"}', '3,2,1', '']);
+  E('urlSync read on create (?sk=n&sd=desc)', r.urlRead, ['3,2,1', '{"key":"n","order":"desc"}']);
+  E('urlSync asc drops order, keeps other params', r.urlAsc, '?sk=n&keep=1');
   E('urlSync desc', r.urlDesc, '?sk=n&keep=1&sd=desc');
   E('urlSync reset clears both', r.urlReset, '?keep=1');
+  E('urlSync: a key no trigger has never wins', r.urlForeignKey, '{"key":"p","order":"desc"}');
+  E('urlSync: reset keeps a foreign key, order and hash', r.urlForeignKept, '?sk=zzz&sd=12345&keep=1#frag');
+  E('urlSync: asc keeps a foreign order value', r.urlForeignOrderKept, '?sk=p&sd=12345&keep=1#frag');
+  E('urlSync: DESC reads as desc', r.urlUpper, ['{"key":"p","order":"desc"}', 'c,b,a']);
+  E('apply: an unknown order is asc', r.badOrder, '{"key":"p","order":"asc"}');
+  E('a trigger with data-sort-order="DESC" sorts desc and shows pressed', r.upperTrigger, ['c,b,a', 'true']);
+  E("urlSync: resetting one sort keeps another sort's key and order", r.otherSortKept, '?sk=b&sd=desc');
 
   const has = s => warns.some(w => w.includes(s));
   ok('warn: selector out of root (once)', warns.filter(w => w.includes('"#outside-t" matches')).length === 1, warns.filter(w => w.includes('#outside-t')).length);

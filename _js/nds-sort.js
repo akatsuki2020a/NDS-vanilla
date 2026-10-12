@@ -8,17 +8,17 @@
  *   NDS.Sort.getInstance(rootOrSel)     the existing instance, or null
  *   NDS.Sort.detectType(sampleValues, dateFormat, calendar)   'number' | 'date' | 'string'
  *   NDS.Sort.parseValue(raw, type, dateFormat, calendar)      pure helper
- *   NDS.Sort.compare(a, b, type, dir, dateFormat, calendar)   pure helper
- *   instance.apply(key, dir)            sort now (null key resets to the authored order)
+ *   NDS.Sort.compare(a, b, type, order, dateFormat, calendar)   pure helper
+ *   instance.apply(key, order)          sort now (null key resets to the authored order)
  *   instance.reset()                    back to the authored order
  *   instance.refresh()                  re-run the active sort over the items as they stand
- *   instance.getState()                 {key, dir}
+ *   instance.getState()                 {key, order}
  *   instance.destroy()
  * Events (bubble from the root):
- *   nds:sort:change   detail {key, dir, orderedItems, sort}
+ *   nds:sort:change   detail {key, order, orderedItems, sort}
  * Hooks:
  *   data-sort          the key, on a trigger
- *   data-sort-dir      the direction that trigger fixes (direct mode)
+ *   data-sort-order    the order that trigger fixes (direct mode)
  *   data-sort-<key>    the value to sort by, on each item (the default accessor)
  *   data-sort-target   the id of the list a trigger sorts — markup wiring, no create()
  *   data-sort-mode     "cycle" on any of a list's triggers picks cycle mode
@@ -41,7 +41,7 @@
  *     Use it only when the page holds every matching row. If the server pages the
  *     results it must sort them too — author no triggers at all and let the consumer
  *     send its own sort param; see nds-filter's form-mode gotcha for that shape.
- *   - In direct mode a trigger with no data-sort-dir always applies asc; it does NOT
+ *   - In direct mode a trigger with no data-sort-order always applies asc; it does NOT
  *     toggle. Ship the asc/desc pair, or a lone trigger looks dead after the first click.
  */
 /**
@@ -57,7 +57,7 @@
  *   NDS.Sort.getInstance(root)          — retrieve existing instance
  *   NDS.Sort.detectType(sampleValues, dateFormat, calendar)   — pure helper
  *   NDS.Sort.parseValue(raw, type, dateFormat, calendar)      — pure helper
- *   NDS.Sort.compare(a, b, type, dir, dateFormat, calendar)   — pure helper
+ *   NDS.Sort.compare(a, b, type, order, dateFormat, calendar)   — pure helper
  *
  * Options (passed to create):
  *   items          — selector | NodeList | Array | () => NodeList  (required)
@@ -66,18 +66,18 @@
  *   accessor       — (item, key) => raw value; default: item.getAttribute('data-sort-' + key)
  *   keyFrom        — (trigger) => key; default: trigger.getAttribute('data-sort') || ''
  *   mode           — 'direct' | 'cycle'   default: 'direct'
- *                      direct : each trigger fixes its own (key, dir) pair; empty key resets
+ *                      direct : each trigger fixes its own (key, order) pair; empty key resets
  *                      cycle  : same trigger toggles asc → desc → reset across three clicks
  *   a11y           — 'pressed' | 'sort' | 'none'   default: 'pressed'
  *                      pressed: aria-pressed on trigger + data-state="selected"
  *                      sort   : aria-sort on a11yTarget + data-state="active" on trigger
  *   a11yTarget     — (trigger) => Element that carries aria-sort   default: trigger.closest('th')
  *   types          — { [key]: 'number' | 'date' | 'string' } overrides for auto-detect
- *   initialState   — { key, dir } | null to seed state without reordering (HTML pre-sorted)
- *   urlSync        — false | { keyParam, dirParam } — read at init, write on change
- *   onChange       — ({ key, dir, orderedItems, state }) => void
+ *   initialState   — { key, order } | null to seed state without reordering (HTML pre-sorted)
+ *   urlSync        — false | { keyParam, orderParam } — read at init, write on change
+ *   onChange       — ({ key, order, orderedItems, state }) => void
  *
- * Event: dispatches `nds:sort:change` on `root` with detail { key, dir, orderedItems, sort }.
+ * Event: dispatches `nds:sort:change` on `root` with detail { key, order, orderedItems, sort }.
  */
 (function() {
     'use strict';
@@ -148,7 +148,7 @@
         return String(raw == null ? '' : raw);
     }
 
-    function compare(a, b, type, dir, dateFormat, calendar) {
+    function compare(a, b, type, order, dateFormat, calendar) {
         const av = parseValue(a, type, dateFormat, calendar);
         const bv = parseValue(b, type, dateFormat, calendar);
         let cmp;
@@ -157,7 +157,7 @@
         } else {
             cmp = av - bv;
         }
-        return dir === 'desc' ? -cmp : cmp;
+        return order === 'desc' ? -cmp : cmp;
     }
 
     // ── Instance ─────────────────────────────────────────────────────────
@@ -174,7 +174,7 @@
             }, options || {});
 
             this.abortController = new AbortController();
-            this.state = { key: null, dir: null };
+            this.state = { key: null, order: null };
             this._originalOrder = null;
 
             this.init();
@@ -184,13 +184,17 @@
             this._originalOrder = [...this._resolveItems()];
             this._bindTriggers();
 
+            // A sort in the URL wins over the markup's: a shared link opens as it was shared.
+            const urlKey = this.opts.urlSync && this._urlKey();
+            if (urlKey) {
+                this.apply(urlKey, new URLSearchParams(window.location.search).get(this.opts.urlSync.orderParam));
+                return;
+            }
+
             // Seed state without reordering — used when HTML arrives pre-sorted
             const seed = this.opts.initialState || this._readSeed();
             if (seed && seed.key != null) {
-                this.state = { key: seed.key, dir: seed.dir || 'asc' };
-            } else if (this.opts.urlSync) {
-                this._readUrl();  // also applies
-                return;
+                this.state = { key: seed.key, order: String(seed.order).toLowerCase() === 'desc' ? 'desc' : 'asc' };
             }
 
             this._render();
@@ -205,9 +209,9 @@
         _readSeed() {
             for (const trigger of this._resolveTriggers()) {
                 const host = this._stateHost(trigger);
-                const dir = NDS.State.has(host, 'sorted-asc') ? 'asc'
+                const order = NDS.State.has(host, 'sorted-asc') ? 'asc'
                           : NDS.State.has(host, 'sorted-desc') ? 'desc' : null;
-                if (dir) return { key: this.opts.keyFrom(trigger), dir };
+                if (order) return { key: this.opts.keyFrom(trigger), order };
             }
             return null;
         }
@@ -283,35 +287,35 @@
 
             if (this.opts.mode === 'cycle') {
                 if (!_hasKey(key)) { this.apply(null, null); return; }
-                let nextDir;
+                let nextOrder;
                 if (this.state.key === key) {
                     // asc → desc → reset
-                    nextDir = this.state.dir === 'asc' ? 'desc'
-                            : this.state.dir === 'desc' ? null
+                    nextOrder = this.state.order === 'asc' ? 'desc'
+                            : this.state.order === 'desc' ? null
                             : 'asc';
                 } else {
-                    nextDir = 'asc';
+                    nextOrder = 'asc';
                 }
-                this.apply(nextDir ? key : null, nextDir);
+                this.apply(nextOrder ? key : null, nextOrder);
                 return;
             }
 
             // direct mode
             if (!_hasKey(key)) { this.apply(null, null); return; }
-            const dir = trigger.getAttribute('data-sort-dir') || 'asc';
-            this.apply(key, dir);
+            this.apply(key, this._triggerOrder(trigger));
         }
 
         // ── Apply / reset ────────────────────────────────────────────────
 
-        apply(key, dir) {
+        apply(key, order) {
             const items = this._resolveItems();
             const container = this._resolveContainer(items);
             const hasKey = _hasKey(key);
 
+            // Anything but desc is asc: a hand-edited URL or a caller's typo never becomes the state.
             this.state = {
                 key: hasKey ? key : null,
-                dir: hasKey ? (dir || 'asc') : null
+                order: hasKey ? (String(order).toLowerCase() === 'desc' ? 'desc' : 'asc') : null
             };
 
             if (!container || !items.length) {
@@ -332,7 +336,7 @@
                 const calendar = NDS.date.calendarFor(this.root);
                 const type = (this.opts.types && this.opts.types[key]) || detectType(sample, dateFormat, calendar);
                 ordered = [...items].sort((a, b) =>
-                    compare(accessor(a, key), accessor(b, key), type, dir || 'asc', dateFormat, calendar)
+                    compare(accessor(a, key), accessor(b, key), type, this.state.order, dateFormat, calendar)
                 );
             } else {
                 // Drop snapshot entries the container no longer holds. appendChild
@@ -349,11 +353,11 @@
 
             if (this.opts.urlSync) this._writeUrl();
             if (typeof this.opts.onChange === 'function') {
-                this.opts.onChange({ key: this.state.key, dir: this.state.dir, orderedItems: ordered, state: this.getState() });
+                this.opts.onChange({ key: this.state.key, order: this.state.order, orderedItems: ordered, state: this.getState() });
             }
 
             this.root.dispatchEvent(new CustomEvent('nds:sort:change', {
-                detail: { key: this.state.key, dir: this.state.dir, orderedItems: ordered, sort: this },
+                detail: { key: this.state.key, order: this.state.order, orderedItems: ordered, sort: this },
                 bubbles: true
             }));
         }
@@ -364,9 +368,9 @@
         // arrive after create() — an async list, an AJAX swap — miss init()'s pass
         // entirely: a URL-seeded sort settles its state with nothing to sort, and
         // nothing re-applies it on its own. No-op when no sort is active.
-        refresh() { if (_hasKey(this.state.key)) this.apply(this.state.key, this.state.dir); }
+        refresh() { if (_hasKey(this.state.key)) this.apply(this.state.key, this.state.order); }
 
-        getState() { return { key: this.state.key, dir: this.state.dir }; }
+        getState() { return { key: this.state.key, order: this.state.order }; }
 
         // ── a11y / active render ─────────────────────────────────────────
 
@@ -378,18 +382,18 @@
 
             triggers.forEach(trigger => {
                 const key = this.opts.keyFrom(trigger);
-                const dirAttr = trigger.getAttribute('data-sort-dir') || null;
+                const orderAttr = trigger.hasAttribute('data-sort-order') ? this._triggerOrder(trigger) : null;
 
                 let isActive;
                 if (this.opts.mode === 'cycle') {
-                    isActive = this.state.key !== null && this.state.key === key && this.state.dir !== null;
+                    isActive = this.state.key !== null && this.state.key === key && this.state.order !== null;
                 } else {
                     isActive = this.state.key !== null
                             && key === this.state.key
-                            && (!dirAttr || dirAttr === this.state.dir);
+                            && (!orderAttr || orderAttr === this.state.order);
                 }
 
-                if (isActive && this.state.dir) NDS.State.add(this._stateHost(trigger), 'sorted-' + this.state.dir);
+                if (isActive && this.state.order) NDS.State.add(this._stateHost(trigger), 'sorted-' + this.state.order);
 
                 if (a11y === 'pressed') {
                     NDS.aria.pressed(trigger, isActive);
@@ -398,8 +402,8 @@
                 } else if (a11y === 'sort') {
                     const target = this.opts.a11yTarget ? this.opts.a11yTarget(trigger) : null;
                     if (target) {
-                        if (isActive && this.state.dir) {
-                            NDS.aria.sort(target, this.state.dir === 'asc' ? 'ascending' : 'descending');
+                        if (isActive && this.state.order) {
+                            NDS.aria.sort(target, this.state.order === 'asc' ? 'ascending' : 'descending');
                         } else {
                             NDS.aria.sort(target, 'none');
                         }
@@ -425,15 +429,14 @@
             const triggerIcon = dropmenu.querySelector('.nds-dropmenu-trigger > i, .nds-dropmenu-trigger .nds-icon, .nds-dropmenu-trigger .hgi');
             if (!triggerIcon) return;
 
-            const { key: activeKey, dir: activeDir } = this.state;
+            const { key: activeKey, order: activeOrder } = this.state;
             const isDirect = this.opts.mode === 'direct';
 
             const activeBtn = triggers.find(t => {
                 const k = this.opts.keyFrom(t);
                 if (!_hasKey(activeKey)) return !_hasKey(k);
                 if (!isDirect) return k === activeKey;
-                const d = t.getAttribute('data-sort-dir') || 'asc';
-                return k === activeKey && (!t.hasAttribute('data-sort-dir') || d === activeDir);
+                return k === activeKey && (!t.hasAttribute('data-sort-order') || this._triggerOrder(t) === activeOrder);
             });
 
             const sourceIcon = activeBtn?.querySelector('i.nds-icon, i.hgi, i');
@@ -442,34 +445,43 @@
 
         // ── URL sync ─────────────────────────────────────────────────────
 
-        _readUrl() {
-            const params = new URLSearchParams(window.location.search);
-            const { keyParam, dirParam } = this.opts.urlSync;
-            const key = params.get(keyParam);
-            if (!key) { this._render(); return; }
-            const dir = params.get(dirParam) || 'asc';
-            this.apply(key, dir);  // handles render + writeUrl + onChange + event
+        // A trigger's order as written, in any case: anything but desc is asc.
+        _triggerOrder(trigger) {
+            return (trigger.getAttribute('data-sort-order') || '').toLowerCase() === 'desc' ? 'desc' : 'asc';
         }
 
+        // Whether one of the triggers sorts by `key`. Another use of the same param
+        // (a server's own sort select, a second sort on the page) is not this sort's.
+        _ownsKey(key) {
+            return !!key && this._resolveTriggers().some(t => this.opts.keyFrom(t) === key);
+        }
+
+        _urlKey() {
+            const key = new URLSearchParams(window.location.search).get(this.opts.urlSync.keyParam);
+            return this._ownsKey(key) ? key : null;
+        }
+
+        // Clears only values this sort could have written, so a site's own ?order=12345 survives.
         _writeUrl() {
             const params = new URLSearchParams(window.location.search);
-            const { keyParam, dirParam } = this.opts.urlSync;
+            const { keyParam, orderParam } = this.opts.urlSync;
+            const ownOrder = /^(asc|desc)$/i.test(params.get(orderParam) || '');
 
             if (this.state.key) {
                 params.set(keyParam, this.state.key);
-                if (this.state.dir && this.state.dir !== 'asc') {
-                    params.set(dirParam, this.state.dir);
-                } else {
-                    params.delete(dirParam);
-                }
+                if (this.state.order === 'desc') params.set(orderParam, 'desc');
+                else if (ownOrder) params.delete(orderParam);
             } else {
-                params.delete(keyParam);
-                params.delete(dirParam);
+                // The order goes with its key: another sort's key keeps its order=desc.
+                const key = params.get(keyParam);
+                if (!key || this._ownsKey(key)) {
+                    params.delete(keyParam);
+                    if (ownOrder) params.delete(orderParam);
+                }
             }
 
             const qs = params.toString();
-            const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
-            window.history.replaceState({}, '', newUrl);
+            window.history.replaceState({}, '', window.location.pathname + (qs ? `?${qs}` : '') + window.location.hash);
         }
 
         destroy() {

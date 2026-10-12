@@ -50,11 +50,11 @@ sidemenu_mode: false
                             <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
                             <span class="nds-label">Most Relevant</span>
                         </button>
-                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-dir="asc" data-filter-target="search_results_content">
+                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-order="asc" data-filter-target="search_results_content">
                             <i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i>
                             <span class="nds-label">A–Z</span>
                         </button>
-                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-dir="desc" data-filter-target="search_results_content">
+                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-order="desc" data-filter-target="search_results_content">
                             <i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i>
                             <span class="nds-label">Z–A</span>
                         </button>

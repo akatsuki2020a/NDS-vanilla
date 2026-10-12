@@ -2,14 +2,14 @@
 //
 // In AJAX form mode the server returns one page of results. The filter then
 // calls _resyncSort(), which re-creates NDS.Sort on the swapped-in container
-// with urlSync — and NDS.Sort's init() reads ?sort=&dir= and REORDERS. Meanwhile
-// _buildAjaxRequest builds its query from FormData alone, so sort/dir never
+// with urlSync — and NDS.Sort's init() reads ?sort=&order= and REORDERS. Meanwhile
+// _buildAjaxRequest builds its query from FormData alone, so sort/order never
 // reach the server (updateUrlParams deliberately preserves them as NDS.Sort's).
 //
 // This harness reports the split as data rather than reasoning about it:
 //   Q1  after an AJAX swap, does the client re-order the server's rows?
 //   Q2  does a sort trigger click in AJAX mode re-fetch, or re-order in place?
-//   Q3  does sort/dir ever reach the server?
+//   Q3  does sort/order ever reach the server?
 //
 //   node scripts/check-filter-sort-ownership.mjs [baseUrl]
 // Defaults to the dev server. Start it with `bundle exec jekyll serve` if down.
@@ -71,10 +71,10 @@ const report = await page.evaluate(async () => {
           </div>
         </div>
         <div class="nds-toolbar" data-filter-target="srt">
-          <button type="button" class="nds-btn nds-subtle" data-sort="name" data-sort-dir="asc">
+          <button type="button" class="nds-btn nds-subtle" data-sort="name" data-sort-order="asc">
             <span class="nds-label">Name A-Z</span>
           </button>
-          <button type="button" class="nds-btn nds-subtle" data-sort="name" data-sort-dir="desc">
+          <button type="button" class="nds-btn nds-subtle" data-sort="name" data-sort-order="desc">
             <span class="nds-label">Name Z-A</span>
           </button>
         </div>
@@ -87,7 +87,7 @@ const report = await page.evaluate(async () => {
             .map((el) => el.getAttribute('data-sort-name'));
 
     // Sort state in the URL, exactly as NDS.Sort writes it.
-    history.replaceState({}, '', `${location.pathname}?sort=name&dir=asc`);
+    history.replaceState({}, '', `${location.pathname}?sort=name&order=asc`);
 
     NDS.Filter.init();
     const f = NDS.Filter.getByTarget('srt');
@@ -115,23 +115,23 @@ const report = await page.evaluate(async () => {
         beforeSubmit: beforeSubmit.join(','),
     });
 
-    // ── Q3 — did sort/dir reach the server on that request? ────────────────
+    // ── Q3 — did sort/order reach the server on that request? ────────────────
     const params = q();
     findings.push({
-        q: 'Q3 sort/dir in the request',
+        q: 'Q3 sort/order in the request',
         requestQuery: params ? params.toString() : '(no request)',
         browserUrl: location.search,
         sortInRequest: !!params?.get('sort'),
-        dirInRequest: !!params?.get('dir'),
+        orderInRequest: !!params?.get('order'),
         requests: sent.length - sentBefore,
     });
 
     // ── Q2 — does a sort trigger click re-fetch, or re-order in place? ─────
     const sentBeforeClick = sent.length;
     const domBeforeClick = domOrder();
-    // mode: 'direct' — each trigger is a fixed (key, dir) pair, it does not
+    // mode: 'direct' — each trigger is a fixed (key, order) pair, it does not
     // toggle. Click the desc option so the click asks for a real change.
-    const trigger = host.querySelector('[data-sort="name"][data-sort-dir="desc"]');
+    const trigger = host.querySelector('[data-sort="name"][data-sort-order="desc"]');
     trigger.click();
     await settle();
     findings.push({
@@ -179,7 +179,7 @@ const report = await page.evaluate(async () => {
     // [data-sort], setupSort() returns early and NDS.Sort is never created, so
     // nothing client-side claims the ?sort= key. Question: does the dev's sort
     // value reach the SHAREABLE URL, or does updateUrlParams' unconditional
-    // sort/dir skip drop it?
+    // sort/order skip drop it?
     const host2 = document.createElement('div');
     host2.innerHTML = `
         <form id="srt2Form" data-filter-target="srt2" data-filter-submit data-ajax

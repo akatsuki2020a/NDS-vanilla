@@ -2,7 +2,7 @@
 # The audit's migration rule reads this file (nds-audit.js, bundled by js_processor.rb).
 # Built from scripts/surface-history.rb plus DEPRECATIONS.md; add rows at each release.
 # Keep the newest release first: core/migration.md groups the rows in this order.
-#   kind     class | attribute | property | id | global (a window setting) | event (events go to the docs only: a page cannot see a listener)
+#   kind     class | attribute | property | id | global (a window setting) | event (events go to the docs only: a page cannot see a listener) | param (a URL query key; docs only: the server reads it)
 #   scope    the selector the old name lived under; a match must sit inside it (closest), or with a leading & match it itself
 #   status   renamed | removed (broken today) | deprecated (still works until the next major)
 #   use      today's name, when there is one
@@ -171,7 +171,9 @@
 - { kind: event, name: nds:digitalStamp:closed, status: renamed, use: nds:digital-stamp:closed, since: "2.0.0", fix: "Listen for nds:digital-stamp:closed." }
 - { kind: event, name: nds:digitalStamp:opened, status: renamed, use: nds:digital-stamp:opened, since: "2.0.0", fix: "Listen for nds:digital-stamp:opened." }
 - { kind: event, name: nds:table:selection, status: renamed, use: nds:selection:change, since: "2.0.0", fix: "Listen for nds:selection:change on the list." }
-- { kind: event, name: nds:table:sort, status: renamed, use: nds:sort:change, since: "2.0.0", fix: "Listen for nds:sort:change; detail.key is the column index and detail.dir the direction." }
+- { kind: event, name: nds:table:sort, status: renamed, use: nds:sort:change, since: "2.0.0", fix: "Listen for nds:sort:change; detail.key is the column index and detail.order the order." }
+- { kind: attribute, name: data-sort-dir, status: renamed, use: data-sort-order, since: "2.0.0", fix: "Use data-sort-order." }
+- { kind: param, name: dir, scope: "&.nds-filter", status: renamed, use: order, since: "2.0.0", fix: "A filter's sort writes ?sort=price&order=desc. Read order on the server; a link with dir=desc opens ascending." }
 - { kind: property, name: --tooltip-background-inverse, scope: .nds-tooltip, status: renamed, use: --tooltip-background-default, since: "1.12.0", fix: "Set --tooltip-background-default under :root[data-theme~=\"dark\"] instead." }
 - { kind: property, name: --tooltip-text-heading-inverse, scope: .nds-tooltip, status: renamed, use: --tooltip-text-heading-default, since: "1.12.0", fix: "Set --tooltip-text-heading-default under :root[data-theme~=\"dark\"] instead." }
 - { kind: property, name: --tooltip-text-paragraph-inverse, scope: .nds-tooltip, status: renamed, use: --tooltip-text-paragraph-default, since: "1.12.0", fix: "Set --tooltip-text-paragraph-default under :root[data-theme~=\"dark\"] instead." }

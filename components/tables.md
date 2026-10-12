@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:19 PM"
+last_edit: "12/10/2026 - 11:57 AM"
 ---
 
 <section id="table-overview" class="nds-content-section nds-doc-overview">
@@ -696,7 +696,7 @@ Keep Selection only when the page has a bulk action that acts on the selected ro
 | `nds-col-header` | `div` in a `th` | Holds the header label and its actions on one line |
 | `nds-col-actions` | `div` in `.nds-col-header` | Holds the header buttons, at 32px |
 | `nds-sort-btn` | `button` in `.nds-col-actions` | Makes its column sortable |
-| `nds-sort-icon` | the icon in `.nds-sort-btn` | Turns to show the sort direction |
+| `nds-sort-icon` | the icon in `.nds-sort-btn` | Turns to show the sort order |
 | `nds-sub` | `tr` | A detail row. It belongs to the row right before it |
 | `nds-actions-column` | `th` and `td` | Shrinks the column to its content |
 | `nds-table-actions` | `div` in a cell | A row of buttons with a small gap |
@@ -776,7 +776,7 @@ Source: the `table` group in `_sass/tokens/_components.scss`.
 | Instance | Method | Effect |
 |---|---|---|
 | `create()` | `getSortColumn()` | The cell index of the sorted column, or `-1` |
-| `create()` | `getSortDirection()` | `"asc"`, `"desc"` or `null` |
+| `create()` | `getSortOrder()` | `"asc"`, `"desc"` or `null` |
 | `create()` | `resetSort()` | Clears the sort and puts the rows back in their first order |
 | `create()` | `destroy()` | Stops sorting. The table keeps its scroll box |
 | `createResponsive()` | `recheckWidth()` | Measures this table again |

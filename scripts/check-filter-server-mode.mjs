@@ -128,7 +128,7 @@ const report = await page.evaluate(async () => {
     // Put sort state in the URL the way NDS.Sort does, so the run measures
     // whether ANY out-of-form param survives into the request instead of
     // inferring it from the fact that the query is built out of FormData.
-    history.replaceState({}, '', `${location.pathname}?sort=name&dir=asc`);
+    history.replaceState({}, '', `${location.pathname}?sort=name&order=asc`);
 
     f.submitForm();
     await settle();
@@ -167,7 +167,7 @@ const report = await page.evaluate(async () => {
     findings.push({ id: 'slider in request', detail: has('price') ? `yes (price=${req.get('price')})` : 'NO' });
     findings.push({ id: 'search in request', detail: has('search') ? `yes (search=${req.get('search')})` : 'NO' });
     findings.push({ id: 'slider thumbs have a name attribute', detail: thumbs.length ? thumbs.map((t) => t.name || '(none)').join(' / ') : 'no slider built' });
-    findings.push({ id: 'sort/dir from the URL in request', detail: has('sort') || has('dir') ? 'yes' : 'NO — dropped' });
+    findings.push({ id: 'sort/order from the URL in request', detail: has('sort') || has('order') ? 'yes' : 'NO — dropped' });
 
     // The general rule behind every "X is missing" row above: is the request
     // exactly FormData, nothing more? If so, no out-of-form state can ever ride
