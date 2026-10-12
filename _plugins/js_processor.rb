@@ -603,4 +603,6 @@ if __FILE__ == $0
   else
     processor.process_files
   end
+  # The word packs ship beside the bundles: their English lives in _js/, their banner carries the version.
+  system('node', 'scripts/check-i18n.mjs', '--build') unless ARGV[0] == 'watch'
 end

@@ -151,9 +151,9 @@
     });
 
     // ── i18n ─────────────────────────────────────────────────────────
-    // One pack per language, assets/i18n/{lang}.json, keyed by component. A section the
-    // pack leaves out reads en.json's; one neither has reads assets/i18n/{component}/{lang}.json.
-    // Missing files fall back to en.json; a missing key keeps the component's default.
+    // One pack per language NDS ships besides English, assets/i18n/{lang}.json, keyed by component
+    // and built from _i18n/ (scripts/check-i18n.mjs --build). English is built in: the JS defaults
+    // and the markup. A missing pack, section or key shows the English.
     //
     // Override hooks:
     //   window.NDS_I18N      = { '{component}': {...}, ... }   inline strings, read on every lookup
@@ -204,16 +204,18 @@
             return /^[a-z]{2,3}$/.test(l) ? l : 'en';
         },
 
-        // undefined until known; then the pack's section, en's (a pack may leave sections
-        // out), or the own file (null when none). Ignores the override: an override is no
-        // sign the file landed.
+        // A section's words in a language: undefined until known, then the pack's section, or
+        // null when it has none. English is built in (the JS defaults and the markup), so an
+        // English page loads no file. Ignores the override: an override is no sign the file landed.
+        // ponytail: Accessibility alone keeps its own files (accessibility/{lang}.json, its en
+        // included) until it joins the pack; then the own-file branches go.
         _fromFiles(component, lang) {
             lang = this._lang(lang);
-            const pack = this._files[lang], en = this._files.en;
-            if (pack && component in pack) return pack[component];
-            if (pack === undefined || en === undefined) return undefined;
-            if (en && component in en) return en[component];
-            return this._files[component + '/' + lang];
+            if (component === 'accessibility') return this._files['accessibility/' + lang];
+            if (lang === 'en') return null;
+            const pack = this._files[lang];
+            if (pack === undefined) return undefined;
+            return pack && component in pack ? pack[component] : null;
         },
 
         // The files' text with the inline override laid over it key by key. Until they
@@ -225,22 +227,23 @@
             return data ? Object.assign({}, data, inline) : inline;
         },
 
-        // ponytail: an own-file component (accessibility) on a non-en page also loads en.json
-        // to rule out an en section; moving accessibility into the pack drops that fetch.
         _get(component, lang) {
             lang = this._lang(lang);
-            const has = p => p && component in p;
-            return this._file(lang).then(pack => has(pack)
-                || this._file('en').then(en => has(en) || this._file(component + '/' + lang)));
+            return component === 'accessibility' ? this._file('accessibility/' + lang) : this.pack(lang);
         },
 
-        // The page language's pack, landed. settled is the capped promise the loader waits on.
-        pack() { return this._file(this._lang()); },
+        // A language's pack (the page's by default), landed; English has none. settled is the
+        // capped promise the loader waits on.
+        pack(lang) {
+            lang = this._lang(lang);
+            return lang === 'en' ? Promise.resolve(null) : this._file(lang);
+        },
 
-        // One fetch per file per page; falls back to the en file.
+        // One fetch per file per page. A missing pack is null, so English shows; a missing
+        // own file falls back to its en file.
         _file(path) {
             return this._loads[path] || (this._loads[path] = this._fetchOne(path)
-                .then(data => data || (/(^|\/)en$/.test(path) ? null : this._file(path.replace(/[a-z]+$/, 'en'))))
+                .then(data => data || (/\/(?!en$)[a-z]+$/.test(path) ? this._file(path.replace(/[a-z]+$/, 'en')) : null))
                 .then(data => (this._files[path] = data || null)));
         },
 
@@ -254,7 +257,7 @@
         //   s.has(key)                  the component defines this key (for keys from outside)
         strings(component, defaults) {
             const I = this, queue = [];
-            // Markers in this section fall back to these when no file has the key.
+            // The section's English: text() and its markers fall back to it when no file has the key.
             I._seeds[component] = Object.assign(I._seeds[component] || {}, defaults);
             const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
             const landed = () => I._fromFiles(component) !== undefined;
@@ -264,7 +267,9 @@
                 if (lang && I._fromFiles(component, lang) === undefined) I._get(component, lang);
                 const d = I._section(component, lang);
                 // Own keys only: a key from outside (a cached value, a browser error name) never reaches Object.prototype.
-                return I.format(has(d, key) ? d[key] : has(defaults, key) ? defaults[key] : key, vars, lang);
+                // The English every strings() call for this section declared, not only this one's.
+                const seed = I._seeds[component];
+                return I.format(has(d, key) ? d[key] : has(seed, key) ? seed[key] : key, vars, lang);
             };
             return {
                 text: t,
@@ -304,8 +309,8 @@
                 const { data } = await NDS.request(base + path + '.json' + ASSETS_VER, { cache: 'default', json: true });
                 return data;
             } catch (err) {
-                // An own en file is optional: the component's English is in its strings() call.
-                if (!(err.status === 404 && /\/en$/.test(path))) console.warn('[NDS.i18n] ' + path + ' failed', err);
+                // A 404 is a language NDS does not ship: English shows, and a site adds its words with NDS_I18N.
+                if (err.status !== 404) console.warn('[NDS.i18n] ' + path + ' failed', err);
                 return null;
             }
         },
@@ -365,17 +370,17 @@
         _warnOnce(msg) { if (!this._warned.has(msg)) { this._warned.add(msg); console.warn('[NDS.i18n] ' + msg); } },
 
         // The word a marker names, through text()'s chain: the override, the pack, en, a
-        // registered component's own file, its JS defaults. Also its English, when known
-        // (en.json once loaded, else the JS default): the guard's baseline. word null: leave the markup.
+        // registered component's own file, its JS defaults. Also its English when a script
+        // declares it (the JS default): the guard's baseline. word null: leave the markup.
         _word(ref) {
             const m = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/.exec(ref);
             // ponytail: an undotted ref is a 1.x Accessibility/IPV key, skipped until they move to markers.
             if (!m) return { word: null };
             const [, section, key] = m;
             const own = (o) => !!o && Object.prototype.hasOwnProperty.call(o, key);
-            const d = this._section(section), seed = this._seeds[section], en = this._files.en?.[section];
+            const d = this._section(section), seed = this._seeds[section];
             const v = own(d) ? d[key] : own(seed) ? seed[key] : undefined;
-            const english = own(en) ? en[key] : own(seed) ? seed[key] : undefined;
+            const english = own(seed) ? seed[key] : undefined;
             if (typeof v === 'string' && !/\{\w+\}/.test(v)) return { word: v, english };
             if (v !== undefined) this._warnOnce(`${ref} has {vars} or plural forms: write it with set(), not a marker`);
             else if (this._isSettled && d === undefined && !seed) this._warnOnce(`${ref}: no pack, file or script has the ${section} section`);
@@ -539,7 +544,7 @@
     // Start the pack now: nearly every page needs it, and most components init after it lands.
     // settled: the pack landed or failed, or 3 s passed. The loader and the marker pass wait on it.
     // ponytail: past 3 s a slow pack starts the late components and the markers in English.
-    NDS.i18n.settled = Promise.race([NDS.i18n._file(NDS.i18n._lang()), new Promise(r => setTimeout(r, 3000))]);
+    NDS.i18n.settled = Promise.race([NDS.i18n.pack(), new Promise(r => setTimeout(r, 3000))]);
 
     // ── Debounce ─────────────────────────────────────────────────────
     // Usage: const fn = NDS.debounce(handler, 150)

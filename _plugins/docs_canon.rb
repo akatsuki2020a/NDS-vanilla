@@ -22,6 +22,7 @@ module DocsCanon
               '.nds-doc-bar{display:inline-block;block-size:12px;background:var(--background-primary);vertical-align:middle}' \
               '.nds-doc-sample{white-space:nowrap}' \
               '.nds-doc-table{inline-size:100%;min-inline-size:0}' \
+              '.nds-doc-table .nds-table{--min-width:720px}' \
               '.nds-doc-ramps{display:grid;gap:var(--spacing-xl);inline-size:100%}' \
               '.nds-doc-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:var(--spacing-xs);margin-block-start:var(--spacing-xs)}' \
               '.nds-doc-step{display:grid;gap:var(--spacing-xxs);text-align:center;font-size:var(--typo-text-xs-FS)}' \

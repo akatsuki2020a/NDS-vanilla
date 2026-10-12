@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "2.0.0"
 updated: "2.0.0"
-last_edit: "12/10/2026 - 04:08 PM"
+last_edit: "12/10/2026 - 09:35 PM"
 ---
 
 <section id="session-timeout-overview" class="nds-content-section nds-doc-overview">
@@ -209,7 +209,7 @@ A server that signs out only on a POST, such as one that needs a CSRF token, get
 ### Text
 {: .nds-block-title}
 
-The modals read their text from the `session-timeout` section of `assets/i18n/en.json` and `ar.json`. To change some of it, set `window.NDS_I18N['session-timeout']` before the NDS scripts: each key you set replaces that text, and the rest keep the pack's text. See [Internationalization](../core/i18n). On an Arabic page, the countdown still reads `02:03` left to right, in Latin digits.
+The modals read their English from the script and their Arabic from the `session-timeout` section of `assets/i18n/ar.json`. To change some of it, set `window.NDS_I18N['session-timeout']` before the NDS scripts: each key you set replaces that text, and the rest keep the pack's text. See [Internationalization](../core/i18n). On an Arabic page, the countdown still reads `02:03` left to right, in Latin digits.
 
 ### JavaScript
 {: .nds-block-title}

@@ -19,7 +19,7 @@ node scripts/run-audit.mjs [page.html]          # print a built page's NDS.Init.
 bundle exec ruby scripts/surface-history.rb     # names every release had that today's code lacks → tmp/surface/candidates.json; new rows go in _data/migrations.yml
 node scripts/find-unused-icons.mjs              # UI icons nothing references
 node scripts/check-date.mjs                     # NDS.date vs Intl: every day 2018–2037 round-trips gregory ↔ hijri; ENGINE=webkit for Safari
-node scripts/check-i18n.mjs                     # every locale pack mirrors en.json and stays under budget, JS defaults match it, no hardcoded Arabic / NDS.langKey left in _js/
+node scripts/check-i18n.mjs [--build]           # every _i18n/ pack holds each English word (JS defaults + markers), markers match it, no Arabic in _js/; --build writes assets/i18n/ + _data/i18n.json (js_processor.rb runs it)
 python scripts/check-docs.py [page.md]          # one-source doc pages vs the nds-doc rules (no build needed)
 python scripts/publish-iq.py [--apply]          # NDS IQ draft → the file installs download: dry run; --apply commits + tags IQvX.Y, never pushes
 python scripts/rig.py new|stage|reset ...       # field rigs: a legacy app a fresh agent ports with the draft rules — guide in .claude/skills/nds-iq-eval/RIGS.md

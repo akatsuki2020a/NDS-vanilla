@@ -1,110 +1,36 @@
-// Component strings: every locale pack (assets/i18n/<lang>.json) and every own file
-// (assets/i18n/<component>/<lang>.json) has exactly en's keys, a pack stays under its size
-// budget, a component's English seed equals its en section (a word only markers use may stay
-// out of it), every data-i18n marker names a plain en word that its markup matches, and no _js/
-// file still carries hardcoded Arabic text or reads NDS.langKey — that text belongs in the JSON.
-// No build, no browser. Usage: node scripts/check-i18n.mjs
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+// NDS words: check them, and with --build write the packs NDS ships.
+// English is built in: a script's words are its NDS.i18n.strings() defaults, a marker's word is its
+// markup. Each pack in _i18n/<lang>.json (NDS maintainers edit these) holds every English word and
+// no other; Accessibility's own folder (assets/i18n/accessibility/) mirrors its en.json. A marker
+// names a plain word its markup matches. No _js/ file carries Arabic or reads NDS.langKey.
+// --build writes assets/i18n/<lang>.json (minified, banner key "_") and _data/i18n.json, the word
+// list core/i18n.md prints; without it, a built file that is out of date fails.
+// No browser. Usage: node scripts/check-i18n.mjs [--build]   (js_processor.rb runs --build)
+import { readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { gzipSync } from 'node:zlib';
 
 const ROOT = join(import.meta.dirname, '..');
-const I18N = join(ROOT, 'assets', 'i18n');
+const SRC = join(ROOT, '_i18n');
+const OUT = join(ROOT, 'assets', 'i18n');
 const JS = join(ROOT, '_js');
+const DATA = join(ROOT, '_data', 'i18n.json');
+const BUILD = process.argv.includes('--build');
 // ponytail: one pack per language; past this, split the lazy bundles' sections into their own pack.
 const PACK_BUDGET_GZ = 12 * 1024;
 const fails = [];
 const read = (p) => readFileSync(p, 'utf-8');
+const jsFiles = readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'));
 // A plural is an object of Intl.PluralRules categories; any other object is component data.
 const PLURAL = new Set(['zero', 'one', 'two', 'few', 'many', 'other']);
 const kind = (v) => (Array.isArray(v) ? 'array'
     : v && typeof v === 'object' ? (Object.keys(v).every(k => PLURAL.has(k)) ? 'plural' : 'object')
     : typeof v);
 
-// 1. Locales mirror en, per component.
-const tables = {};
-function mirror(c, en, loc, where) {
-    for (const k of Object.keys(en)) {
-        if (!(k in loc)) fails.push(`${where}: ${c}.${k} missing`);
-        else if (kind(loc[k]) !== kind(en[k])) fails.push(`${where}: ${c}.${k} is ${kind(loc[k])}, en has ${kind(en[k])}`);
-    }
-    for (const k of Object.keys(loc)) if (!(k in en)) fails.push(`${where}: ${c}.${k} is not in en`);
-}
-const langs = readdirSync(I18N).filter(f => /^[a-z]{2,3}\.json$/.test(f));
-const packs = Object.fromEntries(langs.map(f => [f, JSON.parse(read(join(I18N, f)))]));
-if (!packs['en.json']) fails.push('assets/i18n/en.json missing');
-else Object.assign(tables, packs['en.json']);
-for (const [f, pack] of Object.entries(packs)) {
-    const gz = gzipSync(readFileSync(join(I18N, f)), { level: 9 }).length;
-    if (gz > PACK_BUDGET_GZ) fails.push(`${f}: ${gz} B gzipped, over the ${PACK_BUDGET_GZ} B budget`);
-    if (f === 'en.json') continue;
-    for (const c of Object.keys(tables)) {
-        if (!(c in pack)) fails.push(`${f}: no ${c} section`);
-        else mirror(c, tables[c], pack[c], f);
-    }
-    for (const c of Object.keys(pack)) if (!(c in tables)) fails.push(`${f}: ${c} is not in en.json`);
-}
-for (const c of readdirSync(I18N, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)) {
-    const enPath = join(I18N, c, 'en.json');
-    if (!existsSync(enPath)) { fails.push(`${c}: no en.json`); continue; }
-    if (c in tables) fails.push(`${c}: in the pack and in its own folder`);
-    const en = tables[c] = JSON.parse(read(enPath));
-    for (const f of readdirSync(join(I18N, c)).filter(f => f.endsWith('.json') && f !== 'en.json')) {
-        mirror(c, en, JSON.parse(read(join(I18N, c, f))), `${c}/${f}`);
-    }
-}
-for (const [c, en] of Object.entries(tables)) for (const [k, v] of Object.entries(en)) {
-    if (kind(v) === 'plural' && typeof v.other !== 'string') fails.push(`en: ${c}.${k} plural without "other"`);
-}
-
-// 4. Markers: data-i18n="section.key" (the text) and data-i18n-{attribute}="section.key" in canons,
-// includes and the markup scripts build. Each names a plain string in en, the element holds only the
-// word, an attribute marker sits beside its attribute, and the markup's English equals en's.
-const MARK = /\b(data-i18n(?:-(?:aria-label|aria-description|title|alt|placeholder|label))?)="([^"]*)"/g;
-const REF = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/;
-const marked = new Set();
-const ENTITY = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", nbsp: ' ' };
-const squash = (s) => s.replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, e) => ENTITY[e]).replace(/\s+/g, ' ').trim();
-const MARKUP_DIRS = ['components', 'ui-shell', 'utilities', 'layout', 'core', 'templates', 'examples'];
-const markupFiles = [
-    ...MARKUP_DIRS.flatMap(d => readdirSync(join(ROOT, d)).filter(f => f.endsWith('.md')).map(f => join(d, f))),
-    ...readdirSync(join(ROOT, '_includes')).filter(f => f.endsWith('.html')).map(f => join('_includes', f)),
-    ...readdirSync(join(ROOT, '_layouts')).filter(f => f.endsWith('.html')).map(f => join('_layouts', f)),
-    ...readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.min.js')).map(f => join('_js', f)),
-];
-for (const rel of markupFiles) {
-    const src = read(join(ROOT, rel)).replace(/<!--[\s\S]*?-->/g, '');   // a comment is not markup
-    // Lookahead for the next tag, so it stays matchable when it follows directly.
-    for (const tag of src.matchAll(/<([a-zA-Z][\w-]*)\b([^<>]*)>([^<]*)(?=(<\/?)?)/g)) {
-        const [, , attrs, after, next] = tag;
-        for (const [, name, ref] of attrs.matchAll(MARK)) {
-            if (/[${]/.test(ref)) continue;              // built from a variable in a script
-            // ponytail: undotted refs are the 1.x Accessibility/IPV keys; step 2 of the plan moves them and drops this skip.
-            if (!ref.includes('.')) continue;
-            const m = REF.exec(ref);
-            if (!m) { fails.push(`${rel}: ${name}="${ref}" is not section.key`); continue; }
-            marked.add(ref);
-            const v = tables[m[1]]?.[m[2]];
-            if (v === undefined) { fails.push(`${rel}: ${ref} is not in en.json`); continue; }
-            if (typeof v !== 'string' || /\{\w+\}/.test(v)) { fails.push(`${rel}: ${ref} has {vars} or plural forms: write it with set(), not a marker`); continue; }
-            if (rel.startsWith('_js')) continue;          // a script's markup is checked in the browser
-            if (name === 'data-i18n') {
-                if (next === '<') fails.push(`${rel}: ${ref} is on an element with child elements; data-i18n holds only the word`);
-                else if (squash(after) !== v) fails.push(`${rel}: ${ref} reads "${squash(after)}", en has "${v}"`);
-            } else {
-                const attr = name.slice('data-i18n-'.length);
-                const have = new RegExp(`\\s${attr}="([^"]*)"`).exec(attrs);
-                if (!have) fails.push(`${rel}: ${ref} marks ${attr}, which the element does not have`);
-                else if (squash(have[1]) !== v) fails.push(`${rel}: ${ref} ${attr} reads "${have[1]}", en has "${v}"`);
-            }
-        }
-    }
-}
-
-// The object literal after `marker`, by brace depth, skipping quoted text.
-function literalAfter(src, marker) {
-    const start = src.indexOf('{', src.indexOf(marker));
+// The object literal starting at the first `{` from index `from`, by brace depth, skipping quoted text.
+function literalAt(src, from) {
+    const start = src.indexOf('{', from);
     let depth = 0, quote = null;
     for (let i = start; i < src.length; i++) {
         const ch = src[i];
@@ -116,29 +42,110 @@ function literalAfter(src, marker) {
     return null;
 }
 
+// 1. English from the scripts: every NDS.i18n.strings('section', { … }) default.
+const english = {};
+for (const f of jsFiles) {
+    const src = read(join(JS, f));
+    for (const m of src.matchAll(/NDS\.i18n\.strings\(\s*'([\w-]+)'\s*,/g)) {
+        english[m[1]] = Object.assign(english[m[1]] || {}, runInNewContext('(' + literalAt(src, m.index) + ')'));
+    }
+}
+
+// 2. Markers in canons, includes, layouts and the markup scripts build. A word a script declares:
+// the markup matches it. A word only markers use: the markup is its English, the same everywhere.
+const MARK = /\b(data-i18n(?:-(?:aria-label|aria-description|title|alt|placeholder|label))?)="([^"]*)"/g;
+const REF = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/;
+const ENTITY = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", nbsp: ' ' };
+const squash = (s) => s.replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, e) => ENTITY[e]).replace(/\s+/g, ' ').trim();
+const MARKUP_DIRS = ['components', 'ui-shell', 'utilities', 'layout', 'core', 'templates', 'examples'];
+const markupFiles = [
+    ...MARKUP_DIRS.flatMap(d => readdirSync(join(ROOT, d)).filter(f => f.endsWith('.md')).map(f => join(d, f))),
+    ...['_includes', '_layouts'].flatMap(d => readdirSync(join(ROOT, d)).filter(f => f.endsWith('.html')).map(f => join(d, f))),
+    ...jsFiles.map(f => join('_js', f)),
+];
+const markerWord = {};   // ref → [word, where]
+for (const rel of markupFiles) {
+    const src = read(join(ROOT, rel)).replace(/<!--[\s\S]*?-->/g, '');   // a comment is not markup
+    // Lookahead for the next tag, so it stays matchable when it follows directly.
+    for (const tag of src.matchAll(/<([a-zA-Z][\w-]*)\b([^<>]*)>([^<]*)(?=(<\/?)?)/g)) {
+        const [, , attrs, after, next] = tag;
+        for (const [, name, ref] of attrs.matchAll(MARK)) {
+            if (/[${]/.test(ref)) continue;              // built from a variable in a script
+            // ponytail: undotted refs are the 1.x Accessibility/IPV keys; step 2 of plans/i18n-markers.md moves them and drops this skip.
+            if (!ref.includes('.')) continue;
+            const m = REF.exec(ref);
+            if (!m) { fails.push(`${rel}: ${name}="${ref}" is not section.key`); continue; }
+            let word;
+            if (name === 'data-i18n') {
+                if (next === '<') { fails.push(`${rel}: ${ref} is on an element with child elements; data-i18n holds only the word`); continue; }
+                word = squash(after);
+            } else {
+                const attr = name.slice('data-i18n-'.length);
+                const have = new RegExp(`\\s${attr}="([^"]*)"`).exec(attrs);
+                if (!have) { fails.push(`${rel}: ${ref} marks ${attr}, which the element does not have`); continue; }
+                word = squash(have[1]);
+            }
+            if (/\$\{/.test(word)) continue;               // a script fills it from a variable
+            const declared = english[m[1]]?.[m[2]];
+            if (declared !== undefined) {
+                if (typeof declared !== 'string' || /\{\w+\}/.test(declared)) fails.push(`${rel}: ${ref} has {vars} or plural forms: write it with set(), not a marker`);
+                else if (word !== declared) fails.push(`${rel}: ${ref} reads "${word}", its script has "${declared}"`);
+            } else if (!word) {
+                fails.push(`${rel}: ${ref} has no English: write the word in the markup`);
+            } else if (markerWord[ref] && markerWord[ref][0] !== word) {
+                fails.push(`${rel}: ${ref} reads "${word}", ${markerWord[ref][1]} has "${markerWord[ref][0]}"`);
+            } else {
+                markerWord[ref] ??= [word, rel];
+            }
+        }
+    }
+}
+for (const [ref, [word]] of Object.entries(markerWord)) {
+    const [, section, key] = REF.exec(ref);
+    (english[section] ??= {})[key] = word;
+}
+
+// 3. Each pack holds every English word, of the same kind, and no other.
+function mirror(c, en, loc, where) {
+    for (const k of Object.keys(en)) {
+        if (!(k in loc)) fails.push(`${where}: ${c}.${k} missing`);
+        else if (kind(loc[k]) !== kind(en[k])) fails.push(`${where}: ${c}.${k} is ${kind(loc[k])}, the English is ${kind(en[k])}`);
+    }
+    for (const k of Object.keys(loc)) if (!(k in en)) fails.push(`${where}: ${c}.${k} has no English (no script or marker uses it)`);
+}
+const langs = readdirSync(SRC).filter(f => /^[a-z]{2,3}\.json$/.test(f)).map(f => f.slice(0, -5));
+const packs = Object.fromEntries(langs.map(l => [l, JSON.parse(read(join(SRC, l + '.json')))]));
+for (const [l, pack] of Object.entries(packs)) {
+    const where = `_i18n/${l}.json`;
+    for (const c of Object.keys(english)) {
+        if (!(c in pack)) fails.push(`${where}: no ${c} section`);
+        else mirror(c, english[c], pack[c], where);
+    }
+    for (const c of Object.keys(pack)) if (!(c in english)) fails.push(`${where}: ${c} has no English (no script or marker uses it)`);
+}
+for (const [c, en] of Object.entries(english)) for (const [k, v] of Object.entries(en)) {
+    if (kind(v) === 'plural' && typeof v.other !== 'string') fails.push(`${c}.${k}: plural without "other"`);
+}
+
+// Accessibility's own folder, until it joins the pack: every language mirrors its en.json.
+for (const c of readdirSync(OUT, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)) {
+    const enPath = join(OUT, c, 'en.json');
+    if (!existsSync(enPath)) { fails.push(`${c}: no en.json`); continue; }
+    const en = JSON.parse(read(enPath));
+    for (const f of readdirSync(join(OUT, c)).filter(f => f.endsWith('.json') && f !== 'en.json')) {
+        mirror(c, en, JSON.parse(read(join(OUT, c, f))), `${c}/${f}`);
+    }
+}
+
+// 4. No hardcoded language text left in the scripts.
 // Arabic the components READ, not write: typed input accepted on every page.
 const INPUT_TOKENS = {
     'nds-time-picker.js': ['const MERIDIEM =', 'const isPM =', 'const MER_KEY ='],   // "2:30 م" parses on an English page too
 };
 const ARABIC_LETTER = /[ء-ي]/;   // letters only: Arabic-Indic digit ranges in regexes pass
-for (const f of readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.min.js'))) {
-    const src = read(join(JS, f));
-
-    // 2. The English seed matches en.json.
-    const name = (src.match(/NDS\.i18n\.(?:load|strings)\(\s*'([\w-]+)'/) || [])[1];
-    const marker = src.includes(`NDS.i18n.strings('${name}'`) ? `NDS.i18n.strings('${name}'` : / STR = \{/.test(src) ? ' STR = {' : null;
-    if (name && tables[name] && marker) {
-        const seed = runInNewContext('(' + literalAfter(src, marker) + ')');
-        for (const [k, v] of Object.entries(tables[name])) {
-            if (!(k in seed) && marked.has(`${name}.${k}`)) continue;   // a word only markers use
-            if (JSON.stringify(seed[k]) !== JSON.stringify(v)) fails.push(`${f}: default ${k} differs from en ${name}.${k}`);
-        }
-        for (const k of Object.keys(seed)) if (!(k in tables[name])) fails.push(`${f}: default ${k} is not in en ${name}`);
-    }
-
-    // 3. No hardcoded language text left.
+for (const f of jsFiles) {
     const hits = [];
-    src.split('\n').forEach((line, i) => {
+    read(join(JS, f)).split('\n').forEach((line, i) => {
         if (/^\s*(\/\/|\/?\*)/.test(line)) return;   // comments may quote Arabic
         if ((INPUT_TOKENS[f] || []).some(t => line.includes(t))) return;
         if (ARABIC_LETTER.test(line) || (f !== 'nds-core.js' && line.includes('NDS.langKey'))) hits.push(i + 1);
@@ -146,9 +153,38 @@ for (const f of readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.m
     if (hits.length) fails.push(`${f}: hardcoded language text on ${hits.length} line(s): ${hits.slice(0, 8).join(', ')}${hits.length > 8 ? ', …' : ''}`);
 }
 
+// 5. The built files: the packs NDS ships, and the word list the docs print.
+const version = (read(join(ROOT, '_config.yml')).match(/^version:\s*([^\s#]+)/m) || [])[1] || '';
+const languageName = (l) => new Intl.DisplayNames('en', { type: 'language' }).of(l);
+const outputs = {};
+for (const [l, pack] of Object.entries(packs)) {
+    const banner = `NDS ${version} · ${languageName(l)} words for NDS components · built from _i18n/${l}.json by `
+        + `node scripts/check-i18n.mjs --build · do not edit: an update replaces this file; change words with window.NDS_I18N`;
+    outputs[join(OUT, l + '.json')] = JSON.stringify({ _: banner, ...pack });
+}
+const show = (v) => (v === undefined ? '' : typeof v === 'string' ? v
+    : Array.isArray(v) ? v.join(' · ') : Object.entries(v).map(([k, w]) => `${k}: ${w}`).join(' · '));
+const rows = Object.entries(english).sort(([a], [b]) => a.localeCompare(b)).flatMap(([section, words]) =>
+    Object.entries(words).map(([key, en]) => ({ section, key, en: show(en), ...Object.fromEntries(langs.map(l => [l, show(packs[l][section]?.[key])])) })));
+outputs[DATA] = JSON.stringify(rows, null, 1) + '\n';
+
+for (const [path, text] of Object.entries(outputs)) {
+    const name = path.slice(ROOT.length + 1);
+    if (path !== DATA) {
+        const gz = gzipSync(Buffer.from(text), { level: 9 }).length;
+        if (gz > PACK_BUDGET_GZ) fails.push(`${name}: ${gz} B gzipped, over the ${PACK_BUDGET_GZ} B budget`);
+    }
+    // autocrlf may check a built file out with CRLF: compare the text, not the line endings.
+    const now = existsSync(path) ? read(path).replace(/\r\n/g, '\n') : null;
+    if (now === text) continue;
+    if (BUILD && !fails.length) writeFileSync(path, text);
+    else if (!BUILD) fails.push(`${name} is out of date: run node scripts/check-i18n.mjs --build`);
+}
+
 if (fails.length) {
     console.log(fails.join('\n'));
-    console.log(`\n${fails.length} problem(s).`);
+    console.log(`\n${fails.length} problem(s).${BUILD ? ' Nothing built.' : ''}`);
     process.exit(1);
 }
-console.log(`check-i18n: ${Object.keys(tables).length} components clean; ${Object.keys(packs).map(f => f + ' ' + gzipSync(readFileSync(join(I18N, f)), { level: 9 }).length + ' B gz').join(', ')}.`);
+const sizes = langs.map(l => `${l}.json ${gzipSync(Buffer.from(outputs[join(OUT, l + '.json')]), { level: 9 }).length} B gz`).join(', ');
+console.log(`check-i18n: ${Object.keys(english).length} sections, ${rows.length} words clean; ${sizes}${BUILD ? '; built' : ''}.`);

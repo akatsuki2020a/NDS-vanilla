@@ -1,0 +1,1472 @@
+[
+ {
+  "section": "alert",
+  "key": "close",
+  "en": "Close",
+  "ar": "إغلاق"
+ },
+ {
+  "section": "autocomplete",
+  "key": "no_results",
+  "en": "No results",
+  "ar": "لا توجد نتائج"
+ },
+ {
+  "section": "breadcrumb",
+  "key": "more",
+  "en": "More",
+  "ar": "المزيد"
+ },
+ {
+  "section": "chart",
+  "key": "chart",
+  "en": "Chart",
+  "ar": "رسم بياني"
+ },
+ {
+  "section": "chart",
+  "key": "bar",
+  "en": "Bar chart",
+  "ar": "رسم بياني بالأعمدة"
+ },
+ {
+  "section": "chart",
+  "key": "line",
+  "en": "Line chart",
+  "ar": "رسم بياني خطي"
+ },
+ {
+  "section": "city-weather",
+  "key": "weather",
+  "en": "{desc}, {temp}°C",
+  "ar": "{desc}، {temp}°C"
+ },
+ {
+  "section": "city-weather",
+  "key": "clear",
+  "en": "Clear",
+  "ar": "صافي"
+ },
+ {
+  "section": "city-weather",
+  "key": "partly_cloudy",
+  "en": "Partly Cloudy",
+  "ar": "غائم جزئيًا"
+ },
+ {
+  "section": "city-weather",
+  "key": "overcast",
+  "en": "Overcast",
+  "ar": "غائم"
+ },
+ {
+  "section": "city-weather",
+  "key": "fog",
+  "en": "Fog",
+  "ar": "ضباب"
+ },
+ {
+  "section": "city-weather",
+  "key": "rain",
+  "en": "Rain",
+  "ar": "أمطار"
+ },
+ {
+  "section": "city-weather",
+  "key": "snow",
+  "en": "Snow",
+  "ar": "ثلوج"
+ },
+ {
+  "section": "city-weather",
+  "key": "storm",
+  "en": "Storm",
+  "ar": "عاصفة"
+ },
+ {
+  "section": "cookies",
+  "key": "panel_label",
+  "en": "Cookie settings",
+  "ar": "إعدادات ملفات تعريف الارتباط"
+ },
+ {
+  "section": "cookies",
+  "key": "title",
+  "en": "Cookies",
+  "ar": "ملفات تعريف الارتباط"
+ },
+ {
+  "section": "cookies",
+  "key": "description",
+  "en": "Use of Cookies by this site is just to guarantee Ease of Access and better user experience while browsing. Continuation of your browsing acknowledges your approval for Terms and Conditions of this site and its use of Cookies.",
+  "ar": "هذا الموقع يستخدم ملفات تعريف الارتباط الخاصة للتأكد من سهولة الاستخدام وضمان تحسين تجربتك أثناء التصفح. من خلال الاستمرار في تصفح هذا الموقع، فإنك تقر بقبول استخدام ملفات تعريف الارتباط."
+ },
+ {
+  "section": "cookies",
+  "key": "accept",
+  "en": "Accept",
+  "ar": "قبول"
+ },
+ {
+  "section": "cookies",
+  "key": "reject",
+  "en": "Reject",
+  "ar": "رفض"
+ },
+ {
+  "section": "cookies",
+  "key": "manage",
+  "en": "Manage Cookies",
+  "ar": "إدارة ملفات تعريف الارتباط"
+ },
+ {
+  "section": "cookies",
+  "key": "close",
+  "en": "Close",
+  "ar": "إغلاق"
+ },
+ {
+  "section": "cookies",
+  "key": "scroll_panel",
+  "en": "Scroll panel",
+  "ar": "تمرير اللوحة"
+ },
+ {
+  "section": "cookies",
+  "key": "manage_title",
+  "en": "Manage Cookies",
+  "ar": "إدارة ملفات تعريف الارتباط"
+ },
+ {
+  "section": "cookies",
+  "key": "manage_description",
+  "en": "When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences or your device, and is mostly used to make the site work as you expect it to. The information does not usually identify you directly, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. However, blocking some types of cookies may affect your experience of the site and the services we are able to offer.",
+  "ar": "عند زيارة أي موقع على الويب، قد يخزّن هذا الأخير المعلومات على المستعرض أو يستردها على شكل ملفات تعريف ارتباط على الأغلب. وقد تكون هذه المعلومات عنك أو عن تفضيلاتك أو عن جهازك أو قد يتم استخدامها ليعمل الموقع كما تتوقع. لا تعرّف المعلومات عنك عادةً مباشرةً، ولكنها قد تمنحك تجربة ويب أكثر تخصيصًا. يمكنك اختيار عدم السماح ببعض أنواع ملفات تعريف الارتباط. ومع ذلك، يجب أن تعرف أن حظر بعض أنواع ملفات تعريف الارتباط قد يؤثر في تجربتك على الموقع وفي الخدمات التي يمكننا تقديمها."
+ },
+ {
+  "section": "cookies",
+  "key": "types",
+  "en": "Cookie types",
+  "ar": "أنواع ملفات تعريف الارتباط"
+ },
+ {
+  "section": "cookies",
+  "key": "necessary",
+  "en": "Necessary Cookies",
+  "ar": "ملفات تعريف الارتباط الضرورية"
+ },
+ {
+  "section": "cookies",
+  "key": "necessary_info",
+  "en": "Always active",
+  "ar": "نشطة دائمًا"
+ },
+ {
+  "section": "cookies",
+  "key": "performance",
+  "en": "Performance Cookies",
+  "ar": "ملفات تعريف الارتباط الخاصة بالأداء"
+ },
+ {
+  "section": "cookies",
+  "key": "functional",
+  "en": "Functional Cookies",
+  "ar": "ملفات تعريف الارتباط الوظيفية"
+ },
+ {
+  "section": "cookies",
+  "key": "targeting",
+  "en": "Targeting Cookies",
+  "ar": "ملفات تعريف الارتباط المستهدفة"
+ },
+ {
+  "section": "cookies",
+  "key": "confirm",
+  "en": "Confirm My Choices",
+  "ar": "تأكيد اختياراتي"
+ },
+ {
+  "section": "cookies",
+  "key": "reject_all",
+  "en": "Reject All",
+  "ar": "رفض الكل"
+ },
+ {
+  "section": "cookies",
+  "key": "done_title",
+  "en": "Thank you!",
+  "ar": "شكرًا لك!"
+ },
+ {
+  "section": "cookies",
+  "key": "done",
+  "en": "Your response has been successfully recorded. If you wish to modify or change your answer, you can go back by clicking the Undo button.",
+  "ar": "تم تسجيل ردك بنجاح. إذا كنت ترغب في تعديل إجابتك أو تغييرها، يمكنك الرجوع بالنقر على زر التراجع."
+ },
+ {
+  "section": "cookies",
+  "key": "undo",
+  "en": "Undo",
+  "ar": "تراجع"
+ },
+ {
+  "section": "copy",
+  "key": "copied",
+  "en": "Copied",
+  "ar": "تم النسخ"
+ },
+ {
+  "section": "date",
+  "key": "hijri_months",
+  "en": "Muharram · Safar · Rabi al-Awwal · Rabi al-Thani · Jumada al-Ula · Jumada al-Akhirah · Rajab · Shaban · Ramadan · Shawwal · Dhu al-Qadah · Dhu al-Hijjah",
+  "ar": "محرم · صفر · ربيع الأول · ربيع الثاني · جمادى الأولى · جمادى الآخرة · رجب · شعبان · رمضان · شوال · ذو القعدة · ذو الحجة"
+ },
+ {
+  "section": "date-picker",
+  "key": "select_month",
+  "en": "Select month",
+  "ar": "اختيار الشهر"
+ },
+ {
+  "section": "date-picker",
+  "key": "select_year",
+  "en": "Select year",
+  "ar": "اختيار السنة"
+ },
+ {
+  "section": "date-picker",
+  "key": "prev_month",
+  "en": "Previous month",
+  "ar": "الشهر السابق"
+ },
+ {
+  "section": "date-picker",
+  "key": "next_month",
+  "en": "Next month",
+  "ar": "الشهر التالي"
+ },
+ {
+  "section": "date-picker",
+  "key": "today",
+  "en": "Today",
+  "ar": "اليوم"
+ },
+ {
+  "section": "date-picker",
+  "key": "close",
+  "en": "Close",
+  "ar": "إغلاق"
+ },
+ {
+  "section": "date-picker",
+  "key": "clear",
+  "en": "Clear",
+  "ar": "مسح"
+ },
+ {
+  "section": "date-picker",
+  "key": "save",
+  "en": "Save",
+  "ar": "حفظ"
+ },
+ {
+  "section": "date-picker",
+  "key": "invalid",
+  "en": "Invalid date — expected format {format}",
+  "ar": "تاريخ غير صالح — الصيغة المطلوبة {format}"
+ },
+ {
+  "section": "date-picker",
+  "key": "before_min",
+  "en": "Earliest allowed date is {date}",
+  "ar": "أقرب تاريخ متاح {date}"
+ },
+ {
+  "section": "date-picker",
+  "key": "after_max",
+  "en": "Latest allowed date is {date}",
+  "ar": "آخر تاريخ متاح {date}"
+ },
+ {
+  "section": "date-picker",
+  "key": "range_order",
+  "en": "Start date must come before end date",
+  "ar": "تاريخ البداية يجب أن يسبق تاريخ النهاية"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "tab",
+  "en": "A government website registered with the Digital Government Authority.",
+  "ar": "موقع إلكتروني حكومي مسجل لدى هيئة الحكومة الرقمية."
+ },
+ {
+  "section": "digital-stamp",
+  "key": "tab_short",
+  "en": "Government website registered with DGA",
+  "ar": "موقع حكومي مسجل لدى هيئة الحكومة الرقمية"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "verify",
+  "en": "How you know?",
+  "ar": "كيف تتحقق؟"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "label",
+  "en": "Digital government stamp",
+  "ar": "ختم الحكومة الرقمية"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "flag",
+  "en": "Saudi Arabia flag",
+  "ar": "علم المملكة العربية السعودية"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "dga",
+  "en": "Digital Government Authority",
+  "ar": "هيئة الحكومة الرقمية"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "register",
+  "en": "Registered on Digital Government Authority:",
+  "ar": "مسجل لدى هيئة الحكومة الرقمية برقم:"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "https_title",
+  "en": "Official Reliable websites use",
+  "ar": "المواقع الإلكترونية الحكومية الموثوقة تستخدم بروتوكول"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "https_desc",
+  "en": "Ensure the website is using the HTTPS protocol.",
+  "ar": "تحقق من أن الموقع يستخدم بروتوكول HTTPS"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "gov_title",
+  "en": "Official Saudi Government websites URL ends with",
+  "ar": "روابط المواقع الإلكترونية الرسمية الحكومية تنتهي بـ"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "gov_mark",
+  "en": ".gov.sa",
+  "ar": "gov.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "gov_desc",
+  "en": "Website belongs to an official government organization in the Kingdom of Saudi Arabia always ends with .gov.sa .",
+  "ar": "جميع روابط المواقع الرسمية التابعة للجهات الحكومية في المملكة العربية السعودية تنتهي بـ .gov.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "edu_title",
+  "en": "Official Saudi educational websites URL ends with",
+  "ar": "روابط المواقع الإلكترونية الرسمية التعليمية السعودية تنتهي بـ"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "edu_mark",
+  "en": ".edu.sa",
+  "ar": "edu.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "edu_desc",
+  "en": "Website belongs to an official educational in the Kingdom of Saudi Arabia always ends with .edu.sa or sch.sa .",
+  "ar": "جميع روابط المواقع الرسمية التعليمية في المملكة العربية السعودية تنتهي بـ sch.sa أو edu.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "sch_title",
+  "en": "Official Saudi educational websites URL ends with",
+  "ar": "روابط المواقع الإلكترونية الرسمية التعليمية السعودية تنتهي بـ"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "sch_mark",
+  "en": ".sch.sa",
+  "ar": "sch.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "sch_desc",
+  "en": "Website belongs to an official educational in the Kingdom of Saudi Arabia always ends with .edu.sa or sch.sa .",
+  "ar": "جميع روابط المواقع الرسمية التعليمية في المملكة العربية السعودية تنتهي بـ sch.sa أو edu.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "med_title",
+  "en": "Official Saudi medical websites URL ends with",
+  "ar": "روابط المواقع الإلكترونية الرسمية الطبية السعودية تنتهي بـ"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "med_mark",
+  "en": ".med.sa",
+  "ar": "med.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "med_desc",
+  "en": "Website belongs to an official medical in the Kingdom of Saudi Arabia always ends with .med.sa .",
+  "ar": "جميع روابط المواقع الرسمية الطبية في المملكة العربية السعودية تنتهي بـ med.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "org_title",
+  "en": "Official Saudi non-profit organizations websites URL ends with",
+  "ar": "روابط المواقع الإلكترونية الرسمية للمؤسسات غير الربحية السعودية تنتهي بـ"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "org_mark",
+  "en": ".org.sa",
+  "ar": "org.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "org_desc",
+  "en": "Website belongs to an official non-profit organizations in the Kingdom of Saudi Arabia always ends with .org.sa .",
+  "ar": "جميع روابط المواقع الرسمية للمؤسسات غير الربحية في المملكة العربية السعودية تنتهي بـ org.sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "sa_title",
+  "en": "Official Saudi activities and initiatives websites URL ends with",
+  "ar": "روابط المواقع الإلكترونية الرسمية للأنشطة والمبادرات السعودية تنتهي بـ"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "sa_mark",
+  "en": ".sa",
+  "ar": ".sa"
+ },
+ {
+  "section": "digital-stamp",
+  "key": "sa_desc",
+  "en": "Website belongs to an official activities and initiatives in the Kingdom of Saudi Arabia always ends with .sa .",
+  "ar": "جميع روابط المواقع الرسمية للأنشطة والمبادرات في المملكة العربية السعودية تنتهي بـ .sa"
+ },
+ {
+  "section": "dropmenu",
+  "key": "search",
+  "en": "Search items",
+  "ar": "البحث في العناصر"
+ },
+ {
+  "section": "dropmenu",
+  "key": "search_placeholder",
+  "en": "Search…",
+  "ar": "بحث…"
+ },
+ {
+  "section": "dropmenu",
+  "key": "clear_search",
+  "en": "Clear search",
+  "ar": "مسح البحث"
+ },
+ {
+  "section": "dropmenu",
+  "key": "no_results",
+  "en": "No results",
+  "ar": "لا توجد نتائج"
+ },
+ {
+  "section": "editor",
+  "key": "undo",
+  "en": "Undo",
+  "ar": "تراجع"
+ },
+ {
+  "section": "editor",
+  "key": "redo",
+  "en": "Redo",
+  "ar": "إعادة"
+ },
+ {
+  "section": "editor",
+  "key": "clear",
+  "en": "Clear formatting",
+  "ar": "مسح التنسيق"
+ },
+ {
+  "section": "editor",
+  "key": "remove",
+  "en": "Remove component",
+  "ar": "إزالة المكون"
+ },
+ {
+  "section": "editor",
+  "key": "bold",
+  "en": "Bold",
+  "ar": "غامق"
+ },
+ {
+  "section": "editor",
+  "key": "italic",
+  "en": "Italic",
+  "ar": "مائل"
+ },
+ {
+  "section": "editor",
+  "key": "underline",
+  "en": "Underline",
+  "ar": "تسطير"
+ },
+ {
+  "section": "editor",
+  "key": "strike",
+  "en": "Strikethrough",
+  "ar": "يتوسطه خط"
+ },
+ {
+  "section": "editor",
+  "key": "link",
+  "en": "Insert link",
+  "ar": "إدراج رابط"
+ },
+ {
+  "section": "editor",
+  "key": "image",
+  "en": "Insert image",
+  "ar": "إدراج صورة"
+ },
+ {
+  "section": "editor",
+  "key": "h1",
+  "en": "Heading 1",
+  "ar": "عنوان 1"
+ },
+ {
+  "section": "editor",
+  "key": "h2",
+  "en": "Heading 2",
+  "ar": "عنوان 2"
+ },
+ {
+  "section": "editor",
+  "key": "h3",
+  "en": "Heading 3",
+  "ar": "عنوان 3"
+ },
+ {
+  "section": "editor",
+  "key": "h4",
+  "en": "Heading 4",
+  "ar": "عنوان 4"
+ },
+ {
+  "section": "editor",
+  "key": "ul",
+  "en": "Bulleted list",
+  "ar": "قائمة نقطية"
+ },
+ {
+  "section": "editor",
+  "key": "ol",
+  "en": "Numbered list",
+  "ar": "قائمة رقمية"
+ },
+ {
+  "section": "editor",
+  "key": "align-left",
+  "en": "Align left",
+  "ar": "محاذاة لليسار"
+ },
+ {
+  "section": "editor",
+  "key": "align-center",
+  "en": "Align center",
+  "ar": "توسيط"
+ },
+ {
+  "section": "editor",
+  "key": "align-right",
+  "en": "Align right",
+  "ar": "محاذاة لليمين"
+ },
+ {
+  "section": "editor",
+  "key": "align-justify",
+  "en": "Justify",
+  "ar": "ضبط"
+ },
+ {
+  "section": "editor",
+  "key": "dir-ltr",
+  "en": "Left to right",
+  "ar": "من اليسار إلى اليمين"
+ },
+ {
+  "section": "editor",
+  "key": "dir-rtl",
+  "en": "Right to left",
+  "ar": "من اليمين إلى اليسار"
+ },
+ {
+  "section": "editor",
+  "key": "source",
+  "en": "View HTML source",
+  "ar": "عرض مصدر HTML"
+ },
+ {
+  "section": "editor",
+  "key": "url",
+  "en": "URL",
+  "ar": "الرابط"
+ },
+ {
+  "section": "editor",
+  "key": "text",
+  "en": "Text",
+  "ar": "النص"
+ },
+ {
+  "section": "editor",
+  "key": "external",
+  "en": "Open in new tab",
+  "ar": "فتح في تبويب جديد"
+ },
+ {
+  "section": "editor",
+  "key": "colored",
+  "en": "Colored link",
+  "ar": "رابط ملون"
+ },
+ {
+  "section": "editor",
+  "key": "no_badge",
+  "en": "Hide external badge",
+  "ar": "إخفاء شارة الرابط الخارجي"
+ },
+ {
+  "section": "editor",
+  "key": "from_link",
+  "en": "From link",
+  "ar": "من رابط"
+ },
+ {
+  "section": "editor",
+  "key": "or",
+  "en": "OR",
+  "ar": "أو"
+ },
+ {
+  "section": "editor",
+  "key": "attrs",
+  "en": "Attributes",
+  "ar": "الخصائص"
+ },
+ {
+  "section": "editor",
+  "key": "invalid_image_url",
+  "en": "Enter a valid image URL",
+  "ar": "أدخل رابط صورة صالحًا"
+ },
+ {
+  "section": "editor",
+  "key": "invalid_url",
+  "en": "Enter a valid URL",
+  "ar": "أدخل رابطًا صالحًا"
+ },
+ {
+  "section": "editor",
+  "key": "upload_pending",
+  "en": "Wait for the upload to finish",
+  "ar": "انتظر حتى يكتمل الرفع"
+ },
+ {
+  "section": "editor",
+  "key": "upload_failed",
+  "en": "The file was not uploaded. Choose another file or enter a link",
+  "ar": "لم يتم رفع الملف. اختر ملفًا آخر أو أدخل رابطًا"
+ },
+ {
+  "section": "editor",
+  "key": "paste_blocked",
+  "en": "Pasting images is not available — use the image dialog",
+  "ar": "لصق الصور غير متاح — استخدم نافذة إدراج الصورة"
+ },
+ {
+  "section": "editor",
+  "key": "paste_clips_shell",
+  "en": "Selection crosses a component — adjust it before pasting",
+  "ar": "التحديد يتجاوز حدود مكون — عدّل التحديد قبل اللصق"
+ },
+ {
+  "section": "editor",
+  "key": "alt",
+  "en": "Alt text",
+  "ar": "النص البديل"
+ },
+ {
+  "section": "editor",
+  "key": "width",
+  "en": "Width (px)",
+  "ar": "العرض (بكسل)"
+ },
+ {
+  "section": "editor",
+  "key": "height",
+  "en": "Height (px)",
+  "ar": "الارتفاع (بكسل)"
+ },
+ {
+  "section": "editor",
+  "key": "upload",
+  "en": "Upload image",
+  "ar": "رفع صورة"
+ },
+ {
+  "section": "editor",
+  "key": "cancel",
+  "en": "Cancel",
+  "ar": "إلغاء"
+ },
+ {
+  "section": "editor",
+  "key": "insert",
+  "en": "Insert",
+  "ar": "إدراج"
+ },
+ {
+  "section": "editor",
+  "key": "unlink",
+  "en": "Unlink",
+  "ar": "إزالة الرابط"
+ },
+ {
+  "section": "editor",
+  "key": "remove_prompt",
+  "en": "Remove the component:",
+  "ar": "إزالة المكون:"
+ },
+ {
+  "section": "empty",
+  "key": "message",
+  "en": "No content to show",
+  "ar": "لا يوجد محتوى"
+ },
+ {
+  "section": "expandable",
+  "key": "show_more",
+  "en": "Show More",
+  "ar": "عرض المزيد"
+ },
+ {
+  "section": "expandable",
+  "key": "show_less",
+  "en": "Show Less",
+  "ar": "عرض أقل"
+ },
+ {
+  "section": "export",
+  "key": "exported",
+  "en": "one: Exported {n} row · other: Exported {n} rows",
+  "ar": "zero: لم يتم تصدير أي صف · one: تم تصدير صف واحد · two: تم تصدير صفين · few: تم تصدير {n} صفوف · many: تم تصدير {n} صفًا · other: تم تصدير {n} صف"
+ },
+ {
+  "section": "filter",
+  "key": "update_failed",
+  "en": "Could not update results",
+  "ar": "تعذر تحديث النتائج"
+ },
+ {
+  "section": "filter",
+  "key": "update_failed_description",
+  "en": "Something went wrong applying the filter. The results shown are unchanged.",
+  "ar": "حدث خطأ أثناء تطبيق التصفية. النتائج المعروضة لم تتغير."
+ },
+ {
+  "section": "filter",
+  "key": "no_results",
+  "en": "No Result",
+  "ar": "لا توجد نتائج"
+ },
+ {
+  "section": "filter",
+  "key": "no_results_description",
+  "en": "No result for current filter criteria",
+  "ar": "لا توجد نتائج لمعايير التصفية الحالية"
+ },
+ {
+  "section": "filter",
+  "key": "clear",
+  "en": "Clear Filter",
+  "ar": "مسح التصفية"
+ },
+ {
+  "section": "filter",
+  "key": "all",
+  "en": "All",
+  "ar": "الكل"
+ },
+ {
+  "section": "filter",
+  "key": "apply",
+  "en": "Apply",
+  "ar": "تطبيق"
+ },
+ {
+  "section": "filter",
+  "key": "min",
+  "en": "Minimum",
+  "ar": "الحد الأدنى"
+ },
+ {
+  "section": "filter",
+  "key": "max",
+  "en": "Maximum",
+  "ar": "الحد الأقصى"
+ },
+ {
+  "section": "filter",
+  "key": "max_value",
+  "en": "Maximum value",
+  "ar": "القيمة القصوى"
+ },
+ {
+  "section": "forms",
+  "key": "required",
+  "en": "This field is required",
+  "ar": "هذا الحقل مطلوب"
+ },
+ {
+  "section": "forms",
+  "key": "invalid",
+  "en": "Invalid input",
+  "ar": "مدخل غير صحيح"
+ },
+ {
+  "section": "forms",
+  "key": "invalid_email",
+  "en": "Please enter a valid email address",
+  "ar": "يرجى إدخال عنوان بريد إلكتروني صحيح"
+ },
+ {
+  "section": "forms",
+  "key": "invalid_url",
+  "en": "Please enter a valid URL",
+  "ar": "يرجى إدخال رابط صحيح"
+ },
+ {
+  "section": "forms",
+  "key": "pattern",
+  "en": "Please match the requested format",
+  "ar": "يرجى مطابقة التنسيق المطلوب"
+ },
+ {
+  "section": "forms",
+  "key": "too_short",
+  "en": "Input is too short (minimum {n} characters)",
+  "ar": "المدخل قصير جداً (الحد الأدنى {n})"
+ },
+ {
+  "section": "forms",
+  "key": "too_long",
+  "en": "Input is too long (maximum {n} characters)",
+  "ar": "المدخل طويل جداً (الحد الأقصى {n})"
+ },
+ {
+  "section": "forms",
+  "key": "range_under",
+  "en": "Value must be at least {n}",
+  "ar": "القيمة يجب أن تكون على الأقل {n}"
+ },
+ {
+  "section": "forms",
+  "key": "range_over",
+  "en": "Value must be no more than {n}",
+  "ar": "القيمة يجب ألا تزيد عن {n}"
+ },
+ {
+  "section": "forms",
+  "key": "min_value",
+  "en": "Minimum value is {n}",
+  "ar": "الحد الأدنى {n}"
+ },
+ {
+  "section": "forms",
+  "key": "max_value",
+  "en": "Maximum value is {n}",
+  "ar": "الحد الأقصى {n}"
+ },
+ {
+  "section": "forms",
+  "key": "invalid_national_id",
+  "en": "Invalid national ID number",
+  "ar": "رقم الهوية غير صحيح"
+ },
+ {
+  "section": "forms",
+  "key": "invalid_iban",
+  "en": "Invalid IBAN",
+  "ar": "رقم الآيبان غير صحيح"
+ },
+ {
+  "section": "forms",
+  "key": "no_arabic",
+  "en": "Arabic characters are not allowed",
+  "ar": "الأحرف العربية غير مسموح بها"
+ },
+ {
+  "section": "forms",
+  "key": "select_option",
+  "en": "Please select an option",
+  "ar": "يرجى اختيار خيار"
+ },
+ {
+  "section": "forms",
+  "key": "select_at_least",
+  "en": "one: Please select at least 1 option · other: Please select at least {n} options",
+  "ar": "one: يرجى اختيار خيار واحد على الأقل · two: يرجى اختيار خيارين على الأقل · few: يرجى اختيار {n} خيارات على الأقل · many: يرجى اختيار {n} خيارًا على الأقل · other: يرجى اختيار {n} خيار على الأقل"
+ },
+ {
+  "section": "forms",
+  "key": "select_at_most",
+  "en": "one: Please select no more than 1 option · other: Please select no more than {n} options",
+  "ar": "one: يرجى اختيار خيار واحد كحد أقصى · two: يرجى اختيار خيارين كحد أقصى · few: يرجى اختيار {n} خيارات كحد أقصى · many: يرجى اختيار {n} خيارًا كحد أقصى · other: يرجى اختيار {n} خيار كحد أقصى"
+ },
+ {
+  "section": "forms",
+  "key": "rating_required",
+  "en": "Please choose a rating",
+  "ar": "يرجى اختيار تقييم"
+ },
+ {
+  "section": "forms",
+  "key": "tag_required",
+  "en": "Please add at least one tag",
+  "ar": "يرجى إضافة وسم واحد على الأقل"
+ },
+ {
+  "section": "forms",
+  "key": "file_required",
+  "en": "Please add a file",
+  "ar": "يرجى إرفاق ملف"
+ },
+ {
+  "section": "forms",
+  "key": "upload_pending",
+  "en": "Please wait for the upload to finish",
+  "ar": "يرجى الانتظار حتى يكتمل الرفع"
+ },
+ {
+  "section": "forms",
+  "key": "pick_suggestion",
+  "en": "Choose from the suggestions",
+  "ar": "اختر من الاقتراحات"
+ },
+ {
+  "section": "forms",
+  "key": "otp_incomplete",
+  "en": "Please enter all {n} digits",
+  "ar": "يرجى إدخال جميع الأرقام"
+ },
+ {
+  "section": "forms",
+  "key": "loading",
+  "en": "Loading",
+  "ar": "جارٍ التحميل"
+ },
+ {
+  "section": "forms",
+  "key": "show_password",
+  "en": "Show password",
+  "ar": "إظهار كلمة المرور"
+ },
+ {
+  "section": "forms",
+  "key": "hide_password",
+  "en": "Hide password",
+  "ar": "إخفاء كلمة المرور"
+ },
+ {
+  "section": "ipv",
+  "key": "viewerLabel",
+  "en": "Image viewer",
+  "ar": "عارض الصور"
+ },
+ {
+  "section": "ipv",
+  "key": "zoomIn",
+  "en": "Zoom in",
+  "ar": "تكبير"
+ },
+ {
+  "section": "ipv",
+  "key": "zoomOut",
+  "en": "Zoom out",
+  "ar": "تصغير"
+ },
+ {
+  "section": "ipv",
+  "key": "resetZoom",
+  "en": "Reset zoom",
+  "ar": "إعادة ضبط التكبير"
+ },
+ {
+  "section": "ipv",
+  "key": "toggleUI",
+  "en": "Toggle controls",
+  "ar": "إظهار/إخفاء الأدوات"
+ },
+ {
+  "section": "ipv",
+  "key": "close",
+  "en": "Close",
+  "ar": "إغلاق"
+ },
+ {
+  "section": "ipv",
+  "key": "prevImage",
+  "en": "Previous image",
+  "ar": "الصورة السابقة"
+ },
+ {
+  "section": "ipv",
+  "key": "nextImage",
+  "en": "Next image",
+  "ar": "الصورة التالية"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsTitle",
+  "en": "Controls:",
+  "ar": "أزرار التحكم:"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsScroll",
+  "en": "• Scroll to zoom",
+  "ar": "• مرر للتكبير"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsDrag",
+  "en": "• Drag to pan",
+  "ar": "• اسحب للتحريك"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsReset",
+  "en": "• Double-click to reset",
+  "ar": "• النقر المزدوج لإعادة الضبط"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsNav",
+  "en": "• Arrow keys to navigate",
+  "ar": "• أسهم لوحة المفاتيح للتنقل"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsToggle",
+  "en": "• H key to toggle UI",
+  "ar": "• المفتاح H لإظهار/إخفاء الأدوات"
+ },
+ {
+  "section": "ipv",
+  "key": "instructionsClose",
+  "en": "• ESC to close",
+  "ar": "• ESC للإغلاق"
+ },
+ {
+  "section": "multiselect",
+  "key": "none",
+  "en": "{label}: No selection",
+  "ar": "{label}: لا تحديد"
+ },
+ {
+  "section": "multiselect",
+  "key": "added",
+  "en": "Added {value}",
+  "ar": "تمت إضافة {value}"
+ },
+ {
+  "section": "multiselect",
+  "key": "removed",
+  "en": "Removed {value}",
+  "ar": "تمت إزالة {value}"
+ },
+ {
+  "section": "multiselect",
+  "key": "cleared",
+  "en": "Selection cleared",
+  "ar": "تم مسح التحديد"
+ },
+ {
+  "section": "multiselect",
+  "key": "applied",
+  "en": "Applied {value}",
+  "ar": "تم تطبيق {value}"
+ },
+ {
+  "section": "pagination",
+  "key": "prev",
+  "en": "Previous page",
+  "ar": "الصفحة السابقة"
+ },
+ {
+  "section": "pagination",
+  "key": "next",
+  "en": "Next page",
+  "ar": "الصفحة التالية"
+ },
+ {
+  "section": "pagination",
+  "key": "page",
+  "en": "Page {n}",
+  "ar": "صفحة {n}"
+ },
+ {
+  "section": "pagination",
+  "key": "more",
+  "en": "More pages",
+  "ar": "المزيد من الصفحات"
+ },
+ {
+  "section": "pagination",
+  "key": "jump",
+  "en": "Jump to page",
+  "ar": "الانتقال إلى صفحة"
+ },
+ {
+  "section": "password",
+  "key": "mismatch",
+  "en": "The two passwords do not match",
+  "ar": "كلمتا المرور غير متطابقتين"
+ },
+ {
+  "section": "password",
+  "key": "met",
+  "en": "{n} of {total} password rules met",
+  "ar": "تم استيفاء {n} من {total} من شروط كلمة المرور"
+ },
+ {
+  "section": "rating",
+  "key": "stars",
+  "en": "one: {n} star · other: {n} stars",
+  "ar": "zero: {n} نجمة · one: نجمة واحدة · two: نجمتان · few: {n} نجوم · many: {n} نجمة · other: {n} نجمة"
+ },
+ {
+  "section": "session-timeout",
+  "key": "warning_title",
+  "en": "Your session is about to end",
+  "ar": "جلستك على وشك الانتهاء"
+ },
+ {
+  "section": "session-timeout",
+  "key": "warning_description",
+  "en": "You have not used the page for a while. When the time runs out, you are signed out and lose any data you have not saved.",
+  "ar": "لم تستخدم الصفحة منذ مدة. عند انتهاء الوقت يتم تسجيل خروجك، وتفقد أي بيانات لم تحفظها."
+ },
+ {
+  "section": "session-timeout",
+  "key": "stay",
+  "en": "Stay signed in",
+  "ar": "البقاء متصلًا"
+ },
+ {
+  "section": "session-timeout",
+  "key": "sign_out",
+  "en": "Sign out",
+  "ar": "تسجيل الخروج"
+ },
+ {
+  "section": "session-timeout",
+  "key": "ended_title",
+  "en": "Your session has ended",
+  "ar": "انتهت جلستك"
+ },
+ {
+  "section": "session-timeout",
+  "key": "ended_description",
+  "en": "You were signed out because the page was not used. Sign in again to continue.",
+  "ar": "تم تسجيل خروجك لعدم استخدام الصفحة. سجّل الدخول مرة أخرى للمتابعة."
+ },
+ {
+  "section": "session-timeout",
+  "key": "sign_in",
+  "en": "Sign in",
+  "ar": "تسجيل الدخول"
+ },
+ {
+  "section": "swiper",
+  "key": "go_to_page",
+  "en": "Go to page {n}",
+  "ar": "الانتقال إلى الصفحة {n}"
+ },
+ {
+  "section": "tables",
+  "key": "reset",
+  "en": "Reset",
+  "ar": "إعادة تعيين"
+ },
+ {
+  "section": "tables",
+  "key": "column",
+  "en": "Column {n}",
+  "ar": "العمود {n}"
+ },
+ {
+  "section": "taginput",
+  "key": "added",
+  "en": "Added {value}",
+  "ar": "تمت إضافة {value}"
+ },
+ {
+  "section": "taginput",
+  "key": "removed",
+  "en": "Removed {value}",
+  "ar": "تمت إزالة {value}"
+ },
+ {
+  "section": "taginput",
+  "key": "editing",
+  "en": "Editing {value}",
+  "ar": "تعديل {value}"
+ },
+ {
+  "section": "taginput",
+  "key": "duplicate",
+  "en": "Already added",
+  "ar": "مضاف مسبقًا"
+ },
+ {
+  "section": "taginput",
+  "key": "max",
+  "en": "Maximum limit {n}",
+  "ar": "الحد الأقصى {n}"
+ },
+ {
+  "section": "taginput",
+  "key": "cleared",
+  "en": "All tags removed",
+  "ar": "تمت إزالة جميع الوسوم"
+ },
+ {
+  "section": "taginput",
+  "key": "strict",
+  "en": "Choose from the suggestions",
+  "ar": "اختر من الاقتراحات"
+ },
+ {
+  "section": "time-date",
+  "key": "hijri_date",
+  "en": "{month} {day}, {year} AH",
+  "ar": "{day} {month} {year} هـ"
+ },
+ {
+  "section": "time-picker",
+  "key": "hour",
+  "en": "Hour",
+  "ar": "ساعة"
+ },
+ {
+  "section": "time-picker",
+  "key": "minute",
+  "en": "Minute",
+  "ar": "دقيقة"
+ },
+ {
+  "section": "time-picker",
+  "key": "second",
+  "en": "Second",
+  "ar": "ثانية"
+ },
+ {
+  "section": "time-picker",
+  "key": "meridiem",
+  "en": "AM/PM",
+  "ar": "ص/م"
+ },
+ {
+  "section": "time-picker",
+  "key": "am",
+  "en": "AM",
+  "ar": "ص"
+ },
+ {
+  "section": "time-picker",
+  "key": "pm",
+  "en": "PM",
+  "ar": "م"
+ },
+ {
+  "section": "time-picker",
+  "key": "toggle",
+  "en": "Pick a time",
+  "ar": "اختيار الوقت"
+ },
+ {
+  "section": "time-picker",
+  "key": "invalid",
+  "en": "Invalid time — expected format {format}",
+  "ar": "وقت غير صالح — الصيغة المطلوبة {format}"
+ },
+ {
+  "section": "time-picker",
+  "key": "before_min",
+  "en": "Earliest allowed time is {time}",
+  "ar": "أقرب وقت متاح {time}"
+ },
+ {
+  "section": "time-picker",
+  "key": "after_max",
+  "en": "Latest allowed time is {time}",
+  "ar": "آخر وقت متاح {time}"
+ },
+ {
+  "section": "tooltip",
+  "key": "more_info",
+  "en": "More info",
+  "ar": "مزيد من المعلومات"
+ },
+ {
+  "section": "upload",
+  "key": "size_exceeds",
+  "en": "File size exceeds {size}",
+  "ar": "حجم الملف يتجاوز {size}"
+ },
+ {
+  "section": "upload",
+  "key": "type_not_allowed",
+  "en": "File type not allowed",
+  "ar": "نوع الملف غير مسموح"
+ },
+ {
+  "section": "upload",
+  "key": "type_not_allowed_ext",
+  "en": "File type not allowed (.{ext})",
+  "ar": "نوع الملف غير مسموح (.{ext})"
+ },
+ {
+  "section": "upload",
+  "key": "max_files",
+  "en": "Maximum number of files reached ({n})",
+  "ar": "تم الوصول للحد الأقصى لعدد الملفات ({n})"
+ },
+ {
+  "section": "upload",
+  "key": "network_error",
+  "en": "Network error",
+  "ar": "خطأ في الشبكة"
+ },
+ {
+  "section": "upload",
+  "key": "timed_out",
+  "en": "Upload timed out",
+  "ar": "انتهت مهلة الرفع"
+ },
+ {
+  "section": "upload",
+  "key": "cancelled",
+  "en": "Upload cancelled",
+  "ar": "تم إلغاء الرفع"
+ },
+ {
+  "section": "upload",
+  "key": "failed",
+  "en": "Upload failed",
+  "ar": "فشل الرفع"
+ },
+ {
+  "section": "upload",
+  "key": "remove_file",
+  "en": "Remove file",
+  "ar": "إزالة الملف"
+ },
+ {
+  "section": "user-feedback",
+  "key": "success",
+  "en": "Your feedback is submitted!",
+  "ar": "تم استلام ملاحظتك!"
+ },
+ {
+  "section": "user-feedback",
+  "key": "error",
+  "en": "An error occurred, please try again",
+  "ar": "حدث خطأ، يرجى المحاولة مرة أخرى"
+ },
+ {
+  "section": "voice-input",
+  "key": "start",
+  "en": "Start voice input ({language})",
+  "ar": "بدء إدخال الصوت ({language})"
+ },
+ {
+  "section": "voice-input",
+  "key": "stop",
+  "en": "Stop voice input",
+  "ar": "إيقاف إدخال الصوت"
+ },
+ {
+  "section": "voice-input",
+  "key": "language",
+  "en": "English",
+  "ar": "العربية"
+ },
+ {
+  "section": "voice-input",
+  "key": "no-speech",
+  "en": "No speech detected",
+  "ar": "لم يتم اكتشاف صوت"
+ },
+ {
+  "section": "voice-input",
+  "key": "not-allowed",
+  "en": "Microphone permission required",
+  "ar": "مطلوب إذن الميكروفون"
+ },
+ {
+  "section": "voice-input",
+  "key": "audio-capture",
+  "en": "Microphone access denied",
+  "ar": "تم رفض الوصول للميكروفون"
+ },
+ {
+  "section": "voice-input",
+  "key": "network",
+  "en": "Network error",
+  "ar": "خطأ في الشبكة"
+ },
+ {
+  "section": "voice-input",
+  "key": "aborted",
+  "en": "Voice input cancelled",
+  "ar": "تم إلغاء إدخال الصوت"
+ },
+ {
+  "section": "voice-input",
+  "key": "language-not-supported",
+  "en": "Language not supported",
+  "ar": "اللغة غير مدعومة"
+ },
+ {
+  "section": "voice-input",
+  "key": "default",
+  "en": "Voice input error",
+  "ar": "خطأ في إدخال الصوت"
+ },
+ {
+  "section": "voice-input",
+  "key": "timeout",
+  "en": "Voice input timed out",
+  "ar": "انتهت مهلة إدخال الصوت"
+ },
+ {
+  "section": "voice-input",
+  "key": "unsupported",
+  "en": "Voice input is not supported in this browser",
+  "ar": "إدخال الصوت غير مدعوم في هذا المتصفح"
+ }
+]

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 07:33 PM"
+last_edit: "12/10/2026 - 09:35 PM"
 ---
 
 <section id="cookies-overview" class="nds-content-section nds-doc-overview">
@@ -235,7 +235,7 @@ The close button stores no choice. The panel then does not open by itself for 30
             <i class="hgi hgi-stroke hgi-translate"></i>
             <span class="nds-label">Localized Text</span>
           </span>
-          <p class="nds-item-desc">The built panel takes its text from the <code class="nds-inline-code lang-js">cookies</code> section of <code class="nds-inline-code lang-js">assets/i18n/{lang}.json</code>. The text loads before the panel shows, so an Arabic page never shows English first.</p>
+          <p class="nds-item-desc">The built panel takes its text from the <code class="nds-inline-code lang-js">cookies</code> section of the page language's pack, such as <code class="nds-inline-code lang-js">assets/i18n/ar.json</code>. The text loads before the panel shows, so an Arabic page never shows English first.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -323,7 +323,7 @@ The close button stores no choice. The panel then does not open by itself for 30
 ### Text
 {: .nds-block-title}
 
-The built panel reads its text from the `cookies` section of `assets/i18n/en.json` and `ar.json`. To change some of it, set `window.NDS_I18N.cookies` before the NDS scripts: each key you set replaces that text, and the rest keep the pack's text. A Manual panel ignores both. See [Internationalization](../core/i18n).
+The built panel reads its English from the script and its Arabic from the `cookies` section of `assets/i18n/ar.json`. To change some of it, set `window.NDS_I18N.cookies` before the NDS scripts: each key you set replaces that text, and the rest keep the pack's text. A Manual panel ignores both. See [Internationalization](../core/i18n).
 
 ### Consent Mode Mapping
 {: .nds-block-title}

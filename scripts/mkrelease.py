@@ -226,6 +226,13 @@ def verify(out, version, rules=None):
     if css.returncode:
         sys.exit('check-css.py failed:\n' + css.stdout + css.stderr)
 
+    # The word packs and the docs' Word List are built from _i18n/ and the scripts' English; an edit
+    # that skipped the build ships a stale pack, and a word with no Arabic shows English.
+    words = subprocess.run('node scripts/check-i18n.mjs', cwd=ROOT,
+                           shell=True, capture_output=True, text=True)
+    if words.returncode:
+        sys.exit('check-i18n.mjs failed:\n' + words.stdout + words.stderr)
+
     # A pack's inline <style> wins over its fresh .min.css, so a pack not rebuilt
     # after an SCSS change ships the old look.
     packs = subprocess.run('python scripts/check-event-css.py', cwd=ROOT,

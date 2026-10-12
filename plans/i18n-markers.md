@@ -69,6 +69,16 @@ html[lang]:not([lang=""], [lang|="en"], [data-nds-i18n]) [data-i18n] {
 - The pack usually lands before the reveal (2.7 s vs 3.4 s, `localization.md`), so most pages never paint the bar.
 - No markers in text crit reveals before main CSS (the hero body): adding crit weight for it is ruled out (crit-size verdict).
 
+### The packs (owner 2026-10-12, step 1b)
+
+`assets/i18n/` is NDS's: every update replaces it, so a site never edits it. A site changes or adds words with `window.NDS_I18N` in its own script, loaded on every page before NDS's scripts. That also covers a language NDS does not ship: its pack is missing, so English shows, and the site's `NDS_I18N` holds its words.
+
+- **No `en.json`.** English is written once: a script's words in its JS defaults, a marker's word in the markup. An English page downloads no pack.
+- **Source and build.** NDS maintainers edit `_i18n/{lang}.json` (readable; Jekyll skips `_` folders). `node scripts/check-i18n.mjs --build` checks, then writes `assets/i18n/{lang}.json` minified, and `_data/i18n.json`, the word list `core/i18n.md` prints (section, key, English, Arabic). Without `--build`, the check fails when a built pack is out of date.
+- **Banner.** JSON holds no comments, so a built pack's first key is `"_"`: the version, where it was built from, and "do not edit: change words with `window.NDS_I18N`". Core reads only sections, so it skips it.
+- **The English list** the check holds every pack against: the JS defaults, plus each marker's markup word.
+- **Own files** (`assets/i18n/{section}/{lang}.json`) stay only for Accessibility, which keeps its own `en.json`, until step 2 folds it into the pack and the own-file path goes.
+
 ### The JS function
 
 ```js
@@ -107,6 +117,7 @@ Baseline v1.12.0. `NDS.i18n.strings()`, `t`/`set` and fill the gap never shipped
 ## Order
 
 1. **Core** (main session): the lookup, the guard, the walk, both subscriptions, the settled promise and its stamp, mount and refresh translating first, `t` → `text` (one script), `set` kept; the loader awaits the promise; the CSS hold; `check-i18n.mjs`; the core banner. One fresh Opus review of core, with the owner's OK. Commit. The removals (`NDS.i18n.load(component, scopes)`, `apply()`, `load(scopes)`) land with their last callers in steps 2 and 3, and the docs in step 6.
+1b. **The packs** (main session): `_i18n/` source, `--build`, the banner key, `en.json` gone, core reads no English file, the word list in `core/i18n.md`, `AGENTS.md`'s command line.
 2. **Accessibility and IPV** (main session): files, packs, docs. A section's own file (`assets/i18n/{section}/{lang}.json`) does not reach markers yet: walk again when `_get` lands one, or drop own files if Accessibility joins the pack. From the step-1 code review, left as is: a marker change rewrites every marker on that element, and the hold's `animation` replaces a marked element's own animation until the stamp.
 3. **The `set()` and fill-the-gap sites** (main session): Multiselect, Rating, Swiper, Pagination (`_relabel` becomes `set()`), Expandable (its toggle changes the marker), Empty, Tooltip, Upload, Autocomplete, Filter, Copy, Digital Stamp. Dead SCSS goes: `_empty.scss`'s hold, `_digital-stamp.scss`'s bars and arrow gate.
 4. **The UI words** (Sonnet agents, one batch per component group, a written recipe): markers in every canon, include and example, the `en`/`ar` keys, the doc rows. A: hidden labels (~35): clear, number +/−, Open calendar, modal and panel close and resize, swiper Previous/Next, Show more, OTP digits, Copy code, Sort by, nav and side menu toggles, landmark labels, Toggle dark mode. B: visible UI words (~55): Share, Upload, Filter, Multiselect, Selection and Records, Tables (Columns, Export), TOC On this page, Rating. The main session checks each batch: the diff, and an Arabic page in the browser.

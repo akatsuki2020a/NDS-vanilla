@@ -29,6 +29,26 @@
 (function () {
     'use strict';
 
+    // English defaults; the assets/i18n/{lang}.json pack overrides them. The overlay markup carries
+    // the same words, swapped by NDS.i18n.load('ipv', overlay).
+    NDS.i18n.strings('ipv', {
+        viewerLabel: 'Image viewer',
+        zoomIn: 'Zoom in',
+        zoomOut: 'Zoom out',
+        resetZoom: 'Reset zoom',
+        toggleUI: 'Toggle controls',
+        close: 'Close',
+        prevImage: 'Previous image',
+        nextImage: 'Next image',
+        instructionsTitle: 'Controls:',
+        instructionsScroll: '• Scroll to zoom',
+        instructionsDrag: '• Drag to pan',
+        instructionsReset: '• Double-click to reset',
+        instructionsNav: '• Arrow keys to navigate',
+        instructionsToggle: '• H key to toggle UI',
+        instructionsClose: '• ESC to close',
+    });
+
     // Zoom limits and step factors — shared by buttons, keys, wheel, and pinch.
     const ZOOM = { min: 0.1, max: 10, step: 1.5, wheelIn: 1.1, wheelOut: 0.9 };
 
