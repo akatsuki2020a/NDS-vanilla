@@ -316,7 +316,8 @@
         "clear_search": "مسح البحث",
         "clear": "مسح",
         "increase_value": "زيادة القيمة",
-        "decrease_value": "تقليل القيمة"
+        "decrease_value": "تقليل القيمة",
+        "suggestions": "اقتراحات:"
     },
     "ipv": {
         "viewerLabel": "عارض الصور",
@@ -351,6 +352,9 @@
         "applied": "تم تطبيق {value}",
         "reset": "إعادة تعيين",
         "apply": "تطبيق"
+    },
+    "otp": {
+        "digit": "الرقم {n} من {total}"
     },
     "pagination": {
         "prev": "الصفحة السابقة",

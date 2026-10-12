@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 12:31 AM"
 ---
 
 <section id="selection-overview" class="nds-content-section nds-doc-overview">
@@ -322,6 +322,7 @@ Use it on a paged list, so one line serves both browsing and selecting. The coun
     <div class="nds-section-body nds-prose" markdown="1">
 
 - Add a counter wherever a bulk action exists (export, delete, assign). The number tells users what the action will change.
+- Write the counter's sentence in the page's language, with your own noun, such as «0 محدد من 3 خدمات». The script fills in only the numbers.
 - Put the select-all and the counter in a [Toolbar](../components/toolbar) above the list. Users look there for record counts.
 - Write the sentence in your markup, in your language. The script writes only the numbers, so plurals and Arabic phrasing are yours.
 - Do not show a count for the current page only. Bulk actions act on the whole selection.

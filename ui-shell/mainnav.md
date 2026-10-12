@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 12:31 AM"
 ---
 
 <section id="mainnav-overview" class="nds-content-section nds-doc-overview">
@@ -146,7 +146,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
                     <div class="nds-search-content">
                       <div class="nds-form-control">
                         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                        <input id="main-search" type="text" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search">
+                        <input id="main-search" type="text" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search" data-i18n-aria-label="filter.search">
                         <div class="nds-form-action">
                           <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
                             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
@@ -155,7 +155,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
                       </div>
                       <button type="submit" class="nds-btn nds-primary nds-search-btn">
                         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                        <span class="nds-label" data-hidden="sm sr">Search</span>
+                        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                       </button>
                     </div>
                   </form>
@@ -308,7 +308,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
           <div class="nds-search-content">
             <div class="nds-form-control">
               <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-              <input id="main-search" type="text" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search">
+              <input id="main-search" type="text" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search" data-i18n-aria-label="filter.search">
               <div class="nds-form-action">
                 <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
                   <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
@@ -317,7 +317,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
             </div>
             <button type="submit" class="nds-btn nds-primary nds-search-btn">
               <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-              <span class="nds-label" data-hidden="sm sr">Search</span>
+              <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
             </button>
           </div>
         </form>

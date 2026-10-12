@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 12:31 AM"
 ---
 
 <section id="voice-overview" class="nds-content-section nds-doc-overview">
@@ -77,7 +77,7 @@ Pick another component when:
   <div class="nds-search-content">
     <div class="nds-form-control">
       <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-      <input type="text" id="voice-query" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search">
+      <input type="text" id="voice-query" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search" data-i18n-aria-label="filter.search">
       <div class="nds-form-action">
         <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear search" data-i18n-aria-label="forms.clear_search" hidden>
           <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
@@ -89,7 +89,7 @@ Pick another component when:
     </div>
     <button class="nds-btn nds-primary nds-search-btn" type="button">
       <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-      <span class="nds-label" data-hidden="sm sr">Search</span>
+      <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
     </button>
   </div>
 </div>

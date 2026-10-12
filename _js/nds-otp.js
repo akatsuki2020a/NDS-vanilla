@@ -15,6 +15,8 @@
  *   (none — the group is markup: the inputs inside .nds-otp-container, plus an optional
  *    input[type="hidden"].nds-otp-value the component keeps in sync)
  * Gotchas:
+ *   - Each box's aria-label is "Digit n of N" in the page's language, renumbered for the
+ *     group; a label that is not that English stays.
  *   - setValue() writes the boxes and the hidden carrier but fires NO event.
  *   - A multi-digit paste spreads across the boxes from the focused one.
  *   - There is no reinit(): init() runs once and later .nds-otp-group nodes are picked up
@@ -32,6 +34,10 @@
     // The single init at page load wires the subscribers; subsequent .nds-otp-group
     // mutations are already handled by those long-lived subscribers.
     var _initDone = false;
+
+    var strings = NDS.i18n.strings('otp', { digit: 'Digit {n} of {total}' });
+    // The English label with any numbers: a box copied from a shorter code still counts as unlabelled.
+    var DEFAULT_LABEL = new RegExp('^' + strings.defaults.digit.replace(/\{\w+\}/g, '\\d+') + '$');
 
     // ==============================================
     // HELPERS
@@ -243,7 +249,11 @@
         group._ndsOtpAC = new AbortController();
         var signal = group._ndsOtpAC.signal;
 
-        inputs.forEach(function (input) {
+        inputs.forEach(function (input, i) {
+            // Each box says its place in the page's language; a label the page wrote itself stays.
+            var vars = { n: i + 1, total: inputs.length };
+            var label = input.getAttribute('aria-label');
+            if (!label || DEFAULT_LABEL.test(label)) strings.set(input, 'aria-label', 'digit', vars);
             input.addEventListener('beforeinput', function (e) {
                 handleBeforeInput(e, group, input, inputs);
             }, { signal: signal });

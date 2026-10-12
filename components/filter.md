@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 12:31 AM"
 ---
 
 <section id="filter-overview" class="nds-content-section nds-doc-overview">
@@ -277,7 +277,7 @@ Pick another component when:
 </script>
 <script type="text/html" id="filter-part-suggest" data-canon>
 <div class="nds-auto-fill" data-target="flt-search-input" data-filter-target="flt-items" data-autofill-apply>
-  <span class="nds-label">Suggestions:</span>
+  <span class="nds-label" data-i18n="forms.suggestions">Suggestions:</span>
   <div class="nds-chips">
     <button type="button" class="nds-chip nds-neutral nds-rounded nds-item">
       <i class="nds-icon nds-hgi-plus-sign" aria-hidden="true"></i>

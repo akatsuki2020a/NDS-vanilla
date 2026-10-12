@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 12:31 AM"
 ---
 
 <section id="pagination-overview" class="nds-content-section nds-doc-overview">
@@ -470,6 +470,7 @@ After a page change, the script scrolls the content back into view when its top 
 - Do not mix up `nds-page-item` and `nds-pagination-item`. The first marks your content, the second a control in the nav.
 - Listen for `nds:pagination:change` on the nav, not on a page button. The script builds the buttons of a data-driven or content nav again when the page count changes, and builds the menu rows each time the menu opens. A listener on one of them is lost.
 - Give every nav an `aria-label`. When the HTML holds more than one nav, name what each one pages, such as "Requests pagination".
+- Write the records line in the page's language, with your own noun, such as «عرض 1–3 من 9 خدمات». The script fills in only the numbers.
 - Do not write a nav for a single page.
 - When a server returns no records, put `nds-empty` on the content container. [Empty](../components/empty) fills it with a message.
 

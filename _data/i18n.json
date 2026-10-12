@@ -1441,6 +1441,12 @@
  },
  {
   "section": "forms",
+  "key": "suggestions",
+  "en": "Suggestions:",
+  "ar": "اقتراحات:"
+ },
+ {
+  "section": "forms",
   "key": "decrease_value",
   "en": "Decrease value",
   "ar": "تقليل القيمة"
@@ -1612,6 +1618,12 @@
   "key": "apply",
   "en": "Apply",
   "ar": "تطبيق"
+ },
+ {
+  "section": "otp",
+  "key": "digit",
+  "en": "Digit {n} of {total}",
+  "ar": "الرقم {n} من {total}"
  },
  {
   "section": "pagination",

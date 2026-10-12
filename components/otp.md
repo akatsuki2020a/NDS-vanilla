@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 09:00 AM"
+last_edit: "13/10/2026 - 12:31 AM"
 ---
 
 <section id="otp-overview" class="nds-content-section nds-doc-overview">
@@ -113,7 +113,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-For another code length, copy a box, give it a unique `id`, and number the `aria-label` of every box again ("Digit 2 of 5").
+For another code length, copy a box and give it a unique `id`. The script numbers every box's `aria-label` again ("Digit 2 of 5").
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
@@ -215,7 +215,7 @@ For another code length, copy a box, give it a unique `id`, and number the `aria
 - Make one box for each digit of the code the server sends. The submit check counts the boxes.
 - Put `autocomplete="one-time-code"` on the first box only, so the phone offers the code from an SMS.
 - Give the name to the hidden `nds-otp-value` input, not to the boxes. A named box sends its digit as one more field.
-- Give each box an `aria-label` that names its place, such as "Digit 2 of 4". The boxes have no visible label.
+- Keep the `aria-label` the canon gives each box. The boxes have no visible label, so the script names each box's place in the page's language, such as "Digit 2 of 4". A label of your own stays as you wrote it.
 - Keep `data-required` on the group. Without it, the form does not check the code.
 - Check the code on the server. The OTP input checks only that every box is full.
 - Put `autofocus` on the first box only when the code is the one task on the page, such as a verification step.
