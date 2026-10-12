@@ -65,7 +65,7 @@ sidemenu_mode: false
                                 </div>
                                 <input type="text" id="ft-dob" name="dob" class="nds-input nds-date-input"
                                     placeholder="DD/MM/YYYY" autocomplete="bday"
-                                    data-year-before="100" data-year-after="0" required>
+                                    data-year-before="100" data-year-after="0" data-max-date="today" required>
                             </div>
                         </div>
 

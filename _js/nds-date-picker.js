@@ -25,7 +25,8 @@
  *                                a single date fills every one
  *   .date-picker-toggle:         the button that opens the calendar (none: a click on the
  *                                input opens it)
- *   on the .nds-date-input:      data-min-date · data-max-date (a date, or `today`) · data-lang
+ *   on the .nds-date-input:      data-min-date · data-max-date (a date, `today`, or `today±N`
+ *                                with d, m or y, counted in the field's calendar) · data-lang
  *                                data-year-before · data-year-after
  *   written by the picker:       data-picker-mode (container) · data-converted-date (input)
  * Gotchas:
@@ -108,6 +109,18 @@
     }
     function hijriMonthLength(year, month) {
         return NDS.date.parse('30/' + month + '/' + year, HIJRI) ? 30 : 29;
+    }
+
+    // Today moved by n days, months or years, counted in the field's calendar. A day past the
+    // target month's end becomes its last day: 31 March minus 1m is the last day of February.
+    function shiftToday(n, unit, hijri) {
+        var t = NDS.date.today();
+        if (unit === 'd') return new Date(t.getFullYear(), t.getMonth(), t.getDate() + n);
+        var p = hijri ? toHijri(t) : { year: t.getFullYear(), month: t.getMonth() + 1, day: t.getDate() };
+        var m = p.year * 12 + p.month - 1 + (unit === 'y' ? n * 12 : n);
+        var year = Math.floor(m / 12), month = m - year * 12 + 1;
+        if (hijri) return fromHijri(year, month, Math.min(p.day, hijriMonthLength(year, month)));
+        return new Date(year, month - 1, Math.min(p.day, new Date(year, month, 0).getDate()));
     }
 
     // Detect picker UI mode from the format string. Token presence drives it:
@@ -519,11 +532,15 @@
             var calendar = CalendarConfig[calendarType];
             var minStr = this.elements.input.getAttribute('data-min-date');
             var maxStr = this.elements.input.getAttribute('data-max-date');
-            // 'today' round-trips through the format, so it carries the calendar's fields like a written date.
+            // 'today' or 'today±N' (d, m or y; days by default) round-trips through the format, so it
+            // carries the calendar's fields like a written date.
             // ponytail: resolved once at init; a tab left open past midnight keeps the old day until reinit.
             var bound = function (s) {
                 if (!s) return null;
-                return calendar.parseDate(s === 'today' ? calendar.formatDate(NDS.date.today(), format) : s, format);
+                var rel = /^today(?:([+-]\d+)([dmy])?)?$/.exec(s.trim());
+                if (!rel) return calendar.parseDate(s, format);
+                var day = shiftToday(+(rel[1] || 0), rel[2] || 'd', calendarType === 'hijri');
+                return calendar.parseDate(calendar.formatDate(day, format), format);
             };
             var minDate = bound(minStr);
             var maxDate = bound(maxStr);
