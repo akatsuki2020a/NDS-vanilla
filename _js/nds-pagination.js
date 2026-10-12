@@ -772,7 +772,7 @@
         jump: 'Jump to page',
     });
     // Escaped: the pack is site-editable, and these land in innerHTML.
-    const html = (k, vars) => NDS.escapeHtml(strings.t(k, vars));
+    const html = (k, vars) => NDS.escapeHtml(strings.text(k, vars));
     // Controls generated before the file landed carry the English defaults: re-label them once.
     let _relabelArmed = false;
     function _relabel() {
@@ -780,8 +780,8 @@
         document.querySelectorAll('.nds-pagination-item .nds-btn[aria-label]').forEach(b => {
             const l = b.getAttribute('aria-label'), n = b.textContent.trim();
             const key = ['prev', 'next', 'more'].find(k => l === d[k]);
-            if (key) b.setAttribute('aria-label', strings.t(key));
-            else if (l === NDS.i18n.format(d.page, { n })) b.setAttribute('aria-label', strings.t('page', { n }));
+            if (key) b.setAttribute('aria-label', strings.text(key));
+            else if (l === NDS.i18n.format(d.page, { n })) b.setAttribute('aria-label', strings.text('page', { n }));
         });
     }
     // url (when set) is a page→href function — the controls become navigable

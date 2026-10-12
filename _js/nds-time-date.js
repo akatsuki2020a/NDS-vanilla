@@ -53,7 +53,7 @@
     // Month names from NDS.date: Android's ICU names Umm al-Qura months from the Gregorian set.
     function hijriText(day) {
         const [d, m, y] = NDS.date.format(day, { calendar: 'hijri', format: 'D M YYYY' }).split(' ');
-        return strings.t('hijri_date', { day: d, month: NDS.date.monthNames('hijri')[m - 1], year: y });
+        return strings.text('hijri_date', { day: d, month: NDS.date.monthNames('hijri')[m - 1], year: y });
     }
 
     // The site's wall clock, [h, m, s]. No data-timezone = the visitor's.

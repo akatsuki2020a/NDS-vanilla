@@ -377,7 +377,7 @@
             this.applied = this.getSelected();
             this.renderChips();
             const labels = this.applied.map(v => this.labelFor(v));
-            NDS.announce(labels.length ? strings.t('applied', { value: labels.join(', ') }) : strings.t('cleared'));
+            NDS.announce(labels.length ? strings.text('applied', { value: labels.join(', ') }) : strings.text('cleared'));
             this.emitChange();
         }
 
@@ -395,7 +395,7 @@
             this.applied = [];
             this.renderChips();
             if (before.length) {
-                NDS.announce(strings.t('cleared'));
+                NDS.announce(strings.text('cleared'));
                 this.emitChange();
             }
         }
@@ -414,12 +414,12 @@
                 const remaining = this.chipsEl.children;
                 (remaining[Math.min(removedIdx, remaining.length - 1)] || this.trigger)?.focus();
             }
-            NDS.announce(strings.t('removed', { value: this.labelFor(value) }));
+            NDS.announce(strings.text('removed', { value: this.labelFor(value) }));
             this.emitChange();
         }
 
         announceToggle(cb) {
-            NDS.announce(strings.t(cb.checked ? 'added' : 'removed', { value: this.labelFor(cb.value) }));
+            NDS.announce(strings.text(cb.checked ? 'added' : 'removed', { value: this.labelFor(cb.value) }));
         }
 
         labelFor(value) {

@@ -40,9 +40,14 @@
  *     NDS.i18n.load(component, scopes) fetch + apply a component's string table (en
  *                                      fallback; stamps data-i18n / data-i18n-attr in scope;
  *                                      each scope holds its skeleton until the strings land)
- *     NDS.i18n.strings(component, defaults) → { t, set, load }   a component's strings;
+ *     NDS.i18n.strings(component, defaults) → { text, set, load }   a component's strings;
  *                                      set() re-writes its text when the file lands
- *     NDS.i18n.pack() → Promise         the page language's pack; the loader starts injected bundles after it
+ *     data-i18n="section.key" · data-i18n-{aria-label|aria-description|title|alt|placeholder|label}
+ *                                      a marker: core writes the word in the page language, unless
+ *                                      a script or the author changed it since
+ *     NDS.i18n.translate(root?)         translate the markers in root now (mount/refresh call it)
+ *     NDS.i18n.settled → Promise        the pack landed, failed, or 3 s passed; then <html data-nds-i18n>
+ *     NDS.i18n.pack() → Promise         the page language's pack
  *     NDS.i18n.format(value, vars)     fill {name}; a plural value picks by vars.n
  *     NDS.triggerEvents(el)            dispatch input + change so forms and consumers sync
  *     NDS.badge(el, count) · NDS.buildChip(value, opts)
@@ -153,6 +158,20 @@
     // Override hooks:
     //   window.NDS_I18N      = { '{component}': {...}, ... }   inline strings, read on every lookup
     //   window.NDS_I18N_PATH = '/custom/'                       base path, read once per file
+    //
+    // Markers (plans/i18n-markers.md): data-i18n="section.key" writes an element's text, and
+    // data-i18n-{attribute}="section.key" that attribute. Core translates them all once the pack
+    // settles, then each one added or changed later. The six names are the attribute allowlist.
+    const I18N_MARKS = {
+        'data-i18n': 'text',
+        'data-i18n-aria-label': 'aria-label',
+        'data-i18n-aria-description': 'aria-description',
+        'data-i18n-title': 'title',
+        'data-i18n-alt': 'alt',
+        'data-i18n-placeholder': 'placeholder',
+        'data-i18n-label': 'label',
+    };
+    const I18N_MARK_SEL = Object.keys(I18N_MARKS).map(a => `[${a}]`).join(',');
     NDS.i18n = {
         _files: Object.create(null),   // 'ar' or 'accessibility/ar' → data, once landed (null when none)
         _loads: Object.create(null),   // same keys → Promise<data>
@@ -215,7 +234,7 @@
                 || this._file('en').then(en => has(en) || this._file(component + '/' + lang)));
         },
 
-        // The page language's pack — the loader starts the injected bundles after it.
+        // The page language's pack, landed. settled is the capped promise the loader waits on.
         pack() { return this._file(this._lang()); },
 
         // One fetch per file per page; falls back to the en file.
@@ -226,14 +245,17 @@
         },
 
         // A component's strings: English defaults until its file lands.
-        //   s.t(key, vars, lang)        text in the page's language, or in lang (fetched on first use)
+        //   s.text(key, vars, lang)     the word in the page's language, or in lang (fetched on first use)
         //   s.set(el, attr, key, vars)  write an attribute ('text' = textContent) now, and
-        //                               again when the file lands, unless it changed since
+        //                               again when the file lands, unless it changed since.
+        //                               For words with {vars}; a fixed word in markup is a marker
         //   s.load(scopes, lang)        start the fetch at init; scopes hold their skeleton
         //   s.ready(lang)               true once the text for that language is known
         //   s.has(key)                  the component defines this key (for keys from outside)
         strings(component, defaults) {
             const I = this, queue = [];
+            // Markers in this section fall back to these when no file has the key.
+            I._seeds[component] = Object.assign(I._seeds[component] || {}, defaults);
             const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
             const landed = () => I._fromFiles(component) !== undefined;
             const read = (el, attr) => (attr === 'text' ? el.textContent : el.getAttribute(attr));
@@ -245,7 +267,7 @@
                 return I.format(has(d, key) ? d[key] : has(defaults, key) ? defaults[key] : key, vars, lang);
             };
             return {
-                t,
+                text: t,
                 defaults,
                 load: (scopes, lang) => I.load(component, scopes, lang),
                 ready: lang => I._fromFiles(component, lang) !== undefined,
@@ -336,6 +358,90 @@
 
         // Allowlist for data-i18n-attr — text/a11y attributes only.
         _SAFE_ATTR: /^(aria-[a-z-]+|title|alt|placeholder|label)$/,
+
+        _seeds: Object.create(null),   // section → the JS defaults its strings() call registered
+        _written: new WeakMap(),       // element → { target: the value core wrote last }
+        _warned: new Set(),
+        _warnOnce(msg) { if (!this._warned.has(msg)) { this._warned.add(msg); console.warn('[NDS.i18n] ' + msg); } },
+
+        // The word a marker names, through text()'s chain: the override, the pack, en, a
+        // registered component's own file, its JS defaults. Also its English, when known
+        // (en.json once loaded, else the JS default): the guard's baseline. word null: leave the markup.
+        _word(ref) {
+            const m = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/.exec(ref);
+            // ponytail: an undotted ref is a 1.x Accessibility/IPV key, skipped until they move to markers.
+            if (!m) return { word: null };
+            const [, section, key] = m;
+            const own = (o) => !!o && Object.prototype.hasOwnProperty.call(o, key);
+            const d = this._section(section), seed = this._seeds[section], en = this._files.en?.[section];
+            const v = own(d) ? d[key] : own(seed) ? seed[key] : undefined;
+            const english = own(en) ? en[key] : own(seed) ? seed[key] : undefined;
+            if (typeof v === 'string' && !/\{\w+\}/.test(v)) return { word: v, english };
+            if (v !== undefined) this._warnOnce(`${ref} has {vars} or plural forms: write it with set(), not a marker`);
+            else if (this._isSettled && d === undefined && !seed) this._warnOnce(`${ref}: no pack, file or script has the ${section} section`);
+            return { word: null };
+        },
+
+        // One element's markers. The guard: core skips a word someone changed. Untouched by core,
+        // that is a word that no longer reads its English (when core knows the English); touched,
+        // a word that no longer reads what core wrote. It never adds an absent attribute.
+        // force: the marker itself changed, so its new word always lands.
+        _mark(el, force) {
+            for (const name in I18N_MARKS) {
+                const ref = el.getAttribute(name);
+                if (!ref) continue;
+                const { word: v, english } = this._word(ref.trim());
+                if (v === null) continue;
+                const target = I18N_MARKS[name];
+                const isText = target === 'text';
+                if (isText && el.firstElementChild) {
+                    this._warnOnce(`${ref}: data-i18n goes on an element that holds only the word`);
+                    continue;
+                }
+                if (!isText && !el.hasAttribute(target)) continue;
+                const last = this._written.get(el) || {};
+                const cur = isText ? el.textContent : el.getAttribute(target);
+                if (!force && (target in last ? cur !== last[target] : typeof english === 'string' && cur.trim() !== english)) continue;
+                if (cur.trim() !== v) {
+                    if (!isText) el.setAttribute(target, v);
+                    else {
+                        // Write the lone text node: a framework's node and comment anchors survive, and no childList record fires.
+                        const texts = [...el.childNodes].filter(n => n.nodeType === 3);
+                        if (texts.length === 1) texts[0].nodeValue = v; else el.textContent = v;
+                    }
+                }
+                last[target] = isText ? el.textContent : v;
+                this._written.set(el, last);
+            }
+        },
+
+        // Translate every marker in root (the document by default): root itself, its
+        // descendants, and the content of each <template>, so a later clone lands translated.
+        translate(root = document) {
+            const walk = (r) => {
+                if (r.nodeType === 1 && r.matches(I18N_MARK_SEL)) this._mark(r);
+                r.querySelectorAll(I18N_MARK_SEL).forEach(el => this._mark(el));
+                r.querySelectorAll('template').forEach(t => walk(t.content));
+            };
+            walk(root);
+        },
+
+        // The loader calls this from initialize(), so data-nds-auto-init="false" holds it too.
+        // Once the pack settles: one walk, the data-nds-i18n stamp that releases the CSS hold,
+        // then the markers added or changed later. A pack that lands after the 3 s cap walks
+        // again; the guard keeps it to the words still in English.
+        start() {
+            if (this._started) return;
+            this._started = true;
+            this.settled.then(() => {
+                this._isSettled = true;
+                this.translate();
+                document.documentElement.setAttribute('data-nds-i18n', '');
+                NDS.onDOMAdd(I18N_MARK_SEL, els => els.forEach(el => this._mark(el)));
+                NDS.onAttrChange(I18N_MARK_SEL, Object.keys(I18N_MARKS), els => els.forEach(el => this._mark(el, true)));
+                this.pack().then(() => this.translate());
+            });
+        },
 
         _roots(scopes) {
             if (!scopes) return [document.documentElement];
@@ -431,7 +537,9 @@
     };
 
     // Start the pack now: nearly every page needs it, and most components init after it lands.
-    NDS.i18n._file(NDS.i18n._lang());
+    // settled: the pack landed or failed, or 3 s passed. The loader and the marker pass wait on it.
+    // ponytail: past 3 s a slow pack starts the late components and the markers in English.
+    NDS.i18n.settled = Promise.race([NDS.i18n._file(NDS.i18n._lang()), new Promise(r => setTimeout(r, 3000))]);
 
     // ── Debounce ─────────────────────────────────────────────────────
     // Usage: const fn = NDS.debounce(handler, 150)
@@ -549,7 +657,7 @@
             return Array.from({ length: opts.month ? 12 : 7 }, (_, i) => f.format(at(i)));
         };
         const monthNames = (calendar, lang) => (calendar === 'hijri'
-            ? names.t('hijri_months', null, lang)
+            ? names.text('hijri_months', null, lang)
             : intlNames(lang, { month: 'long' }, i => Date.UTC(2000, i, 15)));
         // Sunday first: 2 Jan 2000 was a Sunday.
         const weekdayNames = (lang) => intlNames(lang, { weekday: 'short' }, i => Date.UTC(2000, 0, 2 + i));

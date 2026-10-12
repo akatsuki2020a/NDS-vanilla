@@ -150,8 +150,8 @@ NDS.UserFeedback = (() => {
             // An error keeps the form open, so the visitor can send it again.
             if (ok) NDS.State.set(feedbackComponent, 'status');
 
-            const successMessage = feedbackComponent.getAttribute('data-success-message') || strings.t('success');
-            const errorMessage = feedbackComponent.getAttribute('data-error-message') || strings.t('error');
+            const successMessage = feedbackComponent.getAttribute('data-success-message') || strings.text('success');
+            const errorMessage = feedbackComponent.getAttribute('data-error-message') || strings.text('error');
             const message = status === 'success' ? successMessage : errorMessage;
 
             // Create feedback message using NDSFeedback API

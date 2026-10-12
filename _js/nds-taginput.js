@@ -135,7 +135,7 @@
                     const last = this.tags.pop();
                     this.renderChips();
                     this.input.value = last;
-                    NDS.announce(strings.t('editing', { value: last }));
+                    NDS.announce(strings.text('editing', { value: last }));
                     this.emitChange();
                 }
             }, { signal });
@@ -205,7 +205,7 @@
         // Strict-mode rejection of typed commits — same feedback shape as the
         // duplicate/max rejections in addTag (incl. the macrotask deferral).
         _strictReject() {
-            const msg = strings.t('strict');
+            const msg = strings.text('strict');
             setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: msg }), 0);
             NDS.announce(msg);
         }
@@ -224,19 +224,19 @@
             // run between the two listeners) — the status must land once the
             // whole event dispatch has finished.
             if (this.tags.length >= this.maxTags) {
-                const msg = strings.t('max', { n: this.maxTags });
+                const msg = strings.text('max', { n: this.maxTags });
                 setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: msg }), 0);
                 NDS.announce(msg);
                 return;
             }
             if (this.tags.some(t => t.toLowerCase() === value.toLowerCase())) {
-                setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: strings.t('duplicate') }), 0);
-                NDS.announce(strings.t('duplicate'));
+                setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: strings.text('duplicate') }), 0);
+                NDS.announce(strings.text('duplicate'));
                 return;
             }
             this.tags.push(value);
             this.renderChips();
-            NDS.announce(strings.t('added', { value }));
+            NDS.announce(strings.text('added', { value }));
             this.emitChange();
         }
 
@@ -253,7 +253,7 @@
                 const remaining = this.formControl.querySelectorAll('.nds-chip');
                 (remaining[Math.min(removedIdx, remaining.length - 1)] || this.input)?.focus();
             }
-            NDS.announce(strings.t('removed', { value }));
+            NDS.announce(strings.text('removed', { value }));
             this.emitChange();
         }
 
@@ -261,7 +261,7 @@
             if (!this.tags.length) return;
             this.tags = [];
             this.renderChips();
-            NDS.announce(strings.t('cleared'));
+            NDS.announce(strings.text('cleared'));
             this.emitChange();
         }
 

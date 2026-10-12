@@ -52,7 +52,7 @@
     });
 
 
-    const html = (key) => NDS.escapeHtml(strings.t(key));
+    const html = (key) => NDS.escapeHtml(strings.text(key));
     const icon = (name) => `<div class="nds-card-header">
     <div class="nds-card-featured-icon">
       <span class="nds-featured-icon nds-xl nds-circle">

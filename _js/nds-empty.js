@@ -44,7 +44,7 @@
 
   function getMessage(container) {
     const custom = container.getAttribute('data-empty-message');
-    return custom && custom.trim() ? custom : strings.t('message');
+    return custom && custom.trim() ? custom : strings.text('message');
   }
 
   function getIconClass(container) {

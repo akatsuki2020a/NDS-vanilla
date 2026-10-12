@@ -48,7 +48,7 @@
         NDS.aria.hidden(icon, true);
         const span = document.createElement('span');
         span.className = 'text';
-        span.textContent = strings.t('weather', { desc: strings.t(payload.cond), temp: payload.temp });
+        span.textContent = strings.text('weather', { desc: strings.text(payload.cond), temp: payload.temp });
         parent.replaceChildren(icon, span);
     }
 

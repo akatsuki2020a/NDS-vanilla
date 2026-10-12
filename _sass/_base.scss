@@ -176,3 +176,22 @@ body.nds-page-bg {
     text-align: start;
 }
 
+/* ========================================
+   I18N HOLD
+   ======================================== */
+
+// A marked word on a page in another language shows a bar until its translation lands, so
+// English never flashes (plans/i18n-markers.md). Core sets data-nds-i18n once the pack settles.
+// The bar lives in the keyframe's backwards fill: it holds for the 4 s delay, then the element's
+// own look returns even if core never runs. Not skeleton-fill, so the width never changes.
+html[lang]:not([lang=""], [lang|="en"], [data-nds-i18n]) [data-i18n] {
+    animation: nds-i18n-hold 0s 4s backwards;
+}
+
+@keyframes nds-i18n-hold {
+    from {
+        background: var(--nds-skeleton-fill);
+        border-radius: var(--nds-skeleton-radius);
+        -webkit-text-fill-color: transparent;
+    }
+}

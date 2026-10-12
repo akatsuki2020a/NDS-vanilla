@@ -60,7 +60,7 @@
     });
 
 
-    const html = (key) => NDS.escapeHtml(strings.t(key));
+    const html = (key) => NDS.escapeHtml(strings.text(key));
     const closeBtn = () => `<div class="nds-panel-action">
           <button type="button" class="nds-btn nds-subtle nds-icon-only" data-panel-close aria-label="${html('close')}">
             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>

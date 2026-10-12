@@ -109,7 +109,7 @@
     function formatDisplay(secs, format) {
         const p = parts(secs);
         const h12 = ((p.h24 + 11) % 12) + 1;
-        const mer = strings.t(p.h24 >= 12 ? 'pm' : 'am');
+        const mer = strings.text(p.h24 >= 12 ? 'pm' : 'am');
         const map = {
             HH: pad(p.h24), H: String(p.h24), hh: pad(h12), h: String(h12),
             mm: pad(p.m), ss: pad(p.s), A: mer, a: mer.toLowerCase()
@@ -203,7 +203,7 @@
             if (!piece) continue;
             if (piece === 'A' || piece === 'a') {
                 if (!mer) break;
-                out += piece === 'a' ? strings.t(mer).toLowerCase() : strings.t(mer);
+                out += piece === 'a' ? strings.text(mer).toLowerCase() : strings.text(mer);
             } else if (TOKEN_PATTERNS[piece]) {
                 if (i >= digits.length) break;
                 const maxFirst = /^[Hh]/.test(piece) ? (hour12 ? 1 : 2) : 5;
@@ -416,7 +416,7 @@
         // ---- panel ------------------------------------------------------
 
         optionsFor(unit) {
-            if (unit === 'meridiem') return optionMarkup('am', strings.t('am')) + optionMarkup('pm', strings.t('pm'));
+            if (unit === 'meridiem') return optionMarkup('am', strings.text('am')) + optionMarkup('pm', strings.text('pm'));
 
             const list = [];
             if (unit === 'hour') {
@@ -435,7 +435,7 @@
             const panel = document.createElement('div');
             panel.className = 'nds-time-picker-panel';
             panel.innerHTML = '<div class="nds-time-picker-units">'
-                + this.units.map((u) => unitMarkup(u, strings.t(u), this.optionsFor(u))).join('')
+                + this.units.map((u) => unitMarkup(u, strings.text(u), this.optionsFor(u))).join('')
                 + '</div>';
 
             // After the input, inside the same form-control — date-picker's shape.
@@ -716,12 +716,12 @@
 
         _validationError(raw) {
             const secs = parseTyped(raw, this.format);
-            if (secs === null) return strings.t('invalid', { format: this.format });
+            if (secs === null) return strings.text('invalid', { format: this.format });
             if (this.min !== null && secs < this.min) {
-                return strings.t('before_min', { time: formatDisplay(this.min, this.format) });
+                return strings.text('before_min', { time: formatDisplay(this.min, this.format) });
             }
             if (this.max !== null && secs > this.max) {
-                return strings.t('after_max', { time: formatDisplay(this.max, this.format) });
+                return strings.text('after_max', { time: formatDisplay(this.max, this.format) });
             }
             return '';
         }

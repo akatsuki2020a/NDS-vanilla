@@ -512,7 +512,7 @@
                 viewBox: `0 0 ${size} ${size}`,
                 class: 'nds-chart-svg',
                 role: 'img',
-                'aria-label': strings.t('chart'),
+                'aria-label': strings.text('chart'),
                 style: `max-height:${size}px`,
             });
 
@@ -594,7 +594,7 @@
             const { bar, dataLabels } = this.opts;
             const stacked = bar?.stacked || false;
 
-            const ctx = this._axisChart(wrap, strings.t('bar'), (seriesArr, catCount) => {
+            const ctx = this._axisChart(wrap, strings.text('bar'), (seriesArr, catCount) => {
                 let maxVal = 0;
                 if (stacked) {
                     for (let c = 0; c < catCount; c++) {
@@ -698,7 +698,7 @@
             const lineW = line?.width || 2;
             const showArea = line?.area || false;
 
-            const ctx = this._axisChart(wrap, strings.t('line'), (seriesArr) => {
+            const ctx = this._axisChart(wrap, strings.text('line'), (seriesArr) => {
                 let maxVal = 0, minVal = 0;
                 seriesArr.forEach(s => s.data.forEach(v => {
                     if (v > maxVal) maxVal = v;

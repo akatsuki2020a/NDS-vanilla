@@ -406,7 +406,7 @@
                 // Only strict needs "no results": elsewhere any typed text is valid.
                 if (!NDS.Empty || !this.strict) { this.close(); return; }
                 NDS.Empty.refresh(this.scroll);
-                NDS.announce(strings.t('no_results'));
+                NDS.announce(strings.text('no_results'));
                 this.open();
                 return;
             }

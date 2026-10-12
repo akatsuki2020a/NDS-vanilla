@@ -82,7 +82,7 @@
 
     // Writes the pack's text into every part the markup leaves empty; text the page wrote stays.
     function fillText() {
-        const { t } = strings;
+        const t = strings.text;
         const empty = (el) => el && !el.textContent.trim();
         const text = (el, key) => { if (empty(el)) el.textContent = t(key); };
         const attr = (el, name, key) => { if (el && !el.getAttribute(name)) el.setAttribute(name, t(key)); };

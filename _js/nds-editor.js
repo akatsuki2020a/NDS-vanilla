@@ -751,7 +751,7 @@
         remove_prompt: 'Remove the component:',
     });
     // Escaped: the pack is site-editable, and these land in innerHTML.
-    const html = (k) => NDS.escapeHtml(strings.t(k));
+    const html = (k) => NDS.escapeHtml(strings.text(k));
 
 
     let uid = 0; // minted label ids for adopted fields whose textarea has no id
@@ -1531,7 +1531,7 @@
             // why.
             const sel = window.getSelection();
             if (sel.rangeCount && this._selectionClipsShell(sel.getRangeAt(0))) {
-                this._notice(strings.t('paste_clips_shell'));
+                this._notice(strings.text('paste_clips_shell'));
                 return;
             }
             const html = e.clipboardData.getData('text/html');
@@ -1558,7 +1558,7 @@
                 const files = Array.from(e.clipboardData.files).filter(f => f.type.startsWith('image/'));
                 if (!files.length) return;
                 if (!this._imageEmbedAllowed()) {
-                    this._notice(strings.t('paste_blocked'));
+                    this._notice(strings.text('paste_blocked'));
                     return;
                 }
                 // Same size/type/MIME gates as the popover upload — full
@@ -2384,7 +2384,7 @@
             const noExternal = !!menu?.querySelector('[data-editor-link-noexternal]')?.checked;
             const colored = !!menu?.querySelector('[data-editor-link-colored]')?.checked;
             if (!url || url === 'https://' || !safeUrl(url)) {
-                this._fieldError(menu?.querySelector('[data-editor-link-url]'), strings.t('invalid_url'));
+                this._fieldError(menu?.querySelector('[data-editor-link-url]'), strings.text('invalid_url'));
                 return;
             }
             dropmenu?.ndsDropmenu?.close?.();
@@ -2674,7 +2674,7 @@
                 const file = this._imageUploadHost()?.ndsUpload?.getAllFiles?.()[0];
                 const msg = !file || file.status === 'complete' ? 'invalid_image_url'
                     : file.status === 'error' ? 'upload_failed' : 'upload_pending';
-                this._fieldError(menu?.querySelector('[data-editor-image-url]'), strings.t(msg));
+                this._fieldError(menu?.querySelector('[data-editor-image-url]'), strings.text(msg));
                 return;
             }
             dropmenu?.ndsDropmenu?.close?.();

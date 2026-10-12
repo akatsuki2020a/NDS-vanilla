@@ -75,7 +75,7 @@
         const duration = opts.duration || DEFAULT_FLASH_MS;
 
         const labelText = button.getAttribute('data-copy-label');
-        const messageText = button.getAttribute('data-copy-announce') || labelText || strings.t('copied');
+        const messageText = button.getAttribute('data-copy-announce') || labelText || strings.text('copied');
 
         // Icon swap: snapshot the className and replace with the mask
         // checkmark for the flash window. Wholesale replace is needed because

@@ -1,7 +1,8 @@
 // Component strings: every locale pack (assets/i18n/<lang>.json) and every own file
 // (assets/i18n/<component>/<lang>.json) has exactly en's keys, a pack stays under its size
-// budget, a component's English seed equals its en section, and no _js/ file still carries
-// hardcoded Arabic text or reads NDS.langKey — that text belongs in the JSON.
+// budget, a component's English seed equals its en section (a word only markers use may stay
+// out of it), every data-i18n marker names a plain en word that its markup matches, and no _js/
+// file still carries hardcoded Arabic text or reads NDS.langKey — that text belongs in the JSON.
 // No build, no browser. Usage: node scripts/check-i18n.mjs
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -57,6 +58,50 @@ for (const [c, en] of Object.entries(tables)) for (const [k, v] of Object.entrie
     if (kind(v) === 'plural' && typeof v.other !== 'string') fails.push(`en: ${c}.${k} plural without "other"`);
 }
 
+// 4. Markers: data-i18n="section.key" (the text) and data-i18n-{attribute}="section.key" in canons,
+// includes and the markup scripts build. Each names a plain string in en, the element holds only the
+// word, an attribute marker sits beside its attribute, and the markup's English equals en's.
+const MARK = /\b(data-i18n(?:-(?:aria-label|aria-description|title|alt|placeholder|label))?)="([^"]*)"/g;
+const REF = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/;
+const marked = new Set();
+const ENTITY = { amp: '&', lt: '<', gt: '>', quot: '"', '#39': "'", nbsp: ' ' };
+const squash = (s) => s.replace(/&(amp|lt|gt|quot|#39|nbsp);/g, (_, e) => ENTITY[e]).replace(/\s+/g, ' ').trim();
+const MARKUP_DIRS = ['components', 'ui-shell', 'utilities', 'layout', 'core', 'templates', 'examples'];
+const markupFiles = [
+    ...MARKUP_DIRS.flatMap(d => readdirSync(join(ROOT, d)).filter(f => f.endsWith('.md')).map(f => join(d, f))),
+    ...readdirSync(join(ROOT, '_includes')).filter(f => f.endsWith('.html')).map(f => join('_includes', f)),
+    ...readdirSync(join(ROOT, '_layouts')).filter(f => f.endsWith('.html')).map(f => join('_layouts', f)),
+    ...readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.min.js')).map(f => join('_js', f)),
+];
+for (const rel of markupFiles) {
+    const src = read(join(ROOT, rel)).replace(/<!--[\s\S]*?-->/g, '');   // a comment is not markup
+    // Lookahead for the next tag, so it stays matchable when it follows directly.
+    for (const tag of src.matchAll(/<([a-zA-Z][\w-]*)\b([^<>]*)>([^<]*)(?=(<\/?)?)/g)) {
+        const [, , attrs, after, next] = tag;
+        for (const [, name, ref] of attrs.matchAll(MARK)) {
+            if (/[${]/.test(ref)) continue;              // built from a variable in a script
+            // ponytail: undotted refs are the 1.x Accessibility/IPV keys; step 2 of the plan moves them and drops this skip.
+            if (!ref.includes('.')) continue;
+            const m = REF.exec(ref);
+            if (!m) { fails.push(`${rel}: ${name}="${ref}" is not section.key`); continue; }
+            marked.add(ref);
+            const v = tables[m[1]]?.[m[2]];
+            if (v === undefined) { fails.push(`${rel}: ${ref} is not in en.json`); continue; }
+            if (typeof v !== 'string' || /\{\w+\}/.test(v)) { fails.push(`${rel}: ${ref} has {vars} or plural forms: write it with set(), not a marker`); continue; }
+            if (rel.startsWith('_js')) continue;          // a script's markup is checked in the browser
+            if (name === 'data-i18n') {
+                if (next === '<') fails.push(`${rel}: ${ref} is on an element with child elements; data-i18n holds only the word`);
+                else if (squash(after) !== v) fails.push(`${rel}: ${ref} reads "${squash(after)}", en has "${v}"`);
+            } else {
+                const attr = name.slice('data-i18n-'.length);
+                const have = new RegExp(`\\s${attr}="([^"]*)"`).exec(attrs);
+                if (!have) fails.push(`${rel}: ${ref} marks ${attr}, which the element does not have`);
+                else if (squash(have[1]) !== v) fails.push(`${rel}: ${ref} ${attr} reads "${have[1]}", en has "${v}"`);
+            }
+        }
+    }
+}
+
 // The object literal after `marker`, by brace depth, skipping quoted text.
 function literalAfter(src, marker) {
     const start = src.indexOf('{', src.indexOf(marker));
@@ -85,6 +130,7 @@ for (const f of readdirSync(JS).filter(f => f.endsWith('.js') && !f.endsWith('.m
     if (name && tables[name] && marker) {
         const seed = runInNewContext('(' + literalAfter(src, marker) + ')');
         for (const [k, v] of Object.entries(tables[name])) {
+            if (!(k in seed) && marked.has(`${name}.${k}`)) continue;   // a word only markers use
             if (JSON.stringify(seed[k]) !== JSON.stringify(v)) fails.push(`${f}: default ${k} differs from en ${name}.${k}`);
         }
         for (const k of Object.keys(seed)) if (!(k in tables[name])) fails.push(`${f}: default ${k} is not in en ${name}`);

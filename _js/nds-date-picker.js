@@ -372,7 +372,7 @@
                     '<div class="nds-calendar-title">' +
                         '<div class="nds-month-year-selectors">' +
                             '<div class="nds-dropmenu nds-month-dropmenu">' +
-                                '<button class="nds-dropmenu-trigger nds-btn nds-subtle nds-menu-btn" aria-label="' + NDS.escapeHtml(strings.t('select_month', null, lang)) + '">' +
+                                '<button class="nds-dropmenu-trigger nds-btn nds-subtle nds-menu-btn" aria-label="' + NDS.escapeHtml(strings.text('select_month', null, lang)) + '">' +
                                     '<span class="nds-label"></span>' +
                                 '</button>' +
                                 '<div class="nds-dropmenu-menu nds-month-dropmenu">' +
@@ -380,7 +380,7 @@
                                 '</div>' +
                             '</div>' +
                             '<div class="nds-dropmenu nds-year-dropmenu">' +
-                                '<button class="nds-dropmenu-trigger nds-btn nds-subtle nds-menu-btn" aria-label="' + NDS.escapeHtml(strings.t('select_year', null, lang)) + '">' +
+                                '<button class="nds-dropmenu-trigger nds-btn nds-subtle nds-menu-btn" aria-label="' + NDS.escapeHtml(strings.text('select_year', null, lang)) + '">' +
                                     '<span class="nds-label"></span>' +
                                 '</button>' +
                                 '<div class="nds-dropmenu-menu nds-year-dropmenu">' +
@@ -389,10 +389,10 @@
                             '</div>' +
                         '</div>' +
                         '<div class="nds-calendar-month-switch">' +
-                            '<button class="nds-btn nds-subtle nds-icon-only prev-month" type="button" aria-label="' + NDS.escapeHtml(strings.t('prev_month', null, lang)) + '">' +
+                            '<button class="nds-btn nds-subtle nds-icon-only prev-month" type="button" aria-label="' + NDS.escapeHtml(strings.text('prev_month', null, lang)) + '">' +
                                 '<i class="nds-icon nds-hgi-arrow-prev-02" aria-hidden="true"></i>' +
                             '</button>' +
-                            '<button class="nds-btn nds-subtle nds-icon-only next-month" type="button" aria-label="' + NDS.escapeHtml(strings.t('next_month', null, lang)) + '">' +
+                            '<button class="nds-btn nds-subtle nds-icon-only next-month" type="button" aria-label="' + NDS.escapeHtml(strings.text('next_month', null, lang)) + '">' +
                                 '<i class="nds-icon nds-hgi-arrow-next-02" aria-hidden="true"></i>' +
                             '</button>' +
                         '</div>' +
@@ -625,7 +625,7 @@
         // so anything the picker itself would accept validates clean.
         _validationError: function (raw) {
             var lang = this.getLanguage();
-            var msg = function (key, vars) { return strings.t(key, vars, lang); };
+            var msg = function (key, vars) { return strings.text(key, vars, lang); };
             var format = this.state.format;
             var calendar = this.getCurrentCalendar();
             var parts = raw.split(' - ');
@@ -1228,7 +1228,7 @@
             for (var key in map) {
                 if (this.elements[key]) {
                     var el = this.elements[key].querySelector('.nds-label');
-                    if (el) el.textContent = strings.t(map[key], null, lang);
+                    if (el) el.textContent = strings.text(map[key], null, lang);
                 }
             }
         },

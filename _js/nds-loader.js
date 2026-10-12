@@ -568,8 +568,11 @@
                 console.warn('[NDS] Initialization disabled (config.disableAll = true)');
             }
             resolveReady();     // nothing will start, so nothing to wait for
+            document.documentElement.setAttribute('data-nds-i18n', '');   // nothing translates: release the hold
             return;
         }
+        // Markers translate once the pack settles; here, so auto-init off holds them too.
+        NDS.i18n.start();
         const startTime = performance.now();
         presplitPaged();
 
@@ -695,13 +698,11 @@
                 if (deferredComponents.length) drainList(deferredComponents, listDone);
                 else listDone();
 
-                // Each bundle's group inits on its own arrival, once the string pack is in:
-                // these components write their text at init.
-                // ponytail: 3 s cap, so a stalled pack never holds them; past it they start in English.
-                const strings = Promise.race([NDS.i18n.pack(), new Promise(r => setTimeout(r, 3000))]);
+                // Each bundle's group inits on its own arrival, once the string pack has settled
+                // (core caps it at 3 s): these components write their text at init.
                 for (const name in injectedGroups) {
                     const group = injectedGroups[name];
-                    Promise.all([loadBundle(name), strings]).then(() => drainList(group, listDone));
+                    Promise.all([loadBundle(name), NDS.i18n.settled]).then(() => drainList(group, listDone));
                 }
 
                 stampWhenStyled();
@@ -812,6 +813,8 @@
     // them a scope argument only if a large page measures slow.
     function refreshContainer(container) {
         const root = container || document;
+        // Words first: a component that reads its label at init reads the page language.
+        if (root !== document) NDS.i18n.translate(root);
         for (const component of COMPONENTS) {
             const ns = NDS[component.name];
             if (!ns || ns.__ndsStub) continue;
@@ -898,7 +901,8 @@
             const bundle = here && nsToBundle[c.name];
             if (bundle) needed.add(bundle);
         }
-        return Promise.all([...needed].map(loadBundle)).then(() => refreshContainer(root));
+        // The pack too, as the injected groups wait for it: the view's components start in the page language.
+        return Promise.all([...needed].map(loadBundle).concat(NDS.i18n.settled)).then(() => refreshContainer(root));
     }
 
     NDS.Init = {

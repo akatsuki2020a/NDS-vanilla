@@ -256,7 +256,7 @@
 
             if (container) NDS.State.remove(container, 'listening');
             NDS.aria.pressed(button, false);
-            NDS.aria.label(button, strings.t('start', { language: strings.t('language') }));
+            NDS.aria.label(button, strings.text('start', { language: strings.text('language') }));
         }
 
         function start() {
@@ -272,13 +272,13 @@
             isListening = true;
             if (container) NDS.State.add(container, 'listening');
             NDS.aria.pressed(button, true);
-            NDS.aria.label(button, strings.t('stop'));
+            NDS.aria.label(button, strings.text('stop'));
             markInsertPoint();
             input.focus();
 
             timeout = setTimeout(function() {
                 stop();
-                showMessage(input, strings.t('timeout'));
+                showMessage(input, strings.text('timeout'));
             }, VOICE_TIMEOUT);
 
             listen(recognition, {
@@ -295,7 +295,7 @@
                 onError: function(error) {
                     stop();
                     var errorType = typeof error === 'string' ? error : (error && error.error);
-                    showMessage(input, strings.t(strings.has(errorType) ? errorType : 'default'));
+                    showMessage(input, strings.text(strings.has(errorType) ? errorType : 'default'));
                 },
                 onEnd: stop
             });
@@ -315,7 +315,7 @@
         if (!button) return;
         if (!isSupported()) {
             // No hiding — tell the user in the field, leave the button alone.
-            showMessage(resolveInput(button), strings.t('unsupported'));
+            showMessage(resolveInput(button), strings.text('unsupported'));
             return;
         }
         getSession(button).toggle();

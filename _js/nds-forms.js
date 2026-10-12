@@ -479,13 +479,13 @@
         if (input.classList.contains('nds-national-id')) {
             clean = original.replace(/[٠-٩]/g, function (c) { return c.charCodeAt(0) - 0x660; }).replace(/\D/g, '');
             ok = isNationalId(clean);
-            msg = strings.t('invalid_national_id');
+            msg = strings.text('invalid_national_id');
         } else if (input.classList.contains('nds-iban')) {
             clean = original.toUpperCase().replace(/[^A-Z0-9]/g, '');
             // Banking apps copy a Saudi IBAN without its SA: a value starting with a digit gets it back.
             if (/^\d/.test(clean)) clean = 'SA' + clean;
             ok = isIban(clean);
-            msg = strings.t('invalid_iban');
+            msg = strings.text('invalid_iban');
         } else {
             return;
         }
@@ -505,35 +505,35 @@
             if (validity.customError && !input.validationMessage.trim()) return '';
 
             if (validity.valueMissing) {
-                return strings.t('required');
+                return strings.text('required');
             } else if (validity.typeMismatch) {
                 if (input.type === 'email') {
-                    return strings.t('invalid_email');
+                    return strings.text('invalid_email');
                 } else if (input.type === 'url') {
-                    return strings.t('invalid_url');
+                    return strings.text('invalid_url');
                 }
             } else if (validity.tooShort) {
-                return strings.t('too_short', { n: input.minLength });
+                return strings.text('too_short', { n: input.minLength });
             } else if (validity.tooLong) {
-                return strings.t('too_long', { n: input.maxLength });
+                return strings.text('too_long', { n: input.maxLength });
             } else if (validity.rangeUnderflow) {
-                return strings.t('range_under', { n: input.min });
+                return strings.text('range_under', { n: input.min });
             } else if (validity.rangeOverflow) {
-                return strings.t('range_over', { n: input.max });
+                return strings.text('range_over', { n: input.max });
             } else if (validity.patternMismatch) {
                 // The one vague default: data-error-message says what the pattern asks for.
-                return input.getAttribute('data-error-message') || strings.t('pattern');
+                return input.getAttribute('data-error-message') || strings.text('pattern');
             } else if (validity.customError) {
                 // setCustomValidity stamp — already localized by the stamping
                 // component (e.g. date-picker format/bounds).
                 return input.validationMessage;
             }
 
-            return strings.t('invalid');
+            return strings.text('invalid');
         },
 
         getNumberRangeMessage: function(type, value) {
-            return strings.t(type === 'min' ? 'min_value' : 'max_value', { n: value });
+            return strings.text(type === 'min' ? 'min_value' : 'max_value', { n: value });
         },
 
         // Shared tail for group validators: apply the data-error-message
@@ -567,7 +567,7 @@
             var message = '';
             if (!isValid) {
                 var below = checkedCount < minChecked;
-                message = strings.t(below ? 'select_at_least' : 'select_at_most', { n: below ? minChecked : maxChecked });
+                message = strings.text(below ? 'select_at_least' : 'select_at_most', { n: below ? minChecked : maxChecked });
             }
 
             return this._finishGroupValidation(group, options, isValid, message, { checked: checkedCount, min: minChecked, max: maxChecked }, checkedCount === 0);
@@ -588,7 +588,7 @@
 
             var isRequired = group.hasAttribute('data-required') || group.classList.contains('nds-required');
             var isValid = !isRequired || isSelected;
-            var message = isValid ? '' : strings.t('select_option');
+            var message = isValid ? '' : strings.text('select_option');
 
             return this._finishGroupValidation(group, options, isValid, message, { selected: isSelected }, !isSelected);
         },
@@ -607,7 +607,7 @@
 
             var isRequired = group.hasAttribute('data-required') || group.classList.contains('nds-required');
             var isValid = !isRequired || value > 0;
-            var message = isValid ? '' : strings.t('rating_required');
+            var message = isValid ? '' : strings.text('rating_required');
 
             return this._finishGroupValidation(group, options, isValid, message, { rating: value }, value === 0);
         },
@@ -636,7 +636,7 @@
             var hasRequired = ti.hasAttribute('data-required') || ti.classList.contains('nds-required');
             var count = ti.querySelectorAll('.nds-form-control > input[type="hidden"]').length;
             var isValid = !hasRequired || count > 0;
-            var message = isValid ? '' : strings.t('tag_required');
+            var message = isValid ? '' : strings.text('tag_required');
             return this._finishGroupValidation(ti, options, isValid, message, { count: count }, count === 0);
         },
 
@@ -651,7 +651,7 @@
             var count = up.querySelectorAll('.nds-file-list .nds-file-item:not([data-status="error"])').length;
             var pending = !!up.querySelector('.nds-file-list .nds-file-item:is([data-state~="uploading"], [data-state~="processing"])');
             var isValid = !pending && (!hasRequired || count > 0);
-            var message = isValid ? '' : strings.t(pending ? 'upload_pending' : 'file_required');
+            var message = isValid ? '' : strings.text(pending ? 'upload_pending' : 'file_required');
             return this._finishGroupValidation(up, options, isValid, message, { count: count, pending: pending }, !pending && count === 0);
         },
 
@@ -665,7 +665,7 @@
             var carrier = container.querySelector('.nds-select-value');
             var hasRequired = container.hasAttribute('data-required') || container.classList.contains('nds-required');
             var isValid = !hasRequired || !!(carrier && carrier.value.trim());
-            var message = isValid ? '' : strings.t('select_option');
+            var message = isValid ? '' : strings.text('select_option');
             return this._finishGroupValidation(container, options, isValid, message, { value: carrier ? carrier.value : '' }, true);
         },
 
@@ -677,7 +677,7 @@
             var carrier = Array.prototype.find.call(dm.querySelectorAll('input[data-nds-select-value]'),
                 function(el) { return el.closest('.nds-dropmenu') === dm; });
             var isValid = !!(carrier && carrier.value.trim());
-            var message = isValid ? '' : strings.t('select_option');
+            var message = isValid ? '' : strings.text('select_option');
             return this._finishGroupValidation(dm, options, isValid, message, { value: carrier ? carrier.value : '' }, true);
         },
 
@@ -694,7 +694,7 @@
             var input = ownField(container);
             var text = input ? input.value.trim() : '';
             var isValid = !carrier || text === '' || carrier.value === text;
-            var message = isValid ? '' : strings.t('pick_suggestion');
+            var message = isValid ? '' : strings.text('pick_suggestion');
             return this._finishGroupValidation(container, options, isValid, message, { picked: !!(carrier && carrier.value) });
         },
 
@@ -706,7 +706,7 @@
             var isAllFilled = inputs.length > 0 && inputs.every(function(i) { return i.value.length === 1; });
 
             var isValid = isAllFilled;
-            var message = isValid ? '' : strings.t('otp_incomplete', { n: inputs.length });
+            var message = isValid ? '' : strings.text('otp_incomplete', { n: inputs.length });
 
             return this._finishGroupValidation(group, options, isValid, message, { filled: isAllFilled },
                 inputs.every(function(i) { return !i.value; }));
@@ -1170,7 +1170,7 @@
             e._ndsArabicStripped = true;
             var fc = c.formControl.closest('.nds-form-container');
             if (fc) {
-                var msg = strings.t('no_arabic');
+                var msg = strings.text('no_arabic');
                 StatusManager.set({ element: fc, status: 'error', message: msg });
             }
         }, true);
@@ -1338,7 +1338,7 @@
                 var isPassword = passwordInput.type === 'password';
                 passwordInput.type = isPassword ? 'text' : 'password';
                 passwordToggle.classList.toggle('show', isPassword);
-                NDS.aria.label(passwordToggle, strings.t(isPassword ? 'hide_password' : 'show_password'));
+                NDS.aria.label(passwordToggle, strings.text(isPassword ? 'hide_password' : 'show_password'));
             });
         },
 

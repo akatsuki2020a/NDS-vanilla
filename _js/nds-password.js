@@ -216,13 +216,13 @@
             // message). Only a mismatch with no match chip needs words.
             // Nothing fires on an empty field: required owns that message.
             var msg = '';
-            if (value && !allPass) msg = mismatched && !('match' in results) ? strings.t('mismatch') : ' ';
+            if (value && !allPass) msg = mismatched && !('match' in results) ? strings.text('mismatch') : ' ';
             this.input.setCustomValidity(msg);
 
             // Announce the error, else progress. Empty field says nothing — otherwise
             // every page load would announce "0 of 6 rules met".
             if (this.statusEl) {
-                this._announce(value ? (msg.trim() || (active ? strings.t('met', { n: passing, total: active }) : '')) : '');
+                this._announce(value ? (msg.trim() || (active ? strings.text('met', { n: passing, total: active }) : '')) : '');
             }
 
             // No raw value in the detail — a listener that needs it reads the input.

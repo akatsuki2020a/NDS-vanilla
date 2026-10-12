@@ -352,7 +352,7 @@
             fileData._xhr.abort();
             fileData._xhr = null;
             fileData.status = 'error';
-            fileData.error = strings.t('cancelled');
+            fileData.error = strings.text('cancelled');
             this._updateFileItem(fileId);
             return true;
         }
@@ -430,14 +430,14 @@
 
             // Size check
             if (file.size > config.maxFileSize) {
-                errors.push(strings.t('size_exceeds', { size: formatFileSize(config.maxFileSize) }));
+                errors.push(strings.text('size_exceeds', { size: formatFileSize(config.maxFileSize) }));
             }
 
             // Extension check
             if (config.allowedTypes) {
                 const ext = file.name.split('.').pop().toLowerCase();
                 if (!config.allowedTypes.includes(ext)) {
-                    errors.push(strings.t('type_not_allowed_ext', { ext }));
+                    errors.push(strings.text('type_not_allowed_ext', { ext }));
                 }
             }
 
@@ -449,7 +449,7 @@
                     return mime === t;
                 });
                 if (!allowed) {
-                    errors.push(strings.t('type_not_allowed'));
+                    errors.push(strings.text('type_not_allowed'));
                 }
             }
 
@@ -484,7 +484,7 @@
 
             // Collect all rejected files (validation errors + excess)
             const rejectedFiles = validationErrors.map(e => e.fileData)
-                .concat(excessFiles.map(file => this._entry(file, [strings.t('max_files', { n: config.maxFiles })])));
+                .concat(excessFiles.map(file => this._entry(file, [strings.text('max_files', { n: config.maxFiles })])));
 
             if (excessFiles.length > 0) {
                 this._dispatchEvent('nds:upload:maxFilesReached', {
@@ -587,7 +587,7 @@
                     // statusText (empty over HTTP/2), else localized generic.
                     let serverMsg = '';
                     try { serverMsg = JSON.parse(xhr.response)?.error || ''; } catch { /* non-JSON body */ }
-                    fileData.error = serverMsg || xhr.statusText || strings.t('failed');
+                    fileData.error = serverMsg || xhr.statusText || strings.text('failed');
                     this._dispatchEvent('nds:upload:error', {
                         fileData: this._toPublic(fileData),
                         error: fileData.error,
@@ -602,7 +602,7 @@
             const fail = (key) => {
                 fileData._xhr = null;
                 fileData.status = 'error';
-                fileData.error = strings.t(key);
+                fileData.error = strings.text(key);
                 this._dispatchEvent('nds:upload:error', {
                     fileData: this._toPublic(fileData),
                     error: fileData.error

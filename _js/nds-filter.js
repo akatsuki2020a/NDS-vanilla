@@ -759,8 +759,8 @@
             NDS.Alert.create({
                 display: 'toast',
                 variant: 'error',
-                title: strings.t('update_failed'),
-                description: strings.t('update_failed_description'),
+                title: strings.text('update_failed'),
+                description: strings.text('update_failed_description'),
                 id: alertId,
                 // The toast is the only failure signal — the results on screen
                 // are unchanged, so nothing else marks the page.
@@ -959,7 +959,7 @@
             // any filter dropmenu panel triggers Apply.
             button.setAttribute('data-dropmenu-primary', '');
             const labelEl = button.querySelector('.nds-label');
-            this.applyButtonBaseLabel = labelEl ? labelEl.textContent : strings.t('apply');
+            this.applyButtonBaseLabel = labelEl ? labelEl.textContent : strings.text('apply');
 
             // In form mode, turn the apply button into a submit for the
             // submission form — works whether the button is inside the form
@@ -2525,14 +2525,14 @@
 
             NDS.Alert.create({
                 variant: 'warning',
-                description: strings.t('no_results_description'),
+                description: strings.text('no_results_description'),
                 target: insertTarget,
-                title: strings.t('no_results'),
+                title: strings.text('no_results'),
                 id: alertId,
                 closable: false,
                 actions: [
                     {
-                        label: strings.t('clear'),
+                        label: strings.text('clear'),
                         variant: 'neutral',
                         onClick: () => {
                             self.reset();
