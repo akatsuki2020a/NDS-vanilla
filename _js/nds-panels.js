@@ -5,7 +5,7 @@
  *   NDS.Panel.init() / .reinit()   bind the delegated toggles; prepare every .nds-panel
  *   NDS.Panel.create(panel)        prepare one panel
  *   NDS.Panel.destroy(panel)       tear one down (closes it and releases the backdrop)
- *   NDS.Panel.open(idOrEl, opts?)  open it — closes whatever is open first. { focus: false }
+ *   NDS.Panel.open(idOrEl, opts?)  open it, by the stacking rules below. { focus: false }
  *                                  leaves focus where it is (a panel the page opens on its own)
  *   NDS.Panel.close(idOrEl)        close it
  *   NDS.Panel.toggle(idOrEl)       open or close it
@@ -29,8 +29,11 @@
  *   data-panel-static   no ESC, no click-outside — it closes only through your own call
  *                       or a [data-panel-close] control
  * Gotchas:
- *   - At most ONE panel is open on the page. Opening B closes A first and waits for A's
- *     transition, so the two never cross.
+ *   - Panels stack. A plain panel replaces the open plain one, after its slide-out, so the
+ *     two never cross. A static panel opened with { focus: false } waits until no panel is
+ *     open; one the user opens takes the screen like a plain one. A static panel another
+ *     replaces hides (no closed/opened events) and comes back once the screen clears. A modal closes nothing and covers the rest with its backdrop.
+ *     Only the top panel answers Escape and an outside click.
  *   - The panel needs an id or no toggle can target it (it warns at init).
  *   - Knobs on the panel: --panel-width, --panel-height, --panel-top, --panel-padding,
  *     --panel-gap, --panel-z, --panel-radius.
@@ -38,17 +41,16 @@
 /**
  * NDS Panel Component
  * Content-agnostic slide-in surface. JS owns open/close, focus and the
- * single-open rule; SCSS owns position and the slide.
+ * stacking rules; SCSS owns position and the slide.
  *
  * Pattern: W3C APG Disclosure by default (page stays interactive), or a
  * focus-trapped side-modal with [data-panel-modal].
  *
- * A page may declare any number of panels on any mix of sides, but at most
- * ONE is open at a time. Opening B while A is open closes A first and defers
- * B's open until A's close transition finishes — mirroring the mainnav
- * dropdown swap (nds-mainnav.js closeAll/_scheduleDropdownOpen), minus the
- * duration arithmetic: a panel swap has exactly one outgoing element, so the
- * incoming open chains off that element's onTransitionEnd cleanup instead.
+ * Opening plain B while plain A is open closes A first and defers B's open
+ * until A's close transition finishes — mirroring the mainnav dropdown swap
+ * (nds-mainnav.js closeAll/_scheduleDropdownOpen), minus the duration
+ * arithmetic: the incoming open chains off the outgoing panel's
+ * onTransitionEnd cleanup instead.
  */
 
 (function () {
@@ -60,9 +62,19 @@
     const INIT_ATTR = 'data-nds-panel-initialized';
     const SIZES = ['sm', 'md', 'lg', 'xl'];
 
-    // Exactly one panel is open at a time, so a single pointer replaces the
-    // Set that mainnav needs for its concurrently-open dropdowns.
-    let openPanel = null;
+    // Open panels, bottom to top; a closing one stays until its slide ends.
+    const stack = [];
+    const top = () => stack[stack.length - 1];
+    // A Modal dialog sits over every panel, so none of them answers while it is open.
+    // A lazy stub's isOpen() returns a truthy Promise and loads the bundle: no Modal can be open yet.
+    const isTop = (panel) => top() === panel && !(NDS.Modal && !NDS.Modal.__ndsStub && NDS.Modal.isOpen());
+    // Static panels kept off the screen by another; the newest returns once none is open.
+    const waiting = [];
+    const drop = (list, panel) => {
+        const i = list.indexOf(panel);
+        if (i > -1) list.splice(i, 1);
+        return i > -1;
+    };
     // Single slot, last-write-wins: a burst of toggle clicks during a swap
     // collapses to one close + one open, never a queue of animations.
     let pendingOpen = null;
@@ -85,8 +97,18 @@
     // OPEN / CLOSE
     // ==============================================
 
+    // Panels under the top modal sink beneath its backdrop.
+    function syncCover() {
+        let covered = false;
+        for (let i = stack.length - 1; i >= 0; i--) {
+            (covered ? addState : removeState)(stack[i], 'covered');
+            if (stack[i].hasAttribute('data-panel-modal')) covered = true;
+        }
+    }
+
     function _open(panel) {
-        openPanel = panel;
+        stack.push(panel);
+        syncCover();
         panel.removeAttribute('hidden');
 
         const isStatic = panel.hasAttribute('data-panel-static');
@@ -104,7 +126,8 @@
 
         if (!isStatic) {
             document.addEventListener('keydown', (e) => {
-                if (e.key !== 'Escape' && e.key !== 'Esc') return;
+                // defaultPrevented: the Modal's own Escape closed it a moment ago.
+                if ((e.key !== 'Escape' && e.key !== 'Esc') || e.defaultPrevented || !isTop(panel)) return;
                 e.preventDefault();
                 close(panel);
             }, { signal });
@@ -113,7 +136,9 @@
             // mid-dispatch isn't called for that same event, but relying on it
             // would make the opening click close the panel if that ever shifted.
             document.addEventListener('click', (e) => {
-                if (panel.contains(e.target)) return;
+                // A Modal closes before its click reaches here, so its parts are named too.
+                if (!isTop(panel) || panel.contains(e.target)
+                    || e.target.closest('.nds-modal, .nds-backdrop, [data-modal-target]')) return;
                 if (panel.id && e.target.closest('[data-panel-toggle="' + panel.id + '"]')) return;
                 close(panel);
             }, { signal });
@@ -140,7 +165,7 @@
             // and suppresses every later teardown (scroll lock included).
             panel._backdrop = true;
             document.addEventListener('keydown',
-                NDS.trapFocus(() => (openPanel === panel ? panel : null)), { signal });
+                NDS.trapFocus(() => (isTop(panel) ? panel : null)), { signal });
         }
 
         togglesFor(panel).forEach(btn => NDS.aria.expanded(btn, true));
@@ -160,10 +185,27 @@
                 target.focus();
             }
             delete panel._noFocus;
-            panel.dispatchEvent(new CustomEvent('nds:panel:opened', {
+            if (panel._silent) delete panel._silent;
+            else panel.dispatchEvent(new CustomEvent('nds:panel:opened', {
                 detail: { panel }, bubbles: true,
             }));
         });
+    }
+
+    const closedEvent = (panel) => new CustomEvent('nds:panel:closed', { detail: { panel }, bubbles: true });
+
+    // A static panel giving way: hidden but still open to its owner, until resume().
+    function park(panel) {
+        if (hasState(panel, 'closing')) return;
+        panel._silent = true;
+        panel._noFocus = true;
+        close(panel);
+        waiting.push(panel);
+    }
+
+    function resume() {
+        if (stack.length || pendingOpen || !waiting.length) return;
+        _open(waiting.pop());
     }
 
     function open(ref, { focus = true } = {}) {
@@ -174,19 +216,28 @@
         // On the panel, not a local: a swap opens it later from close()'s cleanup.
         if (focus) delete panel._noFocus; else panel._noFocus = true;
 
-        pendingOpen = null;              // supersede any swap already waiting
+        // Re-opening the panel that is mid-close: queue behind its own close
+        // rather than fighting the running transition.
+        if (stack.includes(panel)) {
+            pendingOpen = hasState(panel, 'closing') ? panel : null;
+            return;
+        }
+        if (panel.hasAttribute('data-panel-modal')) { _open(panel); return; }
+        // Only a static panel the page opens on its own waits; one the user asks for takes the screen.
+        if (panel.hasAttribute('data-panel-static') && panel._noFocus) {
+            if (!stack.length && !pendingOpen) _open(panel);
+            else if (!waiting.includes(panel)) waiting.push(panel);
+            return;
+        }
 
-        if (openPanel && openPanel !== panel) {
+        pendingOpen = null;              // supersede any swap already waiting
+        drop(waiting, panel);
+        const out = stack.filter(p => !p.hasAttribute('data-panel-modal'));
+        if (out.length) {
             // Swap: let the outgoing panel's close cleanup start this one, so
             // the two never animate across each other.
             pendingOpen = panel;
-            close(openPanel);
-            return;
-        }
-        // Re-opening the panel that is mid-close: queue behind its own close
-        // rather than fighting the running transition.
-        if (openPanel === panel) {
-            if (hasState(panel, 'closing')) pendingOpen = panel;
+            out.forEach(p => (p.hasAttribute('data-panel-static') ? park(p) : close(p)));
             return;
         }
         _open(panel);
@@ -194,7 +245,16 @@
 
     function close(ref) {
         const panel = NDS.resolveEl(ref);
-        if (!panel || !hasState(panel, 'open') || hasState(panel, 'closing')) return;
+        if (!panel) return;
+        if (drop(waiting, panel)) {
+            // A parked panel was still open to its owner, so it gets its closed event.
+            if (panel._silent) {
+                delete panel._silent;
+                if (!hasState(panel, 'open')) panel.dispatchEvent(closedEvent(panel));
+            }
+            return;
+        }
+        if (!hasState(panel, 'open') || hasState(panel, 'closing')) return;
 
         addState(panel, 'closing');
 
@@ -212,7 +272,9 @@
         armTransition(panel, () => {
             clearState(panel);
             panel.setAttribute('hidden', '');
-            if (openPanel === panel) openPanel = null;
+            drop(stack, panel);
+            syncCover();
+            const silent = panel._silent;
 
             // Return focus to the opener only when nothing is queued — the
             // incoming panel takes focus itself a moment later. Drop the
@@ -222,23 +284,23 @@
             // here would strand the next close with no trigger to return to.
             // A swap to a different panel does drop it — holding it would later
             // throw focus at a button that open never came from.
+            // A parked panel keeps its opener for the close that really ends it.
             const opener = panel._opener;
-            if (pendingOpen !== panel) delete panel._opener;
+            if (pendingOpen !== panel && !silent) delete panel._opener;
             // preventScroll: the page may have scrolled while the panel was open; focus goes
             // back to the opener without jumping the page to it.
-            if (!pendingOpen && opener && typeof opener.focus === 'function' && document.contains(opener)) {
+            if (!silent && !pendingOpen && opener && typeof opener.focus === 'function' && document.contains(opener)) {
                 opener.focus({ preventScroll: true });
             }
 
-            panel.dispatchEvent(new CustomEvent('nds:panel:closed', {
-                detail: { panel }, bubbles: true,
-            }));
+            if (!silent) panel.dispatchEvent(closedEvent(panel));
 
             // Flush the swap slot. Read-then-clear so a listener on the
             // `closed` event can queue its own open without being dropped.
             const next = pendingOpen;
             pendingOpen = null;
             if (next) _open(next);
+            resume();
         });
     }
 
@@ -380,11 +442,17 @@
         if (hasState(panel, 'open')) togglesFor(panel).forEach(btn => NDS.aria.expanded(btn, false));
         clearState(panel);
         panel.setAttribute('hidden', '');
-        if (openPanel === panel) openPanel = null;
+        drop(stack, panel);
+        drop(waiting, panel);
+        syncCover();
         delete panel._opener;
+        delete panel._silent;
         panel.removeAttribute(INIT_ATTR);
 
-        if (pending) _open(pending);
+        // Another panel still sliding out flushes the slot itself.
+        if (pending && stack.some(p => hasState(p, 'closing'))) pendingOpen = pending;
+        else if (pending) _open(pending);
+        resume();
     }
 
     // Toggles are delegated from the document: a toggle may live anywhere

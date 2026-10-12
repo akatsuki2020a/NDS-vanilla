@@ -5,9 +5,9 @@
 // chrome; it never styles what authors put inside it.
 //
 // `data-panel-side` picks the edge: start/end are LOGICAL (flip with dir),
-// left/right/top/bottom are PHYSICAL (fixed). Only one panel is ever open
-// (nds-panels.js enforces it), so every instance shares one --panel-z and
-// markup order is irrelevant.
+// left/right/top/bottom are PHYSICAL (fixed). Panels share one --panel-z;
+// nds-panels.js marks the ones under a modal `covered`, which sinks them
+// below its backdrop (panel z − 1).
 
 @use '../mixins' as *;
 
@@ -52,6 +52,10 @@
 
     position: fixed;
     z-index: var(--_panel-z);
+
+    &[data-state~="covered"] {
+        z-index: calc(var(--_panel-z) - 2);
+    }
     display: flex;
     flex-direction: column;
     gap: var(--_panel-gap);

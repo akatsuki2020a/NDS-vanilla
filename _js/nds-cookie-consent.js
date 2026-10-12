@@ -205,13 +205,9 @@
         });
     }
 
-    // Panel shows one at a time: wait for an open one to close rather than shut it.
+    // The panel is static: it waits for any open panel by itself.
     function autoOpen() {
         if (NDS.Cookies.getConsent() || NDS.Cookies.get(DISMISS_KEY)) return;
-        if (document.querySelector('.nds-panel[data-state~="open"]')) {
-            document.addEventListener('nds:panel:closed', autoOpen, { once: true });
-            return;
-        }
         open('notice', null, { focus: false });
     }
 

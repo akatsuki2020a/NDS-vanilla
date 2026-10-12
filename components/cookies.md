@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 09:13 AM"
+last_edit: "12/10/2026 - 03:33 PM"
 ---
 
 <section id="cookies-overview" class="nds-content-section nds-doc-overview">
@@ -200,7 +200,7 @@ Both structures end with an optional trigger button. The Manual template holds t
 
 ### Auto-open
 
-When no choice is stored, the panel opens on the Notice view after six seconds. It does not move focus, so a keyboard user keeps their place. If another panel is open, it waits until that panel closes.
+When no choice is stored, the panel opens on the Notice view after six seconds. It does not move focus, so a keyboard user keeps their place. If another panel is open, it waits until that panel closes. If the user opens a panel while the Notice shows, the Notice hides and comes back when that panel closes.
 
 ### Views
 

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 11:01 AM"
+last_edit: "12/10/2026 - 03:33 PM"
 ---
 
 <section id="modal-overview" class="nds-content-section nds-doc-overview">
@@ -184,6 +184,11 @@ Every option goes on the `nds-modal` element. On a lazy modal, write it on the `
 {: .nds-block-title}
 
 `data-modal-static` turns off the two ways a user closes a modal by accident: Escape and a click on the overlay. The modal then closes only from a `data-modal-close` control or a script. Use it when the user must pick one of the actions. Keep a Cancel action in the modal, so the user always has a way out.
+
+### Panels Below
+{: .nds-block-title}
+
+A modal opens above any open [panel](../components/panels) and leaves it open. When the modal closes, the panel is where the user left it.
 
 ### Lazy Modal
 {: .nds-block-title}

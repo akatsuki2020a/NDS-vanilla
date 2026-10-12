@@ -6,7 +6,7 @@ hero_description: A panel is a surface that slides in from an edge of the screen
 breadcrumb: [["Components", "/components"]]
 since: "1.5.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 03:33 PM"
 lang: en
 direction: ltr
 ---
@@ -179,7 +179,19 @@ A panel without `data-panel-modal` leaves the page usable, so the user can see a
 ### Static
 {: .nds-block-title}
 
-`data-panel-static` turns off the two ways a user closes a panel by accident: Escape and a click outside it. The panel closes only from a `data-panel-close` control or a script. A panel that another panel replaces still closes.
+`data-panel-static` turns off the two ways a user closes a panel by accident: Escape and a click outside it. The panel closes only from a `data-panel-close` control or a script. Another panel can still take its place, as [Stacking](#panel-stacking) shows.
+
+### Stacking
+{: .nds-block-title #panel-stacking}
+
+Each kind of panel has its own rule when another panel opens:
+
+- A plain panel replaces an open plain panel. It waits until the old one slides out, so the two never cross.
+- A modal panel closes nothing. Its dimmed layer covers the panels under it.
+- A static panel that the page opens with `{ focus: false }` waits until no panel is open. A static panel that a toggle or a script opens shows at once, like a plain panel.
+- When another panel replaces a static panel, the static panel hides. It comes back when the screen has no open panel again.
+
+Only the top panel closes on Escape or a click outside, and only the top modal panel keeps focus. A [Modal](../components/modal) sits above every panel. While it is open, no panel closes on Escape or a click, and no panel keeps focus.
 
 ### Resize
 {: .nds-block-title}
@@ -214,14 +226,14 @@ A lazy panel keeps its markup in a `<template class="nds-panel-template">`, so i
             <i class="hgi hgi-stroke hgi-keyboard"></i>
             <span class="nds-label">Focus Management</span>
           </span>
-          <p class="nds-item-desc">Focus moves to the first close button when the panel opens, or to the panel when it has none, and back to the toggle when it closes. Escape and a click outside close the panel.</p>
+          <p class="nds-item-desc">Focus moves to the first close button when the panel opens, or to the panel when it has none, and back to the toggle when it closes. Escape and a click outside close the top panel.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
             <i class="hgi hgi-stroke hgi-transition-left"></i>
-            <span class="nds-label">One Panel at a Time</span>
+            <span class="nds-label">Panel Stacking</span>
           </span>
-          <p class="nds-item-desc">Opening a panel closes the open one first, and waits until it slides out. Two panels never cross.</p>
+          <p class="nds-item-desc">A plain panel replaces the open one after it slides out. A modal panel covers the others, and a static panel comes back when the screen is clear.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -301,7 +313,7 @@ On a phone, the header buttons shrink to 32px.
 | `data-panel-side` | `.nds-panel` | The edge: `end` (the default), `start`, `left`, `right`, `top` or `bottom` |
 | `data-panel-modal` | `.nds-panel` | Dims the page, stops it from scrolling and keeps focus in the panel |
 | `data-panel-static` | `.nds-panel` | Escape and a click outside do not close the panel |
-| `data-state` | `.nds-panel` | The script writes `open` while the panel is open, `opening` while it slides in and `closing` while it slides out |
+| `data-state` | `.nds-panel` | The script writes `open` while the panel is open, `opening` while it slides in and `closing` while it slides out, and `covered` while a modal panel is above it |
 {: .nds-table .nds-responsive}
 
 ### CSS Custom Properties
@@ -328,7 +340,7 @@ Each method takes the panel element or its `id`.
 
 | Method | Effect |
 |---|---|
-| `NDS.Panel.open(panel, { focus })` | Opens the panel. An open panel closes first. For a lazy panel, pass its `id`: the element is not in the page yet. Pass `{ focus: false }` when the page opens it on its own, so focus stays where the user is |
+| `NDS.Panel.open(panel, { focus })` | Opens the panel, by the [Stacking](#panel-stacking) rules. For a lazy panel, pass its `id`: the element is not in the page yet. Pass `{ focus: false }` when the page opens it on its own, so focus stays where the user is |
 | `NDS.Panel.close(panel)` | Closes the panel |
 | `NDS.Panel.toggle(panel)` | Opens or closes the panel |
 | `NDS.Panel.isOpen(panel)` | Returns `true` while the panel is open and not closing |
@@ -340,7 +352,7 @@ Each method takes the panel element or its `id`.
 | Event | Fired on | Detail |
 |---|---|---|
 | `nds:panel:opened` | `.nds-panel` | `{ panel }`, after the panel slides in |
-| `nds:panel:closed` | `.nds-panel` | `{ panel }`, after the panel slides out. When one panel replaces another, this fires before the new panel's `opened` |
+| `nds:panel:closed` | `.nds-panel` | `{ panel }`, after the panel slides out. When one panel replaces another, this fires before the new panel's `opened`. A static panel that hides and comes back fires neither event |
 | `nds:panel:resized` | `.nds-panel` | `{ panel, size }`, after a resize button changes the size |
 | `nds:template:ready` | `.nds-panel` | `{ id }`, when a lazy panel joins the page |
 {: .nds-table .nds-responsive}
