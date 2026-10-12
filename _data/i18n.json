@@ -302,8 +302,8 @@
  {
   "section": "accessibility",
   "key": "confirm_reset_remaining",
-  "en": "Confirm reset within {n} seconds.",
-  "ar": "أكّد إعادة التعيين خلال {n} ثوانٍ."
+  "en": "one: Confirm reset within 1 second. · other: Confirm reset within {n} seconds.",
+  "ar": "one: أكّد إعادة التعيين خلال ثانية واحدة. · two: أكّد إعادة التعيين خلال ثانيتين. · few: أكّد إعادة التعيين خلال {n} ثوانٍ. · many: أكّد إعادة التعيين خلال {n} ثانية. · other: أكّد إعادة التعيين خلال {n} ثانية."
  },
  {
   "section": "accessibility",
@@ -681,13 +681,13 @@
   "section": "date-picker",
   "key": "before_min",
   "en": "Earliest allowed date is {date}",
-  "ar": "أقرب تاريخ متاح {date}"
+  "ar": "أبكر تاريخ مسموح به {date}"
  },
  {
   "section": "date-picker",
   "key": "after_max",
   "en": "Latest allowed date is {date}",
-  "ar": "آخر تاريخ متاح {date}"
+  "ar": "آخر تاريخ مسموح به {date}"
  },
  {
   "section": "date-picker",
@@ -1161,7 +1161,7 @@
   "section": "empty",
   "key": "message",
   "en": "No content to show",
-  "ar": "لا يوجد محتوى"
+  "ar": "لا يوجد محتوى لعرضه"
  },
  {
   "section": "expandable",
@@ -1305,13 +1305,13 @@
   "section": "forms",
   "key": "too_short",
   "en": "Input is too short (minimum {n} characters)",
-  "ar": "المدخل قصير جداً (الحد الأدنى {n})"
+  "ar": "المدخل قصير جدًا (الحد الأدنى {n})"
  },
  {
   "section": "forms",
   "key": "too_long",
   "en": "Input is too long (maximum {n} characters)",
-  "ar": "المدخل طويل جداً (الحد الأقصى {n})"
+  "ar": "المدخل طويل جدًا (الحد الأقصى {n})"
  },
  {
   "section": "forms",
@@ -1323,7 +1323,7 @@
   "section": "forms",
   "key": "range_over",
   "en": "Value must be no more than {n}",
-  "ar": "القيمة يجب ألا تزيد عن {n}"
+  "ar": "القيمة يجب ألا تزيد على {n}"
  },
  {
   "section": "forms",
@@ -1515,7 +1515,7 @@
   "section": "ipv",
   "key": "instructionsScroll",
   "en": "• Scroll to zoom",
-  "ar": "• مرر للتكبير"
+  "ar": "• مرّر للتكبير"
  },
  {
   "section": "ipv",
@@ -1557,7 +1557,7 @@
   "section": "mainnav",
   "key": "toggle_menu",
   "en": "Toggle navigation menu",
-  "ar": "تبديل قائمة التنقل"
+  "ar": "فتح/إغلاق قائمة التنقل"
  },
  {
   "section": "modal",
@@ -1575,7 +1575,7 @@
   "section": "multiselect",
   "key": "none",
   "en": "{label}: No selection",
-  "ar": "{label}: لا تحديد"
+  "ar": "{label}: لا يوجد تحديد"
  },
  {
   "section": "multiselect",
@@ -1629,7 +1629,7 @@
   "section": "pagination",
   "key": "page",
   "en": "Page {n}",
-  "ar": "صفحة {n}"
+  "ar": "الصفحة {n}"
  },
  {
   "section": "pagination",
@@ -1839,7 +1839,7 @@
   "section": "tables",
   "key": "toggle_details",
   "en": "Toggle details",
-  "ar": "تبديل التفاصيل"
+  "ar": "إظهار/إخفاء التفاصيل"
  },
  {
   "section": "taginput",
@@ -1941,13 +1941,13 @@
   "section": "time-picker",
   "key": "before_min",
   "en": "Earliest allowed time is {time}",
-  "ar": "أقرب وقت متاح {time}"
+  "ar": "أبكر وقت مسموح به {time}"
  },
  {
   "section": "time-picker",
   "key": "after_max",
   "en": "Latest allowed time is {time}",
-  "ar": "آخر وقت متاح {time}"
+  "ar": "آخر وقت مسموح به {time}"
  },
  {
   "section": "toc",
@@ -2007,7 +2007,7 @@
   "section": "upload",
   "key": "max_files",
   "en": "Maximum number of files reached ({n})",
-  "ar": "تم الوصول للحد الأقصى لعدد الملفات ({n})"
+  "ar": "تم الوصول إلى الحد الأقصى لعدد الملفات ({n})"
  },
  {
   "section": "upload",
@@ -2067,13 +2067,13 @@
   "section": "voice-input",
   "key": "start",
   "en": "Start voice input ({language})",
-  "ar": "بدء إدخال الصوت ({language})"
+  "ar": "بدء الإدخال الصوتي ({language})"
  },
  {
   "section": "voice-input",
   "key": "stop",
   "en": "Stop voice input",
-  "ar": "إيقاف إدخال الصوت"
+  "ar": "إيقاف الإدخال الصوتي"
  },
  {
   "section": "voice-input",
@@ -2109,7 +2109,7 @@
   "section": "voice-input",
   "key": "aborted",
   "en": "Voice input cancelled",
-  "ar": "تم إلغاء إدخال الصوت"
+  "ar": "تم إلغاء الإدخال الصوتي"
  },
  {
   "section": "voice-input",
@@ -2121,30 +2121,30 @@
   "section": "voice-input",
   "key": "default",
   "en": "Voice input error",
-  "ar": "خطأ في إدخال الصوت"
+  "ar": "خطأ في الإدخال الصوتي"
  },
  {
   "section": "voice-input",
   "key": "timeout",
   "en": "Voice input timed out",
-  "ar": "انتهت مهلة إدخال الصوت"
+  "ar": "انتهت مهلة الإدخال الصوتي"
  },
  {
   "section": "voice-input",
   "key": "unsupported",
   "en": "Voice input is not supported in this browser",
-  "ar": "إدخال الصوت غير مدعوم في هذا المتصفح"
+  "ar": "الإدخال الصوتي غير مدعوم في هذا المتصفح"
  },
  {
   "section": "voice-input",
   "key": "voice_input",
   "en": "Voice input",
-  "ar": "إدخال الصوت"
+  "ar": "الإدخال الصوتي"
  },
  {
   "section": "voice-input",
   "key": "start_voice_input",
   "en": "Start voice input",
-  "ar": "بدء إدخال الصوت"
+  "ar": "بدء الإدخال الصوتي"
  }
 ]

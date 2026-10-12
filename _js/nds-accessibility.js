@@ -126,7 +126,7 @@
         active: 'active',
         confirm_reset: 'Click again to confirm',
         confirm_reset_msg: 'Press the reset button again to confirm.',
-        confirm_reset_remaining: 'Confirm reset within {n} seconds.',
+        confirm_reset_remaining: { one: 'Confirm reset within 1 second.', other: 'Confirm reset within {n} seconds.' },
         reset_cancelled: 'Reset cancelled.',
         start: 'Start',
         end: 'End',
