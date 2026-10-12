@@ -444,8 +444,12 @@
             var slot = preview.querySelector('[data-demo-slot]') || preview;
             NDS.Init.destroy(slot);
             preview.style.removeProperty('--card-bg');
-            // A JS-only structure (a toast) runs on the page: back to Desktop.
-            if (!html) { var desk = preview.querySelector('[data-preview-screen=""]'); if (desk && preview.hasAttribute('data-screen')) desk.click(); return runButton(slot, js); }
+            // A JS-only structure (a toast) shows a Run button, on the page and in a screen.
+            if (!html) {
+                slot.innerHTML = preview.ndsOut = RUN;
+                runButton(slot, preview.ndsRunJs = js, window);
+                return frame(preview);
+            }
             slot.innerHTML = out;
             order.forEach(function (g) { if (active[g]) apply(slot, active[g], 'prop'); });
             // On-color markup sits on the deep primary surface; data-theme gives the grid and toggles their look on it.
@@ -467,13 +471,6 @@
             preview.ndsOut = out;
             if (script.getAttribute('data-preview') === 'js') preview.ndsJs = js;
             frame(preview);
-        }
-
-        // A JS-only structure previews as a Run button that runs the code shown:
-        // the page's own canon, never user input.
-        function runButton(slot, code) {
-            slot.innerHTML = '<button type="button" class="nds-btn nds-primary nds-md"><span class="nds-label">Run</span></button>';
-            slot.firstChild.addEventListener('click', function () { new Function(code)(); });
         }
 
         function set(c, on) {
@@ -712,6 +709,13 @@
     // screen to open in. The screen loads the page's own head and runtime scripts, gets the code
     // shown in its slot, and keeps the card's other parts (a harness).
     var BEZEL = 12, RADIUS = 36;
+    // A JS-only structure previews as a Run button that runs the code shown: the page's own canon,
+    // never user input. In a screen it runs in the screen's window, so a toast floats over the screen.
+    var RUN = '<button type="button" class="nds-btn nds-primary nds-md" data-run-js><span class="nds-label">Run</span></button>';
+    function runButton(root, code, win) {
+        var b = root.querySelector('[data-run-js]');
+        if (b) b.addEventListener('click', function () { new win.Function(code)(); });
+    }
     function frame(card) {
         // A plain card shows its canon as written; a builder's render keeps ndsOut current.
         var canon = document.getElementById(card.getAttribute('data-preview-of'));
@@ -731,6 +735,7 @@
             slot.innerHTML = card.ndsOut;
             win.NDS.Init.mount(slot);
             run(win);
+            runButton(slot, card.ndsRunJs, win);
             theme(f.contentDocument);
             return;
         }
@@ -764,6 +769,7 @@
         f.onload = function () {
             theme(f.contentDocument);
             run(f.contentWindow);
+            runButton(f.contentDocument, card.ndsRunJs, f.contentWindow);
             var bar = f.contentDocument.querySelector('[data-demo-run]');
             if (bar) wireRun(card, bar, f.contentWindow);
             f.style.visibility = '';

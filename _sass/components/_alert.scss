@@ -142,6 +142,11 @@
     }
   }
 
+  // The close button is out of flow, so a long title would run under it.
+  &:not(.nds-inline) .nds-alert-content:has(~ .nds-alert-close) {
+    padding-inline-end: var(--spacing-4xl);
+  }
+
   // Both .nds-color and .nds-inline are always colored via the alpha tint
   // overlay below; .nds-color adds a solid backdrop so stacked alerts don't
   // bleed through each other.
