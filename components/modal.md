@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:12 PM"
+last_edit: "12/10/2026 - 11:01 AM"
 ---
 
 <section id="modal-overview" class="nds-content-section nds-doc-overview">
@@ -294,6 +294,7 @@ A lazy modal keeps its markup in a `<template class="nds-modal-template">`, so i
 - Use `role="alertdialog"` instead for an urgent message the user did not ask for, such as a session that is about to end.
 - Give every button `type="button"`. In a form, a button without it submits the form.
 - Put `.nds-card-actions` after `.nds-card-content`, not inside it.
+- For a form, wrap `.nds-card-content` and `.nds-card-actions` in one `<form class="nds-form">`. A form without `nds-form` breaks the layout: the content runs out of the modal and the actions leave the screen. It also gets no submit validation. `NDS.Init.audit()` flags it.
 - A [Dropmenu](../components/dropmenu), a select, a [Multiselect](../components/multiselect), an [Autocomplete](../components/autocomplete) or a [Filter](../components/filter) works in a modal with no extra attribute. Its menu moves to `<body>` when it opens, so the modal's edge does not cut it off.
 - Do not look up a lazy modal when the page loads: it is not in the page yet. Listen on `document` for `nds:template:ready`, which fires on the modal after it joins the page and its components start.
 

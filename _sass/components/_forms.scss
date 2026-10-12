@@ -7,10 +7,10 @@
 // children directly. Without this, a form wrapping .nds-content-section blocks
 // the flex chain: sections stay pinned at combined min-content, don't shrink to
 // viewport, and internal overflow affordances (tabs show-more, table scroll)
-// never trigger. Consumers styling the form as a box (padding, border,
-// background) should override with display: block.
+// never trigger. Zero specificity, so a consumer's own class with
+// display: block wins when styling the form as a box.
 
-.nds-form {
+:where(.nds-form) {
     display: contents;
 }
 

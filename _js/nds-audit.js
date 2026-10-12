@@ -713,6 +713,14 @@
         });
     } });
 
+    // Forms wires submit checks on .nds-form only (nds-forms.js initForm), and .nds-form is display:contents,
+    // which a modal's flex column needs (_forms.scss). A filter's submission form is the filter's own.
+    rule({ id: 'form-class', docs: 'components/forms.html', check(ctx) {
+        ctx.find('form:not(.nds-form, [data-filter-submit])').filter(f => f.querySelector('.nds-form-container, .nds-form-group')).forEach(el =>
+            ctx.report(el, 'a <form> with NDS fields but no nds-form class: its fields are not checked on submit, and in a modal it breaks the layout.',
+                'Add class="nds-form" to the form.'));
+    } });
+
     // data-error-message has one job per host (nds-forms.js getMessage, _finishGroupValidation): a field's
     // pattern, a group's "nothing picked". On a host that can never fail that way it never shows.
     rule({ id: 'error-message-unused', docs: 'components/forms.html', check(ctx) {
