@@ -1294,6 +1294,41 @@
             this._flushAccordionInit();
             this._autoDetectDirectSearch();
             this._wireDeferredFilterDropmenus();
+            this._wireMenuDraft();
+        }
+
+        // The menu's ticks are a draft until Apply: closing it any other way puts the applied
+        // filters back, so a search, a chip or a sort never applies a tick nobody applied.
+        _wireMenuDraft() {
+            const { signal } = this.abortController;
+            this._targetRoots.forEach(dm => {
+                if (!dm.matches?.('.nds-dropmenu') || dm._ndsFilterDraft === this) return;
+                dm._ndsFilterDraft = this;
+                dm.addEventListener('nds:dropmenu:opened', () => {
+                    this._appliedFilters = structuredClone(this.criteria.filters);
+                }, { signal });
+                dm.addEventListener('nds:dropmenu:closed', () => {
+                    const applied = this._appliedFilters;
+                    this._appliedFilters = null;
+                    if (applied && JSON.stringify(applied) !== JSON.stringify(this.criteria.filters)) this._restoreFilterInputs(applied);
+                }, { signal });
+            });
+        }
+
+        // Set every group's controls, and the criteria, to `applied` (a criteria.filters copy).
+        _restoreFilterInputs(applied) {
+            this._resetFilterInputs();
+            for (const [name, values] of Object.entries(applied)) {
+                const fd = this.filterInputs[name];
+                if (!fd || !values.length) continue;
+                if (fd.type === 'range') {
+                    this._applyRangeFromUrl(name, values[0]);
+                } else {
+                    this._checkInputsForValues(fd, values.join(','));
+                    this.updateFilterCriteria(name);
+                }
+            }
+            this.updateApplyButtonLabel();
         }
 
         // Dropmenus that will defer an auto-populated filter (hidden + not
@@ -2346,6 +2381,8 @@
         // The "commit applied UI + URL" triple: six sites route through here so a
         // path that omits one call can't silently desync the URL from the chips.
         _commitAppliedUi() {
+            // Committed while the menu is open (its Reset): this is now what closing puts back.
+            if (this._appliedFilters) this._appliedFilters = structuredClone(this.criteria.filters);
             this.updateUrlParams();
             this.updateFilterButtonBadge();
             this.updateAppliedChips();

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 08:31 AM"
+last_edit: "12/10/2026 - 08:47 AM"
 ---
 
 <section id="filter-overview" class="nds-content-section nds-doc-overview">
@@ -343,7 +343,7 @@ Every card carries two marks: `sector` and `fee`. A group in the menu filters by
 
 An element with `data-filter` in the menu is a group. Its options come from one of four places: the marks on the items (`data-filter-type`), a list on the group (`data-filter-values`), inputs you write, or your script (`populateFilter()`). From the marks, the script makes one option per value it finds, sorted, in a `<fieldset>` that replaces the element.
 
-The user picks values in the menu, and Apply applies them all at once. A checkbox or switch group matches an item that has any picked value. An item must match every group that has a value.
+The user picks values in the menu, and Apply applies them all at once. Closing the menu without Apply puts back the values that were applied, so the search box or a chip never applies a value the user did not apply. A checkbox or switch group matches an item that has any picked value. An item must match every group that has a value.
 
 ### Values and Labels
 {: .nds-block-title}
