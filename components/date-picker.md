@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 10:42 AM"
+last_edit: "12/10/2026 - 06:24 PM"
 ---
 
 <section id="date-picker-overview" class="nds-content-section nds-doc-overview">
@@ -135,7 +135,7 @@ The field sends the date as the user sees it, such as `15/09/1447`. To send the 
 ### Date Bounds
 {: .nds-block-title}
 
-`data-min-date` and `data-max-date` on `.nds-date-input` set the first and the last day the user can pick. Write them in the field's format and calendar. In a `DD/MM/YYYY` field, `data-min-date="01/01/2026" data-max-date="31/12/2026"` allows only 2026. A Month picker takes a bound such as `01/2026`, and a Hijri field takes a Hijri date such as `29/12/1448`. `today` is the current day in the site's timezone: `data-min-date="today"` blocks past days, and `data-max-date="today"` blocks future ones. `today+N` and `today-N` move it by N days, or by months or years with `m` or `y`, counted in the field's calendar: `data-min-date="today+1" data-max-date="today+60"` books from tomorrow to 60 days ahead, `data-max-date="today-18y"` asks for an age of 18 or more, and `data-min-date="today+6m"` an expiry at least 6 months away. For a year and some months, count months: `today+15m`. A day past the end of the month becomes its last day. Working days, holidays and a limit read from another field are not bounds: check them on the server. Days, months and years outside the bounds are off, and the arrows stop at them. When today is outside the bounds, the calendar opens on the nearest bound.
+`data-min-date` and `data-max-date` on `.nds-date-input` set the first and the last day the user can pick. Write them in the field's format and calendar. In a `DD/MM/YYYY` field, `data-min-date="01/01/2026" data-max-date="31/12/2026"` allows only 2026. A Month picker takes a bound such as `01/2026`, and a Hijri field takes a Hijri date such as `29/12/1448`. `today` is the current day in the site's timezone: `data-min-date="today"` blocks past days, and `data-max-date="today"` blocks future ones. `today+N` and `today-N` move it by N days, or by months or years with `m` or `y`, counted in the field's calendar: `data-min-date="today+1" data-max-date="today+60"` books from tomorrow to 60 days ahead, `data-max-date="today-18y"` asks for an age of 18 or more, and `data-min-date="today+6m"` an expiry at least 6 months away. For a year and some months, count months: `today+15m`. A day past the end of the month becomes its last day. Working days and holidays are not bounds: check them on the server. A bound can follow another field: when check-in changes, write its value to the check-out field's `data-min-date`. The calendar and the value's check use a new bound at once. Days, months and years outside the bounds are off, and the arrows stop at them. When today is outside the bounds, the calendar opens on the nearest bound.
 
 ### Year List
 {: .nds-block-title}

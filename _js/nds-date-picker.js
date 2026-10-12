@@ -26,7 +26,8 @@
  *   .date-picker-toggle:         the button that opens the calendar (none: a click on the
  *                                input opens it)
  *   on the .nds-date-input:      data-min-date · data-max-date (a date, `today`, or `today±N`
- *                                with d, m or y, counted in the field's calendar) · data-lang
+ *                                with d, m or y, counted in the field's calendar; a change
+ *                                applies at once) · data-lang
  *                                data-year-before · data-year-after
  *   written by the picker:       data-picker-mode (container) · data-converted-date (input)
  * Gotchas:
@@ -228,6 +229,7 @@
         };
 
         this.state = this.initializeState();
+        this._readBounds();
         this.isDropdownCreated = false;
         // Scopes listeners bound to elements the instance does not own (the
         // consumer's formControl), so destroy() releases them in one abort.
@@ -524,17 +526,31 @@
             if (this.elements.container) {
                 this.elements.container.setAttribute('data-picker-mode', mode);
             }
-            var calendarType = this.detectCalendarType(format);
+            return {
+                currentDate: NDS.date.today(),
+                selectedDate: null,
+                rangeStart: null,
+                rangeEnd: null,
+                isInitialized: false,
+                format: format,
+                mode: mode,
+                calendarType: this.detectCalendarType(format),
+                minDate: null,
+                maxDate: null
+            };
+        },
 
-            // Parse min/max date bounds (day-precision, in the picker's own
-            // format). Coexist with data-year-before/after — getYearRange
-            // takes the tighter of the two at year granularity.
+        // Parse min/max date bounds (day-precision, in the picker's own
+        // format). Coexist with data-year-before/after — getYearRange
+        // takes the tighter of the two at year granularity. Runs at init, on
+        // each open and when either attribute changes, so a bound that follows
+        // another field (check-out after check-in) needs no rebuild.
+        _readBounds: function () {
+            var format = this.state.format;
+            var calendarType = this.state.calendarType;
             var calendar = CalendarConfig[calendarType];
-            var minStr = this.elements.input.getAttribute('data-min-date');
-            var maxStr = this.elements.input.getAttribute('data-max-date');
             // 'today' or 'today±N' (d, m or y; days by default) round-trips through the format, so it
             // carries the calendar's fields like a written date.
-            // ponytail: resolved once at init; a tab left open past midnight keeps the old day until reinit.
             var bound = function (s) {
                 if (!s) return null;
                 var rel = /^today(?:([+-]\d+)([dmy])?)?$/.exec(s.trim());
@@ -542,27 +558,11 @@
                 var day = shiftToday(+(rel[1] || 0), rel[2] || 'd', calendarType === 'hijri');
                 return calendar.parseDate(calendar.formatDate(day, format), format);
             };
-            var minDate = bound(minStr);
-            var maxDate = bound(maxStr);
-
-            // Open at the nearest bound when today falls outside [min, max] —
-            // otherwise the initial month is entirely disabled.
-            var currentDate = NDS.date.today();
-            if (maxDate && currentDate > maxDate) currentDate = copyDateWithHijri(maxDate);
-            else if (minDate && currentDate < minDate) currentDate = copyDateWithHijri(minDate);
-
-            return {
-                currentDate: currentDate,
-                selectedDate: null,
-                rangeStart: null,
-                rangeEnd: null,
-                isInitialized: false,
-                format: format,
-                mode: mode,
-                calendarType: calendarType,
-                minDate: minDate,
-                maxDate: maxDate
-            };
+            this.state.minDate = bound(this.elements.input.getAttribute('data-min-date'));
+            this.state.maxDate = bound(this.elements.input.getAttribute('data-max-date'));
+            // Open at the nearest bound when the view falls outside [min, max] —
+            // otherwise the month shown is entirely disabled.
+            this.state.currentDate = this._clampToRange(this.state.currentDate);
         },
 
         // Day-precision membership test. Returns true when there is no bound.
@@ -744,6 +744,7 @@
             // so value-based detection parses custom formats correctly.
             this.state.calendarType = this.detectCalendarType(this.state.format);
             this.state.isInitialized = true;
+            this._readBounds();
             this.parseInitialValue();
             this.setupCalendarUI();
             this.bindCalendarEvents();
@@ -1978,8 +1979,19 @@
 
     // Self-driven: sweep every .nds-date-input and attach a calendar. create()
     // is idempotent (skips inputs already wired) so this is reinit-safe.
+    var boundsWatched = false;
     function initializeCalendar() {
         document.querySelectorAll('.nds-date-input').forEach((input) => createInstance(input));
+        if (boundsWatched) return;
+        boundsWatched = true;
+        // A new bound re-checks the value silently (submit shows the error) and redraws an open calendar.
+        NDS.onAttrChange('.nds-date-input', ['data-min-date', 'data-max-date'], (inputs) => inputs.forEach((input) => {
+            var inst = input._ndsDatePicker;
+            if (!inst) return;
+            inst._readBounds();
+            inst._validateInput(true);
+            if (inst.state.isInitialized) inst.render();
+        }));
     }
 
     // Assigned at module eval so the loader's lazy stub resolves; the loader then
