@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.5"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 10:30 PM"
+last_edit: "13/10/2026 - 12:21 AM"
 ---
 
 <section id="accessibility-overview" class="nds-content-section nds-doc-overview">

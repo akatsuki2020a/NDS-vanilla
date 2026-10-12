@@ -384,7 +384,8 @@
         "show_more": "عرض المزيد"
     },
     "selection": {
-        "select_all": "تحديد الكل"
+        "select_all": "تحديد الكل",
+        "clear_all": "مسح الكل"
     },
     "session-timeout": {
         "warning_title": "جلستك على وشك الانتهاء",

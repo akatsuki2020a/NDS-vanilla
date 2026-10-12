@@ -6,7 +6,7 @@ hero_description: A floating action button (FAB) stays at an edge of the screen 
 breadcrumb: [["Components", "/components"]]
 since: "1.5.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 12:21 AM"
 lang: en
 direction: ltr
 ---

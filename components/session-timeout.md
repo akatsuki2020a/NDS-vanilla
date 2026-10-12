@@ -6,9 +6,9 @@ hero_description: A warning that opens before an idle session ends, counts down 
 breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
-since: "2.0.0"
-updated: "2.0.0"
-last_edit: "12/10/2026 - 09:35 PM"
+since: "1.12.x"
+updated: "1.12.x"
+last_edit: "13/10/2026 - 12:21 AM"
 ---
 
 <section id="session-timeout-overview" class="nds-content-section nds-doc-overview">

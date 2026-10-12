@@ -207,8 +207,8 @@ hideFeedback: true
                         <span class="nds-toolbar-text" data-paged-target="transactions-table-body" data-selection-target="transactions-table-body">
                             <span class="nds-records-view">Showing <b data-paged-from>0</b>&ndash;<b data-paged-to>0</b> of <b data-paged-count>0</b> transaction(s)</span>
                             <span class="nds-selection-view" hidden><b data-selection-count>0</b> selected of <b data-paged-count>0</b> transaction(s)</span>
-                            <button type="button" data-selection-all hidden>(<b>Select all</b>)</button>
-                            <button type="button" data-selection-clear hidden>(<b>Clear all</b>)</button>
+                            <button type="button" data-selection-all hidden>(<b data-i18n="selection.select_all">Select all</b>)</button>
+                            <button type="button" data-selection-clear hidden>(<b data-i18n="selection.clear_all">Clear all</b>)</button>
                         </span>
                     </div>
                     <div class="nds-toolbar-end">

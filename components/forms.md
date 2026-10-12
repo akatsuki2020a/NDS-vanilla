@@ -6,7 +6,7 @@ hero_description: Form fields the user types in, with the label, messages and su
 breadcrumb: [["Components", "/components"]]
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 09:34 AM"
+last_edit: "13/10/2026 - 12:21 AM"
 lang: en
 direction: ltr
 ---

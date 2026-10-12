@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 12:21 AM"
 ---
 
 <section id="copy-overview" class="nds-content-section nds-doc-overview">
@@ -114,7 +114,7 @@ Label Swap and Announcement go on the copy button. Label Swap needs a `.nds-labe
 ### Label Swap
 {: #copy-label-swap}
 
-`data-copy-label` replaces the text of the button's `.nds-label` while the checkmark shows. Then the script puts the old text back. On a button with no `.nds-label`, only the screen reader says the text.
+`data-copy-label` replaces the text of the button's `.nds-label` while the checkmark shows. Then the script puts the old text back. With no value, it shows "Copied" in the page's language. On a button with no `.nds-label`, only the screen reader says the text.
 
 </div>
   </div>
@@ -207,7 +207,7 @@ The script reads these attributes on `.nds-copy` and on the elements that match 
 |---|---|---|
 | `data-copy` | `.nds-copy` | The text to copy. The script reads it first. An empty value copies nothing |
 | `data-copy-target` | `.nds-copy` | A CSS selector. The script copies the text of the first match. It reads it only when `data-copy` is absent |
-| `data-copy-label` | `.nds-copy` with a `.nds-label` | The label text while the checkmark shows |
+| `data-copy-label` | `.nds-copy` with a `.nds-label` | The label text while the checkmark shows. With no value: "Copied" in the page's language |
 | `data-copy-announce` | `.nds-copy` | The text the live region announces after the copy. Default: `data-copy-label`, then "Copied" («تم النسخ» on an Arabic page) |
 | `data-status="success"` | `.nds-copy` | The script sets it after a copy, and removes it after `duration`. While it is set, `.nds-copy` and `.nds-btn` show the success color, and `.nds-copy` takes no clicks |
 | `aria-disabled="true"` | `.nds-copy` | The script sets and removes it with `data-status` |

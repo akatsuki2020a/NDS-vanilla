@@ -6,7 +6,7 @@ hero_description: A panel is a surface that slides in from an edge of the screen
 breadcrumb: [["Components", "/components"]]
 since: "1.5.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 03:33 PM"
+last_edit: "13/10/2026 - 12:21 AM"
 lang: en
 direction: ltr
 ---

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 12:21 AM"
 ---
 
 <section id="share-overview" class="nds-content-section nds-doc-overview">
@@ -291,7 +291,7 @@ Custom Link is two rows of one choice: write both attributes on `.nds-share`. Ic
 - Give the trigger an `aria-label` that names what is shared: "Share Page", "Share Article", "Share Report".
 - Give every icon-only button a [Tooltip](../components/tooltip): `nds-tooltip`, `data-tooltip-hover="500"` and a `title` with the same words as the `aria-label`. The label is hidden, so the tooltip shows a sighted user what the icon does.
 - Keep `data-no-auto-close` on the Copy Link item in a menu. Without it, the menu closes before the user sees the checkmark.
-- Keep `data-copy-label` and `data-copy-announce` on the Copy Link item. The label confirms the copy to a sighted user, and the announcement to a screen reader user.
+- Keep `data-copy-label` on the Copy Link item, with no value. The label confirms the copy to a sighted user in the page's language, and a screen reader says the same word.
 - Keep the `nds-share-*` class on each built-in button. The script finds each one by its class. Leave out a button you do not need.
 - Give a custom target an icon, a label and an `aria-label`, like the built-in buttons.
 - The Inline buttons take any [Button](../components/button) style, such as `nds-subtle`. Use one style for all of them.
@@ -328,7 +328,7 @@ Custom Link is two rows of one choice: write both attributes on `.nds-share`. Ic
 | `data-share-url` | `.nds-share` | The link to share. Default: the current page. A relative link becomes a full link. A scheme other than `http`, `https`, `mailto` or `tel` falls back to the current page |
 | `data-share-title` | `.nds-share` | The title that X and WhatsApp send, and that fills `{title}`. Default: `document.title` |
 | `data-share-href` | a button in `.nds-share` | The share link of a custom target. The script replaces `{url}` and `{title}` with the encoded values. A scheme other than `http`, `https`, `mailto` or `tel` does nothing. An `nds-share-*` class on the same button wins |
-| `data-copy-label` | `.nds-share-copy` | The label text while the checkmark shows. Read by [Copy](../utilities/copy) |
+| `data-copy-label` | `.nds-share-copy` | The label text while the checkmark shows. With no value: "Copied" in the page's language. Read by [Copy](../utilities/copy) |
 | `data-copy-announce` | `.nds-share-copy` | The text the live region announces after the copy. Default: `data-copy-label`, then "Copied" («تم النسخ» on an Arabic page). Read by Copy |
 | `data-no-auto-close` | `.nds-share-copy` in a menu | Read by Dropmenu: a click on the item leaves the menu open. Share closes the menu when the checkmark ends |
 | `data-status="success"` | `.nds-share-copy` | Copy sets it after a copy, and removes it after 2 seconds. While it is set, the button shows the success color |

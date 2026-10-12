@@ -1704,6 +1704,12 @@
   "ar": "تحديد الكل"
  },
  {
+  "section": "selection",
+  "key": "clear_all",
+  "en": "Clear all",
+  "ar": "مسح الكل"
+ },
+ {
   "section": "session-timeout",
   "key": "warning_title",
   "en": "Your session is about to end",

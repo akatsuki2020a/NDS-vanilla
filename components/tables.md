@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 04:08 PM"
+last_edit: "13/10/2026 - 12:21 AM"
 ---
 
 <section id="table-overview" class="nds-content-section nds-doc-overview">
@@ -102,8 +102,8 @@ Pick another component when:
       <span class="nds-toolbar-text" data-paged-target="tbl-rec-rows" data-selection-target="tbl-rec-rows">
         <span class="nds-records-view">Showing <b data-paged-from>1</b>&ndash;<b data-paged-to>5</b> of <b data-paged-count>6</b> requests</span>
         <span class="nds-selection-view" hidden><b data-selection-count>0</b> selected of <b data-paged-count>6</b> requests</span>
-        <button type="button" data-selection-all hidden>(<b>Select all</b>)</button>
-        <button type="button" data-selection-clear hidden>(<b>Clear all</b>)</button>
+        <button type="button" data-selection-all hidden>(<b data-i18n="selection.select_all">Select all</b>)</button>
+        <button type="button" data-selection-clear hidden>(<b data-i18n="selection.clear_all">Clear all</b>)</button>
       </span>
     </div>
     <div class="nds-toolbar-end">

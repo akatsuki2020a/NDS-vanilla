@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.4.0"
-updated: "1.6.0"
-last_edit: "10/10/2026 - 11:12 PM"
+updated: "1.12.x"
+last_edit: "13/10/2026 - 12:21 AM"
 ---
 
 <section id="toolbar-overview" class="nds-content-section nds-doc-overview">
