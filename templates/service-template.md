@@ -49,7 +49,7 @@ sidemenu_mode: false
                             <span class="nds-label">Required Documents</span>
                         </button>
                     </nav>
-                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="nds-tab-content">
@@ -212,9 +212,9 @@ sidemenu_mode: false
                 <div class="nds-swiper-navigation" hidden>
                     <div class="nds-swiper-buttons">
                         <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev"
-                            type="button" aria-label="Previous slide"></button>
+                            type="button" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
                         <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next"
-                            type="button" aria-label="Next slide"></button>
+                            type="button" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
                     </div>
                     <div class="nds-swiper-pagination"></div>
                 </div>

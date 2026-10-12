@@ -90,8 +90,8 @@ Pick another component when:
   </div>
   <div class="nds-swiper-navigation" hidden>
     <div class="nds-swiper-buttons">
-      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" aria-label="Previous slide"></button>
-      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" aria-label="Next slide"></button>
+      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
+      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
     </div>
     <div class="nds-swiper-pagination"></div>
   </div>
@@ -160,8 +160,8 @@ Pick another component when:
     </div>
     <div class="nds-swiper-navigation" hidden>
       <div class="nds-swiper-buttons">
-        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
-        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
+        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
+        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
       </div>
       <div class="nds-swiper-pagination"></div>
     </div>
@@ -192,8 +192,8 @@ Pick another component when:
   </div>
   <div class="nds-swiper-navigation" hidden>
     <div class="nds-swiper-buttons">
-      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" aria-label="Previous slide"></button>
-      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" aria-label="Next slide"></button>
+      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
+      <button type="button" class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
     </div>
     <div class="nds-swiper-pagination"></div>
   </div>

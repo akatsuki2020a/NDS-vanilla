@@ -65,13 +65,15 @@
         "mask_close": "إغلاق مجهر القراءة"
     },
     "alert": {
-        "close": "إغلاق"
+        "close": "إغلاق",
+        "close_alert": "إغلاق التنبيه"
     },
     "autocomplete": {
         "no_results": "لا توجد نتائج"
     },
     "breadcrumb": {
-        "more": "المزيد"
+        "more": "المزيد",
+        "breadcrumb": "مسار التنقل"
     },
     "chart": {
         "chart": "رسم بياني",
@@ -87,6 +89,9 @@
         "rain": "أمطار",
         "snow": "ثلوج",
         "storm": "عاصفة"
+    },
+    "code": {
+        "code_language": "لغة الشيفرة"
     },
     "cookies": {
         "panel_label": "إعدادات ملفات تعريف الارتباط",
@@ -112,7 +117,8 @@
         "undo": "تراجع"
     },
     "copy": {
-        "copied": "تم النسخ"
+        "copied": "تم النسخ",
+        "copy_code": "نسخ الشيفرة"
     },
     "date": {
         "hijri_months": [
@@ -142,7 +148,8 @@
         "invalid": "تاريخ غير صالح — الصيغة المطلوبة {format}",
         "before_min": "أقرب تاريخ متاح {date}",
         "after_max": "آخر تاريخ متاح {date}",
-        "range_order": "تاريخ البداية يجب أن يسبق تاريخ النهاية"
+        "range_order": "تاريخ البداية يجب أن يسبق تاريخ النهاية",
+        "open_calendar": "فتح التقويم"
     },
     "digital-stamp": {
         "tab": "موقع إلكتروني حكومي مسجل لدى هيئة الحكومة الرقمية.",
@@ -241,7 +248,8 @@
             "few": "تم تصدير {n} صفوف",
             "many": "تم تصدير {n} صفًا",
             "other": "تم تصدير {n} صف"
-        }
+        },
+        "export": "تصدير"
     },
     "filter": {
         "update_failed": "تعذر تحديث النتائج",
@@ -253,7 +261,11 @@
         "apply": "تطبيق",
         "min": "الحد الأدنى",
         "max": "الحد الأقصى",
-        "max_value": "القيمة القصوى"
+        "max_value": "القيمة القصوى",
+        "search": "بحث",
+        "filter": "تصفية",
+        "reset": "إعادة تعيين",
+        "applied_filters": "التصفيات المطبقة:"
     },
     "forms": {
         "required": "هذا الحقل مطلوب",
@@ -293,7 +305,12 @@
         "otp_incomplete": "يرجى إدخال جميع الأرقام",
         "loading": "جارٍ التحميل",
         "show_password": "إظهار كلمة المرور",
-        "hide_password": "إخفاء كلمة المرور"
+        "hide_password": "إخفاء كلمة المرور",
+        "clear_input": "مسح المدخل",
+        "clear_search": "مسح البحث",
+        "clear": "مسح",
+        "increase_value": "زيادة القيمة",
+        "decrease_value": "تقليل القيمة"
     },
     "ipv": {
         "viewerLabel": "عارض الصور",
@@ -312,12 +329,22 @@
         "instructionsToggle": "• المفتاح H لإظهار/إخفاء الأدوات",
         "instructionsClose": "• ESC للإغلاق"
     },
+    "mainnav": {
+        "primary_navigation": "التنقل الرئيسي",
+        "toggle_menu": "تبديل قائمة التنقل"
+    },
+    "modal": {
+        "close": "إغلاق",
+        "close_dialog": "إغلاق النافذة"
+    },
     "multiselect": {
         "none": "{label}: لا تحديد",
         "added": "تمت إضافة {value}",
         "removed": "تمت إزالة {value}",
         "cleared": "تم مسح التحديد",
-        "applied": "تم تطبيق {value}"
+        "applied": "تم تطبيق {value}",
+        "reset": "إعادة تعيين",
+        "apply": "تطبيق"
     },
     "pagination": {
         "prev": "الصفحة السابقة",
@@ -326,9 +353,15 @@
         "more": "المزيد من الصفحات",
         "jump": "الانتقال إلى صفحة"
     },
+    "panels": {
+        "close_panel": "إغلاق اللوحة",
+        "make_smaller": "تصغير اللوحة",
+        "make_larger": "تكبير اللوحة"
+    },
     "password": {
         "mismatch": "كلمتا المرور غير متطابقتين",
-        "met": "تم استيفاء {n} من {total} من شروط كلمة المرور"
+        "met": "تم استيفاء {n} من {total} من شروط كلمة المرور",
+        "clear_password": "مسح كلمة المرور"
     },
     "rating": {
         "stars": {
@@ -338,7 +371,14 @@
             "few": "{n} نجوم",
             "many": "{n} نجمة",
             "other": "{n} نجمة"
-        }
+        },
+        "vote": "تصويت"
+    },
+    "scroll-more": {
+        "show_more": "عرض المزيد"
+    },
+    "selection": {
+        "select_all": "تحديد الكل"
     },
     "session-timeout": {
         "warning_title": "جلستك على وشك الانتهاء",
@@ -349,12 +389,31 @@
         "ended_description": "تم تسجيل خروجك لعدم استخدام الصفحة. سجّل الدخول مرة أخرى للمتابعة.",
         "sign_in": "تسجيل الدخول"
     },
+    "share": {
+        "share_page": "مشاركة الصفحة",
+        "share_on_x": "المشاركة على X",
+        "share_on_linkedin": "المشاركة على لينكدإن",
+        "share_on_whatsapp": "المشاركة على واتساب",
+        "copy_link": "نسخ الرابط"
+    },
+    "sidemenu": {
+        "sidebar": "الشريط الجانبي",
+        "sidebar_menu": "قائمة الشريط الجانبي"
+    },
+    "sort": {
+        "sort": "ترتيب"
+    },
     "swiper": {
-        "go_to_page": "الانتقال إلى الصفحة {n}"
+        "go_to_page": "الانتقال إلى الصفحة {n}",
+        "previous_slide": "الشريحة السابقة",
+        "next_slide": "الشريحة التالية"
     },
     "tables": {
         "reset": "إعادة تعيين",
-        "column": "العمود {n}"
+        "column": "العمود {n}",
+        "columns": "الأعمدة",
+        "visible_columns": "الأعمدة المرئية",
+        "toggle_details": "تبديل التفاصيل"
     },
     "taginput": {
         "added": "تمت إضافة {value}",
@@ -380,8 +439,17 @@
         "before_min": "أقرب وقت متاح {time}",
         "after_max": "آخر وقت متاح {time}"
     },
+    "toc": {
+        "table_of_contents": "جدول المحتويات",
+        "on_this_page": "في هذه الصفحة"
+    },
     "tooltip": {
         "more_info": "مزيد من المعلومات"
+    },
+    "topbar": {
+        "top_bar_utilities": "أدوات الشريط العلوي",
+        "choose_theme": "اختيار المظهر",
+        "toggle_dark_mode": "تبديل الوضع الداكن"
     },
     "upload": {
         "size_exceeds": "حجم الملف يتجاوز {size}",
@@ -392,7 +460,9 @@
         "timed_out": "انتهت مهلة الرفع",
         "cancelled": "تم إلغاء الرفع",
         "failed": "فشل الرفع",
-        "remove_file": "إزالة الملف"
+        "remove_file": "إزالة الملف",
+        "browse_files": "استعراض الملفات",
+        "drag_drop": "اسحب الملفات وأفلتها هنا للرفع"
     },
     "user-feedback": {
         "success": "تم استلام ملاحظتك!",
@@ -410,6 +480,8 @@
         "language-not-supported": "اللغة غير مدعومة",
         "default": "خطأ في إدخال الصوت",
         "timeout": "انتهت مهلة إدخال الصوت",
-        "unsupported": "إدخال الصوت غير مدعوم في هذا المتصفح"
+        "unsupported": "إدخال الصوت غير مدعوم في هذا المتصفح",
+        "voice_input": "إدخال الصوت",
+        "start_voice_input": "بدء إدخال الصوت"
     }
 }

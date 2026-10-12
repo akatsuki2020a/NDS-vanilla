@@ -29,24 +29,24 @@ sidemenu_mode: false
                             <input id="faq-search" type="text" class="nds-search-input" name="q" autocomplete="off"
                                 placeholder="Search">
                             <div class="nds-form-action">
-                                <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear">
+                                <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear" data-i18n-aria-label="forms.clear">
                                     <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                 </button>
-                                <button type="button" class="nds-btn nds-subtle nds-voice-input nds-icon-only" aria-label="Voice input">
+                                <button type="button" class="nds-btn nds-subtle nds-voice-input nds-icon-only" aria-label="Voice input" data-i18n-aria-label="voice-input.voice_input">
                                     <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
                                 </button>
                             </div>
                         </div>
                         <button type="button" class="nds-btn nds-primary nds-search-btn">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <span class="nds-label" data-hidden="sm sr">Search</span>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                         </button>
                     </div>
                 </div>
                 <div class="nds-dropmenu nds-filter" data-filter-target="faq-all-items">
                     <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger" type="button">
                         <i class="hgi hgi-stroke hgi-filter"></i>
-                        <span class="nds-label" data-hidden="sm sr">Filter</span>
+                        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
                     </button>
                     <div class="nds-dropmenu-menu" style="min-width: 260px;" hidden>
                         <div class="nds-dropmenu-scroll">
@@ -58,18 +58,18 @@ sidemenu_mode: false
                             <div class="nds-dropmenu-action">
                                 <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
                                     data-filter-action="clear" data-no-auto-close>
-                                    <span class="nds-label">Reset</span>
+                                    <span class="nds-label" data-i18n="filter.reset">Reset</span>
                                 </button>
                                 <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
                                     data-filter-action="apply">
-                                    <span class="nds-label">Filter</span>
+                                    <span class="nds-label" data-i18n="filter.filter">Filter</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="nds-filter-applied" data-filter-target="faq-all-items" hidden>
-                    <span class="nds-label">Applied Filters:</span>
+                    <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
                     <div class="nds-chips"></div>
                 </div>
             </div>
@@ -88,7 +88,7 @@ sidemenu_mode: false
                         </button>
                         {% endfor %}
                     </nav>
-                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                     </button>
                 </div>
 

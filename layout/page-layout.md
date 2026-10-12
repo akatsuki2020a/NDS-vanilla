@@ -58,7 +58,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
   <main>
     <section class="nds-hero-section nds-sub">
       <!-- Share and the other forms of the sub hero: ../ui-shell/hero -->
-      <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+      <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
         <ol class="nds-breadcrumb">
           <li><a href="#">Home</a></li>
           <li class="nds-truncate" aria-current="page">Hero Section</li>
@@ -139,8 +139,8 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
         </div>
         <div class="nds-swiper-navigation" hidden>
           <div class="nds-swiper-buttons">
-            <button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
-            <button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
+            <button class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
+            <button class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
           </div>
           <div class="nds-swiper-pagination"></div>
         </div>
@@ -190,7 +190,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
   <main>
     <section class="nds-hero-section nds-sub nds-flat">
       <!-- Share and the other forms of the sub hero: ../ui-shell/hero -->
-      <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+      <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
         <ol class="nds-breadcrumb">
           <li><a href="#">Home</a></li>
           <li class="nds-truncate" aria-current="page">Hero Section</li>
@@ -207,10 +207,10 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
       <div class="nds-content" id="main-content">
         <section id="passport-guide" class="nds-content-section nds-sideinfo-section">
           <div class="nds-section-body">
-            <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page">
-              <nav class="nds-toc" aria-label="Table of contents" data-toc-source="#passport-guide article" data-toc-levels="h2, h3">
+            <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page" data-i18n-aria-label="toc.on_this_page">
+              <nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents" data-toc-source="#passport-guide article" data-toc-levels="h2, h3">
                 <div class="nds-toc-head">
-                  <span class="nds-label">On this page</span>
+                  <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
                   <h2 class="nds-toc-title nds-truncate">Passport Guide</h2>
                 </div>
                 <div class="nds-drawer nds-lined">
@@ -281,8 +281,8 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
   </header>
   <main>
     <div class="nds-content-layout nds-has-sidemenu">
-      <aside class="nds-sidemenu" aria-label="Sidebar">
-        <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" hidden>
+      <aside class="nds-sidemenu" aria-label="Sidebar" data-i18n-aria-label="sidemenu.sidebar">
+        <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" data-i18n-aria-label="sidemenu.sidebar_menu" hidden>
           <i class="nds-icon nds-hgi-menu-02" aria-hidden="true"></i>
           <span class="nds-label nds-truncate">Side menu</span>
         </button>
@@ -305,7 +305,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
                 </a>
               </li>
             </ul>
-            <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more">
+            <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
               <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
             </button>
           </div>
@@ -314,7 +314,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
       <div class="nds-content" id="main-content">
         <section class="nds-hero-section nds-sub">
           <!-- Share and the other forms of the sub hero: ../ui-shell/hero -->
-          <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+          <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
             <ol class="nds-breadcrumb">
               <li><a href="#">Home</a></li>
               <li class="nds-truncate" aria-current="page">Hero Section</li>
@@ -353,8 +353,8 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
 </body>
 </script>
 <script type="text/html" id="layout-sidemenu" data-canon>
-<aside class="nds-sidemenu" aria-label="Sidebar">
-  <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" hidden>
+<aside class="nds-sidemenu" aria-label="Sidebar" data-i18n-aria-label="sidemenu.sidebar">
+  <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" data-i18n-aria-label="sidemenu.sidebar_menu" hidden>
     <i class="nds-icon nds-hgi-menu-02" aria-hidden="true"></i>
     <span class="nds-label nds-truncate">Side menu</span>
   </button>
@@ -377,7 +377,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
           </a>
         </li>
       </ul>
-      <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more">
+      <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
         <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
       </button>
     </div>

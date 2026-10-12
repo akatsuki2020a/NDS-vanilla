@@ -384,6 +384,12 @@
   "ar": "إغلاق"
  },
  {
+  "section": "alert",
+  "key": "close_alert",
+  "en": "Close alert",
+  "ar": "إغلاق التنبيه"
+ },
+ {
   "section": "autocomplete",
   "key": "no_results",
   "en": "No results",
@@ -394,6 +400,12 @@
   "key": "more",
   "en": "More",
   "ar": "المزيد"
+ },
+ {
+  "section": "breadcrumb",
+  "key": "breadcrumb",
+  "en": "Breadcrumb",
+  "ar": "مسار التنقل"
  },
  {
   "section": "chart",
@@ -460,6 +472,12 @@
   "key": "storm",
   "en": "Storm",
   "ar": "عاصفة"
+ },
+ {
+  "section": "code",
+  "key": "code_language",
+  "en": "Code language",
+  "ar": "لغة الشيفرة"
  },
  {
   "section": "cookies",
@@ -594,6 +612,12 @@
   "ar": "تم النسخ"
  },
  {
+  "section": "copy",
+  "key": "copy_code",
+  "en": "Copy code",
+  "ar": "نسخ الشيفرة"
+ },
+ {
   "section": "date",
   "key": "hijri_months",
   "en": "Muharram · Safar · Rabi al-Awwal · Rabi al-Thani · Jumada al-Ula · Jumada al-Akhirah · Rajab · Shaban · Ramadan · Shawwal · Dhu al-Qadah · Dhu al-Hijjah",
@@ -670,6 +694,12 @@
   "key": "range_order",
   "en": "Start date must come before end date",
   "ar": "تاريخ البداية يجب أن يسبق تاريخ النهاية"
+ },
+ {
+  "section": "date-picker",
+  "key": "open_calendar",
+  "en": "Open calendar",
+  "ar": "فتح التقويم"
  },
  {
   "section": "digital-stamp",
@@ -1152,6 +1182,12 @@
   "ar": "zero: لم يتم تصدير أي صف · one: تم تصدير صف واحد · two: تم تصدير صفين · few: تم تصدير {n} صفوف · many: تم تصدير {n} صفًا · other: تم تصدير {n} صف"
  },
  {
+  "section": "export",
+  "key": "export",
+  "en": "Export",
+  "ar": "تصدير"
+ },
+ {
   "section": "filter",
   "key": "update_failed",
   "en": "Could not update results",
@@ -1210,6 +1246,30 @@
   "key": "max_value",
   "en": "Maximum value",
   "ar": "القيمة القصوى"
+ },
+ {
+  "section": "filter",
+  "key": "search",
+  "en": "Search",
+  "ar": "بحث"
+ },
+ {
+  "section": "filter",
+  "key": "filter",
+  "en": "Filter",
+  "ar": "تصفية"
+ },
+ {
+  "section": "filter",
+  "key": "reset",
+  "en": "Reset",
+  "ar": "إعادة تعيين"
+ },
+ {
+  "section": "filter",
+  "key": "applied_filters",
+  "en": "Applied Filters:",
+  "ar": "التصفيات المطبقة:"
  },
  {
   "section": "forms",
@@ -1368,6 +1428,36 @@
   "ar": "إخفاء كلمة المرور"
  },
  {
+  "section": "forms",
+  "key": "clear_input",
+  "en": "Clear input",
+  "ar": "مسح المدخل"
+ },
+ {
+  "section": "forms",
+  "key": "clear_search",
+  "en": "Clear search",
+  "ar": "مسح البحث"
+ },
+ {
+  "section": "forms",
+  "key": "decrease_value",
+  "en": "Decrease value",
+  "ar": "تقليل القيمة"
+ },
+ {
+  "section": "forms",
+  "key": "increase_value",
+  "en": "Increase value",
+  "ar": "زيادة القيمة"
+ },
+ {
+  "section": "forms",
+  "key": "clear",
+  "en": "Clear",
+  "ar": "مسح"
+ },
+ {
   "section": "ipv",
   "key": "viewerLabel",
   "en": "Image viewer",
@@ -1458,6 +1548,30 @@
   "ar": "• ESC للإغلاق"
  },
  {
+  "section": "mainnav",
+  "key": "primary_navigation",
+  "en": "Primary navigation",
+  "ar": "التنقل الرئيسي"
+ },
+ {
+  "section": "mainnav",
+  "key": "toggle_menu",
+  "en": "Toggle navigation menu",
+  "ar": "تبديل قائمة التنقل"
+ },
+ {
+  "section": "modal",
+  "key": "close",
+  "en": "Close",
+  "ar": "إغلاق"
+ },
+ {
+  "section": "modal",
+  "key": "close_dialog",
+  "en": "Close dialog",
+  "ar": "إغلاق النافذة"
+ },
+ {
   "section": "multiselect",
   "key": "none",
   "en": "{label}: No selection",
@@ -1486,6 +1600,18 @@
   "key": "applied",
   "en": "Applied {value}",
   "ar": "تم تطبيق {value}"
+ },
+ {
+  "section": "multiselect",
+  "key": "reset",
+  "en": "Reset",
+  "ar": "إعادة تعيين"
+ },
+ {
+  "section": "multiselect",
+  "key": "apply",
+  "en": "Apply",
+  "ar": "تطبيق"
  },
  {
   "section": "pagination",
@@ -1518,6 +1644,24 @@
   "ar": "الانتقال إلى صفحة"
  },
  {
+  "section": "panels",
+  "key": "close_panel",
+  "en": "Close panel",
+  "ar": "إغلاق اللوحة"
+ },
+ {
+  "section": "panels",
+  "key": "make_smaller",
+  "en": "Make panel smaller",
+  "ar": "تصغير اللوحة"
+ },
+ {
+  "section": "panels",
+  "key": "make_larger",
+  "en": "Make panel larger",
+  "ar": "تكبير اللوحة"
+ },
+ {
   "section": "password",
   "key": "mismatch",
   "en": "The two passwords do not match",
@@ -1530,10 +1674,34 @@
   "ar": "تم استيفاء {n} من {total} من شروط كلمة المرور"
  },
  {
+  "section": "password",
+  "key": "clear_password",
+  "en": "Clear password",
+  "ar": "مسح كلمة المرور"
+ },
+ {
   "section": "rating",
   "key": "stars",
   "en": "one: {n} star · other: {n} stars",
   "ar": "zero: {n} نجمة · one: نجمة واحدة · two: نجمتان · few: {n} نجوم · many: {n} نجمة · other: {n} نجمة"
+ },
+ {
+  "section": "rating",
+  "key": "vote",
+  "en": "Vote",
+  "ar": "تصويت"
+ },
+ {
+  "section": "scroll-more",
+  "key": "show_more",
+  "en": "Show more",
+  "ar": "عرض المزيد"
+ },
+ {
+  "section": "selection",
+  "key": "select_all",
+  "en": "Select all",
+  "ar": "تحديد الكل"
  },
  {
   "section": "session-timeout",
@@ -1578,10 +1746,70 @@
   "ar": "تسجيل الدخول"
  },
  {
+  "section": "share",
+  "key": "share_page",
+  "en": "Share Page",
+  "ar": "مشاركة الصفحة"
+ },
+ {
+  "section": "share",
+  "key": "share_on_x",
+  "en": "Share on X",
+  "ar": "المشاركة على X"
+ },
+ {
+  "section": "share",
+  "key": "share_on_linkedin",
+  "en": "Share on LinkedIn",
+  "ar": "المشاركة على لينكدإن"
+ },
+ {
+  "section": "share",
+  "key": "share_on_whatsapp",
+  "en": "Share on WhatsApp",
+  "ar": "المشاركة على واتساب"
+ },
+ {
+  "section": "share",
+  "key": "copy_link",
+  "en": "Copy Link",
+  "ar": "نسخ الرابط"
+ },
+ {
+  "section": "sidemenu",
+  "key": "sidebar",
+  "en": "Sidebar",
+  "ar": "الشريط الجانبي"
+ },
+ {
+  "section": "sidemenu",
+  "key": "sidebar_menu",
+  "en": "Sidebar Menu",
+  "ar": "قائمة الشريط الجانبي"
+ },
+ {
+  "section": "sort",
+  "key": "sort",
+  "en": "Sort",
+  "ar": "ترتيب"
+ },
+ {
   "section": "swiper",
   "key": "go_to_page",
   "en": "Go to page {n}",
   "ar": "الانتقال إلى الصفحة {n}"
+ },
+ {
+  "section": "swiper",
+  "key": "previous_slide",
+  "en": "Previous slide",
+  "ar": "الشريحة السابقة"
+ },
+ {
+  "section": "swiper",
+  "key": "next_slide",
+  "en": "Next slide",
+  "ar": "الشريحة التالية"
  },
  {
   "section": "tables",
@@ -1594,6 +1822,24 @@
   "key": "column",
   "en": "Column {n}",
   "ar": "العمود {n}"
+ },
+ {
+  "section": "tables",
+  "key": "columns",
+  "en": "Columns",
+  "ar": "الأعمدة"
+ },
+ {
+  "section": "tables",
+  "key": "visible_columns",
+  "en": "Visible columns",
+  "ar": "الأعمدة المرئية"
+ },
+ {
+  "section": "tables",
+  "key": "toggle_details",
+  "en": "Toggle details",
+  "ar": "تبديل التفاصيل"
  },
  {
   "section": "taginput",
@@ -1704,10 +1950,40 @@
   "ar": "آخر وقت متاح {time}"
  },
  {
+  "section": "toc",
+  "key": "on_this_page",
+  "en": "On this page",
+  "ar": "في هذه الصفحة"
+ },
+ {
+  "section": "toc",
+  "key": "table_of_contents",
+  "en": "Table of contents",
+  "ar": "جدول المحتويات"
+ },
+ {
   "section": "tooltip",
   "key": "more_info",
   "en": "More info",
   "ar": "مزيد من المعلومات"
+ },
+ {
+  "section": "topbar",
+  "key": "toggle_dark_mode",
+  "en": "Toggle dark mode",
+  "ar": "تبديل الوضع الداكن"
+ },
+ {
+  "section": "topbar",
+  "key": "top_bar_utilities",
+  "en": "Top bar utilities",
+  "ar": "أدوات الشريط العلوي"
+ },
+ {
+  "section": "topbar",
+  "key": "choose_theme",
+  "en": "Choose a theme",
+  "ar": "اختيار المظهر"
  },
  {
   "section": "upload",
@@ -1762,6 +2038,18 @@
   "key": "remove_file",
   "en": "Remove file",
   "ar": "إزالة الملف"
+ },
+ {
+  "section": "upload",
+  "key": "drag_drop",
+  "en": "Drag and drop files here to upload",
+  "ar": "اسحب الملفات وأفلتها هنا للرفع"
+ },
+ {
+  "section": "upload",
+  "key": "browse_files",
+  "en": "Browse Files",
+  "ar": "استعراض الملفات"
  },
  {
   "section": "user-feedback",
@@ -1846,5 +2134,17 @@
   "key": "unsupported",
   "en": "Voice input is not supported in this browser",
   "ar": "إدخال الصوت غير مدعوم في هذا المتصفح"
+ },
+ {
+  "section": "voice-input",
+  "key": "voice_input",
+  "en": "Voice input",
+  "ar": "إدخال الصوت"
+ },
+ {
+  "section": "voice-input",
+  "key": "start_voice_input",
+  "en": "Start voice input",
+  "ar": "بدء إدخال الصوت"
  }
 ]

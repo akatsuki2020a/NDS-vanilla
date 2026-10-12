@@ -30,7 +30,7 @@ hideFeedback: true
                     <p class="nds-alert-description">System maintenance window from 2:00 AM to 4:00 AM on Friday. Some services may be temporarily unavailable.</p>
                 </div>
             </div>
-            <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close" aria-label="Close alert">
+            <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close" aria-label="Close alert" data-i18n-aria-label="alert.close_alert">
                 <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
             </button>
         </div>
@@ -233,12 +233,12 @@ hideFeedback: true
                         <div class="nds-dropmenu" data-columns-target="console-transactions">
                             <button class="nds-btn nds-secondary-outline nds-md nds-menu-btn nds-dropmenu-trigger" type="button">
                                 <i class="nds-icon nds-hgi-view-off-slash" aria-hidden="true"></i>
-                                <span class="nds-label">Columns</span>
+                                <span class="nds-label" data-i18n="tables.columns">Columns</span>
                             </button>
                             <div class="nds-dropmenu-menu" hidden>
                                 <div class="nds-dropmenu-scroll">
                                     <fieldset class="nds-form-group nds-check-group nds-dropmenu-group" data-columns-list data-no-auto-close>
-                                        <legend class="nds-label">Visible columns</legend>
+                                        <legend class="nds-label" data-i18n="tables.visible_columns">Visible columns</legend>
                                     </fieldset>
                                 </div>
                             </div>
@@ -246,7 +246,7 @@ hideFeedback: true
                         <div class="nds-dropmenu">
                             <button type="button" class="nds-btn nds-secondary-outline nds-md nds-dropmenu-trigger">
                                 <i class="hgi hgi-stroke hgi-download-04" aria-hidden="true"></i>
-                                <span class="nds-label">Export</span>
+                                <span class="nds-label" data-i18n="export.export">Export</span>
                             </button>
                             <div class="nds-dropmenu-menu" hidden>
                                 <div class="nds-dropmenu-scroll">
@@ -274,19 +274,19 @@ hideFeedback: true
                                 <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
                                 <input type="text" class="nds-search-input" placeholder="Search transactions...">
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
                                 </div>
                             </div>
                             <button class="nds-btn nds-primary nds-search-btn" type="button">
                                 <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                                <span class="nds-label" data-hidden="sm sr">Search</span>
+                                <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                             </button>
                         </div>
                     </div>
                     <div class="nds-dropmenu nds-filter" data-filter-target="transactions-table-body">
                         <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger">
                             <i class="hgi hgi-stroke hgi-filter"></i>
-                            <span class="nds-label" data-hidden="sm sr">Filter</span>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
                         </button>
                         <div class="nds-dropmenu-menu" style="min-width: 300px;" hidden>
                             <div class="nds-dropmenu-scroll">
@@ -312,11 +312,11 @@ hideFeedback: true
                                 <div class="nds-dropmenu-action">
                                     <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
                                         data-filter-action="clear" data-no-auto-close>
-                                        <span class="nds-label">Reset</span>
+                                        <span class="nds-label" data-i18n="filter.reset">Reset</span>
                                     </button>
                                     <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
                                         data-filter-action="apply">
-                                        <span class="nds-label">Filter</span>
+                                        <span class="nds-label" data-i18n="filter.filter">Filter</span>
                                     </button>
                                 </div>
                             </div>
@@ -326,7 +326,7 @@ hideFeedback: true
                 <div class="nds-toolbar-row">
                     <div class="nds-toolbar-start">
                         <div class="nds-filter-applied" data-filter-target="transactions-table-body" hidden>
-                            <span class="nds-label">Applied Filters:</span>
+                            <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
                             <div class="nds-chips"></div>
                         </div>
                     </div>
@@ -499,19 +499,19 @@ hideFeedback: true
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
                             <input type="text" class="nds-search-input" placeholder="Search team members...">
                             <div class="nds-form-action">
-                                <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
+                                <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <button class="nds-btn nds-primary nds-search-btn" type="button">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <span class="nds-label" data-hidden="sm sr">Search</span>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                         </button>
                     </div>
                 </div>
                 <div class="nds-dropmenu nds-filter" data-filter-target="team-directory-grid">
                     <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger">
                         <i class="hgi hgi-stroke hgi-filter"></i>
-                        <span class="nds-label" data-hidden="sm sr">Filter</span>
+                        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
                     </button>
                     <div class="nds-dropmenu-menu" hidden>
                         <div class="nds-dropmenu-scroll">
@@ -531,18 +531,18 @@ hideFeedback: true
                             <div class="nds-dropmenu-action">
                                 <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
                                     data-filter-action="clear" data-no-auto-close>
-                                    <span class="nds-label">Reset</span>
+                                    <span class="nds-label" data-i18n="filter.reset">Reset</span>
                                 </button>
                                 <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
                                     data-filter-action="apply">
-                                    <span class="nds-label">Filter</span>
+                                    <span class="nds-label" data-i18n="filter.filter">Filter</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="nds-filter-applied" data-filter-target="team-directory-grid" hidden>
-                    <span class="nds-label">Applied Filters:</span>
+                    <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
                     <div class="nds-chips"></div>
                 </div>
             </div>

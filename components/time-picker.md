@@ -44,7 +44,7 @@ Pick another component when:
   </div>
   <div class="nds-form-control">
     <div class="nds-form-action">
-      <button type="button" class="nds-btn nds-subtle nds-md time-picker-toggle nds-icon-only" aria-label="Pick a time">
+      <button type="button" class="nds-btn nds-subtle nds-md time-picker-toggle nds-icon-only" aria-label="Pick a time" data-i18n-aria-label="time-picker.toggle">
         <i class="nds-icon nds-hgi-clock-01" aria-hidden="true"></i>
       </button>
     </div>

@@ -53,7 +53,7 @@ Pick another component when:
         <span class="nds-label">Contact</span>
       </button>
     </nav>
-    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more">
+    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
       <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
     </button>
   </div>
@@ -94,7 +94,7 @@ Pick another component when:
         <span class="nds-label">Help</span>
       </button>
     </nav>
-    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more">
+    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
       <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
     </button>
   </div>
@@ -155,7 +155,7 @@ Pick another component when:
         <span class="nds-label">Help</span>
       </button>
     </nav>
-    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more">
+    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
       <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
     </button>
   </div>

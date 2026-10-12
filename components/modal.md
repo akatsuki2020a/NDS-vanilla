@@ -47,7 +47,7 @@ Pick another component when:
         <i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i>
       </span>
     </div>
-    <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close">
+    <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close" data-i18n-aria-label="modal.close">
       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
     </button>
   </div>
@@ -104,7 +104,7 @@ Pick another component when:
           <i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i>
         </span>
       </div>
-      <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close">
+      <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close" data-i18n-aria-label="modal.close">
         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
       </button>
     </div>

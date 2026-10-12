@@ -82,8 +82,8 @@ direction: ltr
             </div>
             <div class="nds-swiper-navigation" hidden>
                 <div class="nds-swiper-buttons">
-                    <button class="nds-btn nds-subtle nds-icon-only nds-prev" type="button" aria-label="Previous slide"></button>
-                    <button class="nds-btn nds-subtle nds-icon-only nds-next" type="button" aria-label="Next slide"></button>
+                    <button class="nds-btn nds-subtle nds-icon-only nds-prev" type="button" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
+                    <button class="nds-btn nds-subtle nds-icon-only nds-next" type="button" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
                 </div>
                 <div class="nds-swiper-pagination"></div>
             </div>

@@ -43,8 +43,8 @@ The main links of the site belong in the [Main Navigation](../ui-shell/mainnav),
     <div class="nds-section-body">
 <script type="text/html" id="sidemenu-canon" data-canon data-preview="page" data-preview-height="520" data-variants="sidemenu-variants-table">
 <div class="nds-content-layout nds-has-sidemenu">
-  <aside class="nds-sidemenu" aria-label="Sidebar">
-    <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" hidden>
+  <aside class="nds-sidemenu" aria-label="Sidebar" data-i18n-aria-label="sidemenu.sidebar">
+    <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" data-i18n-aria-label="sidemenu.sidebar_menu" hidden>
       <i class="nds-icon nds-hgi-menu-02" aria-hidden="true"></i>
       <span class="nds-label nds-truncate">Side menu</span>
     </button>
@@ -103,7 +103,7 @@ The main links of the site belong in the [Main Navigation](../ui-shell/mainnav),
             </a>
           </li>
         </ul>
-        <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more">
+        <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
           <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
         </button>
       </div>
@@ -123,8 +123,8 @@ The main links of the site belong in the [Main Navigation](../ui-shell/mainnav),
 </script>
 <script type="text/html" id="sidemenu-grouped" data-canon>
 <div class="nds-content-layout nds-has-sidemenu">
-  <aside class="nds-sidemenu" aria-label="Sidebar">
-    <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" hidden>
+  <aside class="nds-sidemenu" aria-label="Sidebar" data-i18n-aria-label="sidemenu.sidebar">
+    <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" data-i18n-aria-label="sidemenu.sidebar_menu" hidden>
       <i class="nds-icon nds-hgi-menu-02" aria-hidden="true"></i>
       <span class="nds-label nds-truncate">Side menu</span>
     </button>
@@ -191,7 +191,7 @@ The main links of the site belong in the [Main Navigation](../ui-shell/mainnav),
             </a>
           </li>
         </ul>
-        <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more">
+        <button class="nds-show-more nds-btn nds-subtle" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
           <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
         </button>
       </div>

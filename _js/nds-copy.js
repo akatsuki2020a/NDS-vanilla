@@ -17,7 +17,7 @@
  * Hooks (on the button):
  *   data-copy           the literal text to copy
  *   data-copy-target    a selector — copies that element's textContent instead
- *   data-copy-label     label swap during the flash (needs a .nds-label inside)
+ *   data-copy-label     label swap during the flash (needs a .nds-label inside); empty = "Copied" in the page language
  *   data-copy-announce  what is announced; falls back to data-copy-label, then "Copied" / "تم النسخ"
  * Gotchas:
  *   - Text resolution stops at the first hit: data-copy, then data-copy-target, then the
@@ -74,7 +74,8 @@
         const opts = options || {};
         const duration = opts.duration || DEFAULT_FLASH_MS;
 
-        const labelText = button.getAttribute('data-copy-label');
+        // A bare data-copy-label swaps in the pack's word, so the label follows the page language.
+        const labelText = button.hasAttribute('data-copy-label') ? button.getAttribute('data-copy-label') || strings.text('copied') : null;
         const messageText = button.getAttribute('data-copy-announce') || labelText || strings.text('copied');
 
         // Icon swap: snapshot the className and replace with the mask

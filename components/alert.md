@@ -54,7 +54,7 @@ Pick another component when:
       <p class="nds-alert-description">A new version is ready. Update now to get the latest fixes.</p>
     </div>
   </div>
-  <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close" aria-label="Close alert">
+  <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close" aria-label="Close alert" data-i18n-aria-label="alert.close_alert">
     <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
   </button>
 </div>
@@ -72,7 +72,7 @@ Pick another component when:
       <p class="nds-alert-description">A new version is ready.</p>
     </div>
   </div>
-  <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close" aria-label="Close alert">
+  <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close" aria-label="Close alert" data-i18n-aria-label="alert.close_alert">
     <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
   </button>
 </div>

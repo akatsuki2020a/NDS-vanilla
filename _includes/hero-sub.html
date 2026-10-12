@@ -38,27 +38,27 @@
 {%- unless share_placement == "hidden" %}
 {%- capture share_html %}
             <div class="nds-share nds-dropmenu">
-                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page" data-i18n-aria-label="share.share_page">
                     <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
-                    <span class="nds-label">Share Page</span>
+                    <span class="nds-label" data-i18n="share.share_page">Share Page</span>
                 </button>
                 <div class="nds-dropmenu-menu" hidden>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
                         <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
                         <span class="nds-label">X</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
                         <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
                         <span class="nds-label">LinkedIn</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
                         <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
                         <span class="nds-label">WhatsApp</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
-                        data-copy-label="Link Copied!" data-copy-announce="Page link copied to clipboard" data-no-auto-close>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link"
+                        data-copy-label data-no-auto-close>
                         <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-                        <span class="nds-label">Copy Link</span>
+                        <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
                     </button>
                 </div>
             </div>
@@ -80,7 +80,7 @@
 {%- if share_placement == "action" -%}{%- assign _has_action = true -%}{%- endif %}
 <section class="nds-hero-section nds-sub{%- if page.hero_style and page.hero_style != "" %} {{ page.hero_style }}{%- endif %}"
     {%- if hero_bg %} style="--hero-image: url('{{ hero_bg | relative_url }}');{%- if page.hero_image_pos %} --hero-image-position: {{ page.hero_image_pos }};{%- endif %}"{%- endif %}>
-    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
         <ol class="nds-breadcrumb">
             {%- assign home_text = 'الرئيسية' -%}{%- if page.lang == 'en' -%}{%- assign home_text = 'Home' -%}{%- endif %}
             <li><a href="{{ page.breadcrumb_root_url | default: '/' | relative_url }}">{{ page.breadcrumb_root | default: home_text }}</a></li>
@@ -189,7 +189,7 @@
                             <hr class="nds-divider nds-lg">
                             <div class="nds-dropmenu-action">
                                 <button class="nds-btn nds-primary nds-dropmenu-item" data-no-auto-close>
-                                    <span class="nds-label">Vote</span>
+                                    <span class="nds-label" data-i18n="rating.vote">Vote</span>
                                 </button>
                             </div>
                         </div>

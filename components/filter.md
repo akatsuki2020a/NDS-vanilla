@@ -44,21 +44,21 @@ Pick another component when:
         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
         <input type="text" id="flt-search-input" class="nds-search-input" placeholder="Search services..." aria-label="Search services">
         <div class="nds-form-action">
-          <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" hidden aria-label="Clear search">
+          <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
           </button>
         </div>
       </div>
       <button class="nds-btn nds-primary nds-search-btn" type="button">
         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-        <span class="nds-label" data-hidden="sm sr">Search</span>
+        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
       </button>
     </div>
   </div>
   <div class="nds-dropmenu nds-filter" data-filter-target="flt-items">
     <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger" type="button">
       <i class="hgi hgi-stroke hgi-filter"></i>
-      <span class="nds-label" data-hidden="sm sr">Filter</span>
+      <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
     </button>
     <div class="nds-dropmenu-menu" hidden>
       <div class="nds-dropmenu-scroll">
@@ -69,17 +69,17 @@ Pick another component when:
         <hr class="nds-divider">
         <div class="nds-dropmenu-action">
           <button class="nds-btn nds-secondary nds-dropmenu-item" type="button" data-filter-action="clear" data-no-auto-close>
-            <span class="nds-label">Reset</span>
+            <span class="nds-label" data-i18n="filter.reset">Reset</span>
           </button>
           <button class="nds-btn nds-primary nds-dropmenu-item" type="button" data-filter-action="apply">
-            <span class="nds-label">Apply</span>
+            <span class="nds-label" data-i18n="filter.apply">Apply</span>
           </button>
         </div>
       </div>
     </div>
   </div>
   <div class="nds-filter-applied" data-filter-target="flt-items" hidden>
-    <span class="nds-label">Applied Filters:</span>
+    <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
     <div class="nds-chips"></div>
   </div>
 </div>
@@ -198,14 +198,14 @@ Pick another component when:
       <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
       <input type="text" id="flt-search-input" class="nds-search-input" placeholder="Search services..." aria-label="Search services">
       <div class="nds-form-action">
-        <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" hidden aria-label="Clear search">
+        <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
           <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
         </button>
       </div>
     </div>
     <button class="nds-btn nds-primary nds-search-btn" type="button">
       <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-      <span class="nds-label" data-hidden="sm sr">Search</span>
+      <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
     </button>
   </div>
 </div>
@@ -268,7 +268,7 @@ Pick another component when:
 </script>
 <script type="text/html" id="filter-part-applied" data-canon>
 <div class="nds-filter-applied" data-filter-target="flt-items" hidden>
-  <span class="nds-label">Applied Filters:</span>
+  <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
   <div class="nds-chips"></div>
 </div>
 </script>
@@ -407,14 +407,14 @@ For results from a server, add a `<form>` with the same `data-filter-target` and
         </div>
         <button class="nds-btn nds-primary nds-search-btn" type="button">
           <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-          <span class="nds-label" data-hidden="sm sr">Search</span>
+          <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
         </button>
       </div>
     </div>
     <div class="nds-dropmenu nds-filter" data-filter-target="services-results">
       <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger" type="button">
         <i class="hgi hgi-stroke hgi-filter"></i>
-        <span class="nds-label" data-hidden="sm sr">Filter</span>
+        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
       </button>
       <div class="nds-dropmenu-menu" hidden>
         <div class="nds-dropmenu-scroll">
@@ -424,17 +424,17 @@ For results from a server, add a `<form>` with the same `data-filter-target` and
           <hr class="nds-divider">
           <div class="nds-dropmenu-action">
             <button class="nds-btn nds-secondary nds-dropmenu-item" type="button" data-filter-action="clear" data-no-auto-close>
-              <span class="nds-label">Reset</span>
+              <span class="nds-label" data-i18n="filter.reset">Reset</span>
             </button>
             <button class="nds-btn nds-primary nds-dropmenu-item" type="button" data-filter-action="apply">
-              <span class="nds-label">Apply</span>
+              <span class="nds-label" data-i18n="filter.apply">Apply</span>
             </button>
           </div>
         </div>
       </div>
     </div>
     <div class="nds-filter-applied" data-filter-target="services-results" hidden>
-      <span class="nds-label">Applied Filters:</span>
+      <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
       <div class="nds-chips"></div>
     </div>
   </div>
@@ -499,7 +499,7 @@ A filter also drives the [Sort](../components/sort) triggers that carry its `dat
 <div class="nds-dropmenu">
   <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" type="button">
     <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
-    <span class="nds-label">Sort</span>
+    <span class="nds-label" data-i18n="sort.sort">Sort</span>
   </button>
   <div class="nds-dropmenu-menu" hidden>
     <div class="nds-dropmenu-scroll">

@@ -37,26 +37,26 @@ Pick another component when:
     <div class="nds-section-body">
 <script type="text/html" id="share-menu" data-canon data-variants="share-variants-table">
 <div class="nds-share nds-dropmenu">
-  <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page">
+  <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page" data-i18n-aria-label="share.share_page">
     <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
-    <span class="nds-label">Share Page</span>
+    <span class="nds-label" data-i18n="share.share_page">Share Page</span>
   </button>
   <div class="nds-dropmenu-menu" hidden>
-    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
       <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
       <span class="nds-label">X</span>
     </button>
-    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
       <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
       <span class="nds-label">LinkedIn</span>
     </button>
-    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
       <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
       <span class="nds-label">WhatsApp</span>
     </button>
-    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-copy-label="Link Copied!" data-copy-announce="Page link copied to clipboard" data-no-auto-close>
+    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link" data-copy-label data-no-auto-close>
       <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-      <span class="nds-label">Copy Link</span>
+      <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
     </button>
   </div>
 </div>
@@ -64,42 +64,42 @@ Pick another component when:
 
 <script type="text/html" id="share-inline" data-canon>
 <div class="nds-share">
-  <button class="nds-btn nds-secondary-outline nds-share-x" type="button" aria-label="Share on X">
+  <button class="nds-btn nds-secondary-outline nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
     <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
     <span class="nds-label">X</span>
   </button>
-  <button class="nds-btn nds-secondary-outline nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+  <button class="nds-btn nds-secondary-outline nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
     <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
     <span class="nds-label">LinkedIn</span>
   </button>
-  <button class="nds-btn nds-secondary-outline nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+  <button class="nds-btn nds-secondary-outline nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
     <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
     <span class="nds-label">WhatsApp</span>
   </button>
-  <button class="nds-btn nds-secondary-outline nds-share-copy" type="button" aria-label="Copy Link" data-copy-label="Link Copied!" data-copy-announce="Page link copied to clipboard">
+  <button class="nds-btn nds-secondary-outline nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link" data-copy-label>
     <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-    <span class="nds-label">Copy Link</span>
+    <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
   </button>
 </div>
 </script>
 
 <script type="text/html" id="share-inline-icons" data-canon>
 <div class="nds-share">
-  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-x nds-tooltip" type="button" aria-label="Share on X" title="Share on X" data-tooltip-hover="500">
+  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-x nds-tooltip" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x" title="Share on X" data-i18n-title="share.share_on_x" data-tooltip-hover="500">
     <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
     <span class="nds-label">X</span>
   </button>
-  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-linkedin nds-tooltip" type="button" aria-label="Share on LinkedIn" title="Share on LinkedIn" data-tooltip-hover="500">
+  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-linkedin nds-tooltip" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin" title="Share on LinkedIn" data-i18n-title="share.share_on_linkedin" data-tooltip-hover="500">
     <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
     <span class="nds-label">LinkedIn</span>
   </button>
-  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-whatsapp nds-tooltip" type="button" aria-label="Share on WhatsApp" title="Share on WhatsApp" data-tooltip-hover="500">
+  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-whatsapp nds-tooltip" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp" title="Share on WhatsApp" data-i18n-title="share.share_on_whatsapp" data-tooltip-hover="500">
     <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
     <span class="nds-label">WhatsApp</span>
   </button>
-  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-copy nds-tooltip" type="button" aria-label="Copy Link" title="Copy Link" data-tooltip-hover="500" data-copy-announce="Page link copied to clipboard">
+  <button class="nds-btn nds-secondary-outline nds-icon-only nds-share-copy nds-tooltip" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link" title="Copy Link" data-i18n-title="share.copy_link" data-tooltip-hover="500">
     <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-    <span class="nds-label">Copy Link</span>
+    <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
   </button>
 </div>
 </script>

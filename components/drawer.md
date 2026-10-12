@@ -254,7 +254,7 @@ Pick another component when:
       </li>
     </ul>
     <button type="button" class="nds-btn nds-subtle nds-md nds-show-more">
-      <span class="nds-label">Show more</span>
+      <span class="nds-label" data-i18n="scroll-more.show_more">Show more</span>
       <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
     </button>
   </div>

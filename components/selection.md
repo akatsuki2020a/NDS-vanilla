@@ -43,7 +43,7 @@ Pick another component when:
       <div class="nds-form-container nds-check-container">
         <div class="nds-form-header">
           <label for="selection-services-all">
-            <span class="nds-label">Select all</span>
+            <span class="nds-label" data-i18n="selection.select_all">Select all</span>
           </label>
         </div>
         <div class="nds-form-control">

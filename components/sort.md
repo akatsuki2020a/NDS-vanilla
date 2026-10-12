@@ -50,7 +50,7 @@ The triggers sit in a [Toolbar](../components/toolbar) above the list. The list 
       <div class="nds-dropmenu">
         <button type="button" class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger">
           <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
-          <span class="nds-label">Sort</span>
+          <span class="nds-label" data-i18n="sort.sort">Sort</span>
         </button>
         <div class="nds-dropmenu-menu" hidden>
           <div class="nds-dropmenu-scroll">

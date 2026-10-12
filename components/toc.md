@@ -45,11 +45,11 @@ The TOC sits in a sticky [Side Info](../ui-shell/sideinfo) column next to the ar
 <script type="text/html" id="toc-auto" data-canon data-preview="panel" data-preview-flush>
 <section id="policy-page" class="nds-content-section nds-sideinfo-section">
   <div class="nds-section-body">
-    <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page">
-      <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 5"
+    <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page" data-i18n-aria-label="toc.on_this_page">
+      <nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents" style="--toc-skeleton-rows: 5"
         data-toc-source="#policy-page article" data-toc-levels="h2,h3">
         <div class="nds-toc-head">
-          <span class="nds-label">On this page</span>
+          <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
           <h2 class="nds-toc-title nds-truncate">Privacy Policy</h2>
         </div>
         <div class="nds-drawer nds-lined">
@@ -86,9 +86,9 @@ The TOC sits in a sticky [Side Info](../ui-shell/sideinfo) column next to the ar
 You write the links. Nest a `<ul>` inside an `<li>` for each level.
 
 <script type="text/html" id="toc-manual" data-canon>
-<nav class="nds-toc" aria-label="Table of contents">
+<nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents">
   <div class="nds-toc-head">
-    <span class="nds-label">On this page</span>
+    <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
     <h2 class="nds-toc-title nds-truncate">Annual Report 2025</h2>
   </div>
   <div class="nds-drawer nds-lined">

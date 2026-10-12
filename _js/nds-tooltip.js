@@ -127,9 +127,14 @@
             if (fromTitle) {
                 this.root.dataset.tooltipMessage = nativeTitle;
                 this.root.removeAttribute('title');
+                // A marked title may still be English (pack past its cap): its marker follows the words.
+                this._messageRef = this.root.getAttribute('data-i18n-title');
                 // The title was the control's only name — keep it as one.
                 if (!this.root.hasAttribute('aria-label') && !this.root.hasAttribute('aria-labelledby')
-                    && !this.root.textContent.trim()) NDS.aria.label(this.root, nativeTitle);
+                    && !this.root.textContent.trim()) {
+                    NDS.aria.label(this.root, nativeTitle);
+                    if (this._messageRef) this.root.setAttribute('data-i18n-aria-label', this._messageRef);
+                }
             }
 
             const { tooltipTitle: title, tooltipMessage: message } = this.root.dataset;
@@ -184,6 +189,7 @@
                 const p = document.createElement('p');
                 p.className = 'nds-tooltip-message';
                 p.textContent = message;
+                if (this._messageRef) p.setAttribute('data-i18n', this._messageRef);
                 body.appendChild(p);
             }
             balloon.appendChild(body);

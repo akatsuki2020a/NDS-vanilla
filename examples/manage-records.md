@@ -59,12 +59,12 @@ hideFeedback: true
                         <div class="nds-dropmenu" data-columns-target="requests-table">
                             <button class="nds-btn nds-secondary-outline nds-md nds-menu-btn nds-dropmenu-trigger" type="button">
                                 <i class="nds-icon nds-hgi-view-off-slash" aria-hidden="true"></i>
-                                <span class="nds-label">Columns</span>
+                                <span class="nds-label" data-i18n="tables.columns">Columns</span>
                             </button>
                             <div class="nds-dropmenu-menu" hidden>
                                 <div class="nds-dropmenu-scroll">
                                     <fieldset class="nds-form-group nds-check-group nds-dropmenu-group" data-columns-list data-no-auto-close>
-                                        <legend class="nds-label">Visible columns</legend>
+                                        <legend class="nds-label" data-i18n="tables.visible_columns">Visible columns</legend>
                                     </fieldset>
                                 </div>
                             </div>
@@ -72,7 +72,7 @@ hideFeedback: true
                         <div class="nds-dropmenu">
                             <button type="button" class="nds-btn nds-secondary-outline nds-md nds-dropmenu-trigger">
                                 <i class="hgi hgi-stroke hgi-download-04" aria-hidden="true"></i>
-                                <span class="nds-label">Export</span>
+                                <span class="nds-label" data-i18n="export.export">Export</span>
                             </button>
                             <div class="nds-dropmenu-menu" hidden>
                                 <div class="nds-dropmenu-scroll">
@@ -100,19 +100,19 @@ hideFeedback: true
                                 <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
                                 <input type="text" class="nds-search-input" placeholder="Search requests...">
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
                                 </div>
                             </div>
                             <button class="nds-btn nds-primary nds-search-btn" type="button">
                                 <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                                <span class="nds-label" data-hidden="sm sr">Search</span>
+                                <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                             </button>
                         </div>
                     </div>
                     <div class="nds-dropmenu nds-filter" data-filter-target="requests-table-body">
                         <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger">
                             <i class="hgi hgi-stroke hgi-filter"></i>
-                            <span class="nds-label" data-hidden="sm sr">Filter</span>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
                         </button>
                         <div class="nds-dropmenu-menu" style="min-width: 300px;" hidden>
                             <div class="nds-dropmenu-scroll">
@@ -138,11 +138,11 @@ hideFeedback: true
                                 <div class="nds-dropmenu-action">
                                     <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
                                         data-filter-action="clear" data-no-auto-close>
-                                        <span class="nds-label">Reset</span>
+                                        <span class="nds-label" data-i18n="filter.reset">Reset</span>
                                     </button>
                                     <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
                                         data-filter-action="apply">
-                                        <span class="nds-label">Filter</span>
+                                        <span class="nds-label" data-i18n="filter.filter">Filter</span>
                                     </button>
                                 </div>
                             </div>
@@ -152,7 +152,7 @@ hideFeedback: true
                 <div class="nds-toolbar-row">
                     <div class="nds-toolbar-start">
                         <div class="nds-filter-applied" data-filter-target="requests-table-body" hidden>
-                            <span class="nds-label">Applied Filters:</span>
+                            <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
                             <div class="nds-chips"></div>
                         </div>
                     </div>
@@ -251,7 +251,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-118" aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-118" aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -337,7 +337,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-117" aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-117" aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -427,7 +427,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -477,7 +477,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -527,7 +527,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -577,7 +577,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -627,7 +627,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -677,7 +677,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -727,7 +727,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -777,7 +777,7 @@ hideFeedback: true
                             </td>
                             <td class="nds-actions-column">
                                 <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
-                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details">
+                                    <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
                                     <div class="nds-dropmenu" data-portal>
@@ -815,7 +815,7 @@ hideFeedback: true
         <span class="nds-featured-icon nds-circle">
             <i class="hgi hgi-stroke hgi-file-edit"></i>
         </span>
-        <button class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close dialog">
+        <button class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close dialog" data-i18n-aria-label="modal.close_dialog">
             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
         </button>
     </div>
@@ -841,7 +841,7 @@ hideFeedback: true
                         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
                         <input type="text" id="record-requester" class="nds-input" autocomplete="on" placeholder="Type a name..." required>
                         <div class="nds-form-action">
-                            <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input">
+                            <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                                 <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -889,7 +889,7 @@ hideFeedback: true
                     </div>
                     <div class="nds-form-control" data-portal>
                         <div class="nds-form-action">
-                            <button type="button" class="nds-btn nds-subtle nds-md date-picker-toggle nds-icon-only" aria-label="Calendar Toggler">
+                            <button type="button" class="nds-btn nds-subtle nds-md date-picker-toggle nds-icon-only" aria-label="Open calendar" data-i18n-aria-label="date-picker.open_calendar">
                                 <i class="nds-icon nds-hgi-calendar-03" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -933,8 +933,8 @@ hideFeedback: true
                     </div>
                 </div>
                 </div>
-                <button class="nds-btn nds-subtle nds-md nds-show-more" type="button" aria-label="Show more">
-                    <span class="nds-label">Show more</span>
+                <button class="nds-btn nds-subtle nds-md nds-show-more" type="button" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
+                    <span class="nds-label" data-i18n="scroll-more.show_more">Show more</span>
                     <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                 </button>
             </div>
@@ -959,7 +959,7 @@ hideFeedback: true
         <span class="nds-featured-icon nds-circle" data-status="error">
             <i class="hgi hgi-stroke hgi-delete-02"></i>
         </span>
-        <button class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close dialog">
+        <button class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close dialog" data-i18n-aria-label="modal.close_dialog">
             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
         </button>
     </div>
@@ -1063,7 +1063,7 @@ hideFeedback: true
             // No aria-controls: the sub row is built on demand, and the component
             // stamps the toggle with the real id once it exists. Naming an id that
             // never gets created leaves aria-expanded frozen at false.
-            '<button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-label="Toggle details">' +
+            '<button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">' +
               '<i class="hgi hgi-stroke hgi-list-view"></i>' +
             '</button>' +
             '<div class="nds-dropmenu" data-portal>' +

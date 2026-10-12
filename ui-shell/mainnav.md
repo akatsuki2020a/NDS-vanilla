@@ -35,7 +35,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
     </div>
     <div class="nds-section-body">
 <script type="text/html" id="mainnav-canon" data-canon data-form data-preview="page" data-preview-height="440" data-variants="mainnav-variants-table">
-<nav class="nds-main-nav nds-content-wrapper" id="nds-main-nav" aria-label="Primary navigation">
+<nav class="nds-main-nav nds-content-wrapper" id="nds-main-nav" aria-label="Primary navigation" data-i18n-aria-label="mainnav.primary_navigation">
   <div class="nds-nav-container">
     <a href="../" class="nds-brand">
       <img class="nds-brand-logo" src="../assets/img/palm_swords.svg" width="40" height="40" loading="lazy" alt="National Portal logo">
@@ -45,7 +45,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
     </a>
     <ul class="nds-nav-minimal" hidden>
       <li class="nds-nav-toggler nds-nav-item">
-        <button class="nds-nav-link nds-btn nds-subtle nds-indicator" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nds-nav-collapse">
+        <button class="nds-nav-link nds-btn nds-subtle nds-indicator" aria-label="Toggle navigation menu" data-i18n-aria-label="mainnav.toggle_menu" aria-expanded="false" aria-controls="nds-nav-collapse">
           <i class="nds-icon nds-hgi-menu-01" aria-hidden="true"></i>
         </button>
       </li>
@@ -132,7 +132,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
           </li>
         </ul>
         <div class="nds-nav-item nds-show-more">
-          <a href="#" class="nds-nav-link nds-btn nds-subtle nds-indicator nds-full" title="Show More" aria-label="Show more">
+          <a href="#" class="nds-nav-link nds-btn nds-subtle nds-indicator nds-full" title="Show more" data-i18n-title="scroll-more.show_more" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
             <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
           </a>
         </div>
@@ -148,7 +148,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
                         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
                         <input id="main-search" type="text" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search">
                         <div class="nds-form-action">
-                          <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search">
+                          <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
                             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                           </button>
                         </div>
@@ -310,7 +310,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
               <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
               <input id="main-search" type="text" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search">
               <div class="nds-form-action">
-                <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search">
+                <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
                   <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                 </button>
               </div>

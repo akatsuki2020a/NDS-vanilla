@@ -36,7 +36,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body">
 <script type="text/html" id="theme-toggle" data-canon data-screens="none" data-variants="themes-variants-table">
-<button class="nds-btn nds-subtle nds-icon-only" data-theme-toggle aria-pressed="false" aria-label="Toggle dark mode">
+<button class="nds-btn nds-subtle nds-icon-only" data-theme-toggle aria-pressed="false" aria-label="Toggle dark mode" data-i18n-aria-label="topbar.toggle_dark_mode">
   <i class="nds-icon nds-hgi-moon-02" aria-hidden="true"></i>
 </button>
 </script>

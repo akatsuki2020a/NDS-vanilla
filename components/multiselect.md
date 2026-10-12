@@ -143,7 +143,7 @@ Pick another component when:
   <hr class="nds-divider">
   <div class="nds-dropmenu-action">
     <button class="nds-btn nds-secondary nds-dropmenu-item" type="button" data-multiselect-action="reset" data-no-auto-close>
-      <span class="nds-label">Reset</span>
+      <span class="nds-label" data-i18n="multiselect.reset">Reset</span>
     </button>
   </div>
 </div>
@@ -153,7 +153,7 @@ Pick another component when:
   <hr class="nds-divider">
   <div class="nds-dropmenu-action">
     <button class="nds-btn nds-primary nds-dropmenu-item" type="button" data-multiselect-action="apply">
-      <span class="nds-label">Apply</span>
+      <span class="nds-label" data-i18n="multiselect.apply">Apply</span>
     </button>
   </div>
 </div>
@@ -163,10 +163,10 @@ Pick another component when:
   <hr class="nds-divider">
   <div class="nds-dropmenu-action">
     <button class="nds-btn nds-secondary nds-dropmenu-item" type="button" data-multiselect-action="reset" data-no-auto-close>
-      <span class="nds-label">Reset</span>
+      <span class="nds-label" data-i18n="multiselect.reset">Reset</span>
     </button>
     <button class="nds-btn nds-primary nds-dropmenu-item" type="button" data-multiselect-action="apply">
-      <span class="nds-label">Apply</span>
+      <span class="nds-label" data-i18n="multiselect.apply">Apply</span>
     </button>
   </div>
 </div>

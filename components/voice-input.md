@@ -45,10 +45,10 @@ Pick another component when:
     <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
     <input type="text" id="voice-search" name="search" placeholder="Search services...">
     <div class="nds-form-action">
-      <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear search" hidden>
+      <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear search" data-i18n-aria-label="forms.clear_search" hidden>
         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
       </button>
-      <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" type="button" aria-label="Start voice input" aria-pressed="false">
+      <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" type="button" aria-label="Start voice input" data-i18n-aria-label="voice-input.start_voice_input" aria-pressed="false">
         <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
       </button>
     </div>
@@ -65,7 +65,7 @@ Pick another component when:
   <div class="nds-form-control">
     <textarea id="voice-message" class="nds-textarea" name="message" rows="4" placeholder="Enter your message..."></textarea>
     <div class="nds-form-action">
-      <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" type="button" aria-label="Start voice input" aria-pressed="false">
+      <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" type="button" aria-label="Start voice input" data-i18n-aria-label="voice-input.start_voice_input" aria-pressed="false">
         <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
       </button>
     </div>
@@ -79,10 +79,10 @@ Pick another component when:
       <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
       <input type="text" id="voice-query" class="nds-search-input" name="q" placeholder="Search..." aria-label="Search">
       <div class="nds-form-action">
-        <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear search" hidden>
+        <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear search" data-i18n-aria-label="forms.clear_search" hidden>
           <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
         </button>
-        <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" type="button" aria-label="Start voice input" aria-pressed="false">
+        <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" type="button" aria-label="Start voice input" data-i18n-aria-label="voice-input.start_voice_input" aria-pressed="false">
           <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
         </button>
       </div>
@@ -106,7 +106,7 @@ Pick another component when:
       <input type="text" id="voice-comment" name="comment" placeholder="Add a comment...">
     </div>
   </div>
-  <button class="nds-btn nds-secondary-outline nds-icon-only nds-voice-input" type="button" data-voice-target="voice-comment" aria-label="Start voice input" aria-pressed="false">
+  <button class="nds-btn nds-secondary-outline nds-icon-only nds-voice-input" type="button" data-voice-target="voice-comment" aria-label="Start voice input" data-i18n-aria-label="voice-input.start_voice_input" aria-pressed="false">
     <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
   </button>
 </div>

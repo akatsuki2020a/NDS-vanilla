@@ -15,11 +15,11 @@ sidemenu_mode: false
 ---
 <section id="content-template" class="nds-content-section nds-sideinfo-section">
     <div class="nds-section-body">
-        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page">
-            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 11"
+        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page" data-i18n-aria-label="toc.on_this_page">
+            <nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents" style="--toc-skeleton-rows: 11"
                 data-toc-source="#content-template article" data-toc-levels="h2, h3, h4">
                 <div class="nds-toc-head">
-                    <span class="nds-label">On this page</span>
+                    <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
                     <h2 class="nds-toc-title nds-truncate">Page Title</h2>
                 </div>
                 <div class="nds-drawer nds-lined">

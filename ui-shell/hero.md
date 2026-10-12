@@ -40,7 +40,7 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
     <div class="nds-section-body">
 <script type="text/html" id="hero-canon" data-canon data-preview="page" data-preview-height="560" data-variants="hero-variants-table">
 <section class="nds-hero-section nds-sub">
-  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
     <ol class="nds-breadcrumb">
       <li><a href="#">Home</a></li>
       <li><a href="#">About</a></li>
@@ -51,26 +51,26 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
     <div class="nds-section-head">
       <div class="nds-section-action nds-minimal">
         <div class="nds-share nds-dropmenu">
-          <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page">
+          <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page" data-i18n-aria-label="share.share_page">
             <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
-            <span class="nds-label">Share Page</span>
+            <span class="nds-label" data-i18n="share.share_page">Share Page</span>
           </button>
           <div class="nds-dropmenu-menu" hidden>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
               <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
               <span class="nds-label">X</span>
             </button>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
               <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
               <span class="nds-label">LinkedIn</span>
             </button>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
               <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
               <span class="nds-label">WhatsApp</span>
             </button>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-copy-label="Link Copied!" data-copy-announce="Page link copied to clipboard" data-no-auto-close>
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link" data-copy-label data-no-auto-close>
               <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-              <span class="nds-label">Copy Link</span>
+              <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
             </button>
           </div>
         </div>
@@ -83,7 +83,7 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
 </script>
 <script type="text/html" id="hero-service" data-canon>
 <section class="nds-hero-section nds-sub">
-  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
     <ol class="nds-breadcrumb">
       <li><a href="#">Home</a></li>
       <li><a href="#">Services</a></li>
@@ -97,26 +97,26 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
           <span class="nds-label">Start the Service</span>
         </a>
         <div class="nds-share nds-dropmenu">
-          <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page">
+          <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page" data-i18n-aria-label="share.share_page">
             <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
-            <span class="nds-label">Share Page</span>
+            <span class="nds-label" data-i18n="share.share_page">Share Page</span>
           </button>
           <div class="nds-dropmenu-menu" hidden>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
               <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
               <span class="nds-label">X</span>
             </button>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
               <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
               <span class="nds-label">LinkedIn</span>
             </button>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
               <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
               <span class="nds-label">WhatsApp</span>
             </button>
-            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-copy-label="Link Copied!" data-copy-announce="Page link copied to clipboard" data-no-auto-close>
+            <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link" data-copy-label data-no-auto-close>
               <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-              <span class="nds-label">Copy Link</span>
+              <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
             </button>
           </div>
         </div>
@@ -139,7 +139,7 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
 </script>
 <script type="text/html" id="hero-profile" data-canon>
 <section class="nds-hero-section nds-sub nds-flat">
-  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
     <ol class="nds-breadcrumb">
       <li><a href="#">Home</a></li>
       <li><a href="#">Faculty</a></li>
@@ -158,26 +158,26 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
     </div>
     <div class="nds-section-action">
       <div class="nds-share nds-dropmenu">
-        <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page">
+        <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page" data-i18n-aria-label="share.share_page">
           <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
-          <span class="nds-label">Share Page</span>
+          <span class="nds-label" data-i18n="share.share_page">Share Page</span>
         </button>
         <div class="nds-dropmenu-menu" hidden>
-          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
             <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
             <span class="nds-label">X</span>
           </button>
-          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
             <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
             <span class="nds-label">LinkedIn</span>
           </button>
-          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
             <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
             <span class="nds-label">WhatsApp</span>
           </button>
-          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-copy-label="Link Copied!" data-copy-announce="Page link copied to clipboard" data-no-auto-close>
+          <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link" data-copy-label data-no-auto-close>
             <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-            <span class="nds-label">Copy Link</span>
+            <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
           </button>
         </div>
       </div>
@@ -228,8 +228,8 @@ The hero is one region of the page. The other regions are on [Page Layout](../la
     </div>
     <div class="nds-swiper-navigation" hidden>
       <div class="nds-swiper-buttons">
-        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide"></button>
-        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide"></button>
+        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-prev" aria-label="Previous slide" data-i18n-aria-label="swiper.previous_slide"></button>
+        <button type="button" class="nds-btn nds-subtle nds-icon-only nds-next" aria-label="Next slide" data-i18n-aria-label="swiper.next_slide"></button>
       </div>
       <div class="nds-swiper-pagination"></div>
     </div>

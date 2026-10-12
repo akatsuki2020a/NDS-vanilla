@@ -35,7 +35,7 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
     </div>
     <div class="nds-section-body">
 <script type="text/html" id="topbar-canon" data-canon data-preview="page" data-preview-height="304" data-variants="topbar-variants-table">
-<div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities">
+<div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities" data-i18n-aria-label="topbar.top_bar_utilities">
   <button class="nds-btn nds-menu-btn nds-digital-stamp-tab" role="button" aria-expanded="false" aria-controls="nds-digital-stamp">
     <img class="nds-flag" src="../assets/icon/SAflag.min.svg" width="20" height="14" loading="lazy" alt="Saudi Arabia flag" data-i18n-alt="digital-stamp.flag">
     <span class="nds-digital-stamp-lg-text nds-truncate" data-i18n="digital-stamp.tab">A government website registered with the Digital Government Authority.</span>
@@ -45,7 +45,7 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
   <div class="nds-topbar-info">
     <span id="nds-date" class="nds-text-icon" data-calendar="hijri" data-hidden="sm md"></span>
     <span id="nds-real-time-clock" class="nds-text-icon" data-hidden="sm"></span>
-    <button class="nds-btn nds-subtle nds-icon-only nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" aria-label="Toggle dark mode">
+    <button class="nds-btn nds-subtle nds-icon-only nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" data-i18n-title="topbar.toggle_dark_mode" aria-label="Toggle dark mode" data-i18n-aria-label="topbar.toggle_dark_mode">
       <i class="nds-icon nds-hgi-moon-02" aria-hidden="true"></i>
     </button>
   </div>
@@ -134,7 +134,7 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
 <span id="nds-weather-info" class="nds-text-icon" data-hidden="sm" data-latitude="24.7136" data-longitude="46.6753"></span>
 </script>
 <script type="text/html" id="topbar-dark" data-canon>
-<button class="nds-btn nds-subtle nds-icon-only nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" aria-label="Toggle dark mode">
+<button class="nds-btn nds-subtle nds-icon-only nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" data-i18n-title="topbar.toggle_dark_mode" aria-label="Toggle dark mode" data-i18n-aria-label="topbar.toggle_dark_mode">
   <i class="nds-icon nds-hgi-moon-02" aria-hidden="true"></i>
 </button>
 </script>

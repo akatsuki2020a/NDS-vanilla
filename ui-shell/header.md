@@ -37,13 +37,13 @@ The code shows the outer element of each part. Copy each part whole from its own
 
 <script type="text/html" id="header-canon" data-canon data-preview="none">
 <header>
-  <div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities">
+  <div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities" data-i18n-aria-label="topbar.top_bar_utilities">
     <!-- The stamp tab, the widgets and the dark mode button: ../ui-shell/topbar -->
   </div>
-  <div id="nds-digital-stamp" role="region" aria-label="Digital government stamp" hidden>
+  <div id="nds-digital-stamp" role="region" aria-label="Digital government stamp" data-i18n-aria-label="digital-stamp.label" hidden>
     <!-- The stamp panel: ../ui-shell/topbar -->
   </div>
-  <nav class="nds-main-nav nds-content-wrapper" id="nds-main-nav" aria-label="Primary navigation">
+  <nav class="nds-main-nav nds-content-wrapper" id="nds-main-nav" aria-label="Primary navigation" data-i18n-aria-label="mainnav.primary_navigation">
     <!-- The brand, the links and the actions: ../ui-shell/mainnav -->
   </nav>
 </header>

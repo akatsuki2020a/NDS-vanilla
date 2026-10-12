@@ -38,7 +38,7 @@ Pick another component when:
 <script type="text/html" id="code-block" data-canon data-variants="code-variants-table">
 <div class="nds-code nds-expandable">
   <div class="nds-code-action">
-    <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code">
+    <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code" data-i18n-aria-label="copy.copy_code">
       <i class="nds-icon nds-hgi-copy-01"></i>
     </button>
   </div>
@@ -66,7 +66,7 @@ async function submitRequest(form) {
 <script type="text/html" id="code-tabs" data-canon>
 <div class="nds-tabs nds-code nds-divided">
   <div class="nds-tab-list-container nds-scroll-more">
-    <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Code language">
+    <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Code language" data-i18n-aria-label="code.code_language">
       <button type="button" class="nds-btn nds-subtle nds-tab" role="tab" aria-selected="true" aria-controls="code-panel-css" id="code-tab-css" tabindex="0">
         <span class="nds-label">CSS</span>
       </button>
@@ -74,14 +74,14 @@ async function submitRequest(form) {
         <span class="nds-label">JavaScript</span>
       </button>
     </nav>
-    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more">
+    <button type="button" class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more">
       <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
     </button>
   </div>
   <div class="nds-tab-content">
     <div class="nds-tab-panel" role="tabpanel" id="code-panel-css" aria-labelledby="code-tab-css" tabindex="0">
       <div class="nds-code-action">
-        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code">
+        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code" data-i18n-aria-label="copy.copy_code">
           <i class="nds-icon nds-hgi-copy-01"></i>
         </button>
       </div>
@@ -93,7 +93,7 @@ async function submitRequest(form) {
     </div>
     <div class="nds-tab-panel" role="tabpanel" id="code-panel-js" aria-labelledby="code-tab-js" tabindex="-1" hidden>
       <div class="nds-code-action">
-        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code">
+        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code" data-i18n-aria-label="copy.copy_code">
           <i class="nds-icon nds-hgi-copy-01"></i>
         </button>
       </div>
@@ -109,7 +109,7 @@ document.querySelector('.request-summary')
 <script type="text/html" id="code-markdown" data-canon>
 <div class="nds-code">
   <div class="nds-code-action">
-    <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code">
+    <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code" data-i18n-aria-label="copy.copy_code">
       <i class="nds-icon nds-hgi-copy-01"></i>
     </button>
   </div>

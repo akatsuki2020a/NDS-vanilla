@@ -19,11 +19,11 @@ sidemenu_mode: false
 
 <section id="faculty-profile" class="nds-content-section nds-sideinfo-section">
     <div class="nds-section-body">
-        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page">
-            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 5"
+        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page" data-i18n-aria-label="toc.on_this_page">
+            <nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents" style="--toc-skeleton-rows: 5"
                 data-toc-source="#faculty-profile .nds-info-content" data-toc-levels="h2">
                 <div class="nds-toc-head">
-                    <span class="nds-label">On this page</span>
+                    <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
                     <h2 class="nds-toc-title nds-truncate">Dr. Noura Al-Otaibi</h2>
                 </div>
                 <div class="nds-drawer nds-lined">

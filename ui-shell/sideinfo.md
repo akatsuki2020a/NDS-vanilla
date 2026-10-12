@@ -42,7 +42,7 @@ The side info is the side column of a standard page. The other page columns are 
     <div class="nds-section-body">
 <script type="text/html" id="sideinfo-canon" data-canon data-preview="page" data-preview-height="720" data-preview-style="@media (width >= 960px) { .nds-hero-section.nds-aside + .nds-content-layout .nds-sideinfo > :first-child .nds-content-placeholder { min-height: 500px } }" data-variants="sideinfo-variants-table">
 <section class="nds-hero-section nds-sub">
-  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+  <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
     <ol class="nds-breadcrumb">
       <li><a href="#">Home</a></li>
       <li class="nds-truncate" aria-current="page">Renew a Passport</li>

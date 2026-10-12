@@ -124,14 +124,14 @@ A count and an export group on the first row, a search box on the second, and th
           <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
           <input type="text" class="nds-search-input" placeholder="Search orders..." aria-label="Search orders">
           <div class="nds-form-action">
-            <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" hidden aria-label="Clear search">
+            <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search">
               <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
             </button>
           </div>
         </div>
         <button class="nds-btn nds-primary nds-search-btn" type="button">
           <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-          <span class="nds-label" data-hidden="sm sr">Search</span>
+          <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
         </button>
       </div>
     </div>
@@ -139,7 +139,7 @@ A count and an export group on the first row, a search box on the second, and th
   <div class="nds-toolbar-row">
     <div class="nds-toolbar-start">
       <div class="nds-filter-applied" data-filter-target="toolbar-table-body" hidden>
-        <span class="nds-label">Applied Filters:</span>
+        <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
         <div class="nds-chips"></div>
       </div>
     </div>

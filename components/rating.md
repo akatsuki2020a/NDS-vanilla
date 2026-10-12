@@ -81,7 +81,7 @@ Pick another component when:
       <hr class="nds-divider nds-lg">
       <div class="nds-dropmenu-action">
         <button class="nds-btn nds-primary nds-dropmenu-item" data-no-auto-close>
-          <span class="nds-label">Vote</span>
+          <span class="nds-label" data-i18n="rating.vote">Vote</span>
         </button>
       </div>
     </div>

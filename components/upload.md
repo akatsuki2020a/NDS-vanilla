@@ -47,14 +47,14 @@ Pick another component when:
     <div class="nds-upload-zone">
       <i class="hgi hgi-stroke hgi-file-upload nds-upload-icon" aria-hidden="true"></i>
       <div class="nds-upload-text">
-        <span class="nds-drop-hint">Drag and drop files here to upload</span>
+        <span class="nds-drop-hint" data-i18n="upload.drag_drop">Drag and drop files here to upload</span>
       </div>
       <div class="nds-upload-hint">Up to 2 MB each, in JPG, PNG or PDF</div>
     </div>
     <div class="nds-form-action">
       <button type="button" class="nds-btn nds-neutral nds-md nds-browse-btn">
         <i class="hgi hgi-stroke hgi-folder-01" aria-hidden="true"></i>
-        <span class="nds-label">Browse Files</span>
+        <span class="nds-label" data-i18n="upload.browse_files">Browse Files</span>
       </button>
     </div>
   </div>
@@ -145,7 +145,7 @@ Each file gets a row. A file the user just added is `ready`. During an upload, t
     <div class="nds-form-action">
       <button type="button" class="nds-btn nds-neutral nds-md nds-browse-btn">
         <i class="hgi hgi-stroke hgi-folder-01" aria-hidden="true"></i>
-        <span class="nds-label">Browse Files</span>
+        <span class="nds-label" data-i18n="upload.browse_files">Browse Files</span>
       </button>
     </div>
   </div>
@@ -201,7 +201,7 @@ The script draws each row from the built-in row. To customize the row, put a hid
       <div class="nds-file-error"><span class="nds-error-message"></span></div>
     </div>
     <div class="nds-file-actions">
-      <button type="button" class="nds-btn nds-subtle nds-sm nds-icon-only nds-remove-file" aria-label="Remove file">
+      <button type="button" class="nds-btn nds-subtle nds-sm nds-icon-only nds-remove-file" aria-label="Remove file" data-i18n-aria-label="upload.remove_file">
         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
       </button>
     </div>

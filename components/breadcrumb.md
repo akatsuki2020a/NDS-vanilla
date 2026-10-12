@@ -37,7 +37,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body">
 <script type="text/html" id="breadcrumb-standard" data-canon data-variants="breadcrumb-variants-table">
-<nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+<nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
   <ol class="nds-breadcrumb">
     <li><a href="#">Home</a></li>
     <li><a href="#">Services</a></li>
@@ -47,7 +47,7 @@ Pick another component when:
 </script>
 
 <script type="text/html" id="breadcrumb-two-levels" data-canon>
-<nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+<nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
   <ol class="nds-breadcrumb">
     <li><a href="#">Home</a></li>
     <li aria-current="page">Services</li>
@@ -56,7 +56,7 @@ Pick another component when:
 </script>
 
 <script type="text/html" id="breadcrumb-deep" data-canon>
-<nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+<nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
   <ol class="nds-breadcrumb">
     <li><a href="#">Home</a></li>
     <li><a href="#">Services</a></li>
