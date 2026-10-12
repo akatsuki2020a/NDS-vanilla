@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 10:10 PM"
+last_edit: "12/10/2026 - 06:30 PM"
 ---
 
 <section id="empty-overview" class="nds-content-section nds-doc-overview">
@@ -198,7 +198,7 @@ In a table, the placeholder is one row with one cell across every column. The sc
 
 - Show [Loading](../components/loading) while data loads, not the placeholder. If the request returns no items, the placeholder then shows.
 - Write a `data-empty-message` that says why the container has no items, or what the user can do next. "No requests match your search" tells the user more than "Empty".
-- Keep the message to one short sentence. Put longer help outside the container.
+- Keep the message to one short sentence. Put longer help and any button, such as "Add a request", outside the container: the placeholder holds the message only.
 - Wrap text content in an element. The script counts child elements only, so a container that holds only text still shows the placeholder.
 - Do not add your own "no results" markup to the container. The script counts it as an item, so the placeholder never shows.
 - When your code counts the items in a container, skip the element with `data-nds-empty-placeholder`.
