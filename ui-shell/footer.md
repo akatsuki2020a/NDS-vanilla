@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 09:13 AM"
+last_edit: "12/10/2026 - 06:51 PM"
 ---
 
 <section id="footer-overview" class="nds-content-section nds-doc-overview">
@@ -67,7 +67,15 @@ The main navigation belongs in the [Header](../ui-shell/header), and the navigat
             <span class="nds-label">info@example.gov.sa</span>
           </a>
         </li>
+        <li>
+          <i class="nds-icon nds-hgi-location-01" aria-hidden="true"></i>
+          <span>King Fahd Road, Riyadh</span>
+        </li>
       </ul>
+    </div>
+    <div class="nds-footer-column">
+      <span class="nds-footer-heading">Working Hours</span>
+      <p>Sunday to Thursday, 8 AM to 3 PM. Closed on public holidays.</p>
     </div>
     <div class="nds-footer-column nds-footer-icons">
       <div class="nds-footer-icon-group">
@@ -151,7 +159,7 @@ The main navigation belongs in the [Header](../ui-shell/header), and the navigat
 |---|---|---|
 | `footer.nds-footer` | The whole footer. Add `nds-content-wrapper` to keep its content at the page width | Yes |
 | `nav.nds-footer-content` | The columns | No |
-| `.nds-footer-column` | One `.nds-footer-heading` and one `ul.nds-footer-list` of `a.nds-link.nds-footer-link` links. A link can start with an icon | No |
+| `.nds-footer-column` | One `.nds-footer-heading` and one `ul.nds-footer-list` of `a.nds-link.nds-footer-link` links. A link can start with an icon. An item can also hold plain text, such as an address, with or without an icon. A column can hold text instead of the list, such as a `<p>` with the working hours | No |
 | `.nds-footer-column.nds-footer-icons` | The social and app groups, side by side | No |
 | `.nds-footer-icon-group` | One `.nds-footer-heading` and one `.nds-footer-icon-row` of icon buttons. An app-store button adds `.nds-xl`, with the mark `nds-icon-apple`, `nds-icon-google-play` or `nds-icon-huawei` | No |
 | `hr.nds-divider.nds-lg` | The line between the columns and the bottom bar | No |
@@ -204,6 +212,13 @@ The main navigation belongs in the [Header](../ui-shell/header), and the navigat
             <span class="nds-label">Icons Column</span>
           </span>
           <p class="nds-item-desc">The social and app groups sit side by side in one column, and take a full row below 960px.</p>
+        </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-text-font"></i>
+            <span class="nds-label">Any Text</span>
+          </span>
+          <p class="nds-item-desc">Text anywhere in the footer takes the footer's size and color, with no extra class: an address in a list, a paragraph in a column. A long word or address wraps inside its column.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
