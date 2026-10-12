@@ -4,7 +4,7 @@
 # font-scaling, reading-mask, motor, …), the accessibility FAB + panel + reading
 # mask chrome, and the dyslexia-mode @font-face declarations.
 # Requires nds-main.min.css (references its design tokens). Not linked in
-# <head> — nds-accessibility.js requests it when the panel arms. Drop the
+# <head> — the loader requests it with nds-accessibility.min.js when the panel arms. Drop the
 # accessibility-panel.html include and the script to ship your own
 # accessibility solution instead.
 # The a11y baked into the core (focus rings, ARIA, semantic contrast,

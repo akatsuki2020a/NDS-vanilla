@@ -30,7 +30,7 @@
     'use strict';
 
     // English defaults; the assets/i18n/{lang}.json pack overrides them. The overlay markup carries
-    // the same words, swapped by NDS.i18n.load('ipv', overlay).
+    // the same words as data-i18n markers.
     NDS.i18n.strings('ipv', {
         viewerLabel: 'Image viewer',
         zoomIn: 'Zoom in',
@@ -129,17 +129,6 @@
 
             this.attachControlEvents();
             this.attachGlobalEvents();
-
-            // Localize the injected overlay. English defaults are baked into the
-            // markup, so this is fire-and-forget (the first open may show English
-            // for a beat on a localized page — the same arm-time pattern the
-            // accessibility panel uses). The dialog's own aria-label can't be
-            // reached by apply()'s descendant walk, so set it from the returned data.
-            NDS.i18n.load('ipv', this.el.overlay).then((data) => {
-                if (data && data.viewerLabel) {
-                    this.el.overlay.setAttribute('aria-label', data.viewerLabel);
-                }
-            });
         }
 
         // ── Utilities ────────────────────────────────────────────────────
@@ -534,38 +523,37 @@
         }
     }
 
-    // Inject the overlay markup once. English strings are baked in alongside
-    // data-i18n keys so it renders correctly with no JSON / before NDS.i18n
-    // resolves; NDS.i18n.load('ipv', overlay) swaps them per locale at init.
+    // Inject the overlay markup once. Its English sits beside data-i18n markers, which core
+    // translates when the overlay joins the page.
     function createOverlayMarkup() {
         if (document.getElementById('nds-ipv-popup-overlay')) return;
 
         const overlayHTML = `
-            <div class="nds-ipv-popup-overlay" id="nds-ipv-popup-overlay" data-theme="dark" role="dialog" aria-modal="true" aria-label="Image viewer">
+            <div class="nds-ipv-popup-overlay" id="nds-ipv-popup-overlay" data-theme="dark" role="dialog" aria-modal="true" aria-label="Image viewer" data-i18n-aria-label="ipv.viewerLabel">
                 <div class="nds-ipv-popup-container">
                     <div class="nds-ipv-popup-controls">
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-zoom-in-btn" title="Zoom In" aria-label="Zoom in" data-i18n-attr="aria-label:zoomIn,title:zoomIn">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-zoom-in-btn" title="Zoom in" aria-label="Zoom in" data-i18n-aria-label="ipv.zoomIn" data-i18n-title="ipv.zoomIn">
                             <i class="nds-icon nds-hgi-zoom-in-area" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-zoom-out-btn" title="Zoom Out" aria-label="Zoom out" data-i18n-attr="aria-label:zoomOut,title:zoomOut">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-zoom-out-btn" title="Zoom out" aria-label="Zoom out" data-i18n-aria-label="ipv.zoomOut" data-i18n-title="ipv.zoomOut">
                             <i class="nds-icon nds-hgi-zoom-out-area" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-reset-zoom-btn" title="Reset Zoom" aria-label="Reset zoom" data-i18n-attr="aria-label:resetZoom,title:resetZoom">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-reset-zoom-btn" title="Reset zoom" aria-label="Reset zoom" data-i18n-aria-label="ipv.resetZoom" data-i18n-title="ipv.resetZoom">
                             <i class="nds-icon nds-hgi-square-arrow-shrink-01" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-ui-toggle-btn" title="Hide UI" aria-label="Toggle controls" data-i18n-attr="aria-label:toggleUI,title:toggleUI">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-ui-toggle-btn" title="Toggle controls" aria-label="Toggle controls" data-i18n-aria-label="ipv.toggleUI" data-i18n-title="ipv.toggleUI">
                             <i class="nds-icon nds-hgi-eye" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-close-btn" title="Close" aria-label="Close" data-i18n-attr="aria-label:close,title:close">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-close-btn" title="Close" aria-label="Close" data-i18n-aria-label="ipv.close" data-i18n-title="ipv.close">
                             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                         </button>
                     </div>
 
                     <div class="nds-ipv-navigation-controls">
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-prev-btn" title="Previous Image" aria-label="Previous image" data-i18n-attr="aria-label:prevImage,title:prevImage">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-prev-btn" title="Previous image" aria-label="Previous image" data-i18n-aria-label="ipv.prevImage" data-i18n-title="ipv.prevImage">
                             <i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-next-btn" title="Next Image" aria-label="Next image" data-i18n-attr="aria-label:nextImage,title:nextImage">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-next-btn" title="Next image" aria-label="Next image" data-i18n-aria-label="ipv.nextImage" data-i18n-title="ipv.nextImage">
                             <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
                         </button>
                     </div>
@@ -573,13 +561,13 @@
                     <div class="nds-ipv-image-counter" id="nds-ipv-image-counter">1 / 1</div>
 
                     <div class="nds-ipv-instructions" data-hidden="sm">
-                        <strong data-i18n="instructionsTitle">Controls:</strong><br>
-                        <span data-i18n="instructionsScroll">• Scroll to zoom</span><br>
-                        <span data-i18n="instructionsDrag">• Drag to pan</span><br>
-                        <span data-i18n="instructionsReset">• Double-click to reset</span><br>
-                        <span data-i18n="instructionsNav">• Arrow keys to navigate</span><br>
-                        <span data-i18n="instructionsToggle">• H key to toggle UI</span><br>
-                        <span data-i18n="instructionsClose">• ESC to close</span>
+                        <strong data-i18n="ipv.instructionsTitle">Controls:</strong><br>
+                        <span data-i18n="ipv.instructionsScroll">• Scroll to zoom</span><br>
+                        <span data-i18n="ipv.instructionsDrag">• Drag to pan</span><br>
+                        <span data-i18n="ipv.instructionsReset">• Double-click to reset</span><br>
+                        <span data-i18n="ipv.instructionsNav">• Arrow keys to navigate</span><br>
+                        <span data-i18n="ipv.instructionsToggle">• H key to toggle UI</span><br>
+                        <span data-i18n="ipv.instructionsClose">• ESC to close</span>
                     </div>
 
                     <div class="nds-ipv-zoom-info" id="nds-ipv-zoom-info">100%</div>

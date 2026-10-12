@@ -102,6 +102,9 @@
 - { kind: class, name: showZoom, scope: .nds-card, status: renamed, use: nds-zoom-badge, since: "2.0.0", fix: "Use nds-zoom-badge." }
 - { kind: class, name: sr-only, scope: "[class*=\"nds-\"]", status: renamed, use: nds-sr-only, since: "2.0.0", fix: "Use nds-sr-only." }
 - { kind: class, name: table-actions, scope: .nds-table, status: renamed, use: nds-table-actions, since: "2.0.0", fix: "Use nds-table-actions." }
+- { kind: attribute, name: data-i18n-attr, status: renamed, use: data-i18n-aria-label, since: "2.0.0", fix: "Write one marker per attribute, with the section in the key: data-i18n-attr=\"aria-label:close_panel\" becomes data-i18n-aria-label=\"accessibility.close_panel\" (also -title, -alt, -placeholder, -label, -aria-description)." }
+- { kind: attribute, name: data-i18n-name, status: renamed, use: data-i18n, since: "2.0.0", fix: "Write data-i18n=\"accessibility.mode_{id}\", the mode id with underscores: data-i18n=\"accessibility.mode_epilepsy_safe\"." }
+- { kind: attribute, name: data-i18n-desc, status: renamed, use: data-i18n, since: "2.0.0", fix: "Write data-i18n=\"accessibility.mode_{id}_desc\", the mode id with underscores." }
 - { kind: attribute, name: data-accept-message, scope: ":is(.nds-cookie-popup, #ndsCookiesPopup)", status: removed, since: "2.0.0", fix: "Remove it: there is no toast now, and the Done view text comes from the i18n keys done_title and done." }
 - { kind: attribute, name: data-accept-title, scope: ":is(.nds-cookie-popup, #ndsCookiesPopup)", status: removed, since: "2.0.0", fix: "Remove it: there is no toast now, and the Done view text comes from the i18n keys done_title and done." }
 - { kind: attribute, name: data-always-open-on, scope: "&.nds-drawer", status: removed, since: "2.0.0", fix: "Remove it: a drawer no longer locks open by screen width. data-state=\"always-open\" is different: it lets several submenus stay open." }

@@ -1,8 +1,7 @@
 // NDS words: check them, and with --build write the packs NDS ships.
 // English is built in: a script's words are its NDS.i18n.strings() defaults, a marker's word is its
 // markup. Each pack in _i18n/<lang>.json (NDS maintainers edit these) holds every English word and
-// no other; Accessibility's own folder (assets/i18n/accessibility/) mirrors its en.json. A marker
-// names a plain word its markup matches. No _js/ file carries Arabic or reads NDS.langKey.
+// no other. A marker names a plain word its markup matches. No _js/ file carries Arabic or reads NDS.langKey.
 // --build writes assets/i18n/<lang>.json (minified, banner key "_") and _data/i18n.json, the word
 // list core/i18n.md prints; without it, a built file that is out of date fails.
 // No browser. Usage: node scripts/check-i18n.mjs [--build]   (js_processor.rb runs --build)
@@ -69,10 +68,9 @@ for (const rel of markupFiles) {
     // Lookahead for the next tag, so it stays matchable when it follows directly.
     for (const tag of src.matchAll(/<([a-zA-Z][\w-]*)\b([^<>]*)>([^<]*)(?=(<\/?)?)/g)) {
         const [, , attrs, after, next] = tag;
+        if (/\sdata-i18n-(?:attr|name|desc)\b|\sdata-i18n-label(?=[\s/>]|$)/.test(attrs)) fails.push(`${rel}: a 1.x marker (data-i18n-attr, -name, -desc, or data-i18n-label with no value): use data-i18n and data-i18n-{attribute}`);
         for (const [, name, ref] of attrs.matchAll(MARK)) {
             if (/[${]/.test(ref)) continue;              // built from a variable in a script
-            // ponytail: undotted refs are the 1.x Accessibility/IPV keys; step 2 of plans/i18n-markers.md moves them and drops this skip.
-            if (!ref.includes('.')) continue;
             const m = REF.exec(ref);
             if (!m) { fails.push(`${rel}: ${name}="${ref}" is not section.key`); continue; }
             let word;
@@ -125,16 +123,6 @@ for (const [l, pack] of Object.entries(packs)) {
 }
 for (const [c, en] of Object.entries(english)) for (const [k, v] of Object.entries(en)) {
     if (kind(v) === 'plural' && typeof v.other !== 'string') fails.push(`${c}.${k}: plural without "other"`);
-}
-
-// Accessibility's own folder, until it joins the pack: every language mirrors its en.json.
-for (const c of readdirSync(OUT, { withFileTypes: true }).filter(d => d.isDirectory()).map(d => d.name)) {
-    const enPath = join(OUT, c, 'en.json');
-    if (!existsSync(enPath)) { fails.push(`${c}: no en.json`); continue; }
-    const en = JSON.parse(read(enPath));
-    for (const f of readdirSync(join(OUT, c)).filter(f => f.endsWith('.json') && f !== 'en.json')) {
-        mirror(c, en, JSON.parse(read(join(OUT, c, f))), `${c}/${f}`);
-    }
 }
 
 // 4. No hardcoded language text left in the scripts.

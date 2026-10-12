@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.5"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 11:09 AM"
+last_edit: "12/10/2026 - 10:22 PM"
 ---
 
 <section id="accessibility-overview" class="nds-content-section nds-doc-overview">
@@ -48,7 +48,7 @@ Pick another component when:
 <button class="nds-btn nds-primary nds-circle nds-icon-only nds-fab nds-accessibility-toggle"
         type="button"
         aria-label="Accessibility settings"
-        data-i18n-attr="aria-label:panel_label"
+        data-i18n-aria-label="accessibility.panel_label"
         aria-expanded="false"
         data-fab-pos="auto"
         data-panel-side="end"
@@ -97,7 +97,7 @@ The script loads at page load only for a visitor with saved settings, so their m
 ### Custom Panel
 {: .nds-block-title}
 
-To change the panel, put your own copy in a `<template class="nds-panel-template">` on every page that has the FAB. It replaces the panel the script builds. The copy below is that panel, with its English text. The language file still writes the text of every element that keeps a `data-i18n`, `data-i18n-attr`, `data-i18n-name`, `data-i18n-desc` or `data-i18n-label` attribute. Remove the attribute to keep your own text.
+To change the panel, put your own copy in a `<template class="nds-panel-template">` on every page that has the FAB. It replaces the panel the script builds. The copy below is that panel, with its English text. NDS still writes the page language's word into every element that keeps a `data-i18n` or `data-i18n-{attribute}` marker. Remove the marker to keep your own text.
 
 <script type="text/html" id="a11y-panel" data-canon data-preview="none">
 <template class="nds-panel-template">
@@ -105,7 +105,7 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
      class="nds-panel nds-accessibility-panel"
      data-panel-side="end"
      aria-label="Accessibility settings"
-     data-i18n-attr="aria-label:panel_label"
+     data-i18n-aria-label="accessibility.panel_label"
      data-accessibility-panel
      hidden>
 
@@ -114,13 +114,13 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
         <i class="nds-icon nds-hgi-accessibility" aria-hidden="true"></i>
       </span>
       <div class="nds-panel-text">
-        <h2 class="nds-panel-title" data-i18n="panel_title">Accessibility Tools</h2>
+        <h2 class="nds-panel-title" data-i18n="accessibility.panel_title">Accessibility Tools</h2>
       </div>
       <button class="nds-btn nds-subtle nds-icon-only"
           data-panel-close
           type="button"
           aria-label="Close accessibility panel"
-          data-i18n-attr="aria-label:close_panel">
+          data-i18n-aria-label="accessibility.close_panel">
         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
       </button>
     </div>
@@ -137,7 +137,7 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                 data-theme-toggle
                 type="button"
                 aria-label="Toggle theme"
-                data-i18n-attr="aria-label:toggle_theme">
+                data-i18n-aria-label="accessibility.toggle_theme">
               <i class="nds-icon nds-hgi-moon-02" aria-hidden="true"></i>
             </button>
           </div>
@@ -156,7 +156,7 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                 aria-expanded="true"
                 data-state="open"
                 aria-controls="a11y-modes-collapse">
-              <span class="nds-accordion-title"><span data-i18n="section_modes">Accessibility Modes</span> <span class="nds-a11y-count nds-tag nds-green nds-rounded nds-sm" data-a11y-count="modes" aria-hidden="true"></span><span class="nds-sr-only" data-a11y-count-sr="modes"></span></span>
+              <span class="nds-accordion-title"><span data-i18n="accessibility.section_modes">Accessibility Modes</span> <span class="nds-a11y-count nds-tag nds-green nds-rounded nds-sm" data-a11y-count="modes" aria-hidden="true"></span><span class="nds-sr-only" data-a11y-count-sr="modes"></span></span>
             </button>
           </h3>
           <div class="nds-accordion-collapse" id="a11y-modes-collapse" data-state="open">
@@ -164,11 +164,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
               <div class="nds-accordion-body">
                 <fieldset class="nds-form-group nds-switch-group">
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="epilepsy-safe">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-epilepsy-safe">
-                        <span class="nds-label" data-i18n-name>Epilepsy Safe Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Stops motion and dampens color intensity</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_epilepsy_safe">Epilepsy Safe Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_epilepsy_safe_desc">Stops motion and dampens color intensity</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -179,11 +179,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                     </div>
                   </div>
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="visually-impaired">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-visually-impaired">
-                        <span class="nds-label" data-i18n-name>Visually Impaired Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Enlarges text and boosts contrast for clearer reading</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_visually_impaired">Visually Impaired Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_visually_impaired_desc">Enlarges text and boosts contrast for clearer reading</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -194,11 +194,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                     </div>
                   </div>
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="cognitive-disability">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-cognitive-disability">
-                        <span class="nds-label" data-i18n-name>Cognitive Disability Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Highlights titles and stops motion to reduce distraction</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_cognitive_disability">Cognitive Disability Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_cognitive_disability_desc">Highlights titles and stops motion to reduce distraction</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -209,11 +209,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                     </div>
                   </div>
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="motor-impaired">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-motor-impaired">
-                        <span class="nds-label" data-i18n-name>Motor Impaired Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Enlarges click targets</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_motor_impaired">Motor Impaired Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_motor_impaired_desc">Enlarges click targets</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -224,11 +224,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                     </div>
                   </div>
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="colorblind">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-colorblind">
-                        <span class="nds-label" data-i18n-name>Colorblind Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Adjusts colors to distinguish red and green clearly</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_colorblind">Colorblind Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_colorblind_desc">Adjusts colors to distinguish red and green clearly</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -239,11 +239,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                     </div>
                   </div>
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="dyslexia-friendly">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-dyslexia-friendly">
-                        <span class="nds-label" data-i18n-name>Dyslexia Friendly Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Uses a clearer font and widens line and word spacing</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_dyslexia_friendly">Dyslexia Friendly Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_dyslexia_friendly_desc">Uses a clearer font and widens line and word spacing</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -254,11 +254,11 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                     </div>
                   </div>
 
-                  <div class="nds-form-container nds-switch-container" data-mode-id="adhd-friendly">
+                  <div class="nds-form-container nds-switch-container">
                     <div class="nds-form-header">
                       <label for="a11y-mode-adhd-friendly">
-                        <span class="nds-label" data-i18n-name>ADHD Friendly Mode</span>
-                        <span class="nds-info"  data-i18n-desc>Stops motion, highlights titles, and enables the reading mask</span>
+                        <span class="nds-label" data-i18n="accessibility.mode_adhd_friendly">ADHD Friendly Mode</span>
+                        <span class="nds-info"  data-i18n="accessibility.mode_adhd_friendly_desc">Stops motion, highlights titles, and enables the reading mask</span>
                       </label>
                     </div>
                     <div class="nds-form-control">
@@ -282,72 +282,72 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                 type="button"
                 aria-expanded="false"
                 aria-controls="a11y-readable-collapse">
-              <span class="nds-accordion-title"><span data-i18n="section_readable">Readable Experience</span> <span class="nds-a11y-count nds-tag nds-green nds-rounded nds-sm" data-a11y-count="readable" aria-hidden="true"></span><span class="nds-sr-only" data-a11y-count-sr="readable"></span></span>
+              <span class="nds-accordion-title"><span data-i18n="accessibility.section_readable">Readable Experience</span> <span class="nds-a11y-count nds-tag nds-green nds-rounded nds-sm" data-a11y-count="readable" aria-hidden="true"></span><span class="nds-sr-only" data-a11y-count-sr="readable"></span></span>
             </button>
           </h3>
           <div class="nds-accordion-collapse" id="a11y-readable-collapse">
             <div class="nds-accordion-content">
               <div class="nds-accordion-body">
-                <div class="nds-grid" role="group" aria-label="Readable experience controls" data-i18n-attr="aria-label:aria_readable">
+                <div class="nds-grid" role="group" aria-label="Readable experience controls" data-i18n-aria-label="accessibility.aria_readable">
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-setting="font-step" data-a11y-cycle="0,1,2,3" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-text-smallcaps" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="font_sizing">Font Sizing</span>
+                    <span class="nds-label" data-i18n="accessibility.font_sizing">Font Sizing</span>
                     <span class="nds-accessibility-tile-bars" data-a11y-bars aria-hidden="true"></span>
-                    <span class="nds-sr-only" data-a11y-value data-i18n="default">Default</span>
+                    <span class="nds-sr-only" data-a11y-value>Default</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-mode="dyslexia" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-glasses" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="dyslexia">Dyslexia Friendly</span>
+                    <span class="nds-label" data-i18n="accessibility.dyslexia">Dyslexia Friendly</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-mode="highlight-titles" aria-pressed="false">
                     <i class="nds-icon nds-hgi-highlighter" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="highlight_titles">Highlight Titles</span>
+                    <span class="nds-label" data-i18n="accessibility.highlight_titles">Highlight Titles</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-mode="highlight-links" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-link-04" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="highlight_links">Highlight Links</span>
+                    <span class="nds-label" data-i18n="accessibility.highlight_links">Highlight Links</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-mode="reading-mask" aria-pressed="false">
                     <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="reading_mask">Reading Mask</span>
+                    <span class="nds-label" data-i18n="accessibility.reading_mask">Reading Mask</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-mode="reduce-motion" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-pause" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="pause_motion">Pause Motion</span>
+                    <span class="nds-label" data-i18n="accessibility.pause_motion">Pause Motion</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-setting="text-align" data-a11y-cycle="default,end,start,justify" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-text-align-left" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="text_align">Text Alignment</span>
+                    <span class="nds-label" data-i18n="accessibility.text_align">Text Alignment</span>
                     <span class="nds-accessibility-tile-bars" data-a11y-bars aria-hidden="true"></span>
-                    <span class="nds-sr-only" data-a11y-value data-i18n="default">Default</span>
+                    <span class="nds-sr-only" data-a11y-value>Default</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-setting="line-height" data-a11y-cycle="normal,1.6,1.8,2.0" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-paragraph-spacing" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="line_height">Line Height</span>
+                    <span class="nds-label" data-i18n="accessibility.line_height">Line Height</span>
                     <span class="nds-accessibility-tile-bars" data-a11y-bars aria-hidden="true"></span>
-                    <span class="nds-sr-only" data-a11y-value data-i18n="default">Default</span>
+                    <span class="nds-sr-only" data-a11y-value>Default</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-setting="letter-spacing" data-a11y-cycle="0,0.04em,0.08em,0.12em" data-a11y-exclude-token="letter-spacing" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-letter-spacing" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="letter_spacing">Letter Spacing</span>
+                    <span class="nds-label" data-i18n="accessibility.letter_spacing">Letter Spacing</span>
                     <span class="nds-accessibility-tile-bars" data-a11y-bars aria-hidden="true"></span>
-                    <span class="nds-sr-only" data-a11y-value data-i18n="default">Default</span>
+                    <span class="nds-sr-only" data-a11y-value>Default</span>
                   </button>
 
                   <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-setting="word-spacing" data-a11y-cycle="0,0.16em,0.32em,0.48em" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-text-kerning" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n="word_spacing">Word Spacing</span>
+                    <span class="nds-label" data-i18n="accessibility.word_spacing">Word Spacing</span>
                     <span class="nds-accessibility-tile-bars" data-a11y-bars aria-hidden="true"></span>
-                    <span class="nds-sr-only" data-a11y-value data-i18n="default">Default</span>
+                    <span class="nds-sr-only" data-a11y-value>Default</span>
                   </button>
 
                 </div>
@@ -363,42 +363,42 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
                 type="button"
                 aria-expanded="false"
                 aria-controls="a11y-visual-collapse">
-              <span class="nds-accordion-title"><span data-i18n="section_visual">Visually Pleasing Experience</span> <span class="nds-a11y-count nds-tag nds-green nds-rounded nds-sm" data-a11y-count="visual" aria-hidden="true"></span><span class="nds-sr-only" data-a11y-count-sr="visual"></span></span>
+              <span class="nds-accordion-title"><span data-i18n="accessibility.section_visual">Visually Pleasing Experience</span> <span class="nds-a11y-count nds-tag nds-green nds-rounded nds-sm" data-a11y-count="visual" aria-hidden="true"></span><span class="nds-sr-only" data-a11y-count-sr="visual"></span></span>
             </button>
           </h3>
           <div class="nds-accordion-collapse" id="a11y-visual-collapse">
             <div class="nds-accordion-content">
               <div class="nds-accordion-body">
-                <div class="nds-grid" role="group" aria-label="Visual adjustments" data-i18n-attr="aria-label:aria_visual">
+                <div class="nds-grid" role="group" aria-label="Visual adjustments" data-i18n-aria-label="accessibility.aria_visual">
 
-                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="boost-contrast" data-visual-id="boost-contrast" aria-pressed="false">
+                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="boost-contrast" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-flash" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n-label>Boost Contrast</span>
+                    <span class="nds-label" data-i18n="accessibility.visual_boost_contrast">Boost Contrast</span>
                   </button>
 
-                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="monochrome" data-visual-id="monochrome" aria-pressed="false">
+                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="monochrome" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-color-picker" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n-label>Monochrome</span>
+                    <span class="nds-label" data-i18n="accessibility.visual_monochrome">Monochrome</span>
                   </button>
 
-                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="high-contrast" data-visual-id="high-contrast" aria-pressed="false">
+                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="high-contrast" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-blur" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n-label>High Contrast</span>
+                    <span class="nds-label" data-i18n="accessibility.visual_high_contrast">High Contrast</span>
                   </button>
 
-                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="high-saturation" data-visual-id="high-saturation" aria-pressed="false">
+                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="high-saturation" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-sparkles" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n-label>High Saturation</span>
+                    <span class="nds-label" data-i18n="accessibility.visual_high_saturation">High Saturation</span>
                   </button>
 
-                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="low-saturation" data-visual-id="low-saturation" aria-pressed="false">
+                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="low-saturation" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-droplet" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n-label>Low Saturation</span>
+                    <span class="nds-label" data-i18n="accessibility.visual_low_saturation">Low Saturation</span>
                   </button>
 
-                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="cvd-deutan" data-visual-id="cvd-deutan" aria-pressed="false">
+                  <button type="button" class="nds-btn nds-secondary-outline nds-indicator" data-a11y-visual="cvd-deutan" aria-pressed="false">
                     <i class="hgi hgi-stroke hgi-colors" aria-hidden="true"></i>
-                    <span class="nds-label" data-i18n-label>Deuteranopia</span>
+                    <span class="nds-label" data-i18n="accessibility.visual_cvd_deutan">Deuteranopia</span>
                   </button>
 
                 </div>
@@ -410,7 +410,7 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
       </div>
 
         </div>
-        <button class="nds-btn nds-subtle nds-show-more" type="button" aria-label="Scroll panel" data-i18n-attr="aria-label:scroll_panel">
+        <button class="nds-btn nds-subtle nds-show-more" type="button" aria-label="Scroll panel" data-i18n-aria-label="accessibility.scroll_panel">
           <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
         </button>
       </div>
@@ -418,7 +418,7 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
 
     <div class="nds-panel-footer">
       <button class="nds-btn nds-secondary-outline" type="button" data-accessibility-action="reset">
-        <span class="nds-label" data-i18n="reset">Reset Settings</span>
+        <span class="nds-label" data-i18n="accessibility.reset">Reset Settings</span>
         <div class="nds-progress-circle">
           <svg width="100%" height="100%" viewBox="0 0 24 24">
             <circle class="nds-progress-bg" cx="12" cy="12" r="10" fill="none" stroke-width="2"></circle>
@@ -439,7 +439,7 @@ To remove the panel from a page, delete its FAB and every other `data-accessibil
 ### Text
 {: .nds-block-title}
 
-The panel reads its text from `assets/i18n/accessibility/en.json` and `ar.json`. To change some of it, set `window.NDS_I18N.accessibility` before the NDS scripts: each key you set replaces that text, and the rest keep the file's text. See [Internationalization](../core/i18n).
+The panel reads its English from the script and its Arabic from the `accessibility` section of `assets/i18n/ar.json`. To change some of it, set `window.NDS_I18N.accessibility` before the NDS scripts: each key you set replaces that text, and the rest keep the file's text. See [Internationalization](../core/i18n).
 
 </div>
   </div>
@@ -506,7 +506,7 @@ The panel reads its text from `assets/i18n/accessibility/en.json` and `ar.json`.
             <i class="hgi hgi-stroke hgi-megaphone-01"></i>
             <span class="nds-label">Localized Live Announcements</span>
           </span>
-          <p class="nds-item-desc">A screen reader hears every change and reset in the page's language. The text comes from <code class="nds-inline-code lang-js">assets/i18n/accessibility/{lang}.json</code>.</p>
+          <p class="nds-item-desc">A screen reader hears every change and reset in the page's language. The text comes from the <code class="nds-inline-code lang-js">accessibility</code> section of the pack.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -576,14 +576,12 @@ The panel reads its text from `assets/i18n/accessibility/en.json` and `ar.json`.
 | `data-a11y-status` | a screen-reader `role="status"` element in the panel | The script writes each announcement in it |
 | `data-a11y-count` | the count tag in an accordion title | `modes`, `readable` or `visual`. The script writes the group's count in it. It counts inside `#a11y-modes-collapse`, `#a11y-readable-collapse` and `#a11y-visual-collapse`, so keep those ids |
 | `data-a11y-count-sr` | a screen-reader span next to the tag | The same group names. The script writes the count as text for screen readers |
-| `data-mode-id` | a mode switch container | The mode whose name and description the language file writes in it |
 | `data-a11y-mode` | a mode switch input, or a tile button | The mode or token the control turns on and off: a name from Modes or from Tokens on `<html>` |
 | `data-a11y-setting` | a tile button with levels | The setting the tile changes. The panel's values: `font-step` `0,1,2,3`, `text-align` `default,end,start,justify`, `line-height` `normal,1.6,1.8,2.0`, `letter-spacing` `0,0.04em,0.08em,0.12em`, `word-spacing` `0,0.16em,0.32em,0.48em` |
 | `data-a11y-cycle` | the same tile button | The values a press steps through, separated by commas. The first value is the default |
 | `data-a11y-bars` | a span in that tile | The script adds one bar for each value after the first |
 | `data-a11y-value` | a screen-reader span in that tile | The script writes the current value in it |
 | `data-a11y-visual` | a filter tile button | The filter the tile turns on. Turning it on turns the other filters off |
-| `data-visual-id` | a filter tile button | The filter whose label the language file writes in it |
 | `data-a11y-exclude-token` | a tile button | The script removes the tile when the language file lists this value in `exclude_controls`. The Arabic file lists `letter-spacing`, because letter spacing breaks Arabic's joined letters |
 | `data-state~="selected"` | a tile button | The script sets it, with `aria-pressed="true"`, while the tile is on, and removes it when the tile turns off |
 | `data-accessibility-action` | the reset button | `="reset"`. Two presses within 5 seconds reset every setting |

@@ -37,9 +37,8 @@
  *                                      calendar days, Gregorian or Hijri (Umm al-Qura);
  *                                      <html data-timezone / data-date-format>
  *     NDS.announce(text)               say something in the shared live region
- *     NDS.i18n.load(component, scopes) fetch + apply a component's string table (en
- *                                      fallback; stamps data-i18n / data-i18n-attr in scope;
- *                                      each scope holds its skeleton until the strings land)
+ *     NDS.i18n.load(component, scopes) a promise of a section's words; each scope holds its
+ *                                      skeleton until they land
  *     NDS.i18n.strings(component, defaults) → { text, set, load }   a component's strings;
  *                                      set() re-writes its text when the file lands
  *     data-i18n="section.key" · data-i18n-{aria-label|aria-description|title|alt|placeholder|label}
@@ -173,26 +172,19 @@
     };
     const I18N_MARK_SEL = Object.keys(I18N_MARKS).map(a => `[${a}]`).join(',');
     NDS.i18n = {
-        _files: Object.create(null),   // 'ar' or 'accessibility/ar' → data, once landed (null when none)
+        _files: Object.create(null),   // 'ar' → the pack, once landed (null when none)
         _loads: Object.create(null),   // same keys → Promise<data>
 
-        // Load translations for a component and apply them to its scope(s).
-        // Each scope holds its skeleton (data-state loading) until they land,
-        // so an Arabic page never paints English first; a scope that was
-        // already loading keeps it.
+        // A promise of a section's words. Each scope holds its skeleton (data-state loading)
+        // until they land, so an Arabic page never paints English first; a scope that was
+        // already loading keeps it. ponytail: scopes go with their last callers (plans/i18n-markers.md, step 3).
         load(component, scopes, lang) {
-            if (this._fromFiles(component, lang) !== undefined) {
-                const data = this._section(component, lang);
-                if (data && scopes) this.apply(scopes, data);
-                return Promise.resolve(data);
-            }
+            if (this._fromFiles(component, lang) !== undefined) return Promise.resolve(this._section(component, lang));
             const held = scopes ? this._roots(scopes).filter(r => !NDS.State.has(r, 'loading')) : [];
             held.forEach(r => NDS.State.add(r, 'loading'));
             return this._get(component, lang).then(() => {
-                const d = this._section(component, lang);
-                if (d && scopes) this.apply(scopes, d);
                 held.forEach(r => NDS.State.remove(r, 'loading'));
-                return d;
+                return this._section(component, lang);
             });
         },
 
@@ -207,11 +199,8 @@
         // A section's words in a language: undefined until known, then the pack's section, or
         // null when it has none. English is built in (the JS defaults and the markup), so an
         // English page loads no file. Ignores the override: an override is no sign the file landed.
-        // ponytail: Accessibility alone keeps its own files (accessibility/{lang}.json, its en
-        // included) until it joins the pack; then the own-file branches go.
         _fromFiles(component, lang) {
             lang = this._lang(lang);
-            if (component === 'accessibility') return this._files['accessibility/' + lang];
             if (lang === 'en') return null;
             const pack = this._files[lang];
             if (pack === undefined) return undefined;
@@ -227,10 +216,7 @@
             return data ? Object.assign({}, data, inline) : inline;
         },
 
-        _get(component, lang) {
-            lang = this._lang(lang);
-            return component === 'accessibility' ? this._file('accessibility/' + lang) : this.pack(lang);
-        },
+        _get(component, lang) { return this.pack(lang); },
 
         // A language's pack (the page's by default), landed; English has none. settled is the
         // capped promise the loader waits on.
@@ -239,11 +225,9 @@
             return lang === 'en' ? Promise.resolve(null) : this._file(lang);
         },
 
-        // One fetch per file per page. A missing pack is null, so English shows; a missing
-        // own file falls back to its en file.
+        // One fetch per pack per page. A missing pack is null, so English shows.
         _file(path) {
             return this._loads[path] || (this._loads[path] = this._fetchOne(path)
-                .then(data => data || (/\/(?!en$)[a-z]+$/.test(path) ? this._file(path.replace(/[a-z]+$/, 'en')) : null))
                 .then(data => (this._files[path] = data || null)));
         },
 
@@ -315,40 +299,6 @@
             }
         },
 
-        // Walk scope(s) and swap text/attributes per data on every match.
-        //   data-i18n="key"            → textContent = data[key]
-        //   data-i18n-attr="a:k1,b:k2" → setAttribute(a, data[k1]) etc.
-        // Missing keys are skipped (HTML defaults stay). Attribute names are
-        // allowlisted to a11y/text attrs so JSON-driven values can never reach
-        // event handlers (onclick), URLs (href/src), or styles. Lookup is
-        // portal-aware (NDS.queryAll) so future components with portaled
-        // dropmenus inside their i18n scope still get translated.
-        apply(scopes, data) {
-            if (!data) return;
-            this._roots(scopes).forEach(root => {
-                // One walk for both attrs; classify per element. An element can
-                // carry data-i18n AND data-i18n-attr — both branches still run.
-                NDS.queryAll(root, '[data-i18n], [data-i18n-attr]').forEach(el => {
-                    const textKey = el.dataset.i18n;
-                    if (textKey) {
-                        const v = data[textKey];
-                        if (typeof v === 'string') el.textContent = v;
-                    }
-                    const attrSpec = el.dataset.i18nAttr;
-                    if (!attrSpec) return;
-                    attrSpec.split(',').forEach(pair => {
-                        const [attr, key] = pair.split(':').map(s => s.trim());
-                        if (!this._SAFE_ATTR.test(attr)) {
-                            console.warn('[NDS.i18n] refused to set unsafe attr:', attr);
-                            return;
-                        }
-                        const v = data[key];
-                        if (typeof v === 'string') el.setAttribute(attr, v);
-                    });
-                });
-            });
-        },
-
         // Copy own enumerable keys from src onto target, skipping prototype
         // pollution vectors. Use this anywhere a component overlays JSON-
         // sourced data onto a runtime object (e.g. a strings dictionary).
@@ -361,29 +311,28 @@
             return target;
         },
 
-        // Allowlist for data-i18n-attr — text/a11y attributes only.
-        _SAFE_ATTR: /^(aria-[a-z-]+|title|alt|placeholder|label)$/,
-
         _seeds: Object.create(null),   // section → the JS defaults its strings() call registered
         _written: new WeakMap(),       // element → { target: the value core wrote last }
         _warned: new Set(),
         _warnOnce(msg) { if (!this._warned.has(msg)) { this._warned.add(msg); console.warn('[NDS.i18n] ' + msg); } },
 
-        // The word a marker names, through text()'s chain: the override, the pack, en, a
-        // registered component's own file, its JS defaults. Also its English when a script
-        // declares it (the JS default): the guard's baseline. word null: leave the markup.
+        // The word a marker names, through text()'s chain: the override, the pack, the script's
+        // English. Also that English (the JS default): the guard's baseline. word null: leave the markup.
         _word(ref) {
             const m = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/.exec(ref);
-            // ponytail: an undotted ref is a 1.x Accessibility/IPV key, skipped until they move to markers.
-            if (!m) return { word: null };
+            if (!m) {
+                this._warnOnce(`marker "${ref}" is not section.key: a 1.x marker; write the section too, such as accessibility.${ref}`);
+                return { word: null };
+            }
             const [, section, key] = m;
             const own = (o) => !!o && Object.prototype.hasOwnProperty.call(o, key);
             const d = this._section(section), seed = this._seeds[section];
             const v = own(d) ? d[key] : own(seed) ? seed[key] : undefined;
             const english = own(seed) ? seed[key] : undefined;
             if (typeof v === 'string' && !/\{\w+\}/.test(v)) return { word: v, english };
+            // A missing word is no error: the pack may not be in yet, or the section's script not
+            // loaded, and the markup's English shows. check-i18n catches a misspelled section.
             if (v !== undefined) this._warnOnce(`${ref} has {vars} or plural forms: write it with set(), not a marker`);
-            else if (this._isSettled && d === undefined && !seed) this._warnOnce(`${ref}: no pack, file or script has the ${section} section`);
             return { word: null };
         },
 
@@ -394,7 +343,11 @@
         _mark(el, force) {
             for (const name in I18N_MARKS) {
                 const ref = el.getAttribute(name);
-                if (!ref) continue;
+                if (ref === null) continue;
+                if (!ref.trim()) {
+                    this._warnOnce(`${name} with no value: a 1.x marker; name its word, ${name}="section.key"`);
+                    continue;
+                }
                 const { word: v, english } = this._word(ref.trim());
                 if (v === null) continue;
                 const target = I18N_MARKS[name];
@@ -439,7 +392,6 @@
             if (this._started) return;
             this._started = true;
             this.settled.then(() => {
-                this._isSettled = true;
                 this.translate();
                 document.documentElement.setAttribute('data-nds-i18n', '');
                 NDS.onDOMAdd(I18N_MARK_SEL, els => els.forEach(el => this._mark(el)));

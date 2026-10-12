@@ -1,5 +1,389 @@
 [
  {
+  "section": "accessibility",
+  "key": "panel_title",
+  "en": "Accessibility Tools",
+  "ar": "أدوات إمكانية الوصول"
+ },
+ {
+  "section": "accessibility",
+  "key": "panel_label",
+  "en": "Accessibility settings",
+  "ar": "إعدادات إمكانية الوصول"
+ },
+ {
+  "section": "accessibility",
+  "key": "close_panel",
+  "en": "Close accessibility panel",
+  "ar": "إغلاق لوحة إمكانية الوصول"
+ },
+ {
+  "section": "accessibility",
+  "key": "toggle_theme",
+  "en": "Toggle theme",
+  "ar": "تبديل المظهر"
+ },
+ {
+  "section": "accessibility",
+  "key": "scroll_panel",
+  "en": "Scroll panel",
+  "ar": "تمرير اللوحة"
+ },
+ {
+  "section": "accessibility",
+  "key": "section_modes",
+  "en": "Accessibility Modes",
+  "ar": "أوضاع إمكانية الوصول"
+ },
+ {
+  "section": "accessibility",
+  "key": "section_readable",
+  "en": "Readable Experience",
+  "ar": "تجربة القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "section_visual",
+  "en": "Visually Pleasing Experience",
+  "ar": "التجربة البصرية"
+ },
+ {
+  "section": "accessibility",
+  "key": "aria_readable",
+  "en": "Readable experience controls",
+  "ar": "عناصر تحكم تجربة القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "aria_visual",
+  "en": "Visual adjustments",
+  "ar": "التعديلات البصرية"
+ },
+ {
+  "section": "accessibility",
+  "key": "default",
+  "en": "Default",
+  "ar": "افتراضي"
+ },
+ {
+  "section": "accessibility",
+  "key": "font_sizing",
+  "en": "Font Sizing",
+  "ar": "حجم الخط"
+ },
+ {
+  "section": "accessibility",
+  "key": "dyslexia",
+  "en": "Dyslexia Friendly",
+  "ar": "داعم لعسر القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "highlight_titles",
+  "en": "Highlight Titles",
+  "ar": "تمييز العناوين"
+ },
+ {
+  "section": "accessibility",
+  "key": "highlight_links",
+  "en": "Highlight Links",
+  "ar": "تمييز الروابط"
+ },
+ {
+  "section": "accessibility",
+  "key": "reading_mask",
+  "en": "Reading Mask",
+  "ar": "مجهر القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "pause_motion",
+  "en": "Pause Motion",
+  "ar": "إيقاف الحركة"
+ },
+ {
+  "section": "accessibility",
+  "key": "text_align",
+  "en": "Text Alignment",
+  "ar": "محاذاة النص"
+ },
+ {
+  "section": "accessibility",
+  "key": "line_height",
+  "en": "Line Height",
+  "ar": "ارتفاع السطر"
+ },
+ {
+  "section": "accessibility",
+  "key": "letter_spacing",
+  "en": "Letter Spacing",
+  "ar": "تباعد الحروف"
+ },
+ {
+  "section": "accessibility",
+  "key": "word_spacing",
+  "en": "Word Spacing",
+  "ar": "تباعد الكلمات"
+ },
+ {
+  "section": "accessibility",
+  "key": "reset",
+  "en": "Reset Settings",
+  "ar": "إعادة تعيين الإعدادات"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_epilepsy_safe",
+  "en": "Epilepsy Safe Mode",
+  "ar": "وضع مراعٍ للصرع"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_epilepsy_safe_desc",
+  "en": "Stops motion and dampens color intensity",
+  "ar": "يوقف الحركة ويخفّف حدة الألوان"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_visually_impaired",
+  "en": "Visually Impaired Mode",
+  "ar": "وضع ذوي الإعاقة البصرية"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_visually_impaired_desc",
+  "en": "Enlarges text and boosts contrast for clearer reading",
+  "ar": "يكبّر الخط ويعزّز التباين لقراءة أوضح"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_cognitive_disability",
+  "en": "Cognitive Disability Mode",
+  "ar": "وضع داعم للإعاقة المعرفية"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_cognitive_disability_desc",
+  "en": "Highlights titles and stops motion to reduce distraction",
+  "ar": "يبرز العناوين ويوقف الحركة لتقليل الإلهاء"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_motor_impaired",
+  "en": "Motor Impaired Mode",
+  "ar": "وضع ذوي الإعاقة الحركية"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_motor_impaired_desc",
+  "en": "Enlarges click targets",
+  "ar": "يكبّر مناطق النقر"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_colorblind",
+  "en": "Colorblind Mode",
+  "ar": "وضع عمى الألوان"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_colorblind_desc",
+  "en": "Adjusts colors to distinguish red and green clearly",
+  "ar": "يضبط الألوان لتمييز الأحمر والأخضر بوضوح"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_dyslexia_friendly",
+  "en": "Dyslexia Friendly Mode",
+  "ar": "وضع داعم لعسر القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_dyslexia_friendly_desc",
+  "en": "Uses a clearer font and widens line and word spacing",
+  "ar": "يستخدم خطًا أوضح ويوسّع تباعد الأسطر والكلمات"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_adhd_friendly",
+  "en": "ADHD Friendly Mode",
+  "ar": "وضع داعم لاضطراب فرط الحركة وتشتت الانتباه"
+ },
+ {
+  "section": "accessibility",
+  "key": "mode_adhd_friendly_desc",
+  "en": "Stops motion, highlights titles, and enables the reading mask",
+  "ar": "يوقف الحركة ويبرز العناوين مع مجهر القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "visual_boost_contrast",
+  "en": "Boost Contrast",
+  "ar": "تعزيز التباين"
+ },
+ {
+  "section": "accessibility",
+  "key": "visual_monochrome",
+  "en": "Monochrome",
+  "ar": "أحادي اللون"
+ },
+ {
+  "section": "accessibility",
+  "key": "visual_high_contrast",
+  "en": "High Contrast",
+  "ar": "تباين عالٍ"
+ },
+ {
+  "section": "accessibility",
+  "key": "visual_high_saturation",
+  "en": "High Saturation",
+  "ar": "تشبع عالٍ"
+ },
+ {
+  "section": "accessibility",
+  "key": "visual_low_saturation",
+  "en": "Low Saturation",
+  "ar": "تشبع منخفض"
+ },
+ {
+  "section": "accessibility",
+  "key": "visual_cvd_deutan",
+  "en": "Deuteranopia",
+  "ar": "عمى اللون الأخضر"
+ },
+ {
+  "section": "accessibility",
+  "key": "on",
+  "en": "on",
+  "ar": "مفعل"
+ },
+ {
+  "section": "accessibility",
+  "key": "off",
+  "en": "off",
+  "ar": "معطل"
+ },
+ {
+  "section": "accessibility",
+  "key": "set",
+  "en": "set to",
+  "ar": "تم الضبط على"
+ },
+ {
+  "section": "accessibility",
+  "key": "reset_announce",
+  "en": "All accessibility settings reset to default.",
+  "ar": "تمت إعادة تعيين جميع إعدادات إمكانية الوصول إلى الافتراضي."
+ },
+ {
+  "section": "accessibility",
+  "key": "reset_done",
+  "en": "Settings reset",
+  "ar": "تمت إعادة التعيين"
+ },
+ {
+  "section": "accessibility",
+  "key": "active",
+  "en": "active",
+  "ar": "نشط"
+ },
+ {
+  "section": "accessibility",
+  "key": "confirm_reset",
+  "en": "Click again to confirm",
+  "ar": "انقر مرة أخرى للتأكيد"
+ },
+ {
+  "section": "accessibility",
+  "key": "confirm_reset_msg",
+  "en": "Press the reset button again to confirm.",
+  "ar": "اضغط زر إعادة التعيين مرة أخرى للتأكيد."
+ },
+ {
+  "section": "accessibility",
+  "key": "confirm_reset_remaining",
+  "en": "Confirm reset within {n} seconds.",
+  "ar": "أكّد إعادة التعيين خلال {n} ثوانٍ."
+ },
+ {
+  "section": "accessibility",
+  "key": "reset_cancelled",
+  "en": "Reset cancelled.",
+  "ar": "تم إلغاء إعادة التعيين."
+ },
+ {
+  "section": "accessibility",
+  "key": "start",
+  "en": "Start",
+  "ar": "البداية"
+ },
+ {
+  "section": "accessibility",
+  "key": "end",
+  "en": "End",
+  "ar": "النهاية"
+ },
+ {
+  "section": "accessibility",
+  "key": "justify",
+  "en": "Justify",
+  "ar": "مضبوط"
+ },
+ {
+  "section": "accessibility",
+  "key": "small",
+  "en": "Small",
+  "ar": "صغير"
+ },
+ {
+  "section": "accessibility",
+  "key": "medium",
+  "en": "Medium",
+  "ar": "متوسط"
+ },
+ {
+  "section": "accessibility",
+  "key": "large",
+  "en": "Large",
+  "ar": "كبير"
+ },
+ {
+  "section": "accessibility",
+  "key": "mask_toolbar",
+  "en": "Reading mask controls",
+  "ar": "عناصر تحكم مجهر القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "mask_size_down",
+  "en": "Decrease mask band",
+  "ar": "تصغير شريط المجهر"
+ },
+ {
+  "section": "accessibility",
+  "key": "mask_size_up",
+  "en": "Increase mask band",
+  "ar": "تكبير شريط المجهر"
+ },
+ {
+  "section": "accessibility",
+  "key": "mask_grab",
+  "en": "Drag mask vertically. Use arrow keys to nudge.",
+  "ar": "اسحب المجهر رأسيًا. استخدم مفاتيح الأسهم لتحريكه."
+ },
+ {
+  "section": "accessibility",
+  "key": "mask_close",
+  "en": "Close reading mask",
+  "ar": "إغلاق مجهر القراءة"
+ },
+ {
+  "section": "accessibility",
+  "key": "exclude_controls",
+  "en": "",
+  "ar": "letter-spacing"
+ },
+ {
   "section": "alert",
   "key": "close",
   "en": "Close",

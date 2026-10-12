@@ -570,7 +570,9 @@
         const hit = (r, el) => (hits.get(r) || hits.set(r, []).get(r)).push(el);
         // A property name is specific enough on its own: its scope only says where it applied.
         const look = (kind, name, el) => (byKind[kind]?.get(name) || []).forEach(r => { if (kind === 'property' || inScope(el, r.scope)) hit(r, el); });
-        for (const el of ctx.find('body *, body')) {
+        // A <template>'s content too: a custom panel (Accessibility) waits there until it opens.
+        const tpl = [...document.querySelectorAll('template')].flatMap(t => [...t.content.querySelectorAll('*')]);
+        for (const el of [...ctx.find('body *, body'), ...tpl]) {
             for (const c of el.classList) if (!own.has(c)) look('class', c, el);
             for (const a of el.attributes) if (a.name !== 'class' && a.name !== 'style') look('attribute', a.name, el);
             if (el.id) look('id', el.id, el);
