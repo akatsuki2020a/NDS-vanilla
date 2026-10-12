@@ -525,13 +525,20 @@
             if (this.targetContainer) this.targetContainer.classList.add('nds-loading');
 
             const { url, options } = this._buildAjaxRequest();
+            const { signal } = options;
             // 4MB — an HTML fragment is legitimately larger than a JSON payload,
             // so the shared default is raised here rather than for everyone. A
             // ceiling against a runaway response, not a target.
             NDS.request(url, { ...options, maxBytes: 4194304 })
                 .then(({ isJson, data }) => {
                     const eventDetail = this._applyAjaxResponse({ isJson, data });
-                    this._finishAjaxSubmit(eventDetail, isJson);
+                    // Swapped-in results start before the complete event, so its handlers find them live.
+                    // A bundle that fails to load leaves them unstarted; it does not undo the filters.
+                    const mounted = isJson ? null : NDS.Init.mount(this.targetContainer).catch(() => {});
+                    return Promise.resolve(mounted).then(() => {
+                        // A newer request took over while this one mounted: it owns the loading state.
+                        if (!signal.aborted) this._finishAjaxSubmit(eventDetail, isJson);
+                    });
                 })
                 .catch(error => this._handleAjaxError(error, appliedUrl));
         }
@@ -608,6 +615,7 @@
 
             if (targetInResponse) {
                 const newContainer = targetInResponse.cloneNode(true);
+                NDS.Init.destroy(this.targetContainer);
                 this.targetContainer.replaceWith(newContainer);
                 this.targetContainer = newContainer;
                 this.items = this.resolveItems();

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 11:12 PM"
+last_edit: "12/10/2026 - 08:31 AM"
 ---
 
 <section id="filter-overview" class="nds-content-section nds-doc-overview">
@@ -449,7 +449,7 @@ A group on a server page lists its options with `data-filter-values`: the page h
 ### AJAX Submission
 {: .nds-block-title}
 
-`data-ajax` on the form sends the request without a page load. For an HTML response, the script swaps the item container for the element with the same `id` in the response. A response without that element counts as a failure. For a response with a JSON `Content-Type`, the script changes no items: render them in `nds:filterFormComplete`. While a request runs, the menu takes no clicks and the button that sent it shows a spinner. A newer request cancels the one in flight.
+`data-ajax` on the form sends the request without a page load. For an HTML response, the script swaps the item container for the element with the same `id` in the response. It stops the components in the old container and starts the ones in the new container before `nds:filterFormComplete` fires, so the page calls nothing for them. A response without that element counts as a failure. For a response with a JSON `Content-Type`, the script changes no items: render them in `nds:filterFormComplete`. While a request runs, the menu takes no clicks and the button that sent it shows a spinner. A newer request cancels the one in flight.
 
 <script type="text/html" id="filter-json-js" data-canon data-lang="js" data-preview="none">
 var filter = document.querySelector('.nds-filter[data-filter-target="services-results"]');
