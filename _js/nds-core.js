@@ -37,10 +37,9 @@
  *                                      calendar days, Gregorian or Hijri (Umm al-Qura);
  *                                      <html data-timezone / data-date-format>
  *     NDS.announce(text)               say something in the shared live region
- *     NDS.i18n.load(component, scopes) a promise of a section's words; each scope holds its
- *                                      skeleton until they land
+ *     NDS.i18n.load(component, lang)   a promise of a section's words
  *     NDS.i18n.strings(component, defaults) → { text, set, load }   a component's strings;
- *                                      set() re-writes its text when the file lands
+ *                                      set() marks a fixed word for core, re-writes one with {vars}
  *     data-i18n="section.key" · data-i18n-{aria-label|aria-description|title|alt|placeholder|label}
  *                                      a marker: core writes the word in the page language, unless
  *                                      a script or the author changed it since
@@ -175,17 +174,11 @@
         _files: Object.create(null),   // 'ar' → the pack, once landed (null when none)
         _loads: Object.create(null),   // same keys → Promise<data>
 
-        // A promise of a section's words. Each scope holds its skeleton (data-state loading)
-        // until they land, so an Arabic page never paints English first; a scope that was
-        // already loading keeps it. ponytail: scopes go with their last callers (plans/i18n-markers.md, step 3).
-        load(component, scopes, lang) {
+        // A promise of a section's words, in the page's language or lang. A marked word needs no
+        // wait: core writes it, and the CSS holds it as a bar until then.
+        load(component, lang) {
             if (this._fromFiles(component, lang) !== undefined) return Promise.resolve(this._section(component, lang));
-            const held = scopes ? this._roots(scopes).filter(r => !NDS.State.has(r, 'loading')) : [];
-            held.forEach(r => NDS.State.add(r, 'loading'));
-            return this._get(component, lang).then(() => {
-                held.forEach(r => NDS.State.remove(r, 'loading'));
-                return this._section(component, lang);
-            });
+            return this._get(component, lang).then(() => this._section(component, lang));
         },
 
         // The page's language, or the one a component passes ('ar-SA' → 'ar'). Anything
@@ -233,10 +226,10 @@
 
         // A component's strings: English defaults until its file lands.
         //   s.text(key, vars, lang)     the word in the page's language, or in lang (fetched on first use)
-        //   s.set(el, attr, key, vars)  write an attribute ('text' = textContent) now, and
-        //                               again when the file lands, unless it changed since.
-        //                               For words with {vars}; a fixed word in markup is a marker
-        //   s.load(scopes, lang)        start the fetch at init; scopes hold their skeleton
+        //   s.set(el, attr, key, vars)  write an attribute ('text' = textContent) now. A fixed word
+        //                               also gets its marker, so core owns it; one with {vars} is
+        //                               written again when the file lands, unless it changed since
+        //   s.load(lang)                a promise of the section's words
         //   s.ready(lang)               true once the text for that language is known
         //   s.has(key)                  the component defines this key (for keys from outside)
         strings(component, defaults) {
@@ -258,12 +251,15 @@
             return {
                 text: t,
                 defaults,
-                load: (scopes, lang) => I.load(component, scopes, lang),
+                load: lang => I.load(component, lang),
                 ready: lang => I._fromFiles(component, lang) !== undefined,
                 has: key => has(defaults, key),
                 set(el, attr, key, vars) {
                     const v = t(key, vars);
                     write(el, attr, v);
+                    // A fixed word becomes a marker, so core owns it from here, as markup would.
+                    const mark = attr === 'text' ? 'data-i18n' : 'data-i18n-' + attr;
+                    if (!vars && mark in I18N_MARKS) { el.setAttribute(mark, component + '.' + key); return; }
                     if (landed()) return;
                     if (!queue.length) I.load(component).then(() => queue.splice(0).forEach(([e, a, was, k, vs]) => {
                         if (read(e, a) === was) write(e, a, t(k, vs));
@@ -398,14 +394,6 @@
                 NDS.onAttrChange(I18N_MARK_SEL, Object.keys(I18N_MARKS), els => els.forEach(el => this._mark(el, true)));
                 this.pack().then(() => this.translate());
             });
-        },
-
-        _roots(scopes) {
-            if (!scopes) return [document.documentElement];
-            const arr = Array.isArray(scopes) ? scopes : [scopes];
-            return arr
-                .map(s => typeof s === 'string' ? document.querySelector(s) : s)
-                .filter(Boolean);
         },
     };
 

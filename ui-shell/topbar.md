@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 07:43 PM"
+last_edit: "12/10/2026 - 11:31 PM"
 ---
 
 <section id="topbar-overview" class="nds-content-section nds-doc-overview">
@@ -37,10 +37,10 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
 <script type="text/html" id="topbar-canon" data-canon data-preview="page" data-preview-height="304" data-variants="topbar-variants-table">
 <div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities">
   <button class="nds-btn nds-menu-btn nds-digital-stamp-tab" role="button" aria-expanded="false" aria-controls="nds-digital-stamp">
-    <img class="nds-flag" src="../assets/icon/SAflag.min.svg" width="20" height="14" loading="lazy" alt="">
-    <span class="nds-digital-stamp-lg-text nds-truncate"></span>
-    <span class="nds-digital-stamp-sm-text nds-truncate"></span>
-    <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary"></span>
+    <img class="nds-flag" src="../assets/icon/SAflag.min.svg" width="20" height="14" loading="lazy" alt="Saudi Arabia flag" data-i18n-alt="digital-stamp.flag">
+    <span class="nds-digital-stamp-lg-text nds-truncate" data-i18n="digital-stamp.tab">A government website registered with the Digital Government Authority.</span>
+    <span class="nds-digital-stamp-sm-text nds-truncate" data-i18n="digital-stamp.tab_short">Government website registered with DGA</span>
+    <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary" data-i18n="digital-stamp.verify">How you know?</span>
   </button>
   <div class="nds-topbar-info">
     <span id="nds-date" class="nds-text-icon" data-calendar="hijri" data-hidden="sm md"></span>
@@ -50,7 +50,7 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
     </button>
   </div>
 </div>
-<div id="nds-digital-stamp" role="region" hidden>
+<div id="nds-digital-stamp" role="region" aria-label="Digital government stamp" data-i18n-aria-label="digital-stamp.label" hidden>
   <div class="nds-content-wrapper">
     <div class="nds-digital-stamp-notices">
       <div class="nds-digital-stamp-card">
@@ -58,8 +58,8 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
           <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
         </div>
         <div class="nds-digital-stamp-content">
-          <div class="nds-digital-stamp-heading"></div>
-          <div class="nds-digital-stamp-description"></div>
+          <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.gov_title">Official Saudi Government websites URL ends with</span> <span class="nds-digital-stamp-highlight" data-i18n="digital-stamp.gov_mark">.gov.sa</span></div>
+          <div class="nds-digital-stamp-description" data-i18n="digital-stamp.gov_desc">Website belongs to an official government organization in the Kingdom of Saudi Arabia always ends with .gov.sa .</div>
         </div>
       </div>
       <div class="nds-digital-stamp-card">
@@ -67,15 +67,15 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
           <i class="nds-icon nds-hgi-square-lock-01" aria-hidden="true"></i>
         </div>
         <div class="nds-digital-stamp-content">
-          <div class="nds-digital-stamp-heading"></div>
-          <div class="nds-digital-stamp-description"></div>
+          <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.https_title">Official Reliable websites use</span> <span class="nds-digital-stamp-highlight">HTTPS</span></div>
+          <div class="nds-digital-stamp-description" data-i18n="digital-stamp.https_desc">Ensure the website is using the HTTPS protocol.</div>
         </div>
       </div>
     </div>
     <div class="nds-digital-stamp-register">
-      <img src="../assets/img/dga-logo-icon.svg" width="21" height="31" alt="" loading="lazy">
+      <img src="../assets/img/dga-logo-icon.svg" width="21" height="31" alt="Digital Government Authority" data-i18n-alt="digital-stamp.dga" loading="lazy">
       <div>
-        <span class="nds-digital-stamp-register-text"></span>
+        <span class="nds-digital-stamp-register-text" data-i18n="digital-stamp.register">Registered on Digital Government Authority:</span>
         <a class="nds-digital-stamp-registration nds-primary nds-underline" href="#" target="_blank">00000000000</a>
       </div>
     </div>
@@ -84,14 +84,14 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
 </script>
 <script type="text/html" id="topbar-stamp-tab" data-canon>
 <button class="nds-btn nds-menu-btn nds-digital-stamp-tab" role="button" aria-expanded="false" aria-controls="nds-digital-stamp">
-  <img class="nds-flag" src="../assets/icon/SAflag.min.svg" width="20" height="14" loading="lazy" alt="">
-  <span class="nds-digital-stamp-lg-text nds-truncate"></span>
-  <span class="nds-digital-stamp-sm-text nds-truncate"></span>
-  <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary"></span>
+  <img class="nds-flag" src="../assets/icon/SAflag.min.svg" width="20" height="14" loading="lazy" alt="Saudi Arabia flag" data-i18n-alt="digital-stamp.flag">
+  <span class="nds-digital-stamp-lg-text nds-truncate" data-i18n="digital-stamp.tab">A government website registered with the Digital Government Authority.</span>
+  <span class="nds-digital-stamp-sm-text nds-truncate" data-i18n="digital-stamp.tab_short">Government website registered with DGA</span>
+  <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary" data-i18n="digital-stamp.verify">How you know?</span>
 </button>
 </script>
 <script type="text/html" id="topbar-stamp-panel" data-canon>
-<div id="nds-digital-stamp" role="region" hidden>
+<div id="nds-digital-stamp" role="region" aria-label="Digital government stamp" data-i18n-aria-label="digital-stamp.label" hidden>
   <div class="nds-content-wrapper">
     <div class="nds-digital-stamp-notices">
       <div class="nds-digital-stamp-card">
@@ -99,8 +99,8 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
           <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
         </div>
         <div class="nds-digital-stamp-content">
-          <div class="nds-digital-stamp-heading"></div>
-          <div class="nds-digital-stamp-description"></div>
+          <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.gov_title">Official Saudi Government websites URL ends with</span> <span class="nds-digital-stamp-highlight" data-i18n="digital-stamp.gov_mark">.gov.sa</span></div>
+          <div class="nds-digital-stamp-description" data-i18n="digital-stamp.gov_desc">Website belongs to an official government organization in the Kingdom of Saudi Arabia always ends with .gov.sa .</div>
         </div>
       </div>
       <div class="nds-digital-stamp-card">
@@ -108,15 +108,15 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
           <i class="nds-icon nds-hgi-square-lock-01" aria-hidden="true"></i>
         </div>
         <div class="nds-digital-stamp-content">
-          <div class="nds-digital-stamp-heading"></div>
-          <div class="nds-digital-stamp-description"></div>
+          <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.https_title">Official Reliable websites use</span> <span class="nds-digital-stamp-highlight">HTTPS</span></div>
+          <div class="nds-digital-stamp-description" data-i18n="digital-stamp.https_desc">Ensure the website is using the HTTPS protocol.</div>
         </div>
       </div>
     </div>
     <div class="nds-digital-stamp-register">
-      <img src="../assets/img/dga-logo-icon.svg" width="21" height="31" alt="" loading="lazy">
+      <img src="../assets/img/dga-logo-icon.svg" width="21" height="31" alt="Digital Government Authority" data-i18n-alt="digital-stamp.dga" loading="lazy">
       <div>
-        <span class="nds-digital-stamp-register-text"></span>
+        <span class="nds-digital-stamp-register-text" data-i18n="digital-stamp.register">Registered on Digital Government Authority:</span>
         <a class="nds-digital-stamp-registration nds-primary nds-underline" href="#" target="_blank">00000000000</a>
       </div>
     </div>
@@ -152,13 +152,13 @@ The main navigation belongs in the [Header](../ui-shell/header), and the links a
 | Part | Holds | Required |
 |---|---|---|
 | `.nds-topbar` | The whole bar. Add `nds-content-wrapper` to keep its content at the page width | Yes |
-| `button.nds-digital-stamp-tab` | The stamp tab: the flag, the long text (`.nds-digital-stamp-lg-text`), the short text (`.nds-digital-stamp-sm-text`) and `#nds-digital-stamp-verify-text`. The texts are empty in the markup: the script writes them (see [Stamp Text](#stamp-text)). `aria-controls` names the panel | Yes, on a government site |
+| `button.nds-digital-stamp-tab` | The stamp tab: the flag, the long text (`.nds-digital-stamp-lg-text`), the short text (`.nds-digital-stamp-sm-text`) and `#nds-digital-stamp-verify-text`. Each text holds DGA's English with a marker (see [Stamp Text](#stamp-text)). `aria-controls` names the panel | Yes, on a government site |
 | `.nds-topbar-info` | The widgets and the buttons, on the end side. Never put it on the stamp tab: its wide gap stretches the tab's contents apart | No |
 | `span.nds-text-icon` with a widget id | One widget, empty in the markup. The script writes its icon and text | No |
 | `button[data-theme-toggle]` | The dark mode button | No |
 | `#nds-digital-stamp` | The stamp panel, right after the bar. It ships `hidden` | Yes, with the tab |
 | `.nds-digital-stamp-notices` | Two `.nds-digital-stamp-card` notices: the site's address, then HTTPS | Yes, with the tab |
-| `.nds-digital-stamp-card` | `.nds-digital-stamp-icon`, then `.nds-digital-stamp-content` with a `.nds-digital-stamp-heading` and a `.nds-digital-stamp-description`, both empty in the markup. The script marks the domain or `HTTPS` in the heading with `.nds-digital-stamp-highlight` | Yes, with the tab |
+| `.nds-digital-stamp-card` | `.nds-digital-stamp-icon`, then `.nds-digital-stamp-content` with a `.nds-digital-stamp-heading` and a `.nds-digital-stamp-description`. The heading holds two spans: the words, then the domain or `HTTPS` in `.nds-digital-stamp-highlight` | Yes, with the tab |
 | `.nds-digital-stamp-register` | The DGA logo, `.nds-digital-stamp-register-text` and the registration number, a link `a.nds-digital-stamp-registration` | Yes, with the tab |
 {: .nds-table .nds-responsive}
 
@@ -224,9 +224,9 @@ The stamp tab opens the stamp panel, which slides open below the bar. A second p
 ### Stamp Text
 {: .nds-block-title #stamp-text}
 
-The stamp writes DGA's wording in the page language, from the `digital-stamp` section of the [string pack](../core/i18n). It fills each text part that is empty in the markup: the tab's long and short texts, `#nds-digital-stamp-verify-text`, the two card headings and descriptions, and `.nds-digital-stamp-register-text`. It also writes the flag's and the logo's `alt` and the panel's `aria-label` when they are empty. A part that holds text keeps it. Until the text lands, each of the tab's texts shows a placeholder bar, and the tab's arrow stays hidden.
+The stamp's words are DGA's, and each one carries a `data-i18n` marker: NDS writes it in the page language from the `digital-stamp` section of the [string pack](../core/i18n). That covers the tab's texts, the two cards, `.nds-digital-stamp-register-text`, the flag's and the logo's `alt` and the panel's `aria-label`. Remove a marker only to keep your own word.
 
-The address card follows the site's own domain: on `iu.edu.sa` it shows the `.edu.sa` wording. An address outside `.sa`, such as `localhost`, shows `.gov.sa`. `data-digital-stamp-domain` on `#nds-digital-stamp` picks the card instead: `gov.sa`, `edu.sa`, `sch.sa`, `med.sa`, `org.sa` or `sa`.
+The canon's address card holds the `.gov.sa` words. The stamp follows the site's own domain: on `iu.edu.sa` it points the card's markers at the `.edu.sa` words. An address outside `.sa`, such as `localhost`, keeps `.gov.sa`. `data-digital-stamp-domain` on `#nds-digital-stamp` picks the card instead: `gov.sa`, `edu.sa`, `sch.sa`, `med.sa`, `org.sa` or `sa`.
 
 ### Widgets
 {: .nds-block-title #topbar-widgets}
@@ -318,7 +318,7 @@ The widgets also work outside the top bar, such as in a kiosk header or a dashbo
 - Set `data-latitude` and `data-longitude` to the place your service is for. The Riyadh default is wrong for a service in another region.
 - Set `data-city` and `data-city-en`. The Nominatim lookup is rate-limited and is not meant for traffic from every visitor.
 - Put `data-hidden` on every widget, so the bar stays readable on a phone: `"sm md"` on the date, `"sm"` on the clock, and `"sm"` on both the city and the weather. A widget without it shows at every width and crowds the stamp tab.
-- Leave the stamp's text parts empty. The stamp writes DGA's wording in the page language, and text you write in its place stays as you wrote it.
+- Keep the stamp's markers. NDS writes DGA's wording in the page language; a word whose marker you remove stays as you wrote it.
 - On a test server, write `data-digital-stamp-domain` with the site's own domain, so the address card matches the live site.
 - Do not add other buttons to the top bar. Site actions belong in the [Main Navigation](../ui-shell/mainnav).
 
@@ -357,7 +357,6 @@ The widgets also work outside the top bar, such as in a kiosk header or a dashbo
 | `data-theme-toggle` | A button | Makes it the dark mode button. See [Themes](../components/themes) |
 | `aria-expanded` | `.nds-digital-stamp-tab` | Write `false` in the markup. The script sets `true` when the panel opens, and `false` when it closes |
 | `data-digital-stamp-domain` | `#nds-digital-stamp` | `gov.sa`, `edu.sa`, `sch.sa`, `med.sa`, `org.sa` or `sa`: the address card's wording. Without it, the site's address picks the card, and an address outside `.sa` shows `gov.sa` |
-| `data-nds-digital-stamp-initialized` | `.nds-digital-stamp-tab` | The script sets it once the tab's text is in. The tab's arrow shows from then |
 | `data-state="expanded"` | `.nds-digital-stamp-tab` | The script sets it when the panel opens, and removes it when the panel closes |
 | `hidden` | `#nds-digital-stamp` | Write it in the markup. The script removes it when the panel opens, and sets it again after the panel closes |
 | `data-state` | `#nds-digital-stamp` | The script sets `open` and `opening` when the panel opens, adds `closing` when it closes, and removes all three after the close |

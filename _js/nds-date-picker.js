@@ -757,7 +757,7 @@
         // switched by script): render again once it does.
         _renderWhenStringsLand: function () {
             var self = this, lang = this.getLanguage();
-            if (!strings.ready(lang)) strings.load(null, lang).then(function () {
+            if (!strings.ready(lang)) strings.load(lang).then(function () {
                 if (self.state.isInitialized) self.render();
             });
         },

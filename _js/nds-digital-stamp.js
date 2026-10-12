@@ -16,12 +16,9 @@
  *   data-digital-stamp-domain  on the panel: gov.sa · edu.sa · sch.sa · med.sa · org.sa · sa —
  *                              picks the address card's wording. Without it, the site's own
  *                              address picks it; a non-.sa address shows gov.sa
- *   written by the stamp:      data-nds-digital-stamp-initialized (tab) once its text is in;
- *                              the tab's arrow stays hidden until then
  * Gotchas:
- *   - Each text part left empty in the markup (tab texts, card headings and descriptions,
- *     .nds-digital-stamp-register-text, the flag and logo alt, the panel aria-label) gets
- *     DGA's wording from the pack in the page language. Text the page wrote stays.
+ *   - DGA's wording is in the markup as data-i18n markers: core writes it in the page
+ *     language. A word whose marker the page removed stays as the page wrote it.
  *   - One per page, resolved by id at init. A re-init after the tab or panel is replaced
  *     re-wires to the new elements.
  *   - It closes itself when a click lands outside the tab and panel, which is also what
@@ -44,8 +41,9 @@
 
     const { add: addState, remove: removeState, has: hasState, clear: clearState } = NDS.State;
 
-    // DGA's wording, in English; the assets/i18n/{lang}.json pack overrides it.
-    const strings = NDS.i18n.strings('digital-stamp', {
+    // DGA's wording, in English; the assets/i18n/{lang}.json pack overrides it. The markup carries
+    // the same words as markers: this is their baseline.
+    NDS.i18n.strings('digital-stamp', {
         tab: 'A government website registered with the Digital Government Authority.',
         tab_short: 'Government website registered with DGA',
         verify: 'How you know?',
@@ -80,26 +78,10 @@
         return second === 'com' || second === 'net' ? 'gov' : 'sa';
     }
 
-    // Writes the pack's text into every part the markup leaves empty; text the page wrote stays.
-    function fillText() {
-        const t = strings.text;
-        const empty = (el) => el && !el.textContent.trim();
-        const text = (el, key) => { if (empty(el)) el.textContent = t(key); };
-        const attr = (el, name, key) => { if (el && !el.getAttribute(name)) el.setAttribute(name, t(key)); };
-        const heading = (el, key, mark) => {
-            if (!empty(el)) return;
-            const span = document.createElement('span');
-            span.className = 'nds-digital-stamp-highlight';
-            span.textContent = mark;
-            el.replaceChildren(t(key) + ' ', span);
-        };
-
-        text(tab.querySelector('.nds-digital-stamp-lg-text'), 'tab');
-        text(tab.querySelector('.nds-digital-stamp-sm-text'), 'tab_short');
-        text(tab.querySelector('#nds-digital-stamp-verify-text'), 'verify');
-        attr(tab.querySelector('.nds-flag'), 'alt', 'flag');
-        attr(panel, 'aria-label', 'label');
-
+    // The address card follows the site's domain. The canon marks the gov.sa words; on another
+    // domain the script points those markers at its words, and core writes them. A word the page
+    // wrote itself has no marker, so it stays.
+    function pickDomain() {
         // 'edu.sa', '.edu.sa' and 'edu' all name the edu card; '.sa' and 'sa' the sa one.
         let domain = (panel.getAttribute('data-digital-stamp-domain') || domainOfHost()).replace(/^\./, '');
         if (domain !== 'sa') domain = domain.replace(/\.sa$/, '');
@@ -107,15 +89,10 @@
             console.warn('[NDS DigitalStamp] data-digital-stamp-domain "' + domain + '" is not one of ' + DOMAINS.join(', ') + '; showing gov');
             domain = 'gov';
         }
-        const [domainCard, httpsCard] = panel.querySelectorAll('.nds-digital-stamp-card');
-        heading(domainCard?.querySelector('.nds-digital-stamp-heading'), domain + '_title', t(domain + '_mark'));
-        text(domainCard?.querySelector('.nds-digital-stamp-description'), domain + '_desc');
-        heading(httpsCard?.querySelector('.nds-digital-stamp-heading'), 'https_title', 'HTTPS');
-        text(httpsCard?.querySelector('.nds-digital-stamp-description'), 'https_desc');
-        text(panel.querySelector('.nds-digital-stamp-register-text'), 'register');
-        attr(panel.querySelector('.nds-digital-stamp-register > img'), 'alt', 'dga');
-        // Shows the tab's arrow (_digital-stamp.scss).
-        tab.setAttribute('data-nds-digital-stamp-initialized', '');
+        if (domain === 'gov') return;
+        panel.querySelectorAll('[data-i18n^="digital-stamp.gov_"]').forEach(el => {
+            el.setAttribute('data-i18n', el.getAttribute('data-i18n').replace('.gov_', '.' + domain + '_'));
+        });
     }
 
     let tab = null;
@@ -186,9 +163,7 @@
         abortController = new AbortController();
         const { signal } = abortController;
 
-        // The loader starts this bundle once the pack is in; past its cap, wait for the pack, not English.
-        if (strings.ready()) fillText();
-        else strings.load().then(fillText);
+        pickDomain();
 
         tab.addEventListener('click', toggle, { signal });
 

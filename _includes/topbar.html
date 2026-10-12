@@ -1,10 +1,10 @@
 <div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities">
     <button class="nds-btn nds-menu-btn nds-digital-stamp-tab" role="button" aria-expanded="false" aria-controls="nds-digital-stamp">
         <img class="nds-flag" src="{{ 'assets/icon/SAflag.min.svg' | relative_url }}" width="20" height="14"
-            loading="lazy" alt="">
-        <span class="nds-digital-stamp-lg-text nds-truncate"></span>
-        <span class="nds-digital-stamp-sm-text nds-truncate"></span>
-        <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary"></span>
+            loading="lazy" alt="Saudi Arabia flag" data-i18n-alt="digital-stamp.flag">
+        <span class="nds-digital-stamp-lg-text nds-truncate" data-i18n="digital-stamp.tab">A government website registered with the Digital Government Authority.</span>
+        <span class="nds-digital-stamp-sm-text nds-truncate" data-i18n="digital-stamp.tab_short">Government website registered with DGA</span>
+        <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary" data-i18n="digital-stamp.verify">How you know?</span>
     </button>
     <div class="nds-topbar-info">
         <span id="nds-date" class="nds-text-icon" data-calendar="hijri" data-hidden="sm md"></span>
@@ -49,7 +49,7 @@
         {% endif %}
     </div>
 </div>
-<div id="nds-digital-stamp" role="region" hidden>
+<div id="nds-digital-stamp" role="region" aria-label="Digital government stamp" data-i18n-aria-label="digital-stamp.label" hidden>
     <div class="nds-content-wrapper">
         <div class="nds-digital-stamp-notices">
             <div class="nds-digital-stamp-card">
@@ -57,8 +57,8 @@
                     <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
                 </div>
                 <div class="nds-digital-stamp-content">
-                    <div class="nds-digital-stamp-heading"></div>
-                    <div class="nds-digital-stamp-description"></div>
+                    <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.gov_title">Official Saudi Government websites URL ends with</span> <span class="nds-digital-stamp-highlight" data-i18n="digital-stamp.gov_mark">.gov.sa</span></div>
+                    <div class="nds-digital-stamp-description" data-i18n="digital-stamp.gov_desc">Website belongs to an official government organization in the Kingdom of Saudi Arabia always ends with .gov.sa .</div>
                 </div>
             </div>
             <div class="nds-digital-stamp-card">
@@ -66,15 +66,15 @@
                     <i class="nds-icon nds-hgi-square-lock-01" aria-hidden="true"></i>
                 </div>
                 <div class="nds-digital-stamp-content">
-                    <div class="nds-digital-stamp-heading"></div>
-                    <div class="nds-digital-stamp-description"></div>
+                    <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.https_title">Official Reliable websites use</span> <span class="nds-digital-stamp-highlight">HTTPS</span></div>
+                    <div class="nds-digital-stamp-description" data-i18n="digital-stamp.https_desc">Ensure the website is using the HTTPS protocol.</div>
                 </div>
             </div>
         </div>
         <div class="nds-digital-stamp-register">
-            <img src="{{ 'assets/img/dga-logo-icon.svg' | relative_url }}" width="21" height="31" alt="" loading="lazy">
+            <img src="{{ 'assets/img/dga-logo-icon.svg' | relative_url }}" width="21" height="31" alt="Digital Government Authority" data-i18n-alt="digital-stamp.dga" loading="lazy">
             <div>
-                <span class="nds-digital-stamp-register-text"></span>
+                <span class="nds-digital-stamp-register-text" data-i18n="digital-stamp.register">Registered on Digital Government Authority:</span>
                 <a class="nds-digital-stamp-registration nds-primary nds-underline"
                     href="{{ page.dga_registration_url | default: site.dga_registration_url }}"
                     target="_blank">{{ page.dga_registration_number | default: site.dga_registration_number }}</a>

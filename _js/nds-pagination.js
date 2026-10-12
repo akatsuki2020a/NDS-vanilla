@@ -235,7 +235,7 @@
     // open. reconcileCollapse parses it and reparents the author's controls
     // into the scroll container, which stays eager.
     function _ellipsisShell() {
-        return `<li class="nds-pagination-item nds-pagination-ellipsis"><div class="nds-dropmenu"><button type="button" class="nds-btn nds-subtle nds-ellipsis nds-indicator nds-dropmenu-trigger" aria-label="${html('more')}"><span class="nds-label"></span></button><div class="nds-dropmenu-menu nds-pagination-menu" aria-hidden="true"><div class="nds-dropmenu-scroll"></div></div></div></li>`;
+        return `<li class="nds-pagination-item nds-pagination-ellipsis"><div class="nds-dropmenu"><button type="button" class="nds-btn nds-subtle nds-ellipsis nds-indicator nds-dropmenu-trigger" aria-label="${html('more')}" data-i18n-aria-label="pagination.more"><span class="nds-label"></span></button><div class="nds-dropmenu-menu nds-pagination-menu" aria-hidden="true"><div class="nds-dropmenu-scroll"></div></div></div></li>`;
     }
 
     // Ellipsis <li> whose dropdown holds the collapsed range — reparents each
@@ -773,15 +773,14 @@
     });
     // Escaped: the pack is site-editable, and these land in innerHTML.
     const html = (k, vars) => NDS.escapeHtml(strings.text(k, vars));
-    // Controls generated before the file landed carry the English defaults: re-label them once.
+    // Prev, next, more and jump carry markers. A page label holds its number, so it cannot:
+    // the ones generated before the pack landed are re-labelled once it does.
     let _relabelArmed = false;
     function _relabel() {
         const d = strings.defaults;
         document.querySelectorAll('.nds-pagination-item .nds-btn[aria-label]').forEach(b => {
-            const l = b.getAttribute('aria-label'), n = b.textContent.trim();
-            const key = ['prev', 'next', 'more'].find(k => l === d[k]);
-            if (key) b.setAttribute('aria-label', strings.text(key));
-            else if (l === NDS.i18n.format(d.page, { n })) b.setAttribute('aria-label', strings.text('page', { n }));
+            const n = b.textContent.trim();
+            if (b.getAttribute('aria-label') === NDS.i18n.format(d.page, { n })) b.setAttribute('aria-label', strings.text('page', { n }));
         });
     }
     // url (when set) is a page→href function — the controls become navigable
@@ -789,14 +788,14 @@
     // prev/next anchor drops its href; CSS pointer-events handles the rest.
     const _prevLi = (disabled, url, prevPage) => {
         const inner = url
-            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${html('prev')}"${disabled ? ' aria-disabled="true"' : ` href="${url(prevPage)}"`}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></a>`
-            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${html('prev')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></button>`;
+            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${html('prev')}" data-i18n-aria-label="pagination.prev"${disabled ? ' aria-disabled="true"' : ` href="${url(prevPage)}"`}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${html('prev')}" data-i18n-aria-label="pagination.prev"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></button>`;
         return `<li class="nds-pagination-item nds-pagination-prev">${inner}</li>`;
     };
     const _nextLi = (disabled, url, nextPage) => {
         const inner = url
-            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${html('next')}"${disabled ? ' aria-disabled="true"' : ` href="${url(nextPage)}"`}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></a>`
-            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${html('next')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></button>`;
+            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${html('next')}" data-i18n-aria-label="pagination.next"${disabled ? ' aria-disabled="true"' : ` href="${url(nextPage)}"`}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${html('next')}" data-i18n-aria-label="pagination.next"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></button>`;
         return `<li class="nds-pagination-item nds-pagination-next">${inner}</li>`;
     };
     const _pageLi = (i, activePage, url) => {
@@ -1074,7 +1073,7 @@
         if (!menu || menu.querySelector('.nds-pagination-jump')) return;
         menu.insertAdjacentHTML('afterbegin', `<div class="nds-form-container nds-dropmenu-search nds-pagination-jump">
             <div class="nds-form-control">
-                <input type="text" inputmode="numeric" dir="ltr" aria-label="${html('jump')}" placeholder="${scroll._ndsRange.to + 1}">
+                <input type="text" inputmode="numeric" dir="ltr" aria-label="${html('jump')}" data-i18n-aria-label="pagination.jump" placeholder="${scroll._ndsRange.to + 1}">
             </div>
         </div>`);
         const box = menu.firstElementChild;

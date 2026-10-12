@@ -132,10 +132,8 @@
   function inject(container) {
     place(container);
     if ((container.getAttribute('data-empty-message') || '').trim()) return;
-    // The default text comes from the file: hold the skeleton until it lands.
-    const ph = findPlaceholder(container);
-    strings.set(ph.querySelector('.nds-empty-message'), 'text', 'message');
-    strings.load(ph);
+    // The default text is a marker: core writes it in the page language, as a bar until it lands.
+    strings.set(findPlaceholder(container).querySelector('.nds-empty-message'), 'text', 'message');
   }
 
   function place(container) {

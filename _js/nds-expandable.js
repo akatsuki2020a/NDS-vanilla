@@ -124,7 +124,6 @@
 
             this.expandButton.innerHTML = '<span class="nds-label"></span>';
             strings.set(this.expandButton.firstChild, 'text', 'show_more');
-            strings.load(this.expandButton);
 
             // Add button to the parent container (not the content element)
             this.expandableContainer.appendChild(this.expandButton);
