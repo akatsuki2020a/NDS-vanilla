@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.5"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 10:22 PM"
+last_edit: "12/10/2026 - 10:30 PM"
 ---
 
 <section id="accessibility-overview" class="nds-content-section nds-doc-overview">
@@ -582,7 +582,7 @@ The panel reads its English from the script and its Arabic from the `accessibili
 | `data-a11y-bars` | a span in that tile | The script adds one bar for each value after the first |
 | `data-a11y-value` | a screen-reader span in that tile | The script writes the current value in it |
 | `data-a11y-visual` | a filter tile button | The filter the tile turns on. Turning it on turns the other filters off |
-| `data-a11y-exclude-token` | a tile button | The script removes the tile when the language file lists this value in `exclude_controls`. The Arabic file lists `letter-spacing`, because letter spacing breaks Arabic's joined letters |
+| `data-a11y-exclude-token` | a tile button | `letter-spacing`: the script removes the tile on a page whose language is written in a script that joins its letters, such as Arabic, Persian or Urdu, because letter spacing breaks them. The browser names the script from `lang` on `<html>`. A saved letter spacing does not apply there either |
 | `data-state~="selected"` | a tile button | The script sets it, with `aria-pressed="true"`, while the tile is on, and removes it when the tile turns off |
 | `data-accessibility-action` | the reset button | `="reset"`. Two presses within 5 seconds reset every setting |
 | `data-state~="arming"` | the reset button | The script sets it after the first press, and removes it after the second press or after 5 seconds |
@@ -639,7 +639,7 @@ CSS reads these tokens with `[data-a11y~="…"]`. A mode writes the tokens of th
 | `motor-impaired` | The Motor Impaired mode | Makes every button at least 48 × 48px |
 | `font-step-1`, `font-step-2`, `font-step-3` | Font Sizing. The Visually Impaired mode sets step 2 | Sets `--user-font-scale` to 1.15, 1.30 or 1.50 |
 | `text-align-start`, `text-align-end`, `text-align-justify` | Text Alignment | Aligns paragraphs and list items |
-| `has-line-height`, `has-letter-spacing`, `has-word-spacing` | Line Height, Letter Spacing and Word Spacing. The Dyslexia Friendly mode sets 1.6, 0.12em and 0.16em, with no letter spacing on an Arabic page | Applies the matching `--user-*` value to paragraphs, lists and quotes |
+| `has-line-height`, `has-letter-spacing`, `has-word-spacing` | Line Height, Letter Spacing and Word Spacing. The Dyslexia Friendly mode sets 1.6, 0.12em and 0.16em, with no letter spacing on a page whose script joins its letters, such as Arabic | Applies the matching `--user-*` value to paragraphs, lists and quotes |
 {: .nds-table .nds-responsive}
 
 The text and highlight rules reach only the page's `header`, `main` and `footer`, so the panel and the FAB keep their look.

@@ -62,10 +62,7 @@
         "mask_size_down": "تصغير شريط المجهر",
         "mask_size_up": "تكبير شريط المجهر",
         "mask_grab": "اسحب المجهر رأسيًا. استخدم مفاتيح الأسهم لتحريكه.",
-        "mask_close": "إغلاق مجهر القراءة",
-        "exclude_controls": [
-            "letter-spacing"
-        ]
+        "mask_close": "إغلاق مجهر القراءة"
     },
     "alert": {
         "close": "إغلاق"

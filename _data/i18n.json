@@ -378,12 +378,6 @@
   "ar": "إغلاق مجهر القراءة"
  },
  {
-  "section": "accessibility",
-  "key": "exclude_controls",
-  "en": "",
-  "ar": "letter-spacing"
- },
- {
   "section": "alert",
   "key": "close",
   "en": "Close",

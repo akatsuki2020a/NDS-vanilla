@@ -384,12 +384,18 @@
                     if (ns && !ns.__ndsStub && ns.ready) return;
                     e.stopPropagation();
                     NDS.State?.add?.(btn, 'loading');
-                    // Explicit so the paired stylesheet starts with the script, not after it.
-                    NDS.loadBundle(bundle);
+                    // Explicit so the paired stylesheet starts with the script, not after it. A failed
+                    // bundle leaves the stub: drop the button's loading state, or its clicks stay dead.
+                    Promise.resolve(NDS.loadBundle(bundle)).catch(() => {}).then(() => {
+                        if (NDS.Accessibility?.__ndsStub) NDS.State?.remove?.(btn, 'loading');
+                    });
                     NDS.Accessibility.toggle(btn);
                 }, true);
             },
             eager: () => { try { return !!localStorage.getItem('nds-a11y'); } catch (e) { return false; } },
+            // A press may already have started it (and opened the panel) while this group waited:
+            // init() would tear that down and close the panel.
+            init: () => { const ns = NDS.Accessibility; if (ns && !ns.__ndsStub && !ns.started) ns.init(); },
         },
     ];
     for (const c of COMPONENTS) c.init ||= () => NDS[c.name]?.init?.();
@@ -747,7 +753,7 @@
             }
             const bundle = nsToBundle[c.name];
             // Armed even when eager: a press while that bundle is in flight must not reach a half-wired page.
-            if (c.lazy) c.lazy(bundle);
+            if (c.lazy) armLazy(c, bundle);
             if (bundle && c.lazy && !c.eager?.()) continue;      // armed only — nothing loads yet
             if (bundle) (injectedGroups[bundle] ||= []).push(c);
             else deferredComponents.push(c);                     // code already in main
@@ -890,6 +896,14 @@
         return destroyed;
     }
 
+    // A lazy component's press listener, once per page, whichever pass sees it first.
+    const armedLazy = new Set();
+    function armLazy(c, bundle) {
+        if (armedLazy.has(c)) return;
+        armedLazy.add(c);
+        c.lazy(bundle);
+    }
+
     // Markup built after detection: load only the bundles its own content needs, then
     // refresh. Loading every bundle would drag in audit, which must never auto-inject.
     function mountContainer(container) {
@@ -899,6 +913,8 @@
             if (!c.selector) continue;
             const here = root.matches?.(c.selector) || root.querySelector?.(c.selector);
             const bundle = here && nsToBundle[c.name];
+            // A lazy component stays lazy in a mounted view: armed, loaded on its first press.
+            if (bundle && c.lazy) { armLazy(c, bundle); if (!c.eager?.()) continue; }
             if (bundle) needed.add(bundle);
         }
         // The pack too, as the injected groups wait for it: the view's components start in the page language.

@@ -13,6 +13,7 @@
  *   NDS.Accessibility.state                   a deep CLONE of the saved state — read-only
  *   NDS.Accessibility.ready                   true once the panel is built AND wired; false
  *                                             while the bundle loads or the panel builds
+ *   NDS.Accessibility.started                 true once init() ran, by a press or the loader
  * Events:
  *   (none)
  * Hooks:
@@ -20,12 +21,14 @@
  *   (the panel markup lives in this file, not the page HTML — built into a
  *   <template> and pulled out on arm by the id the FAB's data-panel-toggle names)
  *   data-a11y-mode · data-a11y-visual · data-a11y-setting · data-a11y-value
- *   data-a11y-exclude-token   tile removed when the locale's exclude_controls lists it
+ *   data-a11y-exclude-token   letter-spacing: the tile goes on a page whose script joins its letters (ar, fa, ur…)
  *   data-armed                the panel gate (see below)
  *   written on <html>: data-a11y — the token list of active modes
  * Gotchas:
  *   - Every mode is a CSS token override in _variables-a11y.scss. This file only manages
  *     state, persistence, focus and the panel lifecycle — styling is never done here.
+ *   - One per page, for the page's lifetime: no public destroy(), and NDS.Init.destroy()
+ *     leaves it alone. Its modes live on <html>, outside any view.
  *   - This file is a BUNDLE, not a <script> tag: nds-loader.js registers it `lazy`, so
  *     nothing here is downloaded until the FAB is pressed — or, for a visitor whose
  *     saved prefs must apply at load, at init time via the entry's eager(). The loader
@@ -65,14 +68,13 @@
     // real FAB — could ever arm it again for the rest of the page.
     const PANEL_ID = 'nds-accessibility-panel';
 
-    const { add: addState, remove: removeState, has: hasState, clear: clearState } = NDS.State;
+    const { add: addState, remove: removeState, clear: clearState } = NDS.State;
 
     const STORAGE_KEY = 'nds-a11y';
     const root = document.documentElement;
 
     // English defaults; the assets/i18n/{lang}.json pack overrides them. The panel markup carries
-    // the same words as data-i18n markers, which core translates. exclude_controls: the tiles a
-    // language drops (letter-spacing breaks joined Arabic letters).
+    // the same words as data-i18n markers, which core translates.
     const words = NDS.i18n.strings('accessibility', {
         panel_title: 'Accessibility Tools',
         panel_label: 'Accessibility settings',
@@ -137,7 +139,6 @@
         mask_size_up: 'Increase mask band',
         mask_grab: 'Drag mask vertically. Use arrow keys to nudge.',
         mask_close: 'Close reading mask',
-        exclude_controls: [],
     });
 
     // Letter cycle 0/0.04/0.08/0.12em and word cycle 0/0.16/0.32/0.48em both
@@ -178,16 +179,23 @@
         'adhd-friendly':        ['reduce-motion', 'highlight-titles', 'reading-mask'],
     };
 
-    // Normalize a bundle entry. Arabic carve-out: CSS letter-spacing breaks
-    // cursive ligatures, so the bundle's letter-spacing setting is dropped
-    // when document language is Arabic. line-height + word-spacing + the
-    // font primitives still apply.
+    // Letter spacing breaks the letters of a script that joins them. The browser names the page
+    // language's script, so every language written in one is covered (ar, fa, ur, pa-Arab…).
+    // On such a page the tile goes, a bundle's preset skips it and a saved value does not apply.
+    const JOINED_SCRIPTS = new Set(['Arab', 'Syrc', 'Mong', 'Nkoo', 'Adlm', 'Mand']);
+    const noLetterSpacing = () => {
+        try { return JOINED_SCRIPTS.has(new Intl.Locale(document.documentElement.lang || 'en').maximize().script); }
+        catch { return false; }   // not a language tag
+    };
+
+    // Normalize a bundle entry. line-height + word-spacing + the font primitives still
+    // apply where letter spacing does not.
     function bundleRecipe(name) {
         const entry = MODE_BUNDLES[name];
         if (!entry) return { primitives: [], settings: null };
         if (Array.isArray(entry)) return { primitives: entry, settings: null };
         let settings = entry.settings || null;
-        if (settings && NDS.lang === 'ar' && 'letter-spacing' in settings) {
+        if (settings && noLetterSpacing() && 'letter-spacing' in settings) {
             const stripped = {};
             for (const k in settings) if (k !== 'letter-spacing') stripped[k] = settings[k];
             settings = stripped;
@@ -270,37 +278,9 @@
             // __proto__ key can't replace the rehydrated state's prototype.
             const result = NDS.i18n.safeMerge(defaultState(), parsed);
             result.settings = NDS.i18n.safeMerge(defaultState().settings, parsed.settings || {});
+            if (!Array.isArray(result.modes))    result.modes = [];
             if (!Array.isArray(result.bundles))  result.bundles = [];
             if (!Array.isArray(result.excluded)) result.excluded = [];
-            // Strip legacy fields from earlier builds.
-            if ('hidden'   in result) delete result.hidden;
-            if ('position' in result) delete result.position;
-            if ('oversize' in result) delete result.oversize;
-            // Migrate v1 font-scale multiplier → v2 font-step ladder.
-            if (result.settings && result.settings['font-scale'] != null) {
-                const fs = parseFloat(result.settings['font-scale']);
-                let step = 0;
-                if (fs >= 1.5)        step = 3;
-                else if (fs >= 1.25)  step = 2;
-                else if (fs >= 1.15)  step = 1;
-                result.settings['font-step'] = step;
-                delete result.settings['font-scale'];
-            }
-            // Move bundle names that ended up in state.modes into state.bundles.
-            const newModes = [];
-            const newBundles = [...result.bundles];
-            (result.modes || []).forEach(m => {
-                if (MODE_BUNDLES[m]) {
-                    if (!newBundles.includes(m)) newBundles.push(m);
-                } else {
-                    if (!newModes.includes(m)) newModes.push(m);
-                }
-            });
-            result.modes = newModes;
-            result.bundles = newBundles;
-            // Rename smart-contrast → boost-contrast (legacy name).
-            const sci = result.modes.indexOf('smart-contrast');
-            if (sci !== -1) result.modes[sci] = 'boost-contrast';
             return result;
         } catch {
             return defaultState();
@@ -370,7 +350,7 @@
         // Continuous scalars → inline var when non-default + presence token.
         SCALAR_PROPS.forEach(({ key, cssVar, def, token }) => {
             const v = s[key];
-            if (v && v !== def) {
+            if (v && v !== def && !(key === 'letter-spacing' && noLetterSpacing())) {
                 root.style.setProperty(cssVar, v);
                 tokens.add(token);
             } else {
@@ -507,10 +487,12 @@
             maskAbortController = new AbortController();
             const { signal } = maskAbortController;
 
-            // Global Esc closes the mask when the panel isn't capturing it.
+            // Global Esc closes the mask, unless something open owns the key: a modal, a panel
+            // (this one included) or a menu, or a handler that already used it.
             document.addEventListener('keydown', (e) => {
                 if (e.key !== 'Escape' && e.key !== 'Esc') return;
-                if (panel && hasState(panel, 'open')) return;
+                // Showing, not "no hidden attribute": a closed menu may be hidden by CSS alone.
+                if (e.defaultPrevented || [...document.querySelectorAll('.nds-modal, .nds-panel, .nds-dropmenu-menu')].some(el => el.getClientRects().length)) return;
                 e.preventDefault();
                 toggleMode('reading-mask');
             }, { signal });
@@ -648,7 +630,7 @@
             const valEl = btn.querySelector('[data-a11y-value]');
             if (valEl) valEl.textContent = formatSettingValue(key, cur);
             const bars = btn.querySelectorAll('[data-a11y-bars] .nds-accessibility-tile-bar');
-            bars.forEach((bar, i) => bar.classList.toggle('is-active', i < idx));
+            bars.forEach((bar, i) => (i < idx ? addState : removeState)(bar, 'active'));
         });
         // Live "(n)" counter next to each accordion title. Empty when 0
         // so the title stays clean by default.
@@ -1069,13 +1051,9 @@
         },
     ];
 
-    // A language can drop tiles (exclude_controls): letter-spacing breaks joined Arabic letters.
     // The panel's words are data-i18n markers, which core translates.
     function dropExcludedTiles() {
-        if (!panel) return;
-        (words.text('exclude_controls') || []).forEach(token => {
-            panel.querySelectorAll('[data-a11y-exclude-token="' + token + '"]').forEach(el => el.remove());
-        });
+        if (panel && noLetterSpacing()) panel.querySelectorAll('[data-a11y-exclude-token="letter-spacing"]').forEach(el => el.remove());
     }
 
     // Panel markup — moved out of every page's HTML (was a <template> in
@@ -1521,9 +1499,10 @@
             });
         });
 
-        // A press can build the panel before the pack lands: once it is in, drop the tiles the
-        // language excludes and write the script's own words (values, counts) again.
-        words.load().then(() => { dropExcludedTiles(); syncUI(); });
+        dropExcludedTiles();
+        // A press can build the panel before the pack lands: once it is in, write the script's
+        // own words (values, counts) again.
+        words.load().then(syncUI);
 
         syncUI();
     }
@@ -1538,6 +1517,8 @@
         // "still building" (swallow the click) from "done" (let Panel's own
         // delegated toggle have it) and the attribute answers yes to both.
         get ready() { return _initDone && !_arming && !!panel; },
+        // Started, by a press or by the loader: the loader then skips its own init().
+        get started() { return _initDone; },
         get state() { return structuredClone(state); },
     };
 })();
