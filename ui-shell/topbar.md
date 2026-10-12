@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 07:27 PM"
+last_edit: "12/10/2026 - 07:43 PM"
 ---
 
 <section id="topbar-overview" class="nds-content-section nds-doc-overview">
@@ -232,6 +232,8 @@ The address card follows the site's own domain: on `iu.edu.sa` it shows the `.ed
 {: .nds-block-title #topbar-widgets}
 
 The script writes each widget's icon and text. The date changes with the page language and renders again at midnight. The clock shows hours and minutes and changes on the minute. The date and the clock follow the site's timezone, `data-timezone` on `<html>`, or the visitor's clock without it. See [Date](../core/date). The weather renders again every 15 minutes. City and weather work as one widget: both elements must be on the page.
+
+The widgets also work outside the top bar, such as in a kiosk header or a dashboard: copy the widget's `span` to that place. Each widget is an id, so a page shows each one once: a date in the content and a date in the top bar cannot both show. A widget looks the same outside the bar as in it.
 
 ### Widgets on Small Screens
 {: .nds-block-title}

@@ -25,23 +25,24 @@
         margin-inline-start: auto;
         align-items: center;
     }
+}
 
-    .nds-text-icon {
-        height: 40px;
-        min-width: 40px;
-        --loading-size: 24px;
+// A widget (date, clock, weather) looks the same in the bar or anywhere else on the page.
+.nds-text-icon {
+    height: 40px;
+    min-width: 40px;
+    --loading-size: 24px;
 
-        &>.text {
-            font-size: var(--typo-text-clamp-md-FS);
-            line-height: var(--typo-text-clamp-md-LH);
-            white-space: nowrap;
-        }
+    &>.text {
+        font-size: var(--typo-text-clamp-md-FS);
+        line-height: var(--typo-text-clamp-md-LH);
+        white-space: nowrap;
+    }
 
-        &>i {
-            font-size: var(--typo-text-lg-FS);
-            line-height: var(--typo-text-lg-LH);
-            width: var(--typo-text-lg-FS);
-        }
+    &>i {
+        font-size: var(--typo-text-lg-FS);
+        line-height: var(--typo-text-lg-LH);
+        width: var(--typo-text-lg-FS);
     }
 }
 
