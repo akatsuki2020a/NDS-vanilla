@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:27 PM"
+last_edit: "12/10/2026 - 06:32 PM"
 ---
 
 <section id="init-overview" class="nds-content-section nds-doc-overview">
@@ -121,6 +121,12 @@ Only components inside `el` are reached. A filter toolbar can sit beside the gri
 {: .nds-block-title}
 
 Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.destroy(view)` before it unmounts. Do not wait for `NDS.Init.ready`, poll or retry before these calls. A view that mounts before NDS loads is found by NDS's own startup scan, and the `?.` skips each call while `NDS` does not exist yet.
+
+Build rows with the framework, not with the `<template>` pattern above. The framework owns every node it renders.
+
+A framework that hydrates server HTML, such as Next.js or Nuxt, needs that HTML unchanged until hydration ends, and NDS changes some of it when it starts: the clock writes the time, and Main Navigation sets classes. React then discards the page, and it stays hidden. Write `data-nds-auto-init="false"` on `<html>`, and call `NDS.Init.initialize()` once hydration ends: in React, from an effect in the root component. That call must run after `nds-main.min.js`. Put the NDS script tag above your app's script and check the built HTML, because a bundler can move its own script above it.
+
+Keep the `<style>` gate and the inline script out of your bundler. A minifier changes their bytes, so a CSP hash no longer matches (see [Content Security Policy](../ui-shell/head#csp)).
 
 </div>
   </div>
