@@ -15,6 +15,8 @@
  *   data-cookies-view              notice | manage | done — the views inside the panel
  *   data-cookies-action            accept | reject | save (then done) · manage · undo (back to notice)
  *   data-cookies-category          on a switch input in the manage view — the category it allows
+ *   data-cookies="false"           on <html> — no auto-open on this page (a kiosk, a TV); the
+ *                                  toggle buttons still open it
  * Gotchas:
  *   - A lazy BUNDLE like Accessibility, on every page: fetched only for a visitor with no stored
  *     choice (the loader entry's eager()) or on the first data-cookies-toggle press.
@@ -22,8 +24,7 @@
  *     built, so it never shows English first. A page's own panel keeps its own text.
  *   - Closing without a choice stores none and hides the auto-open for 30 minutes under
  *     cookieConsentDismissed. That key is never read as consent.
- *   - The auto-open never takes focus, and waits while another panel is open: Panel shows
- *     one at a time, and would close it.
+ *   - The auto-open never takes focus, and waits while another panel is open.
  */
 (() => {
     'use strict';
@@ -205,9 +206,13 @@
         });
     }
 
+    // No auto-open: a choice is stored, the visitor closed it lately, or the page opts out.
+    const skipAuto = () => NDS.Cookies.getConsent() || NDS.Cookies.get(DISMISS_KEY)
+        || document.documentElement.getAttribute('data-cookies') === 'false';
+
     // The panel is static: it waits for any open panel by itself.
     function autoOpen() {
-        if (NDS.Cookies.getConsent() || NDS.Cookies.get(DISMISS_KEY)) return;
+        if (skipAuto()) return;
         open('notice', null, { focus: false });
     }
 
@@ -216,7 +221,7 @@
         if (_initDone) return;
         _initDone = true;
         wire();
-        if (NDS.Cookies.getConsent() || NDS.Cookies.get(DISMISS_KEY)) return;
+        if (skipAuto()) return;
         // The strings load during the wait, so the panel is ready when it opens.
         if (!document.getElementById(PANEL_ID)) strings.load();
         setTimeout(autoOpen, DELAY);

@@ -222,7 +222,9 @@
                     NDS.CookieConsent.open(btn.dataset.cookiesToggle || undefined, btn);
                 });
             },
-            eager: () => !NDS.Cookies.getConsent() && !NDS.Cookies.get('cookieConsentDismissed'),
+            // A page with <html data-cookies="false"> (a kiosk, a TV) skips the bundle until a toggle press.
+            eager: () => document.documentElement.getAttribute('data-cookies') !== 'false'
+                && !NDS.Cookies.getConsent() && !NDS.Cookies.get('cookieConsentDismissed'),
         },
         {
             // Deferred: stars paint from markup; nothing else reads NDS.Rating.
