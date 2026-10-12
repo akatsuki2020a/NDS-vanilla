@@ -26,6 +26,24 @@
 
 }
 
+// Empty in the markup until the stamp script writes the pack's text: a bar holds its place.
+.nds-digital-stamp-tab > :is(.nds-digital-stamp-lg-text, .nds-digital-stamp-sm-text, #nds-digital-stamp-verify-text):empty {
+    display: inline-block;
+    height: 1em;
+    --nds-skeleton-width: 16em;
+    @include skeleton-bar;
+    @include skeleton-pulse;
+}
+
+.nds-digital-stamp-tab > #nds-digital-stamp-verify-text:empty {
+    --nds-skeleton-width: 5em;
+}
+
+// The arrow waits for the text: the tab opens nothing until the script runs.
+.nds-digital-stamp-tab:not([data-nds-digital-stamp-initialized]) {
+    --nds-icons-opacity: 0;
+}
+
 @include desktop(min) {
     .nds-digital-stamp-tab>.nds-digital-stamp-sm-text {
         display: none!important;
