@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 08:47 AM"
+last_edit: "12/10/2026 - 12:08 PM"
 ---
 
 <section id="filter-overview" class="nds-content-section nds-doc-overview">
@@ -490,10 +490,36 @@ document.addEventListener('nds:filterFormAjax', function (e) {
 });
 </script>
 
-### Sort Ownership
+### Sort
 {: .nds-block-title}
 
-A filter also drives the [Sort](../components/sort) triggers that carry its `data-filter-target`. Sort is not a filter value and is never sent with the form. Decide by what the server returns. All matching items, paged in the browser: add `data-sort` triggers, and the browser sorts. One page of items: add no `data-sort`, and put a `<select name="sort">` in the form for the server.
+A filter also drives the [Sort](../components/sort) triggers that carry its `data-filter-target`. Put them in a [Dropmenu](../components/dropmenu) beside the filter. Each item carries the value it sorts by in `data-sort-<key>`, such as `data-sort-title="Commercial registration"`. A trigger with an empty `data-sort` puts the items back in their first order. `data-sort-mode="cycle"` on a trigger makes each button go from ascending to descending to the first order, as in a table.
+
+<script type="text/html" id="filter-sort" data-canon data-preview="none">
+<div class="nds-dropmenu">
+  <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" type="button">
+    <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
+    <span class="nds-label">Sort</span>
+  </button>
+  <div class="nds-dropmenu-menu" hidden>
+    <div class="nds-dropmenu-scroll">
+      <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort data-filter-target="flt-items">
+        <span class="nds-label">Default</span>
+      </button>
+      <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-order="asc" data-filter-target="flt-items">
+        <span class="nds-label">A–Z</span>
+      </button>
+      <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-order="desc" data-filter-target="flt-items">
+        <span class="nds-label">Z–A</span>
+      </button>
+    </div>
+  </div>
+</div>
+</script>
+
+The sort stays in the URL as `sort`, with `order=desc` for a descending order. Ascending writes no `order`. A sort in the URL wins over a `sorted-asc` or `sorted-desc` state written on a trigger, so a shared link opens in its own order. On a page with sort buttons, do not use `sort` or `order` for anything else, not even as a group name: a descending sort writes `order=desc` over it.
+
+Sort is not a filter value and is never sent with the form. Decide by what the server returns. All matching items, paged in the browser: add `data-sort` triggers, and the browser sorts. One page of items: add no `data-sort`, and put a `<select name="sort">` in the form for the server.
 
 </div>
   </div>
@@ -518,7 +544,7 @@ A filter also drives the [Sort](../components/sort) triggers that carry its `dat
             <i class="hgi hgi-stroke hgi-link-circle-02"></i>
             <span class="nds-label">Shareable URL State</span>
           </span>
-          <p class="nds-item-desc">The search term and the applied values stay in the URL query, so a reload or a shared link opens the same list. The search term's key is the search field's <code class="nds-inline-code lang-html">name</code>, or <code class="nds-inline-code lang-html">search</code> when it has none. A group's key is its <code class="nds-inline-code lang-html">data-filter</code> name. A checkbox or switch group joins its values with commas, so its values must not contain one.</p>
+          <p class="nds-item-desc">The search term and the applied values stay in the URL query, so a reload or a shared link opens the same list. The search term's key is the search field's <code class="nds-inline-code lang-html">name</code>, or <code class="nds-inline-code lang-html">search</code> when it has none. A group's key is its <code class="nds-inline-code lang-html">data-filter</code> name. A checkbox or switch group joins its values with commas, so its values must not contain one. The sort is <code class="nds-inline-code lang-html">sort</code> and <code class="nds-inline-code lang-html">order</code>.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
