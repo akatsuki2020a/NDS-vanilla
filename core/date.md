@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "12/10/2026 - 06:54 PM"
 ---
 
 <section id="date-overview" class="nds-content-section nds-doc-overview">
@@ -74,6 +74,13 @@ Convert a Gregorian date to Hijri.
 <script type="text/html" id="date-convert" data-canon data-lang="js">
 // '16/09/1447'
 NDS.date.convert('05/03/2026', { format: 'DD/MM/YYYY' }, { calendar: 'hijri', format: 'DD/MM/YYYY' });
+</script>
+
+Write the month's name with `MMMM`.
+
+<script type="text/html" id="date-month-name" data-canon data-lang="js">
+// On an Arabic page: '16 رمضان 1447'
+NDS.date.format(new Date(2026, 2, 5), { calendar: 'hijri', format: 'D MMMM YYYY' });
 </script>
 
 </div>
@@ -147,7 +154,7 @@ NDS.date.convert('05/03/2026', { format: 'DD/MM/YYYY' }, { calendar: 'hijri', fo
 - Use `today()` for today's date, not `new Date()`. `new Date()` is the visitor's clock and ignores `data-timezone`.
 - Set `data-timezone` when today must be the same day for every visitor, such as a deadline in Riyadh.
 - Do not pass `timeZone` to `format` for a parsed date. It moves the day for a visitor in another timezone. Pass it only for a moment in time, such as `new Date()` in a clock.
-- For a Hijri month name, format the month as a number and look the name up in your own list. On Android, the browser can print a Gregorian month name for a Hijri month.
+- For a Hijri month name, use `MMMM`, not `month: 'long'`. On Android, the browser can print a Gregorian month name for a Hijri month, and `MMMM` takes the name from the [string pack](../core/i18n).
 - Sort reads a date from the text in the nearest `data-date-format` and `data-calendar`. For text in another format, write the date as a Gregorian `YYYY-MM-DD` in `data-sort-value` on a table cell, or in `data-sort-{key}` on a list item.
 
 </div>
@@ -179,6 +186,7 @@ NDS.date.convert('05/03/2026', { format: 'DD/MM/YYYY' }, { calendar: 'hijri', fo
 |---|---|
 | `YYYY` | The year, 4 digits |
 | `YY` | The year, 2 digits. `parse` reads it as 2000 to 2099 |
+| `MMMM` | The month's name, in `locale` or the page language. Only for `format`: `parse` returns `null` for a format with it, so keep it out of `data-date-format` |
 | `MM` | The month, 2 digits |
 | `M` | The month, 1 or 2 digits |
 | `DD` | The day, 2 digits |
@@ -194,7 +202,7 @@ Any other character is literal. A format with no day, such as `MM/YYYY`, parses 
 |---|---|---|
 | `format` | `data-date-format`, or `DD/MM/YYYY` | The tokens to read or write. `format` writes ASCII digits, unless you set `numerals` |
 | `calendar` | `'gregory'` | The calendar of the text: `'gregory'` or `'hijri'`, the two calendars of Saudi Arabia. `'hijri'` is Umm al-Qura (`'islamic-umalqura'`) |
-| `locale` | the `lang` of `<html>` | The language of the text. Only for the `format` method when it writes the text through the browser: with other options and no `format` |
+| `locale` | the `lang` of `<html>` | The language of the text. Only for the `format` method: the text the browser writes, with other options and no `format`, and the name `MMMM` writes |
 | `numerals` | `'latn'` | The digits. `'arab'` writes Arabic digits. Only for the `format` method |
 | any other option | — | Only for the `format` method: passed to `Intl.DateTimeFormat`, such as `weekday`, `day`, `month`, `year` and `timeZone` |
 {: .nds-table .nds-responsive}

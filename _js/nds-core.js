@@ -480,7 +480,7 @@
     // The site's timezone (<html data-timezone>) enters only through today().
     // ponytail: built for Saudi Arabia's two calendars, gregory and hijri; any other calendar when a site asks.
     NDS.date = (() => {
-        const TOKENS = /YYYY|YY|MM|M|DD|D/g;
+        const TOKENS = /YYYY|YY|MMMM|MM|M|DD|D/g;
         const fmts = new Map();
         const regs = new Map();
         const warned = new Set();
@@ -583,6 +583,8 @@
                     const order = [];
                     const src = format.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(TOKENS, (t) => {
                         order.push(t);
+                        // A month name is print-only: the format never matches.
+                        if (t === 'MMMM') return '(?!)';
                         return t === 'YYYY' ? '(\\d{4})' : t.length === 2 ? '(\\d{2})' : '(\\d{1,2})';
                     });
                     regs.set(format, re = { rx: new RegExp('^' + src + '$'), order });
@@ -612,6 +614,7 @@
                     const { y, m, d } = toCal(date, cal);
                     const out = (format || siteFormat()).replace(TOKENS, (t) =>
                         t === 'YYYY' ? String(y) : t === 'YY' ? String(y).slice(-2)
+                        : t === 'MMMM' ? monthNames(calendar === 'hijri' ? 'hijri' : 'gregory', locale)[m - 1]
                         : String(t[0] === 'M' ? m : d).padStart(t.length, '0'));
                     if (!numerals || numerals === 'latn') return out;
                     // The numbering system's zero, then offset: its digits are contiguous.
