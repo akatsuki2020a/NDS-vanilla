@@ -91,7 +91,7 @@
     // ponytail: lives here until a second component reads a wall time in the site timezone, then it moves to NDS.date.
     function parseIso(text) {
         const s = String(text ?? '').trim();
-        const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?(Z|([+-])(\d{2}):?(\d{2}))?$/.exec(s);
+        const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?)?(Z|([+-])(\d{2}):?(\d{2}))?$/.exec(s);
         if (!m) return NaN;
         const [y, mo, d] = [+m[1], +m[2], +m[3]];
         const [h, mi, sec] = [+m[4] || 0, +m[5] || 0, +m[6] || 0];
