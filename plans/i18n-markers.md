@@ -1,6 +1,6 @@
 # i18n: markers in markup, one translator in core
 
-Status: **design, owner picks made (2026-10-12), awaiting final OK.** Reviewed by two fresh Opus reviewers (design, runtime); their findings are folded in below. Follows `plans/localization.md` (the one pack, shipped). Ships in v2.0.0.
+Status: **shipped 2026-10-13**, steps 1–6 done. Reviewed by two fresh Opus reviewers (design, runtime); their findings are folded in below. Follows `plans/localization.md` (the one pack, shipped). Ships in v2.0.0.
 
 ## Why
 
