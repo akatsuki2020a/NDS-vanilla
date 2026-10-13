@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 11:15 PM"
+last_edit: "13/10/2026 - 12:51 PM"
 ---
 
 <section id="audit-overview" class="nds-content-section nds-doc-overview">
@@ -221,6 +221,9 @@ The audit reads the page, not the scripts. An old method name or an event listen
 | `img-size` | page | warn | An `<img>` whose `width` and `height` give a different shape from the picture, so it stretches or the layout jumps. It skips images that have not loaded, and an SVG with no size of its own |
 | `native-date-time` | page | warn | A browser date or time field (`type="date"`, `month`, `week`, `datetime-local`, `time`) where the Date Picker or Time Picker belongs |
 | `toolbar-part` | structure | warn | An `nds-toolbar-*` part (row, start, end, text) outside a `.nds-toolbar`: it still lays out as a bar, but stacked rows touch and the bar loses its gap. One finding per bar |
+| `toolbar-search-row` | structure | warn | A search box whose line holds more than one other item. The applied-filters and suggestion lines do not count: they take a line of their own |
+| `toolbar-applied` | structure | warn | Applied filters (`.nds-filter-applied`) outside a toolbar, above the search or filter they show, or in the same row as them |
+| `toolbar-sizes` | structure | warn | Items on one toolbar line with different heights, such as a 32px `nds-md` button beside a 40px one. It skips hidden items |
 | `i18n-pack` | i18n | error | The language file of the page did not load |
 | `filter-unclaimed` | structure | error | `data-filter-items` that no filter claimed, so it stays in its skeleton |
 | `filter-no-target` | structure | error | A `.nds-filter` with no `data-filter-target` |

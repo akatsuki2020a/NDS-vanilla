@@ -250,6 +250,42 @@
         });
     } });
 
+    // A search box needs most of its line, on a phone above all. The chip lines take a line of their own.
+    rule({ id: 'toolbar-search-row', group: 'structure', docs: 'components/toolbar.html', check(ctx) {
+        ctx.find('.nds-toolbar .nds-search-box').forEach(box => {
+            const line = box.closest('.nds-toolbar-row') || box.closest('.nds-toolbar');
+            const others = [...line.children]
+                .flatMap(el => el.matches('.nds-toolbar-start, .nds-toolbar-end') ? [...el.children] : [el])
+                .filter(el => el !== box && !el.matches('.nds-toolbar-row, .nds-filter-applied, .nds-auto-fill, script, template'));
+            if (others.length > 1) ctx.report(box, `.nds-search-box shares its line with ${others.length} other items.`, 'Keep one beside it, a Filter or a sort menu, and move the rest to another .nds-toolbar-row.');
+        });
+    } });
+
+    // The applied filters read as the result of the search and filter line, so they sit right under it.
+    rule({ id: 'toolbar-applied', group: 'structure', docs: 'components/toolbar.html', check(ctx) {
+        const fix = 'Put it in the toolbar, in its own .nds-toolbar-row under the search and filter row.';
+        ctx.find('.nds-filter-applied').forEach(el => {
+            const bar = el.closest('.nds-toolbar');
+            if (!bar) return ctx.report(el, '.nds-filter-applied outside a .nds-toolbar.', fix);
+            const controls = [...bar.querySelectorAll('.nds-search-box, .nds-filter')];
+            const row = el.closest('.nds-toolbar-row');
+            if (row && controls.some(c => row.contains(c))) ctx.report(el, '.nds-filter-applied shares a row with the search or filter.', fix);
+            else if (controls.some(c => el.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING)) ctx.report(el, '.nds-filter-applied above the search or filter it shows.', fix);
+        });
+    } });
+
+    // One line, one control height: a 32px button beside a 40px one reads as a mistake. Hidden items are skipped.
+    rule({ id: 'toolbar-sizes', group: 'structure', docs: 'components/toolbar.html', check(ctx) {
+        ctx.find('.nds-toolbar-row, .nds-toolbar:not(:has(> .nds-toolbar-row))').forEach(line => {
+            const heights = new Set([...line.children]
+                .flatMap(el => el.matches('.nds-toolbar-start, .nds-toolbar-end') ? [...el.children] : [el])
+                .map(el => el.matches('.nds-btn') ? el : el.querySelector('.nds-form-control, .nds-btn:not(.nds-dropmenu-menu *)'))
+                .filter(c => c?.getClientRects().length)
+                .map(c => Math.round(c.getBoundingClientRect().height)));
+            if (heights.size > 1) ctx.report(line, `Toolbar items in one line differ in height: ${[...heights].sort().join('px, ')}px.`, 'Give the buttons on a line one size: all default (40px) or all nds-md (32px), to match the search box when there is one.');
+        });
+    } });
+
     // ── i18n ─────────────────────────────────────────────────────────
 
     rule({ id: 'i18n-pack', group: 'i18n', severity: 'error', docs: 'core/i18n.html', check(ctx) {
