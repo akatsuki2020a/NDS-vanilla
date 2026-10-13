@@ -180,7 +180,7 @@
 
 - title: "Content Switcher"
   description: "Toggle between content sections within the same space on the screen"
-  use_when: "Toggle between content sections in the same space with a segmented control: view switcher, list-versus-grid toggle, segmented buttons. Same engine as Tabs; choose Tabs when the control should read as a tab strip."
+  use_when: "Toggle between content sections in the same space with a segmented control: view switcher, segmented buttons. Same engine as Tabs; choose Tabs when the control should read as a tab strip. For view buttons with no panels, such as a grid-or-list toggle on one list, use a button group (Buttons)."
   icon: '<i class="hgi hgi-stroke hgi-exchange-01"></i>'
   category: "UI"
   tags: ["JS", "CSS", "API"]

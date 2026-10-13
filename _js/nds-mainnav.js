@@ -104,7 +104,11 @@
     // yields every 5 ms) and restyles again. On the nav, not <body>: only the
     // nav's rules read it, so a flip restyles the nav alone. init's
     // syncMode then finds both in sync and takes its no-change PAB path.
-    if (DOM.nav && DOM.collapse) {
+    // Auto-init off (the loader reads the same switch): nothing changes before
+    // initialize(), so a framework hydrates the markup it rendered.
+    const autoInit = (window.NDSInitConfig || {}).autoInitialize
+        ?? document.documentElement.getAttribute('data-nds-auto-init') !== 'false';
+    if (autoInit && DOM.nav && DOM.collapse) {
         DOM.nav.classList.toggle('nds-minimal', _mqMinimal.matches);
         DOM.minimal?.toggleAttribute('hidden', !_mqMinimal.matches);
     }
