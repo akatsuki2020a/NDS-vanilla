@@ -129,7 +129,7 @@ module DocsCanon
   # element of that tag (and that `#id`, when named); x counts by name only, y by its `="v"` or `~="v"` too, a descendant part as present.
   # `:not(.anc .x)` skips an element inside `.anc`.
   # `:has(> tag)` needs that tag anywhere in the markup, `:has(.cls)` an element with that class.
-  # `:not(:has(a, b))` fails on any of them in the markup; `.anc > .x` checks x, with .anc anywhere.
+  # `:not(:has(a, b))` fails on any of them in the markup; `.anc.b > .x` checks x, with every class of the ancestor (outside `:not()`) somewhere in the markup.
   # Upgrade to a real parser if a table needs x's value or a true ancestor check.
   def self.matches?(src, sel, js = nil)
     return true if sel == '—'
@@ -152,7 +152,7 @@ module DocsCanon
     depth = 0
     cut = sel.each_char.with_index.select { |ch, _| depth += { '(' => 1, ')' => -1, '[' => 1, ']' => -1 }.fetch(ch, 0); depth.zero? && ' >+~'.include?(ch) }.last&.last
     if cut
-      return false unless sel[0...cut].scan(/\.([\w-]+)/).flatten.then { |cs| cs.empty? || cs.any? { |c| present[".#{c}"] } }
+      return false unless sel[0...cut].gsub(/:not\([^)]*\)/, '').scan(/\.([\w-]+)/).flatten.all? { |c| present[".#{c}"] }
       sel = sel[(cut + 1)..].strip
     end
     has_tags = sel.scan(/:has\(>?\s*([a-z][\w-]*)\)/).flatten
