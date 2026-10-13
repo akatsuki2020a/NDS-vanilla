@@ -101,6 +101,15 @@
   border-radius: 0 !important;
 }
 
+// One axis of padding only.
+.nds-flush-inline {
+  padding-inline: 0 !important;
+}
+
+.nds-flush-block {
+  padding-block: 0 !important;
+}
+
 
 .nds-expandable {
   position: relative;

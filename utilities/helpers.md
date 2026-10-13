@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 09:30 PM"
 ---
 
 <section id="helpers-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "10/10/2026 - 05:28 PM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-Helper classes are five CSS classes for the markup you write yourself: a wrapper, a custom panel, a line of text. Each class does one thing. `nds-center` centers, and `nds-flush` removes spacing. `nds-ltr` sets left-to-right text, and `nds-color-primary` sets the brand text color. `nds-note` makes a small line of secondary text.
+Helper classes are seven CSS classes for the markup you write yourself: a wrapper, a custom panel, a line of text. Each class does one thing. `nds-center` centers, and `nds-flush` removes spacing, `nds-flush-inline` and `nds-flush-block` remove only the side or the top and bottom padding. `nds-ltr` sets left-to-right text, and `nds-color-primary` sets the brand text color. `nds-note` makes a small line of secondary text.
 
 Pick another component when:
 
@@ -70,7 +70,9 @@ The canon is a request confirmation on an Arabic page. Each Class chip adds its 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
 | Class (any) | Center | `.nds-center` | `#helpers-card` | Centers the text in an element and everything inside it. On a card it centers the content, not the card |
-| Class (any) | Flush (hint: Removes padding, margin, border and corner radius) | `.nds-flush` | `#helpers-card` | Removes a component's own padding, margin, border and corner radius when the frame around it gives them. Here the card loses its border and padding, so its content sits straight on the page |
+| Class (any) | Flush (hint: Removes padding, margin, border and corner radius) (limit: 1 flush) | `.nds-flush` | `#helpers-card` | Removes a component's own padding, margin, border and corner radius when the frame around it gives them. Here the card loses its border and padding, so its content sits straight on the page |
+| Class (any) | Flush sides (hint: Removes only the padding at the start and the end) (limit: 1 flush) | `.nds-flush-inline` | `#helpers-card` | Removes only the padding at the start and the end, so the content lines up with the edge around it. On [Tabs](../components/tabs), write it on each panel |
+| Class (any) | Flush top and bottom (hint: Removes only the padding above and below) (limit: 1 flush) | `.nds-flush-block` | `#helpers-card` | Removes only the padding above and below. |
 | Class (any) | LTR | `.nds-ltr` | `#helpers-number` | A request number, phone number, IBAN, email address or URL inside Arabic text. Without it, the hyphens and the plus sign move to the wrong end |
 | Class (any) | LTR | `.nds-ltr` | `#helpers-phone` | The phone number. Written with the first |
 | Class (any) | Brand Color | `.nds-color-primary` | `#helpers-number` | Text that is not a link, in the brand text color: a figure, a term, a status word |
@@ -104,7 +106,7 @@ The canon is a request confirmation on an Arabic page. Each Class chip adds its 
             <i class="hgi hgi-stroke hgi-eraser"></i>
             <span class="nds-label">Priority Over Component Styles</span>
           </span>
-          <p class="nds-item-desc"><code class="nds-inline-code lang-html">nds-center</code>, <code class="nds-inline-code lang-html">nds-flush</code> and <code class="nds-inline-code lang-html">nds-ltr</code> use <code class="nds-inline-code lang-css">!important</code>, so they apply on any element, even one a component styles, with no extra selector.</p>
+          <p class="nds-item-desc"><code class="nds-inline-code lang-html">nds-center</code>, <code class="nds-inline-code lang-html">nds-flush</code>, <code class="nds-inline-code lang-html">nds-flush-inline</code>, <code class="nds-inline-code lang-html">nds-flush-block</code> and <code class="nds-inline-code lang-html">nds-ltr</code> use <code class="nds-inline-code lang-css">!important</code>, so they apply on any element, even one a component styles, with no extra selector.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -177,6 +179,8 @@ The canon is a request confirmation on an Arabic page. Each Class chip adds its 
 |---|---|---|
 | `nds-center` | Any element | Centers the text with `!important`, and sets `margin-inline: auto` |
 | `nds-flush` | Any element | Sets padding, margin, border and corner radius to 0, with `!important` |
+| `nds-flush-inline` | Any element | Sets the start and end padding to 0, with `!important`. |
+| `nds-flush-block` | Any element | Sets the top and bottom padding to 0, with `!important`. |
 | `nds-ltr` | Any element | Sets left-to-right direction with `!important` on the element and everything inside it, and isolates it from the text around it |
 | `nds-color-primary` | Any element | Sets the brand text color, `--text-primary` |
 | `nds-note` | A text element | Small text in the secondary paragraph color. No margin |

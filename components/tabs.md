@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 09:28 PM"
 ---
 
 <section id="tabs-overview" class="nds-content-section nds-doc-overview">
@@ -322,6 +322,7 @@ The first tab is open in the markup: its `aria-selected` is `true`, and every ot
 - Keep the tabs and the panels in the same order and the same number: tab one opens panel one.
 - Give the tab list an `aria-label`, and pair each tab and panel with `aria-controls` and `aria-labelledby`.
 - Build a long panel from `nds-block` parts with `nds-block-title` headings, so it reads in sections.
+- When a panel holds content with its own edge, such as a grid of cards, add a flush helper to each panel. `nds-flush-inline` lines the content up with the tab row, `nds-flush-block` removes the space above and below, and `nds-flush` removes both. See [Helper Classes](../utilities/helpers).
 
 </div>
   </div>
