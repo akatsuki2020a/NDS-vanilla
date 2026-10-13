@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 06:51 PM"
+last_edit: "13/10/2026 - 11:23 AM"
 ---
 
 <section id="footer-overview" class="nds-content-section nds-doc-overview">
@@ -35,8 +35,8 @@ The main navigation belongs in the [Header](../ui-shell/header), and the navigat
     </div>
     <div class="nds-section-body">
 <script type="text/html" id="footer-canon" data-canon data-preview="page" data-preview-height="320" data-preview-style="body{display:flex;flex-direction:column;min-height:100vh}.nds-footer{margin-block-start:auto}" data-variants="footer-variants-table">
-<footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer">
-  <nav class="nds-footer-content" aria-label="Footer navigation">
+<footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer" data-i18n-aria-label="footer.site_footer">
+  <nav class="nds-footer-content" aria-label="Footer navigation" data-i18n-aria-label="footer.footer_navigation">
     <div class="nds-footer-column">
       <span class="nds-footer-heading" id="footer-col-1">Services</span>
       <ul class="nds-footer-list" aria-labelledby="footer-col-1">

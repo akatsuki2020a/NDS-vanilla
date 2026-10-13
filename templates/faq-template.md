@@ -121,7 +121,7 @@ sidemenu_mode: false
                             </div>
                             {% endfor %}
                         </div>
-                        <nav class="nds-pagination" data-auto-pagination="faq-all-items" aria-label="Pagination"></nav>
+                        <nav class="nds-pagination" data-auto-pagination="faq-all-items" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
                     </div>
 
                     {% for category in categories %}
@@ -155,7 +155,7 @@ sidemenu_mode: false
                             {% endif %}
                             {% endfor %}
                         </div>
-                        <nav class="nds-pagination" data-auto-pagination="faq-{{ category }}-items" aria-label="Pagination"></nav>
+                        <nav class="nds-pagination" data-auto-pagination="faq-{{ category }}-items" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
                     </div>
                     {% endfor %}
 

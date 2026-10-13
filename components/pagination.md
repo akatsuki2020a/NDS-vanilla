@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:31 AM"
+last_edit: "13/10/2026 - 11:23 AM"
 ---
 
 <section id="pagination-overview" class="nds-content-section nds-doc-overview">
@@ -37,7 +37,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body">
 <script type="text/html" id="pg-buttons" data-canon data-variants="pagination-variants-table">
-<nav class="nds-pagination" aria-label="Pagination">
+<nav class="nds-pagination" aria-label="Pagination" data-i18n-aria-label="pagination.pagination">
   <ul class="nds-pagination-list">
     <li class="nds-pagination-item nds-pagination-prev">
       <button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="Previous page" disabled>
@@ -78,7 +78,7 @@ Pick another component when:
 </nav>
 </script>
 <script type="text/html" id="pg-links" data-canon>
-<nav class="nds-pagination" aria-label="Pagination">
+<nav class="nds-pagination" aria-label="Pagination" data-i18n-aria-label="pagination.pagination">
   <ul class="nds-pagination-list">
     <li class="nds-pagination-item nds-pagination-prev">
       <a class="nds-btn nds-subtle nds-icon-only" aria-label="Previous page" aria-disabled="true">
@@ -109,7 +109,7 @@ Pick another component when:
 </nav>
 </script>
 <script type="text/html" id="pg-data" data-canon>
-<nav class="nds-pagination" data-total-pages="12" aria-label="Pagination"></nav>
+<nav class="nds-pagination" data-total-pages="12" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
 </script>
 <script type="text/html" id="pg-grid" data-canon>
 <div id="pg-cards" class="nds-grid nds-paged-content" style="--per-page: 3; --max-col: 3; --mid-col: 3; --min-col: 1;">

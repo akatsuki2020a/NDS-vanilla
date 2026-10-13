@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.8.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 11:23 AM"
 ---
 
 <section id="page-layout-overview" class="nds-content-section nds-doc-overview">
@@ -106,7 +106,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
       <!-- The page feedback: ../components/user-feedback -->
     </section>
   </main>
-  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer">
+  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer" data-i18n-aria-label="footer.site_footer">
     <!-- The footer: copy it from ../ui-shell/footer -->
   </footer>
   <!-- Last in body: the nds-main.min.js script tag, see ../ui-shell/head -->
@@ -175,7 +175,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
       </div>
     </div>
   </main>
-  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer">
+  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer" data-i18n-aria-label="footer.site_footer">
     <!-- The footer: copy it from ../ui-shell/footer -->
   </footer>
   <!-- Last in body: the nds-main.min.js script tag, see ../ui-shell/head -->
@@ -239,7 +239,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
       <!-- The page feedback: ../components/user-feedback -->
     </section>
   </main>
-  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer">
+  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer" data-i18n-aria-label="footer.site_footer">
     <!-- The footer: copy it from ../ui-shell/footer -->
   </footer>
   <!-- Last in body: the nds-main.min.js script tag, see ../ui-shell/head -->
@@ -346,7 +346,7 @@ The `<head>` and the markup of the header, hero, side menu and footer are on the
       </div>
     </div>
   </main>
-  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer">
+  <footer class="nds-footer nds-content-wrapper nds-brand" role="contentinfo" aria-label="Site Footer" data-i18n-aria-label="footer.site_footer">
     <!-- The footer: copy it from ../ui-shell/footer -->
   </footer>
   <!-- Last in body: the nds-main.min.js script tag, see ../ui-shell/head -->

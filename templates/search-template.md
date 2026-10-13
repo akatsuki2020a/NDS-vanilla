@@ -118,7 +118,7 @@ sidemenu_mode: false
                 </div>
                 {% endfor %}
             </div>
-            <nav class="nds-pagination" data-auto-pagination="search_results_content" aria-label="Pagination"></nav>
+            <nav class="nds-pagination" data-auto-pagination="search_results_content" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
         </div>
     </div>
 </section>

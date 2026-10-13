@@ -1272,6 +1272,18 @@
   "ar": "التصفيات المطبقة:"
  },
  {
+  "section": "footer",
+  "key": "site_footer",
+  "en": "Site Footer",
+  "ar": "تذييل الموقع"
+ },
+ {
+  "section": "footer",
+  "key": "footer_navigation",
+  "en": "Footer navigation",
+  "ar": "روابط التذييل"
+ },
+ {
   "section": "forms",
   "key": "required",
   "en": "This field is required",
@@ -1654,6 +1666,12 @@
   "key": "jump",
   "en": "Jump to page",
   "ar": "الانتقال إلى صفحة"
+ },
+ {
+  "section": "pagination",
+  "key": "pagination",
+  "en": "Pagination",
+  "ar": "ترقيم الصفحات"
  },
  {
   "section": "panels",

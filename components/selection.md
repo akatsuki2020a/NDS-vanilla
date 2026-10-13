@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:31 AM"
+last_edit: "13/10/2026 - 11:23 AM"
 ---
 
 <section id="selection-overview" class="nds-content-section nds-doc-overview">
@@ -202,7 +202,7 @@ Pick another component when:
     </tr>
   </tbody>
 </table>
-<nav class="nds-pagination" data-auto-pagination="selection-requests" aria-label="Pagination"></nav>
+<nav class="nds-pagination" data-auto-pagination="selection-requests" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
 </script>
     </div>
   </div>
