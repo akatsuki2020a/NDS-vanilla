@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 08:10 PM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -272,6 +272,7 @@ Pick another component when:
 | Layout | Stacked (default) | — | — | Header above content |
 | Layout | Row (hint: Header beside the content) | `.nds-horizontal` | `.nds-card` | Header beside content. The card stacks again when it is narrower than 324px |
 | Layout | Center (not: statistic) | `.nds-center` | `.nds-card` | Centers every part. Put it on the card root only: the featured icon reads it there, so on an inner part it centers nothing. It does not move the card: its container places it |
+| Reverse | Reverse (hint: Header at the end side. Row only) | `.nds-reverse` | `.nds-card.nds-horizontal` | Puts the header at the end side of the row, after the content. For a figure that closes the row, such as a progress ring. Row only |
 | Full width | Full width | `.nds-full` | `.nds-card` | Fills its container, instead of stopping at 360px. Do not use `.nds-full-width` on a card: inside a section, that class breaks out to the full screen width |
 | Number size | LG (default) | — | `.nds-card-number` | The display size |
 | Number size | MD | `.nds-md` | `.nds-card-number` | A smaller headline number |
