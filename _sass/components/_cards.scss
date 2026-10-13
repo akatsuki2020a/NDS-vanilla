@@ -172,6 +172,24 @@
     > .nds-card-actions {
       flex-basis: 100%;
     }
+
+    // Reverse: the header at the end side of the row, for a figure that closes it (a progress
+    // ring). Once the row breaks, the header goes back on top.
+    &.nds-reverse {
+      > .nds-card-header {
+        order: 1;
+      }
+
+      > .nds-card-actions {
+        order: 2;
+      }
+
+      @container (width < 324px) {
+        > .nds-card-header {
+          order: 0;
+        }
+      }
+    }
   }
 
   // Color fill variant (tinted background) — default tracks brand primary.
@@ -491,6 +509,17 @@
 
     &.nds-end {
       justify-content: flex-end;
+    }
+
+    // Reverse: the first button (the main action) shows last. The row stays at its side:
+    // row-reverse swaps the edges, so the packing swaps back. A stack keeps markup order.
+    &.nds-reverse {
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+
+      &.nds-end {
+        justify-content: flex-start;
+      }
     }
 
     // Stacked actions fill the card width. .nds-stacked is the canon; the .nds-col

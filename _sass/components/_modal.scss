@@ -88,6 +88,11 @@
         flex-direction: column;
         gap: var(--spacing-lg, 12px);
 
+        // A reversed footer still stacks, in markup order: the main action on top.
+        &.nds-reverse {
+          flex-direction: column;
+        }
+
         .nds-btn {
           width: 100%;
 

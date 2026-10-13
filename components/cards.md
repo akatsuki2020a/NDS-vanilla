@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 08:10 PM"
+last_edit: "13/10/2026 - 11:10 PM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -257,6 +257,7 @@ Pick another component when:
 | Actions | Full (hint: The buttons share the width) | `.nds-full` | `.nds-card-actions .nds-btn` | The same, with each button filling the width |
 | Actions | Stacked (hint: One above the other, full width) | canon `#card-actions` | `div.nds-card` | The same, with the buttons one above the other, each filling the width |
 | Actions | Stacked (hint: One above the other, full width) | `.nds-stacked` | `.nds-card-actions` | The same, with the buttons one above the other, each filling the width. `.nds-col` works too |
+| Actions order | Main last (hint: The first button shows last. Not stacked) | `.nds-reverse` | `.nds-card-actions:not(.nds-stacked):not(.nds-col)` | Write the main action first, and it shows last in the row, as in a dialog's Back and Next. The row stays at its side, with or without End. Stacked buttons keep the markup order, so the main action stays on top |
 | Stroke | Stroke (default) | `.nds-stroke` | `.nds-card` | A 1px border. For flat and content-heavy layouts. Leave out both stroke and shadow for a plain card |
 | Shadow | Shadow | `.nds-shadow` | `.nds-card` | An elevation shadow. For floating or modal-adjacent cards. It combines with the stroke |
 | Color | None (default) | — | — | The default colors |

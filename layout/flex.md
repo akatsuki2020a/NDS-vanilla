@@ -128,7 +128,7 @@ Each Justify, Align and Gap option sets one custom property in the `style` of `.
             <i class="hgi hgi-stroke hgi-arrow-left-right"></i>
             <span class="nds-label">Scoped Reverse</span>
           </span>
-          <p class="nds-item-desc"><code class="nds-inline-code lang-html">nds-reverse</code> reverses any flex row, such as a row card or card actions, not only <code class="nds-inline-code lang-html">nds-flex</code>. On a column, write <code class="nds-inline-code lang-html">nds-col</code> too. The stepper and the side info column have their own <code class="nds-inline-code lang-html">nds-reverse</code>, and keep its meaning.</p>
+          <p class="nds-item-desc"><code class="nds-inline-code lang-html">nds-reverse</code> reverses only a flex container. A component that has its own <code class="nds-inline-code lang-html">nds-reverse</code>, such as a card, the stepper or the side info column, keeps its own meaning.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -177,7 +177,7 @@ Each Justify, Align and Gap option sets one custom property in the `style` of `.
 | `nds-flex` | The element that holds the children | Makes it a flex container, in a row |
 | `nds-row` | Any flex container, with or without `nds-flex` | Lays the children out in a row |
 | `nds-col` | Any flex container, with or without `nds-flex` | Lays the children out in a column |
-| `nds-reverse` | Any flex row, or `.nds-col` | Shows the children in the opposite order. It also swaps the start and end edges, so `--justify: flex-start` puts them at the end |
+| `nds-reverse` | `.nds-flex`, `.nds-row` or `.nds-col` | Shows the children in the opposite order. It also swaps the start and end edges, so `--justify: flex-start` puts them at the end |
 | `nds-center` | `.nds-flex` | Centers the children along the row, the same as `--justify: center`. With `nds-col` it also centers them across. It centers the text inside too |
 | `nds-wrap` | Any flex container | Lets the children flow onto new lines |
 | `nds-nowrap` | Any flex container | Keeps the children on one line. Children that do not fit overflow |
