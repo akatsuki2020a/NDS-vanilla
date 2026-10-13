@@ -15,6 +15,9 @@
 - label: "DGA Templates"
   has_sub: true
   children:
+    - label: "Life Journeys Template"
+      url: "/templates/life-journey-template"
+      href: "/templates/life-journey-template.html"
     - label: "Home Page Template"
       url: "/templates/home-template"
       href: "/templates/home-template.html"

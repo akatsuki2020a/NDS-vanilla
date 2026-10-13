@@ -1,6 +1,6 @@
 {%- assign hero_bg = page.hero_image | default: site.hero_image_sub %}
 
-{%- comment %} Hero tags / actions / float actions come from page front matter — no data-file indirection. The share button floats inline-end by default (icon-only on mobile via nds-minimal); a page overrides with `hero_float_actions` or suppresses it with `hide_share_page: true`. {%- endcomment %}
+{%- comment %} Hero tags / actions / float actions come from page front matter — no data-file indirection. The share button floats inline-end by default (icon-only on mobile via nds-minimal); a page overrides with `hero_float_actions` (an item is "share", a link, or raw `html`) or suppresses it with `hide_share_page: true`. {%- endcomment %}
 {%- assign hero_tags = page.hero_tags %}
 {%- assign hero_actions = page.hero_actions %}
 
@@ -108,6 +108,8 @@
             <div class="nds-section-action{%- if hero_float_actions_class %} {{ hero_float_actions_class }}{%- endif %}">
                 {%- for item in hero_float_actions %}
                 {%- if item == "share" -%}{%- unless share_placement == "hidden" %}{{ share_html }}{%- endunless %}
+                {%- elsif item.html %}
+                {{ item.html }}
                 {%- else %}
                 <a class="nds-btn {{ item.style | default: 'nds-secondary-outline' }}" href="{{ item.url | relative_url }}"
                     aria-label="{{ item.aria_label | default: item.label }}"
