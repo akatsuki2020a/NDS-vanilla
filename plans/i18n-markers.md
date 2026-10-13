@@ -48,7 +48,7 @@ The content rule: a marked word is NDS's. Every unmarked word in a canon is an E
 - **When:** the loader starts it from `initialize()`, so `data-nds-auto-init="false"` holds it with everything else. Once the pack settles: one walk of the document, the elements themselves and each `<template>`'s `content` included. Then `NDS.onDOMAdd` for markup added later and `NDS.onAttrChange` for a changed marker. Subscribed after the walk, so neither runs during the critical pass.
 - **Mount:** `NDS.Init.mount(root)` and `refresh(root)` translate `root` before any component in it starts, so a component that reads its label at start reads the page language.
 - **Settled:** core owns one promise that settles when the pack lands, fails, or core's own 3 s timer ends. It stamps `data-nds-i18n` on `<html>` in the same task as the walk's writes. The loader awaits this promise instead of its own `Promise.race` (`nds-loader.js` "NDS.i18n.pack()").
-- **Frameworks** (`core/init.md` Framework Views): a framework view renders NDS words itself with `text()` after `words.load()`, and leaves markers out of its JSX: a state update rewrites text without either observer seeing it.
+- **Frameworks** (`core/i18n.md` Frameworks, tested 2026-10-13 with React 18, Vue 3 and morphdom): markers stay in JSX and templates. A render that leaves a word alone keeps it; a word that changes with state changes its marker too, which the attribute observer sees. A morph writes the markup's English back, and `refresh(root)` restores it: the guard also accepts the markup word core replaced.
 - Out of scope, as in `localization.md`: re-translating when `<html lang>` changes after load.
 
 ### First paint: a bar holds marked text

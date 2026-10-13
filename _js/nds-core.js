@@ -308,7 +308,7 @@
         },
 
         _seeds: Object.create(null),   // section → the JS defaults its strings() call registered
-        _written: new WeakMap(),       // element → { target: the value core wrote last }
+        _written: new WeakMap(),       // element → { target: { wrote: core's last write, was: the markup word it replaced } }
         _warned: new Set(),
         _warnOnce(msg) { if (!this._warned.has(msg)) { this._warned.add(msg); console.warn('[NDS.i18n] ' + msg); } },
 
@@ -334,7 +334,7 @@
 
         // One element's markers. The guard: core skips a word someone changed. Untouched by core,
         // that is a word that no longer reads its English (when core knows the English); touched,
-        // a word that no longer reads what core wrote. It never adds an absent attribute.
+        // a word that reads neither what core wrote nor the markup word it replaced. It never adds an absent attribute.
         // force: the marker itself changed, so its new word always lands.
         _mark(el, force) {
             for (const name in I18N_MARKS) {
@@ -353,9 +353,11 @@
                     continue;
                 }
                 if (!isText && !el.hasAttribute(target)) continue;
-                const last = this._written.get(el) || {};
+                const seen = this._written.get(el) || {};
+                const prev = seen[target];
                 const cur = isText ? el.textContent : el.getAttribute(target);
-                if (!force && (target in last ? cur !== last[target] : typeof english === 'string' && cur.trim() !== english)) continue;
+                // prev.was: the markup word core replaced. A morph (Livewire, Turbo, htmx) puts it back, and it is still NDS's.
+                if (!force && (prev ? cur !== prev.wrote && cur !== prev.was : typeof english === 'string' && cur.trim() !== english)) continue;
                 if (cur.trim() !== v) {
                     if (!isText) el.setAttribute(target, v);
                     else {
@@ -364,8 +366,8 @@
                         if (texts.length === 1) texts[0].nodeValue = v; else el.textContent = v;
                     }
                 }
-                last[target] = isText ? el.textContent : v;
-                this._written.set(el, last);
+                seen[target] = { wrote: isText ? el.textContent : v, was: prev && !force ? prev.was : cur };
+                this._written.set(el, seen);
             }
         },
 
