@@ -53,15 +53,14 @@ The content rule: a marked word is NDS's. Every unmarked word in a canon is an E
 
 ### First paint: a bar holds marked text
 
-Owner decision 2026-10-08 stands: an Arabic page never flashes English. On a page whose language is set and is not English, an element with `data-i18n` (the text marker; attribute markers never hold) shows a static bar until `data-nds-i18n` lands:
+Owner decision 2026-10-08 stands: an Arabic page never flashes English. On a page whose language is set and is not English, an element with `data-i18n` (the text marker; attribute markers never hold) shows a skeleton bar until `data-nds-i18n` lands:
 
 ```scss
-// Main CSS. Own declarations, not the skeleton-fill mixin: no width change on release, no !important.
+// Main CSS. skeleton-bar, as the components use it; core's 3 s timer is the release.
+// Owner 2026-10-13: no 4 s CSS release — an animated bar is a non-composited animation in PSI.
+// No pulse: it goes on a region root, never per bar, and the hold has no root.
 html[lang]:not([lang=""], [lang|="en"], [data-nds-i18n]) [data-i18n] {
-    background: var(--nds-skeleton-fill);
-    border-radius: var(--nds-skeleton-radius);
-    color: transparent;
-    animation: nds-i18n-release 0s 4s forwards; // releases with no script; verify keyframes reach color
+    @include skeleton-bar;
 }
 ```
 

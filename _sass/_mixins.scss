@@ -490,13 +490,19 @@ $dark-area: ':is([data-theme~="dark"]:not(:root), [data-theme~="dark"]:not(:root
 }
 
 // Paint a text element as a skeleton bar — fill + radius, descendants'
-// text hidden too.
+// text hidden too, and its pseudos (a required star, a divider rule) keep
+// their space unseen. Not for a pseudo-element itself: use skeleton-fill.
 @mixin skeleton-bar {
   @include skeleton-fill;
   border-radius: var(--nds-skeleton-radius);
 
   >* {
     color: transparent;
+  }
+
+  &::before,
+  &::after {
+    opacity: 0;
   }
 }
 

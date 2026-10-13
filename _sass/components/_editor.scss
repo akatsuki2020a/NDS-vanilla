@@ -160,7 +160,8 @@
       block-size: 32px; // .nds-md --btn-size
       margin-block-start: var(--spacing-md);
       --nds-skeleton-width: 100%;
-      @include skeleton-bar;
+      @include skeleton-fill;
+      border-radius: var(--nds-skeleton-radius);
     }
 
     // The not-yet-adopted textarea IS the skeleton surface: the field box

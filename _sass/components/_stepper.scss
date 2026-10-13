@@ -858,13 +858,6 @@
     .nds-stepper-content > * {
         --nds-skeleton-width: 100%;
         @include skeleton-bar;
-
-        // A divider draws its rules as pseudo-element borders, which would otherwise
-        // sit on top of the fill.
-        &::before,
-        &::after {
-            visibility: hidden;
-        }
     }
 
     // The text parts set their colour deeper than the bar's `> * { color: transparent }`
