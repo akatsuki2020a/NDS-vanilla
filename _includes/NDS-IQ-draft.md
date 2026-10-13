@@ -178,7 +178,7 @@ Map every part a matched source ships to the project's data: a two-state field i
 
 - An existing page without a hero gets the sub hero; a heavy-text page gets its flat variant. The hero slider stays on home and hub pages.
 - A different required presentation picks a documented NDS variant first; it never changes a component's canonical anatomy.
-- Forms default to TWO input steps, form and review; add more only when the flow needs them. A terminal confirmation is not an input step: keep the success step the source ships.
+- A form that needs a confirmation before it submits, such as an application, a booking or a payment, ends with a review step; add input steps only when the flow needs them. A simple form, such as a contact form, stays one screen and shows a status or redirects after it sends. A terminal confirmation is not an input step: keep the success step the source ships.
 - Greenfield only: remove a template section the brief does not cover; never invent content to fill one.
 - Data scale follows the existing API: an endpoint that returns the full set → fetch once and let the NDS components filter, sort, page, and export in the browser; an endpoint that pages, sorts, or filters on the server → wire the NDS controls to its parameters. A shape that misfits the data → report it; backend changes are the dev's.
 

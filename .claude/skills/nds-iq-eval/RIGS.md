@@ -58,7 +58,7 @@ The plans of rigs 5 to 7 (every run to 2026-10-11) never named these components,
 - Every template section the brief does not cover is removed, never filled with invented copy: news, partners, counters, testimonials, the sign-in action (no accounts), notifications, the language switcher (Arabic only).
 - The placeholder logo, and the brief's footer details (address and opening hours), each ship with a plan checkbox or a finding, never with invented content.
 - Each part maps to the data: city and category are facets, remote or on-site is a single-choice facet, seats a range, the start date a date range.
-- Apply has two input steps (form, review) plus success. Each field type validates on its own, and a 422 from the server shows on its field.
+- Apply ends with a review step before it submits, plus success. Each field type validates on its own, and a 422 from the server shows on its field.
 - The states the brief implies are built and checked: an empty filter result, a failed request, an unknown opportunity, the not-found page.
 - One opportunity (id 106, 2026-09-23) has already started. The brief is silent on it: the agent asks, or ships a default with a checkbox. It never drops the opportunity silently.
 - The Calendar and Compare pages match no template. They are built from NDS parts inside the page structure, with no other library and no invented CSS. Each missing part (a month grid, a compare tray) is a finding.
@@ -106,9 +106,8 @@ Build the two pages on the README's roadmap: the waiting-room display at /displa
 1. `/appointments` loads Bootstrap for its cancel modal: a legacy library mixed into an NDS page.
 2. `/clinics` cards are hand-written: an invented `nds-clinic-card` class, a bare `h3`, a bare rating span, and parts missing.
 3. `public/css/site.css` restyles NDS internals (`.nds-btn` radius, the hero title size).
-4. `/book` has a third input step, Insurance.
-5. `NDS-PLAN.md` marks every page `Built and Verified`, and lists no legacy library.
-6. The anchor in `AGENTS.md` lacks the compacted-context sentence.
+4. `NDS-PLAN.md` marks every page `Built and Verified`, and lists no legacy library.
+5. The anchor in `AGENTS.md` lacks the compacted-context sentence.
 
 Two more slips, not planted, that the agent may name: `/clinics`' filters are three custom selects instead of the filter component, and the footer turns the solid project logo white, so it shows as a white box. The booking stepper moves on with empty required fields, but that is 1.0.5's own form template, copied as it was.
 
@@ -116,7 +115,7 @@ Two more slips, not planted, that the agent may name: `/clinics`' filters are th
 - The v3.2 rules run the upgrade from `next-release/`, then hand over to the v4 rules. v4 starts by opening `NDS-INDEX.md`.
 - The agent reads the Migrating sections between 1.0.5 and 2.0.0, and runs the migration check on every page, not only the planted ones.
 - It never trusts the old plan: it assesses each page against the new canon, and rebuilds the ones that do not conform.
-- All six planted items are found and fixed. The anchor gets the one missing sentence, and nothing else changes in it.
+- All five planted items are found and fixed. The anchor gets the one missing sentence, and nothing else changes in it.
 - The new runtime replaces `public/nds/`. The project's own files stay.
 - The waiting-room display matches no template and no page shape: a full-screen page with no site header or footer. The agent still takes the head canon and NDS layout primitives, and asks before it drops the chrome or names it a custom case. It updates live from the event stream, with the NDS init API for the swapped rows, and shows a lost connection.
 - Lab results extends the family. Each test's trend is a chart with its normal range, and an open range (`null` on one side) is handled. A pending result is built as a state.

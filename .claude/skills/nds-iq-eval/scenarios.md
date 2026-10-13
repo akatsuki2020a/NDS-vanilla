@@ -26,7 +26,7 @@ One row per scenario; the full record (rules, setup, prompt, rubric, floor, leak
 | S9 | re-audit-request | c | dev-requested re-audit recreates the plan | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
 | S10 | greenfield-first-session | c | greenfield: plan from intent | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
 | S11 | no-project-hard-stop | c | no project → say so and stop | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
-| S12 | greenfield-brief-fabrication | c | brief fills template, trim don't pad, two-step floor | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S12 | greenfield-brief-fabrication | c | brief fills template, trim don't pad, review step only for a form that needs confirmation | PASS 2026-10-13 scoped v4 form-kinds (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
 | S13 | cold-spike-ask | c | spike = full ceremony: one parallel page, whole head unit | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field · WATCH spike-vs-plan ×1 (2026-10-09, v1.12.0 root) |
 | S14 | server-driven-listing-wiring | c | filter/pagination banner-first composite wiring | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:field |
 | S15 | menu-clipping-in-modal | c | dropmenu portal via banner Rides | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
