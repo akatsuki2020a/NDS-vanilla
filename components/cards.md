@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 11:10 PM"
+last_edit: "14/10/2026 - 12:22 AM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -395,7 +395,7 @@ Set these on `.nds-card`, except the image properties, which go on `.nds-card-im
 | `--card-padding` | `var(--spacing-xl)` | Padding on both axes |
 | `--card-padding-block` | `var(--card-padding)` | Top and bottom padding |
 | `--card-padding-inline` | `var(--card-padding)` | Start and end padding. Card-style tab panels read it too |
-| `--card-gap` | `var(--spacing-3xl)` | Gap between header, content and actions, and between the rows in `.nds-card-meta` |
+| `--card-gap` | `var(--spacing-3xl)`, `var(--spacing-xl)` on phones | Gap between header, content and actions, and between the rows in `.nds-card-meta` |
 | `--card-radius` | `var(--radius-lg)` | Corner radius |
 | `--card-width` | `100%` | Width |
 | `--card-width-min` | `0` | Minimum width |

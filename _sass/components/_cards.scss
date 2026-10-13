@@ -57,6 +57,7 @@
   --_card-padding-inline: var(--card-padding-inline, var(--_card-padding-inline-base));
   --_card-gap-base: var(--spacing-3xl);
   --_card-gap: var(--card-gap, var(--_card-gap-base));
+
   --_card-radius-base: var(--radius-lg);
   --_card-radius: var(--card-radius, var(--_card-radius-base));
   --_card-text-base: var(--text-display);
@@ -102,6 +103,11 @@
   flex-direction: column;
   gap: var(--_card-gap);
   flex-wrap: nowrap;
+
+  // Phones: a tighter gap leaves a narrow card, or a modal sheet, more room for its content.
+  @include mobile {
+    --_card-gap-base: var(--spacing-xl);
+  }
 
   // Shadow variant
   &.nds-shadow {
