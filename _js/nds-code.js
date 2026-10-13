@@ -107,6 +107,7 @@
             html += '<span class="nds-code-line' + row + '">' + renderTokens(lines[i]) + '</span>\n';
         }
         codeElement.innerHTML = html.trim();
+        codeElement.querySelectorAll('[data-code-swatch]').forEach(s => { s.style.background = s.dataset.codeSwatch; });
         labelLanguage(codeElement, lang);
         codeElement.dataset.ndsCodeHighlighted = 'true';
     }
@@ -260,7 +261,8 @@
         rootStyle = rootStyle || getComputedStyle(document.documentElement);
         const paint = name ? rootStyle.getPropertyValue(name[1]).trim() : v;
         if (!paint || NOT_A_PAINT.test(paint) || !CSS.supports('color', paint)) return '';
-        return '<span class="nds-code-swatch" style="background:' + NDS.escapeHtml(v) + '" aria-hidden="true"></span>';
+        // The color goes on through CSSOM after the write: a style attribute in markup dies under a strict CSP.
+        return '<span class="nds-code-swatch" data-code-swatch="' + NDS.escapeHtml(v) + '" aria-hidden="true"></span>';
     }
 
     // Split a flat token stream into per-line token arrays. Any token that spans a
