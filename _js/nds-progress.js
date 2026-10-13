@@ -10,6 +10,7 @@
  * Hooks:
  *   data-value           the percentage, 0–100
  *   data-num · data-max  the "out of" display (circle only) — both are needed
+ *   .nds-progress-steps  shows the same pair as "2 / 4", the stepper's ring style
  * Gotchas:
  *   - The attributes ARE the API. setValue() and setOutOf() only write them; an observer
  *     repaints. Writing the attribute yourself works just as well.
@@ -80,6 +81,8 @@
             const ofEl = el.querySelector('.nds-progress-out-of .nds-progress-of');
             if (numberEl) numberEl.textContent = num;
             if (ofEl) ofEl.textContent = '/' + max;
+            const stepsEl = el.querySelector('.nds-progress-steps');
+            if (stepsEl) stepsEl.textContent = `${num} / ${max}`;
         }
         // Percentage mode: data-value
         else if (!isNaN(value)) {

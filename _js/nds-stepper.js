@@ -43,7 +43,7 @@
  * states in place. All of its work is cold (no layout reads):
  *   - data-state stamping on every .nds-stepper-step (radial CSS hides any
  *     non-current step via display:none — without this, radial paints EMPTY).
- *   - Progress display: --current-step / --total-steps style props +
+ *   - Progress display: the --progress-value style prop (Progress draws the arc) +
  *     .nds-progress-number + .nds-progress-steps text — so the radial arc +
  *     percentage + "1 / 4" label paint complete on first frame.
  *   - One delegated document click listener for [data-stepper-control].
@@ -68,14 +68,14 @@
         }
     }
 
-    // Write the progress display onto `el`: --current-step / --total-steps CSS
-    // vars + the .nds-progress-number percentage + the "n / total" label. Shared
+    // Write the progress display onto `el`: the --progress-value the ring reads
+    // + the .nds-progress-number percentage + the "n / total" label. Shared
     // by first-paint _stampProgress (queries the targets fresh) and the instance
     // updateProgressDisplay (passes its cached refs) so both stay in lockstep.
     function _writeProgress(el, current, total, number, text) {
-        el.style.setProperty('--current-step', Math.min(current, total));
-        el.style.setProperty('--total-steps', total);
-        if (number) number.textContent = Math.min(100, Math.round((current / total) * 100));
+        const pct = Math.min(100, (current / total) * 100);
+        el.style.setProperty('--progress-value', pct);
+        if (number) number.textContent = Math.round(pct);
         if (text) text.textContent = `${Math.min(current, total)} / ${total}`;
     }
 

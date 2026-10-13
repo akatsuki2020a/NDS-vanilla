@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 08:21 PM"
 ---
 
 <section id="progress-overview" class="nds-content-section nds-doc-overview">
@@ -71,6 +71,19 @@ Pick another component when:
   </div>
 </div>
 </script>
+<script type="text/html" id="progress-steps" data-canon>
+<div class="nds-progress-circle nds-lg" data-num="2" data-max="4" role="progressbar" aria-labelledby="progress-steps-text">
+  <svg width="120" height="120" viewBox="0 0 24 24">
+    <circle class="nds-progress-bg" cx="12" cy="12" r="10" fill="none" stroke-width="2" />
+    <circle class="nds-progress-track" cx="12" cy="12" r="10" fill="none" stroke-width="2"
+      stroke-dasharray="62.83" stroke-dashoffset="62.83" stroke-linecap="round" />
+  </svg>
+  <div class="nds-progress-info">
+    <span class="nds-progress-steps"></span>
+    <span class="nds-progress-text" id="progress-steps-text">Journey</span>
+  </div>
+</div>
+</script>
 <script type="text/html" id="progress-bar" data-canon>
 <div class="nds-progress-bar nds-lg" data-value="65" role="progressbar" aria-labelledby="progress-bar-label">
   <span class="nds-progress-label" id="progress-bar-label">Uploading document.pdf</span>
@@ -94,11 +107,12 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-Color and Status have one row for the circle and one for the bar. Write the row whose element is in the markup. Status is not for Out of: a score is not a task that succeeds or fails.
+Color and Status have one row for the circle and one for the bar. Write the row whose element is in the markup. Status is not for Out of or Steps: they show their own count.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
 | Structure | Circle (default) | — | — | A value that is the focus of the view: a dashboard figure or a completion rate |
+| Structure | Steps (hint: Steps done out of all, such as 2 / 4) | canon `#progress-steps` | — | Steps done out of all the steps, in the stepper's ring style. `data-num` and `data-max` replace `data-value` |
 | Structure | Out of (hint: A score read as a fraction, such as a GPA) | canon `#progress-out-of` | — | A score read as a fraction: a GPA, a rating. `data-num` and `data-max` replace `data-value` |
 | Structure | Bar | canon `#progress-bar` | — | A task the user waits for: an upload or a form to complete |
 | Circle size | SM | — | `.nds-progress-circle` | 64px, a circle with no size class. The text under the number does not show |
@@ -133,6 +147,11 @@ Color and Status have one row for the circle and one for the bar. Write the row 
 {: .nds-block-title}
 
 The circle shows a score as a fraction, such as 3.75/5, in place of a percentage. Set `data-num` and `data-max` on the circle instead of `data-value`. The script writes the two numbers and fills the ring to their ratio. When both are set, they win over `data-value`.
+
+### Steps
+{: .nds-block-title}
+
+The circle shows steps done out of all the steps, such as 2 / 4, the same as the ring of a radial [Stepper](../components/stepper). Set `data-num` and `data-max`, as for Out of, and write `nds-progress-steps` in place of `nds-progress-out-of`. Use it for a task the user moves through outside a stepper, such as a journey shown on a card.
 
 ### Status
 {: .nds-block-title}
@@ -240,7 +259,7 @@ A large bar (`nds-lg`) shows the percentage inside the fill, at its end. Small a
 | Attribute | Element | Effect |
 |---|---|---|
 | `data-value` | `.nds-progress-circle`, `.nds-progress-bar` | The value, 0 to 100 |
-| `data-num`, `data-max` | `.nds-progress-circle` | The fraction for Out of. Both are needed. They win over `data-value` |
+| `data-num`, `data-max` | `.nds-progress-circle` | The fraction for Out of and Steps. Both are needed. They win over `data-value` |
 | `data-status` | `.nds-progress-circle`, `.nds-progress-bar` | `success` or `error`. See Status under Behavior |
 | `aria-labelledby` | `.nds-progress-circle`, `.nds-progress-bar` | The id of the element that names the indicator |
 {: .nds-table .nds-responsive}

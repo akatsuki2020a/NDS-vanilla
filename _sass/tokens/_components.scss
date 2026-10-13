@@ -181,6 +181,9 @@
     --link-oncolor-focused: var(--colors-base-white);
     --link-oncolor-visited: var(--colors-alpha-white-90);
 
+    // ── progress (the neutral fill; the stepper's neutral ring reads it too) ──
+    --progress-background-neutral: var(--colors-neutral-700);
+
     // ── radio ──
     --radio-primary-checked: var(--controls-primary-checked);
     --radio-primary-hovered: var(--controls-primary-hovered);
@@ -381,6 +384,9 @@
     --link-neutral-pressed: var(--colors-neutral-500);
     --link-neutral-focused: var(--colors-neutral-200);
     --link-neutral-visited: var(--colors-neutral-300);
+
+    // ── progress ──
+    --progress-background-neutral: var(--colors-neutral-200);
 
     // ── radio (brighter for dot-with-border style) ──
     --radio-neutral-checked: var(--colors-neutral-400);

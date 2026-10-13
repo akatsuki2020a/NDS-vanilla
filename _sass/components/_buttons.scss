@@ -727,16 +727,9 @@ $btn-disabled: ':is(:disabled, [data-state~="disabled"], [aria-disabled="true"])
     --progress-color: var(--_btn-color);
     --_progress-size: var(--progress-size, calc(var(--btn-size) - 8px));
 
-    // Hide text/percentage display
+    // Hide text/percentage display; the fill itself is Progress's, from --progress-value
     .nds-progress-info {
       display: none !important;
-    }
-
-    // Progress circle SVG
-    svg circle.nds-progress-track {
-      // Static progress value (default)
-      stroke-dashoffset: calc((var(--progress-circumference, 62.83) - (var(--progress-circumference, 62.83) * min(var(--progress-value, 0), 100) / 100)) * 1px);
-      transition: stroke-dashoffset 0.3s ease;
     }
   }
 

@@ -658,45 +658,15 @@
     }
 
     &.nds-neutral .nds-progress-circle {
-        --progress-color: var(--colors-neutral-700);
-
-        @include dark {
-            --progress-color: var(--colors-neutral-200);
-        }
+        --progress-color: var(--progress-background-neutral);
     }
 
+    // The ring is a Progress circle: it draws the arc from the --progress-value the script writes.
+    // display: flex undoes the base rule's display: none, which outranks Progress's own flex.
     .nds-progress-circle {
         --progress-size: var(--stepper-size);
-        --progress-track-color: var(--colors-neutral-100);
-        --progress-color: var(--background-primary);
+        display: flex;
         align-self: center;
-
-        @include dark {
-            --progress-track-color: var(--colors-alpha-white-10);
-        }
-
-        @include progress-circle-base(var(--progress-size), -90deg);
-
-        // Progress based on steps
-        svg circle.nds-progress-track {
-            stroke-dasharray: 62.83px !important;
-            stroke-dashoffset: calc((62.83 - (62.83 * var(--current-step) / var(--total-steps))) * 1px);
-            transition: stroke-dashoffset 0.3s ease !important;
-        }
-
-        .nds-progress-steps {
-            direction: ltr; // "1 / 3": RTL would lay the two numbers out as "3 / 1"
-            display: flex !important;
-            align-items: center;
-            flex-wrap: nowrap;
-            justify-content: center;
-            font-size: calc(var(--progress-size) / 5);
-            font-weight: var(--font-weight-bold);
-            white-space: nowrap;
-            gap: var(--spacing-xs);
-            line-height: 1;
-        }
-
         flex-shrink: 0;
     }
 
