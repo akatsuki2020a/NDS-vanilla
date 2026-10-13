@@ -252,6 +252,19 @@
     position: relative;
 }
 
+// In a body it sits among content, so it keeps a block's space.
+.nds-content-section .nds-section-body > .nds-section-action {
+    margin-block: var(--spacing-4xl);
+
+    &:first-child {
+        margin-block-start: 0;
+    }
+
+    &:last-child {
+        margin-block-end: 0;
+    }
+}
+
 /* ── Section wrapper ── */
 
 .nds-section-wrapper {

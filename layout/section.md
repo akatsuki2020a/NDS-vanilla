@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "13/10/2026 - 11:45 AM"
 ---
 
 <section id="section-overview" class="nds-content-section nds-doc-overview">
@@ -285,7 +285,7 @@ A body with `nds-max-width` cancels the section's side padding, so its content r
 
 ### Standard Action
 
-A `nds-section-action` after the head sits beside it on a desktop, at the top. Below 600px it takes its own row, and each button is full width.
+A `nds-section-action` after the head sits beside it on a desktop, at the top. Below 600px it takes its own row, and each button is full width. In the body, it keeps 32px of space above and below it, as a [block](../layout/block) does.
 
 ### Float Action
 
@@ -372,6 +372,7 @@ A `nds-section-image` before the head holds a small image or an [avatar](../comp
 - Use a horizontal section where a short text and an image sit side by side, such as a feature or a call to action.
 - Striping counts sections, not wrappers. When you merge sections into one, check the stripes of the sections below it.
 - Use a float action for a secondary action when the head has room. Use a standard action for a main call to action.
+- Use a section action only for an action on that section's content. Put an action for the whole page, such as a link back to a list, in its own section. Put the section action in the head or right after it; put it in the body only when it acts on the content just above it.
 - Give each button in an `nds-minimal` float action an icon. Without one, the button is empty on a phone.
 - Use a background color on one section at a time. Two dark sections in a row read as one block.
 - Use a breakout body for a [swiper](../components/swiper) or a wide image, not for text.
