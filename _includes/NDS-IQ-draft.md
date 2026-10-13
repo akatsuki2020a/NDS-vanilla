@@ -128,7 +128,7 @@ When a plan is required, create `NDS-PLAN.md` at the project root, starting with
 - **Pacing:** `gate-by-gate` (default) or `whole plan`, which takes this file's defaults, verifies each page, and builds row after row without stopping until every row is at `Awaiting Verification` or blocked. Under `whole plan`, only a §Stop and ask state blocks. A missing asset or a question with a sensible default never does: ship the placeholder or the default, record it as an open checkbox, and go on. Before you end a turn, read the Status column: any other row means keep building, however long the plan. Under either pacing, a row reaches `Awaiting Verification` only when every agent-owned check passed. The row, not the agent, waits there for the dev.
 - When every row is verified, retire the plan. A new multi-page effort or a dev-requested re-audit recreates it from current state: passing pages `Awaiting Verification`, drifted pages `Planned` with their deltas named.
 - **No-plan work** covers one named page: state its source paths and open questions first; the final report carries the verification evidence and any unmet check. If the dev waived a required plan, note once that cross-session memory is lost.
-- **`NDS-REPORT.md`** holds NDS findings only: a missing API or event, a canon/rule/doc contradiction, a reproducible bug, a rule gap. Create it at the first finding and add each one when you meet it, unasked: code that works around NDS, or a use its doc rules out, is a finding even when the page works. Not a finding: a path the component's doc already gives, or the app's own work outside the UI, such as its requests, its data, or state it keeps (unsaved edits). Give the NDS version, instruction version, component, and a generic repro; never project markup, routes, or data.
+- **`NDS-REPORT.md`** holds NDS findings only: a missing API or event, a canon/rule/doc contradiction, a reproducible bug, a rule gap. Give the NDS version, instruction version, component, and a generic repro; never project markup, routes, or data.
 
 ## Build
 
@@ -189,7 +189,7 @@ Map every part a matched source ships to the project's data: a two-state field i
 Before listening on NDS elements or writing NDS-owned attributes, read the component's JS API (the index names where). If NDS ships a behavior, use its methods and events; never rebuild it. Before hand-writing fetch, debounce, resize, state, text, or date logic, read the core APIs the index names.
 
 - Every request needs a visible failure path (form or component status, or an alert), exercised in §Verify.
-- If NDS has no surface you need, direct code is allowed: comment what you checked and add it to `NDS-REPORT.md` if it is a finding.
+- If NDS has no surface you need, direct code is allowed: comment what you checked.
 
 **Build exit gate.** Before §Verify:
 
