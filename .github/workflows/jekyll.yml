@@ -15,6 +15,7 @@ on:
     branches: ["main"]
     paths-ignore:
       - 'CHANGELOG.md'
+      - 'CHANGELOG-v1.md'
       - 'README.md'
       - 'CONTRIBUTING.md'
       - 'CODE_OF_CONDUCT.md'

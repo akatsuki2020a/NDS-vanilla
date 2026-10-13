@@ -174,5 +174,6 @@ exclude:
   - CODE_OF_CONDUCT.md
   - SECURITY.md
   - CHANGELOG.md
+  - CHANGELOG-v1.md
   - LICENSE
 
