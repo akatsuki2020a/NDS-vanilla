@@ -410,6 +410,12 @@ $strip: ':is(.nds-tab-list-container, .nds-tab-list)';
   flex-direction: row;
 }
 
+// Divided only: the strip, and its divider, only as wide as the tabs. It still scrolls once they overflow.
+.nds-tabs.nds-divided:not(.nds-vertical) > .nds-tab-list-container.nds-fit {
+  width: fit-content;
+  max-width: 100%;
+}
+
 // ==============================================
 // PROCESSING SKELETON
 // ==============================================
