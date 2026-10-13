@@ -1,6 +1,6 @@
 # Souq Al-Hiraf (سوق الحرف)
 
-The online shop for Saudi crafts and local products: dates, coffee, incense, pottery, palm-frond baskets and Sadu weaving. Arabic first, with an English version. Built with Next.js 15 (App Router) and Material UI 6.
+The online shop for Saudi crafts and local products: dates, coffee, incense, pottery, palm-frond baskets and Sadu weaving. Arabic first, with an English version. Built with Next.js 16 (App Router) and Material UI 6.
 
 ## Run it
 
@@ -71,5 +71,5 @@ Shipping is 25 SAR and free over 300 SAR (both can be changed in the admin setti
 ## Notes
 
 - UI: Material UI 6 with emotion. Right-to-left layout comes from `stylis-plugin-rtl` and the theme `direction`; see `components/ThemeRegistry.tsx`.
-- CSP: `middleware.ts` sends a strict `Content-Security-Policy` with a per-request nonce (also used by the emotion cache). Add new inline scripts or styles through that nonce. Only style attributes are allowed without it (`style-src-attr`), because next/image and Material UI write them.
+- CSP: `proxy.ts` sends a strict `Content-Security-Policy` with a per-request nonce (also used by the emotion cache). Add new inline scripts or styles through that nonce. Only style attributes are allowed without it (`style-src-attr`), because next/image and Material UI write them.
 - Fonts: the system font stack. There is no web font download.

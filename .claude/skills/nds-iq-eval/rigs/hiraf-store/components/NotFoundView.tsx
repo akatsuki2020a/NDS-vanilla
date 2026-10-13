@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/Link';
 import { headers } from 'next/headers';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';

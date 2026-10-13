@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from '@/components/Link';
 import { notFound } from 'next/navigation';
 import Box from '@mui/material/Box';
 import IconButton from '@mui/material/IconButton';

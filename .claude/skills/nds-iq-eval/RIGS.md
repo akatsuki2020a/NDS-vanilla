@@ -13,7 +13,7 @@ The baselines live in `rigs/`, at their clean state. Rig N runs on port 300N, so
 | 1 | `sawaed` | No app: an empty folder with `BRIEF.md` (an Arabic volunteering site: pages, copy, fields, API) and its data | — | `http://localhost:3001`, once the agent builds it |
 | 2 | `shop-licenses` | A municipality's shop license portal in Arabic and English: a finished Django backend with no templates, CSS or JS yet. `BRIEF.md`, the copy in `licenses/copy.py` | `.venv/Scripts/python manage.py runserver 3002` | `http://localhost:3002` |
 | 3 | `nakheel-clinics` | English clinic bookings: Express and EJS partials, built on NDS 1.0.5 by an earlier team, with its old plan and anchor. `rig.py new` copies the 1.0.5 runtime into `public/nds/` | `npm start` | `http://localhost:3003` |
-| 4 | `hiraf-store` | A Saudi crafts shop in Arabic and English: Next.js 15 App Router and Material UI 6, a strict nonce CSP, a cart, checkout, gift box builder, order tracking, and an admin console | `npm run dev` | `http://localhost:3004` |
+| 4 | `hiraf-store` | A Saudi crafts shop in Arabic and English: Next.js 16 App Router and Material UI 6, a strict nonce CSP, a cart, checkout, gift box builder, order tracking, and an admin console | `npm run dev` | `http://localhost:3004` |
 | 5 | `library-portal` | Arabic RTL public library: Express and JSON APIs, Bootstrap RTL, jQuery, DataTables, Select2, Summernote, an SSO stub, a hash-router account area | `npm start` | `http://localhost:3005` |
 | 6 | `citydesk` | English LTR municipal help desk: Express and JSON APIs, Bootstrap, jQuery, DataTables, Select2, TinyMCE, a staff back office | `npm start` | `http://localhost:3006` |
 | 7 | `grants-desk` | English staff console: a React single-page app on Vite, no backend | `npm run dev` | `http://localhost:3007` |
@@ -136,7 +136,7 @@ Two more slips, not planted, that the agent may name: `/clinics`' filters are th
 - Server-action errors show on their fields. A declined card (`…0002`) reaches the failed state, and a thrown one (`…0003`) the error state.
 - Cart, checkout, gift box, tracking, the editable admin table, the settings save bar and the roles grid are built from NDS parts, each gap a finding, with no MUI left on a ported page.
 
-**Known in the app:** a Next 15 quirk. `notFound()` answers 404, but its body renders only after hydration (the server sends Next's error shell). The app keeps `style-src-attr 'unsafe-inline'` for `next/image` and the MUI slider; a port that drops MUI may tighten it.
+**Known in the app:** a Next quirk. `notFound()` answers 404, but its body renders only after hydration (the server sends Next's error shell). The app keeps `style-src-attr 'unsafe-inline'` for `next/image` and the MUI slider; a port that drops MUI may tighten it.
 
 ## Set up a rig
 
