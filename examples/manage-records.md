@@ -201,7 +201,7 @@ hideFeedback: true
                                     </div>
                                 </div>
                             </th>
-                            <th data-export-label="Fee (SAR)">
+                            <th data-export-label="Fee (SAR)" data-align="end">
                                 <div class="nds-col-header">
                                     <span class="nds-label">Fee</span>
                                     <div class="nds-col-actions">
@@ -209,7 +209,7 @@ hideFeedback: true
                                     </div>
                                 </div>
                             </th>
-                            <th>
+                            <th data-align="center">
                                 <div class="nds-col-header">
                                     <span class="nds-label">Status</span>
                                     <div class="nds-col-actions">
@@ -250,7 +250,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-118" aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -336,7 +336,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-117" aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -426,7 +426,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -476,7 +476,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -526,7 +526,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -576,7 +576,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -626,7 +626,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -676,7 +676,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -726,7 +726,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -776,7 +776,7 @@ hideFeedback: true
                                 </span>
                             </td>
                             <td class="nds-actions-column">
-                                <div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">
+                                <div class="nds-table-actions">
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
@@ -1059,7 +1059,7 @@ hideFeedback: true
           '</span>' +
         '</td>' +
         '<td class="nds-actions-column">' +
-          '<div class="nds-flex" style="--gap: var(--spacing-xs); --align: center;">' +
+          '<div class="nds-table-actions">' +
             // No aria-controls: the sub row is built on demand, and the component
             // stamps the toggle with the real id once it exists. Naming an id that
             // never gets created leaves aria-expanded frozen at false.

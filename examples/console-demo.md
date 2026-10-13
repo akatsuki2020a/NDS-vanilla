@@ -368,7 +368,7 @@ hideFeedback: true
                                         </div>
                                     </div>
                                 </th>
-                                <th data-export-label="Amount (SAR)">
+                                <th data-export-label="Amount (SAR)" data-align="end">
                                     <div class="nds-col-header">
                                         <span class="nds-label">Amount</span>
                                         <div class="nds-col-actions">
@@ -384,7 +384,7 @@ hideFeedback: true
                                         </div>
                                     </div>
                                 </th>
-                                <th>
+                                <th data-align="center">
                                     <div class="nds-col-header">
                                         <span class="nds-label">Status</span>
                                         <div class="nds-col-actions">

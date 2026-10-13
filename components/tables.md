@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 12:16 PM"
 ---
 
 <section id="table-overview" class="nds-content-section nds-doc-overview">
@@ -43,8 +43,8 @@ Pick another component when:
       <th>Reference</th>
       <th>Service</th>
       <th>Submitted</th>
-      <th>Status</th>
-      <th>Fee</th>
+      <th data-align="center">Status</th>
+      <th data-align="end">Fee</th>
     </tr>
   </thead>
   <tbody>
@@ -245,7 +245,7 @@ Pick another component when:
           </div>
         </div>
       </th>
-      <th>
+      <th data-align="center">
         <div class="nds-col-header">
           <span class="nds-label">Status</span>
           <div class="nds-col-actions">
@@ -663,6 +663,7 @@ Keep Selection only when the page has a bulk action that acts on the selected ro
 - Do not use a table for page layout or for a grid of cards.
 - Put the identifier in the first column, and the status and actions in the last columns.
 - Keep header labels short. A long label widens its column on every row.
+- Write `data-align="center"` on the header of a column of short values, such as a status tag or a count, and `data-align="end"` on a column of amounts. The actions column is centered already.
 - Add sort buttons only to columns that users compare, such as dates, amounts and status.
 - Write `data-sort-value` on a cell whose text sorts wrong: a date that is not in the table's date format (one with a month name, or a Hijri date), an amount with a currency, a status that has an order. Write a date there as `YYYY-MM-DD`. A table whose dates use another order carries its own `data-date-format`: see [Date](../core/date).
 - Use selection only with a bulk action that acts on the selected rows.
@@ -698,7 +699,7 @@ Keep Selection only when the page has a bulk action that acts on the selected ro
 | `nds-sort-btn` | `button` in `.nds-col-actions` | Makes its column sortable |
 | `nds-sort-icon` | the icon in `.nds-sort-btn` | Turns to show the sort order |
 | `nds-sub` | `tr` | A detail row. It belongs to the row right before it |
-| `nds-actions-column` | `th` and `td` | Shrinks the column to its content |
+| `nds-actions-column` | `th` and `td` | Shrinks the column to its content and centers it. `data-align` on its header changes the alignment |
 | `nds-table-actions` | `div` in a cell | A row of buttons with a small gap |
 | `nds-checkbox-column` | `th` and `td` | A 40px column with its content centered. A cell that holds a checkbox gets the same look with no class |
 {: .nds-table .nds-responsive}

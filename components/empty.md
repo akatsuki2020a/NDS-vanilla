@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 06:30 PM"
+last_edit: "13/10/2026 - 12:16 PM"
 ---
 
 <section id="empty-overview" class="nds-content-section nds-doc-overview">
@@ -47,7 +47,7 @@ Pick another component when:
   <thead>
     <tr>
       <th>Request</th>
-      <th>Status</th>
+      <th data-align="center">Status</th>
       <th>Updated</th>
     </tr>
   </thead>
@@ -58,7 +58,7 @@ Pick another component when:
   <thead>
     <tr>
       <th>Request</th>
-      <th>Status</th>
+      <th data-align="center">Status</th>
       <th>Updated</th>
     </tr>
   </thead>

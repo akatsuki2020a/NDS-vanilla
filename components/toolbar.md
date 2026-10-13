@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "13/10/2026 - 12:16 PM"
 ---
 
 <section id="toolbar-overview" class="nds-content-section nds-doc-overview">
@@ -150,7 +150,7 @@ A count and an export group on the first row, a search box on the second, and th
     <tr>
       <th>Reference</th>
       <th>Entity</th>
-      <th>Status</th>
+      <th data-align="center">Status</th>
     </tr>
   </thead>
   <tbody id="toolbar-table-body" data-filter-items="tr">

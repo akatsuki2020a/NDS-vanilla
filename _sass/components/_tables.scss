@@ -257,8 +257,14 @@
         }
     }
 
+    // Centered like the checkbox column; data-align on the header still wins.
     .nds-actions-column {
         width: 1%;
+        text-align: center;
+
+        :is(.nds-col-header, .nds-table-actions) {
+            justify-content: center;
+        }
     }
 
     :is(th, td):has(.nds-check-container),

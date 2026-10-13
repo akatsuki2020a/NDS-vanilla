@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 11:23 AM"
+last_edit: "13/10/2026 - 12:16 PM"
 ---
 
 <section id="pagination-overview" class="nds-content-section nds-doc-overview">
@@ -185,7 +185,7 @@ Pick another component when:
     <tr>
       <th>Request</th>
       <th>Service</th>
-      <th>Status</th>
+      <th data-align="center">Status</th>
     </tr>
   </thead>
   <tbody id="pg-rows" class="nds-paged-content" style="--per-page: 5;">
