@@ -16,6 +16,14 @@
   tags: ["DGA", "Alert", "Tabs", "Cards", "Grid"]
   url: "/templates/life-journey-template.html"
 
+- title: "Life Journey Page Template"
+  description: "One life journey: a progress card and facts beside a vertical stepper of its services, in progress or completed, with related journeys."
+  use_when: "The page of a single life journey, such as establishing a company branch or having a baby, opened from the Life Journeys hub. A side column holds a progress card and the journey facts; the content is a vertical stepper of the journey's services, each with its requirements and a start button on the current one. A completed journey shows the dates and the time taken instead. Closes with related journeys and a comments card."
+  icon: '<i class="hgi hgi-stroke hgi-route-02"></i>'
+  category: "Service"
+  tags: ["DGA", "Stepper", "Progress", "Accordion", "Cards"]
+  url: "/templates/life-journey-page-template.html"
+
 - title: "Home Page Template"
   description: "Organization home page with a main hero slider, headline figures, a services card deck, a news row, and a partner logo strip."
   use_when: "The public home or landing page of a portal, ministry, authority, or platform — the page the domain root serves. Carries the main hero slider (not a sub hero), a row of headline figures that count up, a services card deck the visitor pages through, a three-across news row, and a partner logo strip. Use for home page, landing page, portal home, or main page. Copy the hero from here rather than composing it: the main hero is a swiper and needs its full navigation block."

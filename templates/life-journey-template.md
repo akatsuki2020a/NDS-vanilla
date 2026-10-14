@@ -164,7 +164,7 @@ completed:
                                 </div>
                             </div>
                             <div class="nds-card-actions">
-                                <a href="#" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
+                                <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
                                     <span class="nds-label">View Details</span>
                                 </a>
                                 <a href="#" class="nds-btn nds-primary nds-lg" aria-label="Continue {{ journey.title }}">
@@ -195,7 +195,7 @@ completed:
                                 </div>
                             </div>
                             <div class="nds-card-actions">
-                                <a href="#" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
+                                <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
                                     <span class="nds-label">View Details</span>
                                 </a>
                                 <a href="#" class="nds-btn nds-primary nds-lg" aria-label="Start {{ journey.title }}">
@@ -232,7 +232,7 @@ completed:
                                 </div>
                             </div>
                             <div class="nds-card-actions">
-                                <a href="#" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
+                                <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
                                     <span class="nds-label">View Details</span>
                                 </a>
                             </div>
