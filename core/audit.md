@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:51 PM"
+last_edit: "15/10/2026 - 01:05 AM"
 ---
 
 <section id="audit-overview" class="nds-content-section nds-doc-overview">
@@ -211,10 +211,10 @@ The audit reads the page, not the scripts. An old method name or an event listen
 | `skip-link` | page | warn, error | No skip link, a skip link to a missing id (error), or one that lands on `<main>` |
 | `main-flex` | page | warn | A wrapper between `<body>` and `<main>` that stops `<main>` from growing |
 | `content-layout-child` | page | warn | An element in `.nds-content-layout` that is not `.nds-content` or `.nds-sidemenu`. An element that renders nothing, such as a `<template>`, passes |
-| `sidemenu-missing` | page | warn | `nds-has-sidemenu` on a `.nds-content-layout` whose `.nds-sidemenu` is missing or `hidden`: the content squeezes into the menu column |
+| `sidemenu-missing` | page | warn | `nds-has-sidemenu` on an element with no `.nds-sidemenu` child, or a `hidden` one: the content squeezes into the menu column |
 | `alert-as-page` | page | warn | A view whose only visible content, apart from tabs, a breadcrumb or pagination, is an `.nds-alert`: a view that cannot show its content (sign in, no permission, not found, a failed load) is a Status Section |
 | `content-layout-once` | page | warn | More than one `.nds-content-layout` on the page, or one inside another: the page grid is set once |
-| `sidemenu-pair` | page | warn | `.nds-has-sidemenu` with no `.nds-sidemenu` as its child, or a `.nds-sidemenu` outside such a layout |
+| `sidemenu-pair` | page | warn | A `.nds-sidemenu` outside a layout with `nds-has-sidemenu` |
 | `legacy-library` | page | warn | A common legacy UI library loaded on the page, such as jQuery, Select2, DataTables, Bootstrap CSS or Font Awesome |
 | `bundle-tag` | page | warn | A tag in the page for a bundle the loader adds itself, such as `nds-delegated.min.js` |
 | `inline-defer` | page | warn | An inline `<script defer>`: without `src`, `defer` does nothing and the code runs before NDS loads |

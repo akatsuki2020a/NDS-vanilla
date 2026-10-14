@@ -165,10 +165,10 @@
 
     // nds-has-sidemenu keeps the menu's grid column even when no menu shows in it.
     rule({ id: 'sidemenu-missing', group: 'page', docs: 'layout/page-layout.html', check(ctx) {
-        ctx.find('.nds-content-layout.nds-has-sidemenu').forEach(layout => {
+        ctx.find('.nds-has-sidemenu').forEach(layout => {
             const menu = Array.from(layout.children).find(c => c.matches('.nds-sidemenu'));
             if (menu && !menu.hidden) return;
-            ctx.report(layout, `nds-has-sidemenu with ${menu ? 'a hidden' : 'no'} .nds-sidemenu — the layout keeps the menu column, so the content squeezes into it.`, 'Remove nds-has-sidemenu from .nds-content-layout on a page that shows no side menu.');
+            ctx.report(layout, `nds-has-sidemenu with ${menu ? 'a hidden' : 'no'} .nds-sidemenu — the layout keeps the menu column, so the content squeezes into it.`, 'Add the side menu as its first child, or remove nds-has-sidemenu on a page that shows no side menu.');
         });
     } });
 
@@ -289,7 +289,7 @@
     // ── i18n ─────────────────────────────────────────────────────────
 
     rule({ id: 'i18n-pack', group: 'i18n', severity: 'error', docs: 'core/i18n.html', check(ctx) {
-        const lang = NDS.i18n && NDS.i18n._lang();
+        const lang = NDS.i18n._lang();
         // undefined: still loading. null: the file and its en fallback both failed.
         if (lang && NDS.i18n._files[lang] === null) {
             ctx.report(null, `the language file for "${lang}" did not load — components show their English text.`, 'Keep the i18n/ folder beside the folder that holds nds-main.min.js, or set NDS_I18N_PATH.');
@@ -492,6 +492,16 @@
     const DARK_AREA = /\[data-theme~?="dark"\]:not\(:root\)/;
     const STATE = /^(--[\w-]+)-(default|hovered|pressed|selected|focused|disabled)$/;
     const customOnly = (style) => [...style].every(p => p.startsWith('--'));
+    // The site's selectors that pick keeps, by sheet. A rule that only sets custom properties restyles nothing.
+    const selectorsBySheet = (pick) => {
+        const bySheet = new Map();
+        for (const { sel, style, where } of siteRules()) {
+            if (customOnly(style)) continue;
+            const kept = selItems(sel).filter(pick);
+            if (kept.length) (bySheet.get(where) || bySheet.set(where, []).get(where)).push(...kept);
+        }
+        return bySheet;
+    };
 
     // What NDS's own sheets declare: their classes, the nds- classes of each selector, and the tokens
     // at :root in light mode, in dark mode, and with the dark-area selector. null when the sheets
@@ -533,27 +543,15 @@
 
     // An override is the last resort, and it names a project hook so it never restyles NDS everywhere.
     rule({ id: 'nds-restyle', group: 'page', docs: 'components/tokens.html', check(ctx) {
-        const bySheet = new Map();
-        for (const { sel, style, where } of siteRules()) {
-            if (customOnly(style)) continue;
-            // A project class, an id, or a data-* that is not an NDS state names the site's own scope.
-            const bare = selItems(sel).filter(s => /\.(nds|hgi)-/.test(s) && !/\.(?!nds-|hgi-)-?[_a-zA-Z]|#|\[data-(?!state|status|theme|nds-)/.test(s));
-            if (bare.length) (bySheet.get(where) || bySheet.set(where, []).get(where)).push(...bare);
-        }
-        bySheet.forEach((sels, where) => ctx.report(null,
+        // A project class, an id, or a data-* that is not an NDS state names the site's own scope.
+        selectorsBySheet(s => /\.(nds|hgi)-/.test(s) && !/\.(?!nds-|hgi-)-?[_a-zA-Z]|#|\[data-(?!state|status|theme|nds-)/.test(s)).forEach((sels, where) => ctx.report(null,
             `${where} restyles NDS classes with no project class in the selector (${[...new Set(sels)].slice(0, 3).join(', ')}${sels.length > 3 ? ', …' : ''}): ${sels.length} selector${sels.length > 1 ? 's' : ''}.`,
             'Use the component\'s knobs or a token. When an override is the only way, scope it under a project class or data-* attribute, and comment why.', undefined, sels.length));
     } });
 
     // A site rule on bare tags (body, h1, a, input) reaches every NDS element on the page.
     rule({ id: 'global-element-css', group: 'page', check(ctx) {
-        const bySheet = new Map();
-        for (const { sel, style, where } of siteRules()) {
-            if (customOnly(style)) continue;
-            const bare = selItems(sel).filter(s => !/[.#]|\[(data-|class|id)\b|:root/.test(s));
-            if (bare.length) (bySheet.get(where) || bySheet.set(where, []).get(where)).push(...bare);
-        }
-        bySheet.forEach((sels, where) => ctx.report(null,
+        selectorsBySheet(s => !/[.#]|\[(data-|class|id)\b|:root/.test(s)).forEach((sels, where) => ctx.report(null,
             `${where} styles bare elements (${[...new Set(sels)].slice(0, 4).join(', ')}${sels.length > 4 ? ', …' : ''}): ${sels.length} selector${sels.length > 1 ? 's' : ''} that reach${sels.length > 1 ? '' : 'es'} every NDS element on the page.`,
             'Scope them under a project class, or keep the sheet off NDS pages.', undefined, sels.length));
     } });
@@ -776,11 +774,8 @@
             'Keep one .nds-content-layout, around the page content.', undefined, all.length);
     } });
 
+    // The missing-menu half is sidemenu-missing's.
     rule({ id: 'sidemenu-pair', group: 'page', docs: 'layout/page-layout.html', check(ctx) {
-        ctx.find('.nds-has-sidemenu').forEach(l => {
-            if (!l.querySelector(':scope > .nds-sidemenu')) ctx.report(l, '.nds-has-sidemenu with no .nds-sidemenu as its child: the layout makes room for a menu that is not there.',
-                'Add the side menu as its first child, or remove nds-has-sidemenu.');
-        });
         ctx.find('.nds-sidemenu').forEach(m => {
             if (!m.closest('.nds-has-sidemenu')) ctx.report(m, '.nds-sidemenu outside a layout with nds-has-sidemenu: the layout gives it no column.',
                 'Add nds-has-sidemenu to its .nds-content-layout.');
