@@ -143,10 +143,13 @@
             if (x.hideZero) x.box.hidden = v === 0;
         }
         fire(el, 'nds:countdown:tick', { remaining: rem });
+        // A listener's set() replaced this run and rendered itself: this one stops.
+        if (items.get(el) !== it) return;
         if (it.warn && !it.warned && rem <= it.warn) {
             it.warned = true;
             NDS.State.add(el, 'warning');
             fire(el, 'nds:countdown:warn', { remaining: rem });
+            if (items.get(el) !== it) return;
         }
         if (rem === 0) {
             items.delete(el);
@@ -165,7 +168,9 @@
 
     function tick() {
         timer = null;
-        for (const [el, it] of items) {
+        // A copy: an entry a listener's set() replaces or re-adds would be visited again in this loop.
+        for (const [el, it] of [...items]) {
+            if (items.get(el) !== it) continue;
             if (!el.isConnected) { items.delete(el); continue; }
             render(el, it);
         }
@@ -186,12 +191,14 @@
 
     function track(el, target) {
         const offset = offsets.get(el) || 0;
-        const t = typeof target === 'number' ? Date.now() + offset + target * 1000
+        let t = typeof target === 'number' ? Date.now() + offset + target * 1000
             : target instanceof Date ? target.getTime() : parseIso(target);
         if (!Number.isFinite(t)) {
             console.warn('NDS Countdown: target is not a date or a number of seconds', el);
             return false;
         }
+        // On a whole visitor second, like the timer: a late tick then never flips the rounding (15, 15).
+        t = Math.round((t - offset) / 1000) * 1000 + offset;
         const swap = endedSwap.get(el);
         if (swap) {
             el.replaceChildren(...swap.nodes);
@@ -234,7 +241,8 @@
 
     function wire(el) {
         if (el.hasAttribute(WIRED_ATTR) || el.closest('code')) return;
-        const src = el.closest('[data-countdown-now]');
+        // Once: a waiter is re-wired by every reinit(), and the server time in the markup does not move.
+        const src = !offsets.has(el) && el.closest('[data-countdown-now]');
         if (src) {
             const t = parseIso(src.getAttribute('data-countdown-now'));
             if (Number.isFinite(t)) offsets.set(el, t - Date.now());
