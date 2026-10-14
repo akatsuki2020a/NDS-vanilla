@@ -129,6 +129,12 @@
             this.applied = this.getSelected();
             this.bindEvents();
             this.renderChips();
+            // A narrow field wraps the trigger onto its own top row, a shape only
+            // layout can see; CSS rounds the trigger's corners for it.
+            this._offStacked = NDS.onElementResize(this.formControl, () => {
+                const stacked = this.dropmenu.offsetHeight < this.formControl.clientHeight - 1;
+                return () => this.formControl.toggleAttribute('data-multiselect-stacked', stacked);
+            });
             this.root.setAttribute('data-nds-multiselect-initialized', 'true');
             // Registered here (not the sweep) so create()-made instances get the
             // expando too — init() only runs on successful construction.
@@ -348,6 +354,8 @@
 
         destroy() {
             this.abortController?.abort();
+            this._offStacked?.();
+            this.formControl.removeAttribute('data-multiselect-stacked');
             // Chips hold their own remove listeners; create() rebuilds them.
             this.chipsEl.replaceChildren();
             NDS.State.remove(this.root, 'filled');

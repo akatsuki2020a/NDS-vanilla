@@ -24,6 +24,31 @@
     align-items: center;
     row-gap: var(--spacing-sm);
     cursor: pointer;
+    // With the prefix's -md end margin this nets the usual md gap on one row;
+    // a prefix wrapped onto its own row then fills it to the border.
+    column-gap: calc(var(--spacing-md) * 2);
+
+    > .nds-form-action.nds-prefix {
+      margin-inline-end: calc(var(--spacing-md) * -1);
+      flex-grow: 1;
+
+      > .nds-btn {
+        flex-grow: 1;
+      }
+    }
+
+    // Stacked (set by JS): the trigger is the top row, so it rounds the top-end
+    // corner the border has and squares the bottom-start one above the chips.
+    &[data-multiselect-stacked] > .nds-form-action.nds-prefix > .nds-btn.nds-dropmenu-trigger {
+      border-start-end-radius: var(--_input-radius);
+      border-end-start-radius: 0;
+    }
+
+    // Out-grow the prefix 999:1, so it only fills a row it has alone.
+    > .nds-multiselect-chips,
+    > .nds-multiselect-placeholder {
+      flex-grow: 999;
+    }
   }
 
   // ============================================================

@@ -35,6 +35,8 @@
   box-sizing: border-box;
   // A column layout would otherwise stretch a lone chip to its full width.
   width: fit-content;
+  // A container narrower than the chip ellipsizes the label instead of overflowing.
+  max-width: 100%;
   height: var(--_chip-size);
   line-height: var(--_chip-size);
   background-color: var(--_chip-bg);
