@@ -11,7 +11,6 @@
  *                                               or outside data-min-time/data-max-time
  *   NDS.TimePicker.getValue(el)                 the 24h value, '' until the time is complete
  *   NDS.TimePicker.clear(el)                    empty the field and every unit
- *   NDS.TimePicker.TimePicker                   the instance prototype (extension use)
  * Events:
  *   (none — a pick writes the input and dispatches native input + change; listen on the input)
  * Hooks:
@@ -80,6 +79,7 @@
     });
 
     const pad = (n) => String(n).padStart(2, '0');
+    const latin = (s) => String(s).replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15);
     const isPM = (token) => /^(PM|pm|م)$/.test(token);
 
     // Token presence drives the panel, so the format string stays the single
@@ -133,13 +133,12 @@
         const order = [];
         let source = '';
         let last = 0;
-        format.replace(FORMAT_TOKEN_REGEX, (token, _g, index) => {
+        for (const { 0: token, index } of format.matchAll(FORMAT_TOKEN_REGEX)) {
             source += format.slice(last, index).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             source += TOKEN_PATTERNS[token];
             order.push(token);
             last = index + token.length;
-            return token;
-        });
+        }
         source += format.slice(last).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const config = { re: new RegExp('^\\s*' + source + '\\s*$'), order };
         _parseCache.set(format, config);
@@ -175,7 +174,7 @@
     // "٢:٣٠ م". Reads a paste, and a typed value the format's own parse rejects.
     const LOOSE = new RegExp('^(\\d{1,2})[:.]?(\\d{2})(?:[:.](\\d{2}))?\\s*' + MERIDIEM + '?$');
     function parseLoose(text) {
-        const m = LOOSE.exec(String(text || '').replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15).trim());
+        const m = LOOSE.exec(latin(text || '').trim());
         if (!m) return null;
         let h = +m[1];
         const min = +m[2], sec = m[3] ? +m[3] : 0;
@@ -187,15 +186,20 @@
         return h * 3600 + min * 60 + sec;
     }
 
+    // What the field accepts — its own format, then any common form — so a paste, a typed
+    // edit, a server prefill and the error message all agree.
+    const parseAny = (text, format) => parseTyped(text, format) ?? parseLoose(text);
+
     // The one key typed for each meridiem, in both languages.
     const MER_KEY = { a: 'am', A: 'am', 'ص': 'am', p: 'pm', P: 'pm', 'م': 'pm' };
+    const MERIDIEM_RUNS = new RegExp('\\d+|' + MERIDIEM, 'g');
 
     // Typing at the end → the format's shape: digits fill the units, separators appear on
     // their own, a meridiem key fills AM/PM. A single digit is padded when no unit can start
     // with it ("9" → "09:") or when a separator follows it ("2:" → "02:"). Stops at the
     // first unit not typed yet.
     function shapeTyped(text, format, hour12) {
-        const s = String(text).replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15);
+        const s = latin(text);
         // Digit positions that a typed separator closes.
         let digits = '';
         const closed = new Set();
@@ -206,7 +210,7 @@
         // The last one: a typed "p" after a shown "AM" switches it.
         const mer = MER_KEY[[...s].reverse().find((c) => MER_KEY[c])];
         let out = '', i = 0;
-        for (const piece of format.split(/(HH|H|hh|h|mm|ss|A|a)/)) {
+        for (const piece of format.split(FORMAT_TOKEN_REGEX)) {
             if (!piece) continue;
             if (piece === 'A' || piece === 'a') {
                 if (!mer) break;
@@ -233,8 +237,9 @@
         ch = latin(ch);
         const kinds = format.match(/HH|H|hh|h|mm|ss/g) || [];
         let n = 0;
-        // Digit runs are the units, in the format's order; a letter run is the meridiem.
-        const runs = [...value.matchAll(/\d+|[^\d\s:]+/g)].map((m) => ({
+        // Digit runs are the units, in the format's order; a meridiem word is the meridiem.
+        // Only the words: any other separator ("." in hh.mm) is stepped over, not a run.
+        const runs = [...value.matchAll(MERIDIEM_RUNS)].map((m) => ({
             start: m.index, end: m.index + m[0].length, text: m[0],
             kind: /\d/.test(m[0]) ? (kinds[n++] || 'mm')[0].toLowerCase() : 'a',
         }));
@@ -247,7 +252,7 @@
             const mer = runs.find((r) => r.kind === 'a');
             if (!mer) return null;
             const label = strings.text(MER_KEY[ch]);
-            const text = format.split(/(HH|H|hh|h|mm|ss|A|a)/).includes('a') ? label.toLowerCase() : label;
+            const text = format.split(FORMAT_TOKEN_REGEX).includes('a') ? label.toLowerCase() : label;
             return { value: value.slice(0, mer.start) + text + value.slice(mer.end), caret: pos };
         }
         // A typed separator steps over the one at the caret; any other key is refused.
@@ -363,11 +368,17 @@
             // since it is the unambiguous one.
             const seeded = (this.elements.carrier && this.elements.carrier.value.trim())
                 ? parse24(this.elements.carrier.value)
-                : parseTyped(input.value, this.format);
-            if (seeded !== null) this._adopt(seeded);
+                : parseAny(input.value, this.format);
+            if (seeded !== null && this._inBounds(seeded, seeded)) this._adopt(seeded);
             // A pre-filled bad value stamps validity silently so it can't pass a
-            // pre-open submit without painting an error on first paint.
-            else if (input.value.trim()) this._validateInput(true);
+            // pre-open submit without painting an error on first paint. Out of range is
+            // shown but not adopted, as a typed one is — else the panel's bounds would snap
+            // the picks away from what the input and carrier hold. Stamped from the seed
+            // itself: a lossy display (hh:mm, no meridiem) can re-parse in range.
+            else if (seeded !== null) {
+                input.value = formatDisplay(seeded, this.format);
+                input.setCustomValidity(this._boundsError(seeded));
+            } else if (input.value.trim()) this._validateInput(true);
 
             container.setAttribute('data-nds-time-picker-initialized', '');
             this.valid = true;
@@ -382,10 +393,6 @@
                 if (this.elements.input.disabled || NDS.State.has(this.elements.container, 'readonly')) return;
                 if (!this.isPanelCreated) {
                     this.createPanelDOM();
-                    if (!this.elements.panel) {
-                        console.error('NDS TimePicker: failed to create the panel');
-                        return;
-                    }
                     this.setupDropmenu();
                 }
                 if (e) e.stopPropagation();
@@ -409,12 +416,14 @@
             // A delete keeps what the user wrote, so Backspace can remove an added separator.
             const input = this.elements.input;
             // decimal, not numeric: its keypad has a separator key, and forms blocks non-digits under numeric.
-            if (!/[Aa]/.test(this.format) && !input.hasAttribute('inputmode')) input.inputMode = 'decimal';
+            if (!/[Aa]/.test(this.format) && !input.hasAttribute('inputmode')) {
+                input.inputMode = 'decimal';
+                this._ownInputMode = true;
+            }
             input.addEventListener('input', (e) => {
                 // A pasted time in any common form commits at once, in the field's format.
                 if (e.inputType === 'insertFromPaste') {
-                    const parsed = parseTyped(input.value, this.format);
-                    const secs = parsed === null ? parseLoose(input.value) : parsed;
+                    const secs = parseAny(input.value, this.format);
                     if (secs !== null && this._inBounds(secs, secs)) this._adopt(secs);
                     return;
                 }
@@ -616,16 +625,16 @@
             });
         }
 
-        // The one write path — a unit pick, a typed edit, setValue and clear all
-        // funnel through it, so the panel, the input and the carrier cannot drift.
+        // A unit pick's write — onUnitChange already skipped the re-entrant ones.
         commit() {
-            if (this._committing) return;
             this._quiet(() => {
                 this.applyBounds();
                 this.updateInput();
             });
         }
 
+        // The one write path — a unit pick, a typed edit, setValue and clear all
+        // funnel through it, so the panel, the input and the carrier cannot drift.
         updateInput() {
             const secs = this._seconds();
             const display = secs === null ? '' : formatDisplay(secs, this.format);
@@ -648,8 +657,7 @@
         readTyped() {
             const raw = this.elements.input.value.trim();
             if (!raw) { this.clear(); return; }
-            const parsed = parseTyped(raw, this.format);
-            const secs = parsed === null ? parseLoose(raw) : parsed;
+            const secs = parseAny(raw, this.format);
             if (secs === null || !this._inBounds(secs, secs)) { this._validateInput(); return; }
             this._adopt(secs);
         }
@@ -690,7 +698,7 @@
             // already run by the time a late option is inserted.
             btn.className = 'nds-btn nds-subtle nds-select-option nds-dropmenu-item';
             btn.dataset.value = value;
-            btn.innerHTML = '<span class="nds-option-text"><span class="nds-label">' + pad(value) + '</span></span>';
+            btn.innerHTML = '<span class="nds-option-text"><span class="nds-label">' + NDS.escapeHtml(pad(value)) + '</span></span>';
             box.insertBefore(btn, Array.from(box.children).find((o) => Number(o.dataset.value) > Number(value)) || null);
         }
 
@@ -784,8 +792,11 @@
         }
 
         _validationError(raw) {
-            const secs = parseTyped(raw, this.format);
-            if (secs === null) return strings.text('invalid', { format: this.format });
+            const secs = parseAny(raw, this.format);
+            return secs === null ? strings.text('invalid', { format: this.format }) : this._boundsError(secs);
+        }
+
+        _boundsError(secs) {
             if (this.min !== null && secs < this.min) {
                 return strings.text('before_min', { time: formatDisplay(this.min, this.format) });
             }
@@ -798,9 +809,6 @@
         // ---- lifecycle ---------------------------------------------------
 
         setupLanguageObserver() {
-            // Release before re-registering — otherwise every re-init stacks
-            // another closure on the shared observer.
-            if (this._offLangChange) this._offLangChange();
             this._offLangChange = NDS.onAttrChange('html', ['lang'], () => this._relocalize());
             // Built before the pack landed: its AM/PM went out in English.
             if (!strings.ready()) this._relocalize();
@@ -808,7 +816,14 @@
 
         // Rewrites the localized text; waits for the language's strings first.
         _relocalize() {
-            if (!strings.ready()) { strings.load().then(() => this._relocalize()); return; }
+            if (!strings.ready()) {
+                // One wait at a time; a destroy() while waiting nulls _offLangChange and ends it.
+                if (!this._langLoad) this._langLoad = strings.load().then(() => {
+                    this._langLoad = null;
+                    if (this._offLangChange) this._relocalize();
+                });
+                return;
+            }
             // The panel carries localized labels throughout; rebuilding it is
             // cheaper to reason about than patching six places.
             if (this.isPanelCreated) {
@@ -818,7 +833,8 @@
                 this.setupDropmenu();
                 if (open) this.dropmenuInstance.open();
             }
-            this._quiet(() => this.updateInput());
+            // Incomplete picks would write '' over what the user typed.
+            if (this._complete()) this._quiet(() => this.updateInput());
         }
 
         // Per-open-cycle teardown: releases the panel's listeners and its DOM,
@@ -847,6 +863,7 @@
             fc.removeAttribute('data-dropmenu-no-click');
             fc.removeAttribute('data-dropmenu-no-keys');
             fc.removeAttribute('data-anchor');
+            if (this._ownInputMode) this.elements.input.removeAttribute('inputmode');
             NDS.State.remove(this.elements.container, 'open');
             // Nothing is left to clear the picker's own error, so it would block submit for good.
             // Only that one: a status forms or the page set stays.
@@ -861,8 +878,6 @@
     }
 
     // ---- box mode: .nds-time-fields, an hour box and a minute box, 24h only ----
-
-    const latin = (s) => String(s).replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15);
 
     class TimeFields {
         constructor(group) {
@@ -902,7 +917,7 @@
                 // maxlength cuts a paste to two characters, so it is read here, whole.
                 box.addEventListener('paste', (e) => {
                     if (box.readOnly) return;
-                    const secs = parseLoose(latin(e.clipboardData.getData('text')));
+                    const secs = parseLoose(e.clipboardData.getData('text'));
                     if (secs === null) return;
                     e.preventDefault();
                     this._adopt(secs);
@@ -1068,7 +1083,6 @@
         create: create,
         setValue: (el, value) => { const i = instanceOf(el); return i ? i.setValue(value) : false; },
         getValue: (el) => { const i = instanceOf(el); return i ? i.getValue() : ''; },
-        clear: (el) => { const i = instanceOf(el); return i ? i.clear() : false; },
-        TimePicker: TimePicker
+        clear: (el) => { const i = instanceOf(el); return i ? i.clear() : false; }
     };
 })();
