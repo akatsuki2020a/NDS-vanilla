@@ -226,6 +226,47 @@
         return out;
     }
 
+    // Typing inside a shown value types over it, as a native time field does: the digit
+    // replaces the one at the caret, the caret steps over separators, and a digit that
+    // makes an impossible unit is refused, as at the end. Returns { value, caret } or null.
+    function typeOver(value, pos, ch, format, hour12) {
+        ch = latin(ch);
+        const kinds = format.match(/HH|H|hh|h|mm|ss/g) || [];
+        let n = 0;
+        // Digit runs are the units, in the format's order; a letter run is the meridiem.
+        const runs = [...value.matchAll(/\d+|[^\d\s:]+/g)].map((m) => ({
+            start: m.index, end: m.index + m[0].length, text: m[0],
+            kind: /\d/.test(m[0]) ? (kinds[n++] || 'mm')[0].toLowerCase() : 'a',
+        }));
+        const i = runs.findIndex((r) => r.end > pos);
+        // Past the last unit: the same shaping as typing at the end.
+        if (i < 0) return { value: shapeTyped(value + ch, format, hour12), caret: null };
+        const run = runs[i];
+        const set = (text, caret) => ({ value: value.slice(0, run.start) + text + value.slice(run.end), caret });
+        if (MER_KEY[ch]) {
+            const mer = runs.find((r) => r.kind === 'a');
+            if (!mer) return null;
+            const label = strings.text(MER_KEY[ch]);
+            const text = format.split(/(HH|H|hh|h|mm|ss|A|a)/).includes('a') ? label.toLowerCase() : label;
+            return { value: value.slice(0, mer.start) + text + value.slice(mer.end), caret: pos };
+        }
+        // A typed separator steps over the one at the caret; any other key is refused.
+        if (!/^\d$/.test(ch) || run.kind === 'a') return value[pos] === ch ? { value, caret: pos + 1 } : null;
+
+        const hour = run.kind === 'h';
+        const ok = (s) => +s >= (hour && hour12 ? 1 : 0) && +s <= (hour ? (hour12 ? 12 : 23) : 59);
+        const next = runs[i + 1] ? runs[i + 1].start : value.length;
+        const k = Math.max(0, pos - run.start);
+        const text = run.text.slice(0, k) + ch + run.text.slice(k + 1);
+        if (k === 0 && run.text.length === 2 && !ok(text)) {
+            // No second digit can follow ("9" → "09"), or the old one can't: take the lowest that can ("29" → "20").
+            if (+ch > (hour ? (hour12 ? 1 : 2) : 5)) return set('0' + ch, next);
+            return set(ch + [...'0123456789'].find((s) => ok(ch + s)), run.start + 1);
+        }
+        if (!ok(text)) return null;
+        return set(text, k >= text.length - 1 ? next : run.start + k + 1);
+    }
+
     // Nearest still-enabled option to a value that just went out of bounds.
     function nearestEnabled(options, current) {
         const live = Array.from(options).filter((o) => !o.disabled);
@@ -364,8 +405,8 @@
                 this.readTyped();
             }, { signal });
 
-            // Typing only, at the end: a delete or a mid-text edit keeps what the user wrote,
-            // so Backspace can remove an added separator and the caret never jumps.
+            // Typing at the end is shaped; typing inside the value types over it (typeOver).
+            // A delete keeps what the user wrote, so Backspace can remove an added separator.
             const input = this.elements.input;
             // decimal, not numeric: its keypad has a separator key, and forms blocks non-digits under numeric.
             if (!/[Aa]/.test(this.format) && !input.hasAttribute('inputmode')) input.inputMode = 'decimal';
@@ -380,6 +421,25 @@
                 if (e.inputType !== 'insertText' || e.isComposing || input.selectionEnd !== input.value.length) return;
                 const shaped = shapeTyped(input.value, this.format, this.hour12);
                 if (shaped !== input.value) { input.value = shaped; this._shaped = true; }
+            }, { signal });
+            input.addEventListener('beforeinput', (e) => {
+                if (e.inputType !== 'insertText' || e.isComposing || !e.data
+                    || input.selectionEnd >= input.value.length) return;
+                e.preventDefault();
+                let value = input.value, caret = input.selectionStart;
+                for (const ch of e.data) {
+                    const r = typeOver(value, caret, ch, this.format, this.hour12);
+                    if (!r) break;
+                    value = r.value;
+                    caret = r.caret ?? value.length;
+                }
+                if (value !== input.value) {
+                    input.value = value;
+                    this._shaped = true;
+                    // No inputType, so the shaping handler above skips it; Forms still hears it.
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                input.setSelectionRange(caret, caret);
             }, { signal });
             // WebKit sends no change on blur when a script wrote the last edit: send it here.
             input.addEventListener('blur', () => {
