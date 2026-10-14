@@ -207,7 +207,9 @@
             } else if (TOKEN_PATTERNS[piece]) {
                 if (i >= digits.length) break;
                 const maxFirst = /^[Hh]/.test(piece) ? (hour12 ? 1 : 2) : 5;
-                const unit = +digits[i] > maxFirst || closed.has(i) ? '0' + digits[i++] : digits.slice(i, i += 2);
+                let unit = +digits[i] > maxFirst || closed.has(i) ? '0' + digits[i++] : digits.slice(i, i += 2);
+                // A second hour digit past the clock ("25", or "13"/"00" under 12h) is refused.
+                if (unit.length === 2 && maxFirst < 5 && (hour12 ? +unit < 1 || +unit > 12 : +unit > 23)) unit = unit[0];
                 out += unit;
                 if (unit.length < 2) break;
             } else {

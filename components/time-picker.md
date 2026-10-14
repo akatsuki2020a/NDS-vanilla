@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "14/10/2026 - 07:25 AM"
 ---
 
 <section id="time-picker-overview" class="nds-content-section nds-doc-overview">
@@ -48,7 +48,7 @@ Pick another component when:
         <i class="nds-icon nds-hgi-clock-01" aria-hidden="true"></i>
       </button>
     </div>
-    <input type="text" id="time-picker-visit" class="nds-input nds-time-input" placeholder="HH:mm">
+    <input type="text" id="time-picker-visit" class="nds-input nds-time-input" placeholder="––:––">
     <input type="hidden" class="nds-time-value" name="visit-time">
   </div>
 </div>
@@ -64,17 +64,17 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-A Format or Seconds choice changes two elements: write `data-format` on `.nds-time-picker` and the same format as the placeholder of `.nds-time-input`. Seconds adds `:ss` to the chosen format: `HH:mm:ss` for 24-hour, `hh:mm:ss A` for 12-hour. A Bounds choice writes both `data-min-time` and `data-max-time` on `.nds-time-input`. Set another format, step or bound by hand: see the Data Attributes table.
+A Format or Seconds choice changes two elements: write `data-format` on `.nds-time-picker` and a matching placeholder on `.nds-time-input`. Seconds adds `:ss` to the format and `:––` to the placeholder: `HH:mm:ss` and `––:––:––` for 24-hour, `hh:mm:ss A` and `––:––:–– ––` for 12-hour. A Bounds choice writes both `data-min-time` and `data-max-time` on `.nds-time-input`. Set another format, step or bound by hand: see the Data Attributes table.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
 | Format | 24-hour (default) | — | — | The field shows `14:30`. The panel has an Hour and a Minute list |
 | Format | 12-hour | `[data-format="hh:mm A"]` | `.nds-time-picker` | The field shows `02:30 PM`, and the panel adds an AM/PM list. See Time Format |
-| Format | 12-hour | `[placeholder="hh:mm A"]` | `.nds-time-input` | |
+| Format | 12-hour | `[placeholder="––:–– ––"]` | `.nds-time-input` | |
 | Seconds | Seconds | `[data-format="HH:mm:ss"]` | `.nds-time-picker:not([data-format="hh:mm A"])` | The field shows the second too, such as `14:30:15`, and the panel adds a Second list. See Time Format |
-| Seconds | Seconds | `[placeholder="HH:mm:ss"]` | `.nds-time-input:not([placeholder="hh:mm A"])` | |
+| Seconds | Seconds | `[placeholder="––:––:––"]` | `.nds-time-input:not([placeholder="––:–– ––"])` | |
 | Seconds | Seconds | `[data-format="hh:mm:ss A"]` | `.nds-time-picker[data-format="hh:mm A"]` | |
-| Seconds | Seconds | `[placeholder="hh:mm:ss A"]` | `.nds-time-input[placeholder="hh:mm A"]` | |
+| Seconds | Seconds | `[placeholder="––:––:–– ––"]` | `.nds-time-input[placeholder="––:–– ––"]` | |
 | Minute step | 5 minutes (default) | — | — | The Minute list shows 00, 05, 10 and on to 55 |
 | Minute step | 15 minutes | `[data-step="15"]` | `.nds-time-picker` | The Minute list shows 00, 15, 30 and 45. See Minute Step |
 | Minute step | 30 minutes | `[data-step="30"]` | `.nds-time-picker` | The Minute list shows 00 and 30. See Minute Step |
@@ -113,7 +113,7 @@ The field fills when every list has a value, and each later pick changes it at o
 ### Time Format
 {: .nds-block-title}
 
-`data-format` on `.nds-time-picker` sets how the field shows a time, and which lists the panel holds. The default is `HH:mm`. Write the same format as the placeholder. The tokens are:
+`data-format` on `.nds-time-picker` sets how the field shows a time, and which lists the panel holds. The default is `HH:mm`. Give the field a placeholder with `––` for each part, such as `––:–– ––` for `hh:mm A`. The tokens are:
 
 - `HH` and `H`: the hour from 0 to 23, with and without a leading zero
 - `hh` and `h`: the hour from 1 to 12, with and without a leading zero
@@ -160,7 +160,7 @@ Any other character stays as written. `ss` adds a Second list, and `A` or `a` ad
             <i class="hgi hgi-stroke hgi-keyboard"></i>
             <span class="nds-label">Type or Pick</span>
           </span>
-          <p class="nds-item-desc">The user can type the time, in Latin or Arabic digits. The digits fill the format as they are typed: the separator appears on its own, <code class="nds-inline-code lang-html">9</code> becomes <code class="nds-inline-code lang-html">09:</code>, and <code class="nds-inline-code lang-html">2:</code> becomes <code class="nds-inline-code lang-html">02:</code>. <code class="nds-inline-code lang-html">a</code> or <code class="nds-inline-code lang-html">p</code>, <code class="nds-inline-code lang-html">ص</code> or <code class="nds-inline-code lang-html">م</code>, adds AM or PM. A pasted time is read at once in any common form: <code class="nds-inline-code lang-html">2:30 PM</code> shows as <code class="nds-inline-code lang-html">14:30</code> in a 24-hour field. An edit in the middle is read when the user leaves the field.</p>
+          <p class="nds-item-desc">The user can type the time, in Latin or Arabic digits. The digits fill the format as they are typed: the separator appears on its own, <code class="nds-inline-code lang-html">9</code> becomes <code class="nds-inline-code lang-html">09:</code>, and <code class="nds-inline-code lang-html">2:</code> becomes <code class="nds-inline-code lang-html">02:</code>. A digit that makes the hour impossible is ignored: after <code class="nds-inline-code lang-html">2</code>, a <code class="nds-inline-code lang-html">5</code> is not added. <code class="nds-inline-code lang-html">a</code> or <code class="nds-inline-code lang-html">p</code>, <code class="nds-inline-code lang-html">ص</code> or <code class="nds-inline-code lang-html">م</code>, adds AM or PM. A pasted time is read at once in any common form: <code class="nds-inline-code lang-html">2:30 PM</code> shows as <code class="nds-inline-code lang-html">14:30</code> in a 24-hour field. An edit in the middle is read when the user leaves the field.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
