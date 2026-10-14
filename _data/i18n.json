@@ -1975,6 +1975,12 @@
  },
  {
   "section": "time-picker",
+  "key": "incomplete",
+  "en": "Enter the hour and the minute",
+  "ar": "أدخل الساعة والدقيقة"
+ },
+ {
+  "section": "time-picker",
   "key": "before_min",
   "en": "Earliest allowed time is {time}",
   "ar": "أبكر وقت مسموح به {time}"

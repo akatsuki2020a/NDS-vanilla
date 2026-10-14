@@ -41,3 +41,55 @@
         }
     }
 }
+
+// Box mode: an hour box and a minute box, hour first on every page like the digits.
+.nds-time-fields {
+    // The legend reads as a field label, so the group lines up with the fields beside it.
+    &.nds-form-group > legend {
+        margin-bottom: var(--spacing-md);
+
+        > .nds-label {
+            margin-bottom: 0;
+            font-size: var(--typo-text-md-FS);
+            line-height: var(--typo-text-md-LH);
+        }
+    }
+
+    .nds-time-fields-row {
+        display: flex;
+        align-items: flex-end;
+        column-gap: var(--spacing-xs);
+        direction: ltr;
+        width: fit-content;
+    }
+
+    .nds-form-container {
+        --form-width: 3.5rem;
+        gap: var(--spacing-xs);
+
+        // The note above each box is forms' .nds-info; only its width floor is too wide for a box.
+        .nds-form-header .nds-info {
+            min-width: 0;
+            text-align: center;
+        }
+    }
+
+    .nds-form-control > input {
+        text-align: center;
+    }
+
+    // Level with the boxes, not with the notes above them.
+    // ponytail: the default box height only; follow the box once box mode gets sizes.
+    .nds-time-fields-sep {
+        display: flex;
+        align-items: center;
+        height: var(--input-size, 40px);
+        font-weight: var(--font-weight-semibold);
+    }
+
+    // The status lands on the group, a level above the containers _forms.scss styles from.
+    &[data-status="error"] {
+        --_control-border-forced: var(--form-field-border-error);
+        --_control-underline-forced: var(--form-field-border-error);
+    }
+}

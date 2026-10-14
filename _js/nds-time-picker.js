@@ -4,6 +4,7 @@
  *      · nds-forms (invalid-value status message under the field; soft)
  * Methods:
  *   NDS.TimePicker.init() / .reinit()           attach a picker to every .nds-time-input
+ *                                               and every .nds-time-fields group
  *   NDS.TimePicker.create(input, formControl)   build/return one instance — idempotent,
  *                                               null on bad markup; formControl is optional
  *   NDS.TimePicker.setValue(el, '14:30')        commit a 24h value — false when unparsable
@@ -20,7 +21,12 @@
  *   .time-picker-toggle:         the button that opens the panel (none: a click on the
  *                                input opens it)
  *   on the .nds-time-input:      data-min-time · data-max-time (24h HH:mm[:ss], always)
+ *   box mode — .nds-time-fields: an hour box .nds-time-hour and a minute box
+ *                                .nds-time-minute, 24h only; data-min-time · data-max-time
+ *                                on the group
  * Gotchas:
+ *   - Box mode has no panel, no data-format and no seconds. Its error stamps the hour box,
+ *     which nds-forms reads for the group at submit.
  *   - The visible input is DISPLAY ("02:30 م") and is typeable; the hidden .nds-time-value
  *     carries the stable 24h string and is the one that submits. Read getValue().
  *   - Typing at the end is shaped to the format: digits only, separators added, a/p
@@ -68,6 +74,7 @@
         pm: 'PM',
         toggle: 'Pick a time',
         invalid: 'Invalid time — expected format {format}',
+        incomplete: 'Enter the hour and the minute',
         before_min: 'Earliest allowed time is {time}',
         after_max: 'Latest allowed time is {time}',
     });
@@ -793,6 +800,167 @@
         }
     }
 
+    // ---- box mode: .nds-time-fields, an hour box and a minute box, 24h only ----
+
+    const latin = (s) => String(s).replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15);
+
+    class TimeFields {
+        constructor(group) {
+            this.valid = false;
+            const hour = group.querySelector('.nds-time-hour');
+            const minute = group.querySelector('.nds-time-minute');
+            if (!hour || !minute) {
+                console.warn('NDS TimePicker: .nds-time-fields needs .nds-time-hour and .nds-time-minute');
+                return;
+            }
+            this.elements = { container: group, hour, minute, carrier: group.querySelector('.nds-time-value') };
+            this.min = parse24(group.getAttribute('data-min-time'));
+            this.max = parse24(group.getAttribute('data-max-time'));
+            this.value = '';
+            this.instanceAbortController = new AbortController();
+            this.bindEvents();
+
+            // The carrier wins, as in field mode; boxes the server filled are the fallback.
+            const carrier = this.elements.carrier;
+            const seeded = parse24(carrier && carrier.value.trim() ? carrier.value : hour.value + ':' + minute.value);
+            if (seeded !== null) this._adopt(seeded);
+            else this._sync(true);
+
+            group.setAttribute('data-nds-time-picker-initialized', '');
+            this.valid = true;
+        }
+
+        bindEvents() {
+            const { container, hour, minute } = this.elements;
+            const signal = this.instanceAbortController.signal;
+            const max = (box) => (box === hour ? 23 : 59);
+
+            [hour, minute].forEach((box) => {
+                // Typing replaces the box, so a full hour never blocks the next digit.
+                box.addEventListener('focus', () => box.select(), { signal });
+
+                // maxlength cuts a paste to two characters, so it is read here, whole.
+                box.addEventListener('paste', (e) => {
+                    if (box.readOnly) return;
+                    const secs = parseLoose(latin(e.clipboardData.getData('text')));
+                    if (secs === null) return;
+                    e.preventDefault();
+                    this._adopt(secs);
+                    minute.focus();
+                }, { signal });
+
+                box.addEventListener('input', (e) => {
+                    const raw = latin(box.value);
+                    let d = raw.replace(/\D/g, '');
+                    if (e.inputType === 'insertText') {
+                        // A digit no second digit can follow, or a typed separator, ends the box: "9" → "09".
+                        if (d.length === 1 && (+d > (box === hour ? 2 : 5) || (box === hour && /\D/.test(raw)))) d = '0' + d;
+                        // A second hour digit past the clock is refused, as in field mode.
+                        if (d.length === 2 && +d > max(box)) d = d[0];
+                    }
+                    if (d !== box.value) box.value = d;
+                    if (box === hour && d.length === 2 && e.inputType === 'insertText') minute.focus();
+                    this._sync(true);
+                }, { signal });
+
+                box.addEventListener('keydown', (e) => {
+                    // A selection counts for the arrows, so a selected box hands over in one press.
+                    const atStart = box.selectionStart === 0;
+                    const atEnd = box.selectionEnd === box.value.length;
+                    // Read-only (Forms copies it from the group) stops the arrows, as it stops typing.
+                    if ((e.key === 'ArrowUp' || e.key === 'ArrowDown') && !box.readOnly) {
+                        e.preventDefault();
+                        const n = box.value === '' ? 0 : +box.value + (e.key === 'ArrowUp' ? 1 : -1);
+                        box.value = pad((n + max(box) + 1) % (max(box) + 1));
+                        box.select();
+                        this._sync(true);
+                    } else if (box === minute && atStart && (e.key === 'ArrowLeft' || (e.key === 'Backspace' && !box.value))) {
+                        e.preventDefault();
+                        hour.focus();
+                        hour.setSelectionRange(hour.value.length, hour.value.length);
+                    } else if (box === hour && atEnd && e.key === 'ArrowRight') {
+                        e.preventDefault();
+                        minute.focus();
+                        minute.setSelectionRange(0, 0);
+                    }
+                }, { signal });
+            });
+
+            // Leaving the group pads a single digit and paints any error.
+            container.addEventListener('focusout', (e) => {
+                if (container.contains(e.relatedTarget)) return;
+                [hour, minute].forEach((box) => { if (/^\d$/.test(box.value)) box.value = '0' + box.value; });
+                this._sync(false);
+            }, { signal });
+        }
+
+        _adopt(secs) {
+            const p = parts(secs);
+            this.elements.hour.value = pad(p.h24);
+            this.elements.minute.value = pad(p.m);
+            this._sync(true);
+        }
+
+        // The one write path: the boxes → the carrier and the validity stamp.
+        _sync(silent) {
+            const { container, hour, minute, carrier } = this.elements;
+            const secs = parse24(hour.value + ':' + minute.value);
+            let msg = '';
+            if ((hour.value || minute.value) && secs === null) msg = strings.text('incomplete');
+            else if (secs !== null && this.min !== null && secs < this.min) msg = strings.text('before_min', { time: format24(this.min) });
+            else if (secs !== null && this.max !== null && secs > this.max) msg = strings.text('after_max', { time: format24(this.max) });
+
+            // Forms reads the hour box's stamp at submit; an out-of-range time never reaches the carrier.
+            hour.setCustomValidity(msg);
+            const value = secs === null || msg ? '' : format24(secs);
+            if (value !== this.value) {
+                this.value = value;
+                if (carrier) { carrier.value = value; NDS.triggerEvents(carrier); }
+            }
+            // An error paints on leaving the group; a fixed value clears it at once. Soft dependency, as in field mode.
+            if (msg && !silent) NDS.Forms?.setStatus?.({ element: container, status: 'error', message: msg });
+            else if (!msg && NDS.Status.get(container) === 'error') NDS.Forms?.clearStatus?.(container);
+        }
+
+        getValue() { return this.value; }
+
+        setValue(value) {
+            const secs = parse24(value);
+            if (secs === null || !this._inBounds(secs)) return false;
+            this._adopt(secs);
+            return true;
+        }
+
+        clear() {
+            this.elements.hour.value = '';
+            this.elements.minute.value = '';
+            this._sync(true);
+            return true;
+        }
+
+        _inBounds(secs) {
+            return (this.min === null || secs >= this.min) && (this.max === null || secs <= this.max);
+        }
+
+        destroy() {
+            this.instanceAbortController.abort();
+            // As in field mode: nothing is left to clear the picker's own error.
+            if (this.elements.hour.validity.customError) {
+                this.elements.hour.setCustomValidity('');
+                NDS.Forms?.clearStatus?.(this.elements.container);
+            }
+            this.elements.container.removeAttribute('data-nds-time-picker-initialized');
+            delete this.elements.container._ndsTimePicker;
+        }
+    }
+
+    // Consumers hold a box, the group or a wrapper around it.
+    function groupOf(el) {
+        if (!el || !el.closest) return null;
+        if (el.querySelector && el.querySelector('.nds-time-input')) return null;
+        return el.closest('.nds-time-fields') || (el.querySelector ? el.querySelector('.nds-time-fields') : null);
+    }
+
     // Consumers hold the input, the form-control or the container.
     function inputOf(el) {
         if (!el || !el.closest) return null;
@@ -801,6 +969,14 @@
     }
 
     function create(input, formControl) {
+        const group = groupOf(input);
+        if (group) {
+            if (!group._ndsTimePicker) {
+                const instance = new TimeFields(group);
+                if (instance.valid) group._ndsTimePicker = instance;
+            }
+            return group._ndsTimePicker || null;
+        }
         const el = inputOf(input) || (input && input.closest ? input.closest('.nds-form-container')?.querySelector('.nds-time-input') : null);
         if (!el) return null;
         if (el._ndsTimePicker) return el._ndsTimePicker;
@@ -816,10 +992,12 @@
     }
 
     function init() {
-        document.querySelectorAll('.nds-time-input').forEach((el) => create(el));
+        document.querySelectorAll('.nds-time-input, .nds-time-fields').forEach((el) => create(el));
     }
 
     const instanceOf = (el) => {
+        const group = groupOf(el);
+        if (group) return group._ndsTimePicker || null;
         const input = inputOf(el);
         return input ? input._ndsTimePicker || null : null;
     };

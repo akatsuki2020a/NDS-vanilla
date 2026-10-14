@@ -82,7 +82,7 @@
         {
             // Extras: the field paints complete with no JS; the panel is built on first open.
             name: 'TimePicker',
-            selector: '.nds-time-input',
+            selector: '.nds-time-input, .nds-time-fields',
         },
         {
             // Deferred: input wiring fires on typing; an autofocus restore lands one idle slot later.

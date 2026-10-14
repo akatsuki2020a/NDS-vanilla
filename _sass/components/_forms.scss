@@ -178,7 +178,8 @@
 }
 
 :is(.nds-form-container, .nds-form-group) {
-    .nds-label+.nds-info {
+    // Under the label, or alone in a label as a small note (the time picker's Hour/Minute boxes).
+    :is(.nds-label+.nds-info, label>.nds-info:first-child) {
         color: var(--_header-color-forced, var(--text-primary-paragraph));
         font-size: var(--typo-text-sm-FS);
         line-height: var(--typo-text-sm-LH);

@@ -762,7 +762,7 @@
         // Validate OTP / checkbox / radio groups; pushes each invalid group +
         // message onto the shared accumulator `acc`.
         _validateGroups: function(form, options, acc) {
-            form.querySelectorAll('.nds-form-group[data-min-checked], .nds-form-group[data-max-checked], .nds-form-group[data-required], .nds-form-group.nds-required').forEach(function(group) {
+            form.querySelectorAll('.nds-form-group[data-min-checked], .nds-form-group[data-max-checked], .nds-form-group[data-required], .nds-form-group.nds-required, .nds-form-group.nds-time-fields').forEach(function(group) {
                 if (!isFieldVisible(group, form)) return;
 
                 var hasCheckboxes = group.querySelector('input[type="checkbox"]');
@@ -783,6 +783,15 @@
                     result = Validator.validateRatingGroup(group, { showMessage: options.showMessages });
                     // Anchor on the first star: the stars are buttons, so focusFirst lands on one.
                     anchor = group.querySelector('.nds-rating-star');
+                } else if (group.classList.contains('nds-time-fields')) {
+                    // Time picker boxes: the picker stamps a typed error on the hour box.
+                    anchor = group.querySelector('.nds-time-hour');
+                    var carrier = group.querySelector('.nds-time-value');
+                    var typedError = anchor ? anchor.validationMessage : '';
+                    var empty = !typedError && !(carrier && carrier.value);
+                    var required = group.hasAttribute('data-required') || group.classList.contains('nds-required');
+                    var timeMsg = typedError || (empty && required ? strings.text('required') : '');
+                    result = Validator._finishGroupValidation(group, { showMessage: options.showMessages }, !timeMsg, timeMsg, {}, empty);
                 }
 
                 if (result && !result.valid) {
