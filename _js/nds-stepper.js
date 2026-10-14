@@ -19,6 +19,7 @@
  *   data-stepper-target         the stepper id that button drives
  *   data-stepper-value          the step number for a goto
  * Gotchas:
+ *   - nds-static gets no step states: data-current and the movers change nothing on screen.
  *   - Give the stepper an id. A control resolves its target from data-stepper-target, then
  *     the closest .nds-stepper, then the first one on the page.
  *   - The layout is CSS alone: nds-vertical / nds-radial (the desktop layout), overridden on
@@ -59,6 +60,7 @@
     let _offDataAttrChange;
 
     function _stampSteps(el) {
+        if (el.classList.contains('nds-static')) return;
         const current = parseInt(el.dataset.current) || 1;
         const steps = el.querySelectorAll('.nds-stepper-step');
         for (let i = 0; i < steps.length; i++) {
@@ -189,6 +191,7 @@
         }
 
         syncStepStates() {
+            if (this.element.classList.contains('nds-static')) return;
             const allCompleted = this.currentStep > this.totalSteps;
 
             this.steps.forEach((step, index) => {

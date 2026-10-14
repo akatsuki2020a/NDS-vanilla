@@ -478,6 +478,37 @@
 }
 
 // ==============================================
+// STATIC + ICONS
+// ==============================================
+
+// Static: a fixed list, such as a how-it-works row. The script stamps no state, so
+// every step keeps the base look; the line takes the neutral colour. The circle reads the
+// featured-icon status knobs, so it follows a status around it, such as an info alert.
+.nds-stepper.nds-static {
+    --_stepper-line-current: var(--stepper-line-upcoming);
+
+    .nds-stepper-circle {
+        &, &:hover {
+            border-color: transparent;
+            background-color: var(--featuredicon-bg, var(--background-primary-light));
+            color: var(--featuredicon-color, var(--stepper-button-current));
+        }
+    }
+}
+
+// Icons: the icon in each circle replaces the number. After the state rules, so it beats the completed check.
+.nds-stepper.nds-icons .nds-stepper-circle {
+    &::before {
+        display: none;
+    }
+
+    > :is(.hgi, .nds-icon) {
+        font-size: calc(var(--stepper-size) / 2);
+        line-height: 1;
+    }
+}
+
+// ==============================================
 // VERTICAL LAYOUT
 // ==============================================
 

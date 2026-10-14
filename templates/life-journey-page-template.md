@@ -47,9 +47,8 @@ steps:
     description: "A service that lets the establishment apply for the sector licenses its investment activity needs, so it can operate formally under the conditions of the regulating entity."
     requirements: ["Investment registration certificate", "Commercial register number"]
 survey:
-  - "How satisfied are you with the journey?"
-  - "How easy was it to complete the journey?"
-  - "How satisfied are you with the time the journey took?"
+  - "How would you rate how easy it was to reach the right life journey?"
+  - "How would you rate your overall experience of using the life journey?"
 related:
   - title: "Establishing a Saudi Company Branch"
     description: "Open the main branch of a Saudi company in the Kingdom."
@@ -290,27 +289,33 @@ related:
 <!-- Completed only: the journey survey. Open it when the user enters a completed journey they have not rated -->
 <div id="journey-survey" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="journey-survey-title" aria-hidden="true" hidden>
     <div class="nds-card-header">
-        <div class="nds-card-featured-icon">
-            <span class="nds-featured-icon nds-circle">
-                <i class="hgi hgi-stroke hgi-star" aria-hidden="true"></i>
-            </span>
-        </div>
+        <span class="nds-card-title" id="journey-survey-title">Tell us what you think of this journey</span>
         <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close" data-i18n-aria-label="modal.close">
             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
         </button>
     </div>
     <div class="nds-card-content">
         <div class="nds-card-text">
-            <span class="nds-card-title" id="journey-survey-title">Rate your journey</span>
-            <p class="nds-card-description">You completed this journey. Tell us about your experience, to help us improve it.</p>
+            <p class="nds-card-description">Please don't include personal or financial information. Your feedback will be sent and recorded to improve the services.</p>
         </div>
         <form class="nds-form nds-flex nds-col" data-ajax>
+            <div class="nds-alert nds-card nds-inline" data-status="info">
+                <span class="nds-feedback nds-alert-icon">
+                    <span class="nds-feedback-icon">
+                        <i class="nds-icon" aria-hidden="true"></i>
+                    </span>
+                </span>
+                <div class="nds-alert-content">
+                    <div class="nds-alert-text">
+                        <p class="nds-alert-description" id="journey-survey-hint">Rate your experience from (1) poor to (5) excellent</p>
+                    </div>
+                </div>
+            </div>
             {%- for question in page.survey %}
-            <fieldset class="nds-form-group" data-required aria-describedby="survey-hint-{{ forloop.index }}">
+            <fieldset class="nds-form-group" data-required aria-describedby="journey-survey-hint">
                 <legend>
                     <span class="nds-label">{{ question }}</span>
                 </legend>
-                <span class="nds-note" id="survey-hint-{{ forloop.index }}">From (1) poor to (5) excellent</span>
                 <div class="nds-rating nds-md nds-brand" data-rating="0">
                     <button class="nds-rating-star" type="button" aria-label="1 star"></button>
                     <button class="nds-rating-star" type="button" aria-label="2 stars"></button>
@@ -323,14 +328,15 @@ related:
             {%- endfor %}
             <div class="nds-form-container nds-textarea">
                 <div class="nds-form-header">
-                    <label for="journey-survey-comment"><span class="nds-label">Comments</span></label>
+                    <label for="journey-survey-comment"><span class="nds-label">Do you have any suggestions to improve the life journey?</span></label>
                 </div>
                 <div class="nds-form-control">
                     <textarea id="journey-survey-comment" name="comment" class="nds-textarea" placeholder="Enter your message..." rows="3"></textarea>
                 </div>
             </div>
+            <p>For more information you may review the <a href="#" class="nds-link">e-participation statement</a> and the <a href="#" class="nds-link">rules of engagement</a>.</p>
             <button type="submit" class="nds-btn nds-primary nds-lg">
-                <span class="nds-label">Submit</span>
+                <span class="nds-label">Send</span>
             </button>
         </form>
     </div>

@@ -307,9 +307,10 @@ module DocsCanon
     style = [("width:#{width};max-width:100%" if width), ("font-size:#{size}" if size)].compact.join(';')
     slot = %(<div data-demo-slot#{' class="nds-flex nds-col"' if width}#{%( style="#{style}") unless style.empty?}>)
     # data-harness="stepper": Back and Next under the preview move the canon's root id. Preview only.
+    # nds-docs.js hides them while the stepper is static, which has no step to move.
     if kind == 'stepper'
       ctl = ->(act, cls, label) { %(<button type="button" class="nds-btn #{cls} nds-md" data-stepper-control="#{act}" data-stepper-target="#{src[/\sid="([^"]+)"/, 1]}"><span class="nds-label">#{label}</span></button>) }
-      return %(#{slot}\n#{src}\n</div><div class="nds-form-actions">#{ctl['previous', 'nds-secondary-outline', 'Back']}#{ctl['next', 'nds-primary', 'Next']}</div>)
+      return %(#{slot}\n#{src}\n</div><div class="nds-form-actions" data-demo-steps>#{ctl['previous', 'nds-secondary-outline', 'Back']}#{ctl['next', 'nds-primary', 'Next']}</div>)
     end
     return %(#{slot}\n#{src}\n</div>) unless kind == 'form'
 

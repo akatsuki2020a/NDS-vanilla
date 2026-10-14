@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "14/10/2026 - 03:27 PM"
+last_edit: "14/10/2026 - 11:39 PM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "14/10/2026 - 03:27 PM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-A stepper is a `.nds-stepper` of `.nds-stepper-step` items. Each step has a base with a numbered circle, and content with a title and a description. The script marks each step completed, current or upcoming from the stepper's `data-current`, and the line between two circles takes the color of that state. A radial stepper shows only the current step, beside a ring that fills as the user moves on. A vertical stepper with dots, divider labels and reverse order is also a timeline, such as a request's history with dates.
+A stepper is a `.nds-stepper` of `.nds-stepper-step` items. Each step has a base with a numbered circle, and content with a title and a description. The script marks each step completed, current or upcoming from the stepper's `data-current`, and the line between two circles takes the color of that state. A radial stepper shows only the current step, beside a ring that fills as the user moves on. A vertical stepper with dots, divider labels and reverse order is also a timeline, such as a request's history with dates. A static stepper shows an order with no progress, such as a how-it-works row.
 
 Pick another component when:
 
@@ -50,7 +50,8 @@ Pick another component when:
   </div>
   <div class="nds-stepper-step">
     <div class="nds-stepper-base">
-      <div class="nds-stepper-circle"></div>
+      <div class="nds-stepper-circle">
+      </div>
     </div>
     <div class="nds-stepper-content">
       <div class="nds-stepper-text">
@@ -62,7 +63,8 @@ Pick another component when:
   </div>
   <div class="nds-stepper-step">
     <div class="nds-stepper-base">
-      <div class="nds-stepper-circle"></div>
+      <div class="nds-stepper-circle">
+      </div>
     </div>
     <div class="nds-stepper-content">
       <div class="nds-stepper-text">
@@ -74,7 +76,8 @@ Pick another component when:
   </div>
   <div class="nds-stepper-step">
     <div class="nds-stepper-base">
-      <div class="nds-stepper-circle"></div>
+      <div class="nds-stepper-circle">
+      </div>
     </div>
     <div class="nds-stepper-content">
       <div class="nds-stepper-text">
@@ -86,7 +89,8 @@ Pick another component when:
   </div>
   <div class="nds-stepper-step">
     <div class="nds-stepper-base">
-      <div class="nds-stepper-circle"></div>
+      <div class="nds-stepper-circle">
+      </div>
     </div>
     <div class="nds-stepper-content">
       <div class="nds-stepper-text">
@@ -109,6 +113,18 @@ Pick another component when:
 <script type="text/html" id="stepper-label-4" data-canon>
 <div class="nds-divider">Pending</div>
 </script>
+<script type="text/html" id="stepper-icon-1" data-canon>
+<i class="hgi hgi-stroke hgi-user" aria-hidden="true"></i>
+</script>
+<script type="text/html" id="stepper-icon-2" data-canon>
+<i class="hgi hgi-stroke hgi-file-upload" aria-hidden="true"></i>
+</script>
+<script type="text/html" id="stepper-icon-3" data-canon>
+<i class="hgi hgi-stroke hgi-file-search" aria-hidden="true"></i>
+</script>
+<script type="text/html" id="stepper-icon-4" data-canon>
+<i class="hgi hgi-stroke hgi-sent" aria-hidden="true"></i>
+</script>
 <script type="text/html" id="stepper-action" data-canon>
 <div class="nds-stepper-action">
   <button type="button" class="nds-btn nds-primary nds-sm">
@@ -127,23 +143,23 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-Most classes go on `.nds-stepper`. The Card rows put `nds-card` on the stepper, on every step or on every step's content, as the On element cell says. The Action rows act on the second step, which is the current step in the canon. The Layout row sets the desktop layout. Phone layout and Tablet layout each add a breakpoint class, which wins on that screen size. The ring and the `.nds-stepper-next` lines show only in the radial layout: leave them out of a stepper that is never radial. An option that needs one layout has a row for each class that gives it. A Divider choice has one row for each step: write a divider at the start of every step's content. A size class gives a different size in the radial layout, as its Use cell says.
+Most classes go on `.nds-stepper`. The Card rows put `nds-card` on the stepper, on every step or on every step's content, as the On element cell says. The Action rows act on the second step, which is the current step in the canon. The Layout row sets the desktop layout. Phone layout and Tablet layout each add a breakpoint class, which wins on that screen size. The ring and the `.nds-stepper-next` lines show only in the radial layout: leave them out of a stepper that is never radial. An option that needs one layout has a row for each class that gives it. A Divider choice has one row for each step: write a divider at the start of every step's content. The Icons choice works the same way: write an icon in every circle. A size class gives a different size in the radial layout, as its Use cell says.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
 | Layout | Horizontal (default) | — | — | The steps in a row, start to end. Every title must fit its column |
 | Layout | Vertical | `.nds-vertical` | `.nds-stepper` | The steps in a column. For a step with long content or buttons, or a narrow column |
-| Layout | Radial (hint: The current step only, beside a progress ring) | `.nds-radial` | `.nds-stepper` | The current step only, beside the ring. For a narrow space, such as a side column |
+| Layout | Radial (hint: The current step only, beside a progress ring) | `.nds-radial` | `.nds-stepper:not(.nds-static)` | The current step only, beside the ring. For a narrow space, such as a side column |
 | Phone layout | Same (default) (hint: Uses the Layout choice) | — | — | The Layout choice on phones: narrower than 600px |
 | Phone layout | Horizontal | `.nds-horizontal-sm` | `.nds-stepper.nds-vertical` | A row on phones: narrower than 600px |
 | Phone layout | Horizontal | `.nds-horizontal-sm` | `.nds-stepper.nds-radial` | A row on phones: narrower than 600px |
 | Phone layout | Vertical | `.nds-vertical-sm` | `.nds-stepper:not(.nds-vertical)` | A column on phones: narrower than 600px |
-| Phone layout | Radial | `.nds-radial-sm` | `.nds-stepper:not(.nds-radial)` | The ring on phones: narrower than 600px |
+| Phone layout | Radial | `.nds-radial-sm` | `.nds-stepper:not(.nds-radial):not(.nds-static)` | The ring on phones: narrower than 600px |
 | Tablet layout | Same (default) (hint: Uses the Layout choice) | — | — | The Layout choice on tablets: 600px to 959px |
 | Tablet layout | Horizontal | `.nds-horizontal-md` | `.nds-stepper.nds-vertical` | A row on tablets: 600px to 959px |
 | Tablet layout | Horizontal | `.nds-horizontal-md` | `.nds-stepper.nds-radial` | A row on tablets: 600px to 959px |
 | Tablet layout | Vertical | `.nds-vertical-md` | `.nds-stepper:not(.nds-vertical)` | A column on tablets: 600px to 959px |
-| Tablet layout | Radial | `.nds-radial-md` | `.nds-stepper:not(.nds-radial)` | The ring on tablets: 600px to 959px |
+| Tablet layout | Radial | `.nds-radial-md` | `.nds-stepper:not(.nds-radial):not(.nds-static)` | The ring on tablets: 600px to 959px |
 | Size | XS | `.nds-xs` | `.nds-stepper.nds-radial` | A 40px ring with smaller text. Radial only |
 | Size | XS | `.nds-xs` | `.nds-stepper.nds-radial-sm` | A 40px ring with smaller text. Radial only |
 | Size | XS | `.nds-xs` | `.nds-stepper.nds-radial-md` | A 40px ring with smaller text. Radial only |
@@ -153,7 +169,14 @@ Most classes go on `.nds-stepper`. The Card rows put `nds-card` on the stepper, 
 | Size | MD (default) | — | — | 32px circles, or a 64px ring in the radial layout |
 | Size | LG | `.nds-lg` | `.nds-stepper:not(.nds-dot)` | 40px circles, or an 80px ring |
 | Size | XL | `.nds-xl` | `.nds-stepper:not(.nds-dot)` | 48px circles, or a 120px ring with a larger title |
-| Dot | Dot (hint: Small dots with no numbers. Not radial) | `.nds-dot` | `.nds-stepper:not(.nds-lg):not(.nds-xl):not(.nds-radial)` | 16px dots with no numbers. For a timeline, or a short flow where the order is plain. A dot has one size, and the radial layout shows no dots |
+| Dot | Dot (hint: Small dots with no numbers. Not radial) | `.nds-dot` | `.nds-stepper:not(.nds-lg):not(.nds-xl):not(.nds-radial):not(.nds-icons)` | 16px dots with no numbers. For a timeline, or a short flow where the order is plain. A dot has one size, and the radial layout shows no dots |
+| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | `.nds-icons` | `.nds-stepper:not(.nds-dot)` | An icon in each circle in place of the number. A completed step keeps its icon in the filled circle. Not with Dot. See Icons under Behavior |
+| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-1` | `.nds-stepper-step:nth-child(2) .nds-stepper-circle` | The icon of step 1 |
+| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-2` | `.nds-stepper-step:nth-child(3) .nds-stepper-circle` | The icon of step 2 |
+| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-3` | `.nds-stepper-step:nth-child(4) .nds-stepper-circle` | The icon of step 3 |
+| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-4` | `.nds-stepper-step:nth-child(5) .nds-stepper-circle` | The icon of step 4 |
+| Type | Progress (default) (hint: Steps done, current and to come) | `[data-current="2"]` | `.nds-stepper` | The script marks each step completed, current or upcoming from `data-current`. For a flow the user moves through |
+| Type | Static (hint: Every step looks the same, with no progress. Not radial) | `.nds-static` | `.nds-stepper:not(.nds-radial):not(.nds-radial-sm):not(.nds-radial-md)` | Every step looks the same, and the line is neutral. For an order with no progress, such as a how-it-works row. Not radial, which needs a current step. See Static under Behavior |
 | Divider | Divider (hint: A label above each step, such as a date. Vertical only) | — | `.nds-stepper.nds-vertical` | A divider at the start of each step, as its label: a date, a phase name, or a group of steps. Vertical only. With Dot and Reverse it makes a timeline. See Divider Labels under Behavior |
 | Divider | Divider (hint: A label above each step, such as a date. Vertical only) | — | `.nds-stepper.nds-vertical-sm` | A divider at the start of each step, as its label: a date, a phase name, or a group of steps. Vertical only. With Dot and Reverse it makes a timeline. See Divider Labels under Behavior |
 | Divider | Divider (hint: A label above each step, such as a date. Vertical only) | — | `.nds-stepper.nds-vertical-md` | A divider at the start of each step, as its label: a date, a phase name, or a group of steps. Vertical only. With Dot and Reverse it makes a timeline. See Divider Labels under Behavior |
@@ -224,6 +247,16 @@ A stepper with On color gives its cards the translucent white surface and the on
 {: .nds-block-title}
 
 `nds-separated` hides the line between the steps in every layout. A vertical stepper then spaces its steps for a column with no line, and moves the text down to meet the circle's center. A card on each step does the same with no class.
+
+### Icons
+{: .nds-block-title}
+
+`nds-icons` on the stepper shows the icon in each circle in place of the number. Write one icon in every `.nds-stepper-circle`. The step states still color the circle, and a completed step keeps its icon in the filled circle. `data-step-text` shows nothing with icons.
+
+### Static
+{: .nds-block-title}
+
+`nds-static` makes the stepper a plain list of steps in order, such as a how-it-works row. The script writes no step state, so `data-current`, the methods and the control buttons change nothing on screen. Every circle takes the light tint of a [Featured Icon](../components/featured-icons), and the line is neutral. Inside a status, such as an info [Alert](../components/alert), the circles take that status color.
 
 ### Step Action
 {: .nds-block-title}
@@ -320,6 +353,8 @@ When something can refuse the move, such as validation or a request, call `NDS.S
 - Put `nds-card` on every step or on every step's content. A stepper with some cards and some plain steps does not line up.
 - Put one main button in an action with `nds-end`. A row of buttons wraps inside its narrow column.
 - To change the layout after load, change the class on the stepper. CSS alone sets the layout, so the change shows at once.
+- Use `nds-static` for a list that explains an order. A flow the user moves through keeps the step states.
+- Give a circle icon `aria-hidden="true"`. The step title names the step.
 - Name the current step in the page as well, such as in the form heading. The stepper shows the step to the eye only, and a screen reader does not announce it.
 
 </div>
@@ -349,11 +384,11 @@ When something can refuse the move, such as validation or a request, call `NDS.S
 
 | Attribute | Element | Effect |
 |---|---|---|
-| `data-current` | `.nds-stepper` | The current step, from 1. Write it at page load: without it, step 1 is current. The script watches it: write a new number and the steps change, and `nds:stepper:change` fires. Code that holds the step number, such as a framework view, can drive the stepper this way. A number one past the last step shows every step completed |
+| `data-current` | `.nds-stepper` | The current step, from 1. Write it at page load: without it, step 1 is current. The script watches it: write a new number and the steps change, and `nds:stepper:change` fires. Code that holds the step number, such as a framework view, can drive the stepper this way. A number one past the last step shows every step completed. A static stepper ignores it |
 | `data-total` | `.nds-stepper` | The number of steps. The script writes it when it starts. After you add or remove steps, write the new count in it, and the script reads the steps again |
 | `data-state` | `.nds-stepper` | The script writes `completed` when `next()` runs on the last step, or when `data-current` is past it. It removes it when the stepper moves back. Write `loading` yourself to show the skeleton: it works the same as `nds-loading` |
-| `data-state` | `.nds-stepper-step` | The script writes `completed`, `current` or `upcoming` on each step from `data-current`. It colors the circle and the border of a card on the step or its content. Do not write it yourself |
-| `data-step-text` | `.nds-stepper-circle` | Text in place of the step number, such as a letter. A completed step shows its check mark, and a dot shows no text |
+| `data-state` | `.nds-stepper-step` | The script writes `completed`, `current` or `upcoming` on each step from `data-current`. It colors the circle and the border of a card on the step or its content. The script writes none on a static stepper. Do not write it yourself |
+| `data-step-text` | `.nds-stepper-circle` | Text in place of the step number, such as a letter. A completed step shows its check mark. A dot and `nds-icons` show no text |
 | `data-stepper-control` | `button` | `next`, `previous` or `goto`. The click moves the stepper. See Step Controls under Behavior |
 | `data-stepper-target` | `button` with `data-stepper-control` | The id of the stepper the button moves |
 | `data-stepper-value` | `button` with `data-stepper-control="goto"` | The step number to go to |
@@ -445,6 +480,7 @@ The full API is in the banner of `_js/nds-stepper.js`.
 
 - [Form Template](../templates/form-template): a stepper that is radial on phones and tablets and vertical on a desktop, beside a form with checked moves.
 - [Journey Page Template](../templates/life-journey-page-template): a vertical stepper with a card on each step and a start button at the end of the current step.
+- [Life Journeys Template](../templates/life-journey-template): a static stepper with icons in an info alert, a row on a desktop and a column on phones.
 - [Faculty CV](../examples/faculty-cv): a career timeline with dots, divider labels and reverse order.
 - [Divider](../utilities/divider): the label at the start of a step.
 

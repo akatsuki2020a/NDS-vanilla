@@ -120,7 +120,7 @@
 // icon itself or on any ancestor (a card, drawer item, …). The icon's own
 // status wins via higher specificity in the direct rules above.
 // --featuredicon-bg / --featuredicon-color are only consumed by .nds-featured-icon (and
-// forwarded through cards), so applying them on these aliases is safe; hosts
+// forwarded through cards and static stepper circles), so applying them on these aliases is safe; hosts
 // that need a different value (cards' softer neutral, .nds-color tints,
 // disabled/oncolor) override at higher specificity. Selectors stay (0,1,0).
 // ==============================================

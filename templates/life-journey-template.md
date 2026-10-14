@@ -52,49 +52,37 @@ completed:
   - title: "Getting a Job"
     steps: 4
 ---
-{% capture journey_steps %}<div class="nds-grid" style="--max-col: 3; --mid-col: 3; --min-col: 1;">
-    <div class="nds-card nds-center">
-        <div class="nds-card-header">
-            <div class="nds-card-featured-icon">
-                <span class="nds-featured-icon nds-circle nds-lg">
-                    <i class="hgi hgi-stroke hgi-cursor-01" aria-hidden="true"></i>
-                </span>
-            </div>
+{% capture journey_steps %}<div class="nds-stepper nds-block nds-center nds-xl nds-static nds-icons nds-vertical-sm">
+    <div class="nds-stepper-step">
+        <div class="nds-stepper-base">
+            <div class="nds-stepper-circle"><i class="hgi hgi-stroke hgi-cursor-magic-selection-02" aria-hidden="true"></i></div>
         </div>
-        <div class="nds-card-content">
-            <div class="nds-card-text">
-                <span class="nds-card-title">Choose the life journey</span>
-                <span class="nds-card-description">that fits your need</span>
+        <div class="nds-stepper-content">
+            <div class="nds-stepper-text">
+                <span class="nds-stepper-title">Choose the life journey</span>
+                <span class="nds-stepper-description">that fits your need</span>
             </div>
         </div>
     </div>
-    <div class="nds-card nds-center">
-        <div class="nds-card-header">
-            <div class="nds-card-featured-icon">
-                <span class="nds-featured-icon nds-circle nds-lg">
-                    <i class="hgi hgi-stroke hgi-view" aria-hidden="true"></i>
-                </span>
-            </div>
+    <div class="nds-stepper-step">
+        <div class="nds-stepper-base">
+            <div class="nds-stepper-circle"><i class="hgi hgi-stroke hgi-view" aria-hidden="true"></i></div>
         </div>
-        <div class="nds-card-content">
-            <div class="nds-card-text">
-                <span class="nds-card-title">Browse all the services</span>
-                <span class="nds-card-description">related to the journey</span>
+        <div class="nds-stepper-content">
+            <div class="nds-stepper-text">
+                <span class="nds-stepper-title">Browse all the services</span>
+                <span class="nds-stepper-description">related to the journey</span>
             </div>
         </div>
     </div>
-    <div class="nds-card nds-center">
-        <div class="nds-card-header">
-            <div class="nds-card-featured-icon">
-                <span class="nds-featured-icon nds-circle nds-lg">
-                    <i class="hgi hgi-stroke hgi-file-validation" aria-hidden="true"></i>
-                </span>
-            </div>
+    <div class="nds-stepper-step">
+        <div class="nds-stepper-base">
+            <div class="nds-stepper-circle"><i class="hgi hgi-stroke hgi-file-verified" aria-hidden="true"></i></div>
         </div>
-        <div class="nds-card-content">
-            <div class="nds-card-text">
-                <span class="nds-card-title">Complete your steps in order</span>
-                <span class="nds-card-description">until you reach your goal</span>
+        <div class="nds-stepper-content">
+            <div class="nds-stepper-text">
+                <span class="nds-stepper-title">Complete your steps in order</span>
+                <span class="nds-stepper-description">until you reach your goal</span>
             </div>
         </div>
     </div>
@@ -109,7 +97,7 @@ completed:
                 </span>
             </span>
             <div class="nds-alert-content">
-                <div class="nds-alert-text">
+                <div class="nds-alert-text nds-block">
                     <span class="nds-alert-title">How life journeys work</span>
                     <p class="nds-alert-description">We grouped all the government services for one goal into a single journey, to help you complete every step from one place, in a clear order.</p>
                 </div>

@@ -467,6 +467,9 @@
             // The Validate and Reset buttons show only while the field has a rule that can fail.
             var acts = preview.querySelector('[data-demo-actions]');
             if (acts) acts.hidden = !slot.querySelector(RULES);
+            // A static stepper has no step to move, so Back and Next hide.
+            var steps = preview.querySelector('[data-demo-steps]');
+            if (steps) steps.hidden = !!slot.querySelector('.nds-stepper.nds-static');
             dropAlert(slot.closest('form'));
             preview.ndsOut = out;
             if (script.getAttribute('data-preview') === 'js') preview.ndsJs = js;
