@@ -37,6 +37,7 @@
 - { kind: class, name: nds-bar-start, status: renamed, use: nds-toolbar-start, since: "2.0.0", fix: "Use nds-toolbar-start." }
 - { kind: class, name: nds-bar-text, status: renamed, use: nds-toolbar-text, since: "2.0.0", fix: "Use nds-toolbar-text." }
 - { kind: class, name: nds-card-price, status: renamed, use: nds-card-value, since: "2.0.0", fix: "Use nds-card-value." }
+- { kind: class, name: nds-card-view, scope: "&.nds-stepper", status: removed, since: "2.0.0", fix: "Remove it and put nds-card on every step, on every step's content, or on the stepper. The card border takes the step state color." }
 - { kind: class, name: nds-cardView, status: renamed, use: nds-card-view, since: "2.0.0", fix: "Use nds-card-view." }
 - { kind: class, name: nds-collapse, scope: .nds-main-nav, status: renamed, use: nds-nav-collapse, since: "2.0.0", fix: "Use nds-nav-collapse." }
 - { kind: class, name: nds-collapse-content, scope: .nds-main-nav, status: renamed, use: nds-nav-collapse-content, since: "2.0.0", fix: "Use nds-nav-collapse-content." }

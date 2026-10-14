@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:19 PM"
+last_edit: "14/10/2026 - 01:12 PM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -109,6 +109,13 @@ Pick another component when:
 <script type="text/html" id="stepper-label-4" data-canon>
 <div class="nds-divider">Pending</div>
 </script>
+<script type="text/html" id="stepper-action" data-canon>
+<div class="nds-stepper-action">
+  <button type="button" class="nds-btn nds-primary nds-sm">
+    <span class="nds-label">Upload documents</span>
+  </button>
+</div>
+</script>
     </div>
   </div>
 </section>
@@ -120,7 +127,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-Every class goes on `.nds-stepper`. The Layout row sets the desktop layout. Phone layout and Tablet layout each add a breakpoint class, which wins on that screen size. The ring and the `.nds-stepper-next` lines show only in the radial layout: leave them out of a stepper that is never radial. An option that needs one layout has a row for each class that gives it. A Divider choice has one row for each step: write a divider at the start of every step's content. A size class gives a different size in the radial layout, as its Use cell says.
+Most classes go on `.nds-stepper`. The Card rows put `nds-card` on the stepper, on every step or on every step's content, as the On element cell says. The Action rows act on the second step, which is the current step in the canon. The Layout row sets the desktop layout. Phone layout and Tablet layout each add a breakpoint class, which wins on that screen size. The ring and the `.nds-stepper-next` lines show only in the radial layout: leave them out of a stepper that is never radial. An option that needs one layout has a row for each class that gives it. A Divider choice has one row for each step: write a divider at the start of every step's content. A size class gives a different size in the radial layout, as its Use cell says.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
@@ -160,12 +167,17 @@ Every class goes on `.nds-stepper`. The Layout row sets the desktop layout. Phon
 | Reverse | Reverse (hint: Last step on top, for a timeline. Vertical only) | `.nds-reverse` | `.nds-stepper.nds-vertical` | The last step at the top. Write the steps oldest first. Vertical only |
 | Reverse | Reverse (hint: Last step on top, for a timeline. Vertical only) | `.nds-reverse` | `.nds-stepper.nds-vertical-sm` | The last step at the top. Write the steps oldest first. Vertical only |
 | Reverse | Reverse (hint: Last step on top, for a timeline. Vertical only) | `.nds-reverse` | `.nds-stepper.nds-vertical-md` | The last step at the top. Write the steps oldest first. Vertical only |
-| Card view | Card view (hint: Each step in a card. Vertical or radial) | `.nds-card-view` | `.nds-stepper.nds-vertical` | Each step's content in a card in the vertical layout, and the whole stepper in one card in the radial layout. With On color, the card is the translucent white of a card on a colored background. Do not put a [Card](../components/cards) in the step as well |
-| Card view | Card view (hint: Each step in a card. Vertical or radial) | `.nds-card-view` | `.nds-stepper.nds-vertical-sm` | Each step's content in a card in the vertical layout, and the whole stepper in one card in the radial layout. With On color, the card is the translucent white of a card on a colored background. Do not put a [Card](../components/cards) in the step as well |
-| Card view | Card view (hint: Each step in a card. Vertical or radial) | `.nds-card-view` | `.nds-stepper.nds-vertical-md` | Each step's content in a card in the vertical layout, and the whole stepper in one card in the radial layout. With On color, the card is the translucent white of a card on a colored background. Do not put a [Card](../components/cards) in the step as well |
-| Card view | Card view (hint: Each step in a card. Vertical or radial) | `.nds-card-view` | `.nds-stepper.nds-radial` | Each step's content in a card in the vertical layout, and the whole stepper in one card in the radial layout. With On color, the card is the translucent white of a card on a colored background. Do not put a [Card](../components/cards) in the step as well |
-| Card view | Card view (hint: Each step in a card. Vertical or radial) | `.nds-card-view` | `.nds-stepper.nds-radial-sm` | Each step's content in a card in the vertical layout, and the whole stepper in one card in the radial layout. With On color, the card is the translucent white of a card on a colored background. Do not put a [Card](../components/cards) in the step as well |
-| Card view | Card view (hint: Each step in a card. Vertical or radial) | `.nds-card-view` | `.nds-stepper.nds-radial-md` | Each step's content in a card in the vertical layout, and the whole stepper in one card in the radial layout. With On color, the card is the translucent white of a card on a colored background. Do not put a [Card](../components/cards) in the step as well |
+| Separated | Separated (hint: No line between the steps) | `.nds-separated` | `.nds-stepper:not(.nds-radial):not(:has(> .nds-stepper-step.nds-card))` | Removes the line between the steps. A vertical stepper gets spacing for steps with no line, and the text moves down to meet the circle. A card on each step does the same, so use this class for steps with no card |
+| Action (any) | Button | canon `#stepper-action` | `.nds-stepper-step:nth-child(3) > .nds-stepper-content` | A button under the text of the current step. A row of buttons goes in the same `nds-stepper-action` |
+| Action (any) | At end (hint: Beside the title, on the end side. Vertical only) | `.nds-end` | `.nds-stepper.nds-vertical .nds-stepper-action` | Moves the action to the end of the step's first row, beside the text. A phone stacks it under the text. `--stepper-action-width` caps the column |
+| Action (any) | At end (hint: Beside the title, on the end side. Vertical only) | `.nds-end` | `.nds-stepper.nds-vertical-sm .nds-stepper-action` | Moves the action to the end of the step's first row, beside the text. A phone stacks it under the text. `--stepper-action-width` caps the column |
+| Action (any) | At end (hint: Beside the title, on the end side. Vertical only) | `.nds-end` | `.nds-stepper.nds-vertical-md .nds-stepper-action` | Moves the action to the end of the step's first row, beside the text. A phone stacks it under the text. `--stepper-action-width` caps the column |
+| Card | None (default) | — | — | No card. The stepper has no surface of its own |
+| Card | Stepper (hint: The whole stepper in one card) | `.nds-card` | `.nds-stepper` | The whole stepper in one [Card](../components/cards). The usual use is a radial stepper, with the ring and the step on one surface. See Card under Behavior |
+| Card | Step (hint: Each step in a card, with the line removed. Not radial) | `.nds-card` | `.nds-stepper:not(.nds-radial) .nds-stepper-step` | Each step in its own card, with the circle inside it. See Card under Behavior. Put the class on every step |
+| Card | Content (hint: The text in a card beside the circle, with the line kept. Not radial) | `.nds-card` | `.nds-stepper:not(.nds-radial) .nds-stepper-content` | The text of each step in a card beside its circle. The line stays. Put the class on every step's content |
+| Stroke | Stroke (hint: A border around the stepper card) | `.nds-stroke` | `.nds-stepper.nds-card` | A border around the stepper card. A card on a step or on its content has a border already |
+| Shadow | Shadow | `.nds-shadow` | `.nds-card` | An elevation shadow under each card. It combines with the border |
 | Neutral | Neutral (hint: A gray ring. Radial only) | `.nds-neutral` | `.nds-stepper.nds-radial` | A gray ring in place of the primary color. Radial only |
 | Neutral | Neutral (hint: A gray ring. Radial only) | `.nds-neutral` | `.nds-stepper.nds-radial-sm` | A gray ring in place of the primary color. Radial only |
 | Neutral | Neutral (hint: A gray ring. Radial only) | `.nds-neutral` | `.nds-stepper.nds-radial-md` | A gray ring in place of the primary color. Radial only |
@@ -198,6 +210,25 @@ A breakpoint class picks the layout on one screen size: `nds-radial-sm` on a pho
 {: .nds-block-title}
 
 In a vertical stepper, a [Divider](../utilities/divider) at the start of a step's content labels the step: a date, a phase name, or the name of a group of steps. Its line meets the circle and runs on as the separator between steps. With `nds-dot` and `nds-reverse` it makes a timeline, such as a career history. Write the steps oldest first, and the newest shows on top.
+
+### Card
+{: .nds-block-title}
+
+`nds-card` on a part of the stepper gives that part the [Card](../components/cards) surface, with its options such as the shadow. On the stepper it makes one card around everything. On every step it puts the circle inside a card. On every step's content it puts a card beside the circle and keeps the line. Put the class on every step, not on some.
+
+A card on a step needs no other class. The line goes away, the spacing and the text change to fit, and the content fills the card. In a horizontal stepper, the cards share one height. It works with Dot, Reverse and divider labels. The border takes the color of the step state: the primary color for the current and the completed steps, the neutral color for the upcoming ones. The card needs no `nds-stroke` for this border.
+
+A stepper with On color gives its cards the translucent white surface and the on-color text. Put `nds-oncolor` on the stepper only.
+
+### Separated
+{: .nds-block-title}
+
+`nds-separated` hides the line between the steps in every layout. A vertical stepper then spaces its steps for a column with no line, and moves the text down to meet the circle's center. A card on each step does the same with no class.
+
+### Step Action
+{: .nds-block-title}
+
+A row of buttons in a step goes in `nds-stepper-action`, under the text. In a vertical stepper, `nds-end` on the row moves it to the end of the step's first row, beside the title and the description. The column is as wide as its buttons, up to 40% of the step. A phone stacks the row under the text.
 
 ### Step Controls
 {: .nds-block-title}
@@ -286,6 +317,8 @@ When something can refuse the move, such as validation or a request, call `NDS.S
 - Move a form step with `NDS.Stepper.next()`, not `data-stepper-control`. Validation or a request can refuse the move.
 - Give every control button `type="button"`. Inside a form, a button with no type is a submit button, and the stepper leaves it to the form.
 - Write `.nds-stepper-next` in every radial step except the last.
+- Put `nds-card` on every step or on every step's content. A stepper with some cards and some plain steps does not line up.
+- Put one main button in an action with `nds-end`. A row of buttons wraps inside its narrow column.
 - To change the layout after load, change the class on the stepper. CSS alone sets the layout, so the change shows at once.
 - Name the current step in the page as well, such as in the form heading. The stepper shows the step to the eye only, and a screen reader does not announce it.
 
@@ -308,7 +341,7 @@ When something can refuse the move, such as validation or a request, call `NDS.S
 | `nds-horizontal-sm`, `nds-vertical-sm`, `nds-radial-sm` | `.nds-stepper` | The layout on a phone: narrower than 600px. See Responsive Layout under Behavior |
 | `nds-horizontal-md`, `nds-vertical-md`, `nds-radial-md` | `.nds-stepper` | The layout on a tablet: 600px to 959px |
 | `nds-md` | `.nds-stepper.nds-radial` | The 64px ring. It is the default, so it needs no class |
-| `nds-stepper-action` | `div` in `.nds-stepper-content` | A row of buttons in a step. Each button takes an equal share of the row |
+| `nds-stepper-action` | `div` in `.nds-stepper-content` | A row of buttons in a step. Each button keeps its own width |
 {: .nds-table .nds-responsive}
 
 ### Data Attributes
@@ -319,7 +352,7 @@ When something can refuse the move, such as validation or a request, call `NDS.S
 | `data-current` | `.nds-stepper` | The current step, from 1. Write it at page load: without it, step 1 is current. The script watches it: write a new number and the steps change, and `nds:stepper:change` fires. Code that holds the step number, such as a framework view, can drive the stepper this way. A number one past the last step shows every step completed |
 | `data-total` | `.nds-stepper` | The number of steps. The script writes it when it starts. After you add or remove steps, write the new count in it, and the script reads the steps again |
 | `data-state` | `.nds-stepper` | The script writes `completed` when `next()` runs on the last step, or when `data-current` is past it. It removes it when the stepper moves back. Write `loading` yourself to show the skeleton: it works the same as `nds-loading` |
-| `data-state` | `.nds-stepper-step` | The script writes `completed`, `current` or `upcoming` on each step from `data-current`. Do not write it yourself |
+| `data-state` | `.nds-stepper-step` | The script writes `completed`, `current` or `upcoming` on each step from `data-current`. It colors the circle and the border of a card on the step or its content. Do not write it yourself |
 | `data-step-text` | `.nds-stepper-circle` | Text in place of the step number, such as a letter. A completed step shows its check mark, and a dot shows no text |
 | `data-stepper-control` | `button` | `next`, `previous` or `goto`. The click moves the stepper. See Step Controls under Behavior |
 | `data-stepper-target` | `button` with `data-stepper-control` | The id of the stepper the button moves |
@@ -334,13 +367,14 @@ Set these on `.nds-stepper`. The size classes set `--stepper-size` too, so set i
 | Property | Default | Controls |
 |---|---|---|
 | `--stepper-size` | `32px` | Circle diameter, or ring diameter in the radial layout |
-| `--stepper-gap` | from the layout | Space between steps. Unset, it is `--stepper-indicator-gap` in a row (1.2 times with `nds-lg`, 1.5 times with `nds-xl`), 1.5 circles in a column, half a circle in a column of cards, and a spacing token that grows with the size in the radial layout |
+| `--stepper-gap` | from the layout | Space between steps. Unset, it is `--stepper-indicator-gap` in a row (1.2 times with `nds-lg`, 1.5 times with `nds-xl`), 1.5 circles in a column, half a circle in a column of cards on the content, `var(--spacing-xl)` in a column with no line (a card on each step has none), and a spacing token that grows with the size in the radial layout |
 | `--stepper-indicator-gap` | `var(--spacing-md)` | The space between steps in a row, before the size classes scale it |
 | `--stepper-text-padding` | `var(--spacing-xl)` | Space between the circle and the step content |
 | `--gap` | `var(--spacing-xl)` | Space between the parts of a step's content: a label divider, the text, a list, a row of buttons |
-| `--stepper-content-width` | `var(--paragraph-max-width)` | The widest a step's content gets. Set `none` for a step that holds a table or a wide image |
-| `--divider-lift` | `calc(var(--stepper-size) / 4)` | Moves a label divider down, so its line meets the middle of the circle. `0` by default with `nds-dot` or `nds-card-view`. Set `0` to leave the divider where it falls |
-| `--stepper-card-lift` | `calc(var(--stepper-size) / 4)` | How far `nds-card-view` raises each card in a column, so its first line meets the circle. `var(--stepper-size)` with `nds-dot`. Set it when the content starts with something taller or shorter than a title |
+| `--stepper-content-width` | `var(--paragraph-max-width)` | The widest a step's content gets. Set `none` for a step that holds a table or a wide image. With a card on the step the default is `none`, so the content fills the card |
+| `--divider-lift` | `calc(var(--stepper-size) / 4)` | Moves a label divider down, so its line meets the middle of the circle. `0` by default with `nds-dot`, `nds-separated`, or a card on a step or on its content. Set `0` to leave the divider where it falls |
+| `--stepper-card-lift` | `calc(var(--stepper-size) / 4)` | How far a card on the content rises in a column, so its first line meets the circle. `var(--stepper-size)` with `nds-dot`. Set it when the content starts with something taller or shorter than a title |
+| `--stepper-action-width` | `40%` | The widest the action column gets with `nds-end`, as a share of the step. A row of buttons wraps inside it |
 | `--stepper-title-FS`, `--stepper-title-LH` | set by the size class | Title font size and line height in the radial layout. The text does not grow with the ring, so set them for a large title beside a small ring. Set both |
 | `--stepper-description-FS`, `--stepper-description-LH` | set by the size class | Font size and line height of the description and the next-step line in the radial layout |
 {: .nds-table .nds-responsive}
@@ -410,6 +444,7 @@ The full API is in the banner of `_js/nds-stepper.js`.
     <div class="nds-section-body nds-prose" markdown="1">
 
 - [Form Template](../templates/form-template): a stepper that is radial on phones and tablets and vertical on a desktop, beside a form with checked moves.
+- [Life Journey Page Template](../templates/life-journey-page-template): a vertical stepper with a card on each step and a start button at the end of the current step.
 - [Faculty CV](../examples/faculty-cv): a career timeline with dots, divider labels and reverse order.
 - [Divider](../utilities/divider): the label at the start of a step.
 
