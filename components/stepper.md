@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "14/10/2026 - 01:12 PM"
+last_edit: "14/10/2026 - 03:27 PM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -444,7 +444,7 @@ The full API is in the banner of `_js/nds-stepper.js`.
     <div class="nds-section-body nds-prose" markdown="1">
 
 - [Form Template](../templates/form-template): a stepper that is radial on phones and tablets and vertical on a desktop, beside a form with checked moves.
-- [Life Journey Page Template](../templates/life-journey-page-template): a vertical stepper with a card on each step and a start button at the end of the current step.
+- [Journey Page Template](../templates/life-journey-page-template): a vertical stepper with a card on each step and a start button at the end of the current step.
 - [Faculty CV](../examples/faculty-cv): a career timeline with dots, divider labels and reverse order.
 - [Divider](../utilities/divider): the label at the start of a step.
 

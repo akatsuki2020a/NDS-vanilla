@@ -3,7 +3,7 @@ layout: page
 # layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
 title: Life Journeys Template
 hero_title: Life Journeys
-hero_description: Life journeys group the digital government services around the key moments of a person's life, so each one is simple and seamless from the beneficiary's point of view.
+hero_description: A life journey puts the government services for one life event, such as starting a business or building a home, in one place and in order.
 breadcrumb:
 - ["DGA Templates", "/templates"]
 lang: en
@@ -21,35 +21,36 @@ hero_float_actions:
         </div>
 last_edit: "04/12/2020 - 04:13 PM"
 current:
-  - title: "Establishing a Foreign Company Branch"
-    step: 1
+  - title: "Starting a Business"
+    step: 2
     steps: 4
   - title: "Having a Baby"
-    step: 2
+    step: 3
     steps: 5
   - title: "Getting Married"
     step: 1
-    steps: 3
+    steps: 4
+# Journeys the user has not started. Current and completed journeys are not listed here.
 journeys:
-  - title: "Building Permit Journey"
+  - title: "Building a Home"
     icon: "hgi-building-03"
-  - title: "Starting a Business"
-    icon: "hgi-briefcase-01"
-  - title: "Having a Baby"
-    icon: "hgi-baby-01"
-  - title: "Getting Married"
-    icon: "hgi-favourite"
   - title: "Buying a Home"
     icon: "hgi-home-01"
-  - title: "Retirement"
-    icon: "hgi-beach"
+  - title: "Getting Housing Support"
+    icon: "hgi-money-receive-square"
+  - title: "Hiring Employees"
+    icon: "hgi-user-add-01"
+  - title: "Opening a New Branch"
+    icon: "hgi-store-01"
+  - title: "Importing Goods"
+    icon: "hgi-delivery-truck-01"
 completed:
-  - title: "Establishing a Saudi Company Branch"
-    steps: 4
-  - title: "Starting a Business"
+  - title: "Getting a Driving License"
     steps: 3
-  - title: "Renewing a Passport"
-    steps: 2
+  - title: "Enrolling a Child in School"
+    steps: 3
+  - title: "Getting a Job"
+    steps: 4
 ---
 {% capture journey_steps %}<div class="nds-grid" style="--max-col: 3; --mid-col: 3; --min-col: 1;">
     <div class="nds-card nds-center">
@@ -167,7 +168,7 @@ completed:
                                 <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
                                     <span class="nds-label">View Details</span>
                                 </a>
-                                <a href="#" class="nds-btn nds-primary nds-lg" aria-label="Continue {{ journey.title }}">
+                                <a href="{{ '/templates/journey-service-template' | relative_url }}" class="nds-btn nds-primary nds-lg" aria-label="Continue {{ journey.title }}">
                                     <span class="nds-label">Continue Journey</span>
                                 </a>
                             </div>
@@ -198,7 +199,7 @@ completed:
                                 <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
                                     <span class="nds-label">View Details</span>
                                 </a>
-                                <a href="#" class="nds-btn nds-primary nds-lg" aria-label="Start {{ journey.title }}">
+                                <a href="{{ '/templates/journey-service-template' | relative_url }}" class="nds-btn nds-primary nds-lg" aria-label="Start {{ journey.title }}">
                                     <span class="nds-label">Start Journey</span>
                                 </a>
                             </div>
@@ -232,7 +233,7 @@ completed:
                                 </div>
                             </div>
                             <div class="nds-card-actions">
-                                <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
+                                <a href="{{ '/templates/life-journey-page-template' | relative_url }}?status=completed" class="nds-btn nds-secondary-outline nds-lg" aria-label="{{ journey.title }} details">
                                     <span class="nds-label">View Details</span>
                                 </a>
                             </div>

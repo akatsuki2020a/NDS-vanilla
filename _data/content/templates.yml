@@ -10,19 +10,11 @@
 
 - title: "Life Journeys Template"
   description: "Life journeys hub: a first-visit intro modal and how-it-works alert, and tabs for current, available and completed journeys with progress rings."
-  use_when: "The landing hub of a set of life journeys: services grouped around a life event such as having a baby, starting a business, or getting a building permit. A first visit gets a three-step intro modal and a how-it-works alert; a returning user also gets current and completed journey tabs, each card with a progress ring. The page marks each conditional part with a comment. The journey pages it links to are part of the same template set."
+  use_when: "The landing hub of a set of life journeys: services grouped around a life event such as having a baby, starting a business, or getting a building permit. A first visit gets a three-step intro modal and a how-it-works alert; a returning user also gets current and completed journey tabs, each card with a progress ring. The page marks each conditional part with a comment. Its cards open two internal pages of the same set, reached only from the hub: Details opens the Journey page (templates/life-journey-page-template.md): the journey's services in a stepper with the user's progress, which a completed card opens with ?status=completed and a rating survey. Start, Continue and a step's Start service open the Journey Service page (templates/journey-service-template.md): the journey itself, laid out like a service page, where the user starts it or continues from the last completed service."
   icon: '<i class="hgi hgi-stroke hgi-route-01"></i>'
   category: "Service"
   tags: ["DGA", "Alert", "Tabs", "Cards", "Grid"]
   url: "/templates/life-journey-template.html"
-
-- title: "Life Journey Page Template"
-  description: "One life journey: a progress card and facts beside a vertical stepper of its services, in progress or completed, with related journeys."
-  use_when: "The page of a single life journey, such as establishing a company branch or having a baby, opened from the Life Journeys hub. A side column holds a progress card and the journey facts; the content is a vertical stepper of the journey's services, each with its requirements and a start button on the current one. A completed journey shows the dates and the time taken instead. Closes with related journeys and a comments card."
-  icon: '<i class="hgi hgi-stroke hgi-route-02"></i>'
-  category: "Service"
-  tags: ["DGA", "Stepper", "Progress", "Accordion", "Cards"]
-  url: "/templates/life-journey-page-template.html"
 
 - title: "Home Page Template"
   description: "Organization home page with a main hero slider, headline figures, a services card deck, a news row, and a partner logo strip."

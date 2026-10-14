@@ -3,7 +3,7 @@ layout: page
 # layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
 layout_class: nds-has-sideinfo
 hero_style: "nds-aside"
-title: Life Journey Page Template
+title: Journey Page Template
 hero_title: Establishing a Foreign Company Branch
 hero_description: The journey enables the investor to open the main branch of a foreign company in the Kingdom of Saudi Arabia. It requires no trade name reservation and no articles of incorporation.
 breadcrumb:
@@ -37,6 +37,19 @@ steps:
   - title: "Register the general manager"
     description: "A service to appoint and register the establishment's general manager officially, link them to the legal entity in the government systems and grant them the permissions required to manage it."
     requirements: ["National ID or residence permit of the manager", "Appointment decision"]
+  - title: "Open a bank account"
+    description: "A service that lets the establishment open a bank account in its commercial name, to manage its finances, receive payments and make official transactions."
+    requirements: ["Commercial register number", "General manager's ID"]
+  - title: "Complete the other government registrations"
+    description: "A service to complete and link the establishment's accounts with the other government entities, such as Zakat and Human Resources, so it complies with the rules and can use the integrated government journeys."
+    requirements: ["Establishment file number", "Bank account details"]
+  - title: "Get the sector licenses for the investment activity"
+    description: "A service that lets the establishment apply for the sector licenses its investment activity needs, so it can operate formally under the conditions of the regulating entity."
+    requirements: ["Investment registration certificate", "Commercial register number"]
+survey:
+  - "How satisfied are you with the journey?"
+  - "How easy was it to complete the journey?"
+  - "How satisfied are you with the time the journey took?"
 related:
   - title: "Establishing a Saudi Company Branch"
     description: "Open the main branch of a Saudi company in the Kingdom."
@@ -80,7 +93,7 @@ related:
                                 <!-- In progress only: the action and the requirements -->
                                 {%- if forloop.first %}
                                 <div class="nds-stepper-action nds-end" data-journey-progress>
-                                    <a href="#" class="nds-btn nds-primary nds-md">
+                                    <a href="{{ '/templates/journey-service-template' | relative_url }}" class="nds-btn nds-primary nds-md">
                                         <span class="nds-label">Start service</span>
                                     </a>
                                 </div>
@@ -226,7 +239,7 @@ related:
     <div class="nds-section-body">
         <div class="nds-block nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;">
             {% for journey in page.related %}
-            <a href="#" class="nds-card nds-stroke">
+            <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-card nds-stroke">
                 <div class="nds-card-header">
                     <div class="nds-card-featured-icon">
                         <span class="nds-featured-icon nds-circle nds-lg">
@@ -243,7 +256,7 @@ related:
             </a>
             {% endfor %}
         </div>
-        <a href="#" class="nds-btn nds-transparent nds-color nds-lg">
+        <a href="{{ '/templates/life-journey-template' | relative_url }}" class="nds-btn nds-transparent nds-color nds-lg">
             <span class="nds-label">View more journeys</span>
         </a>
     </div>
@@ -274,10 +287,68 @@ related:
     </div>
 </section>
 
+<!-- Completed only: the journey survey. Open it when the user enters a completed journey they have not rated -->
+<div id="journey-survey" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="journey-survey-title" aria-hidden="true" hidden>
+    <div class="nds-card-header">
+        <div class="nds-card-featured-icon">
+            <span class="nds-featured-icon nds-circle">
+                <i class="hgi hgi-stroke hgi-star" aria-hidden="true"></i>
+            </span>
+        </div>
+        <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close" data-i18n-aria-label="modal.close">
+            <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="nds-card-content">
+        <div class="nds-card-text">
+            <span class="nds-card-title" id="journey-survey-title">Rate your journey</span>
+            <p class="nds-card-description">You completed this journey. Tell us about your experience, to help us improve it.</p>
+        </div>
+        <form class="nds-form nds-flex nds-col" data-ajax>
+            {%- for question in page.survey %}
+            <fieldset class="nds-form-group" data-required aria-describedby="survey-hint-{{ forloop.index }}">
+                <legend>
+                    <span class="nds-label">{{ question }}</span>
+                </legend>
+                <span class="nds-note" id="survey-hint-{{ forloop.index }}">From (1) poor to (5) excellent</span>
+                <div class="nds-rating nds-md nds-brand" data-rating="0">
+                    <button class="nds-rating-star" type="button" aria-label="1 star"></button>
+                    <button class="nds-rating-star" type="button" aria-label="2 stars"></button>
+                    <button class="nds-rating-star" type="button" aria-label="3 stars"></button>
+                    <button class="nds-rating-star" type="button" aria-label="4 stars"></button>
+                    <button class="nds-rating-star" type="button" aria-label="5 stars"></button>
+                </div>
+                <div class="nds-form-footer" data-feedback-target hidden></div>
+            </fieldset>
+            {%- endfor %}
+            <div class="nds-form-container nds-textarea">
+                <div class="nds-form-header">
+                    <label for="journey-survey-comment"><span class="nds-label">Comments</span></label>
+                </div>
+                <div class="nds-form-control">
+                    <textarea id="journey-survey-comment" name="comment" class="nds-textarea" placeholder="Enter your message..." rows="3"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="nds-btn nds-primary nds-lg">
+                <span class="nds-label">Submit</span>
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
-// Demo only. In production, the server renders one state: drop [data-journey-done] parts for a journey in progress,
+// Send the scores, then thank the user.
+document.getElementById('journey-survey').addEventListener('nds:formValid', () => {
+    NDS.Modal.close();
+    NDS.Alert.create({ variant: 'success', title: 'Thank you', description: 'Your rating was sent.', display: 'toast', duration: 4000 });
+});
+</script>
+
+<script>
+// Demo only. In production, the server renders one state: drop [data-journey-done] parts and the survey for a journey in progress,
 // and [data-journey-progress] parts for a completed one, and write the stepper's data-current (one past the last step when completed).
-// Here the hero's #journey-done-toggle switch flips between the states.
+// Here the hero's #journey-done-toggle switch flips between the states, and switching it on opens the survey.
+// The hub's Completed cards link with ?status=completed, which starts the page completed.
 document.addEventListener('DOMContentLoaded', () => {
     const toggle = document.getElementById('journey-done-toggle');
     const stepper = document.getElementById('journey-stepper');
@@ -287,6 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('[data-journey-progress]').forEach(el => { el.hidden = done; });
         document.querySelectorAll('[data-journey-done]').forEach(el => { el.hidden = !done; });
         stepper.dataset.current = done ? total + 1 : 1;
+        if (done) NDS.Modal.open('journey-survey');
     });
+    if (new URLSearchParams(location.search).get('status') === 'completed') {
+        toggle.checked = true;
+        toggle.dispatchEvent(new Event('change'));
+    }
 });
 </script>
