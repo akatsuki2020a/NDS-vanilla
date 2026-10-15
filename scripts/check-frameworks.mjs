@@ -10,6 +10,8 @@
 //             doc's advice (put the changing class on a wrapper) keeps it.
 //   SWAPS     htmx and Turbo swaps with destroy() before and mount() after: the new view works
 //             and nothing from the old one is left.
+//   MORPH     idiomorph and Turbo 8 frame morphs keep the nodes: the same two calls work, and
+//             refresh() alone leaves a second instance on a node (the doc's warning).
 //   HYDRATION React and Vue hydrate server HTML from their own server renderers: NDS starting at
 //             load breaks it; data-nds-auto-init="false" + initialize() after hydration does not.
 //   INFO rows print a class-binding result the doc does not claim yet; they never fail the run.
@@ -496,6 +498,96 @@ for (const [v, zone] of ANGULAR) {
         ok(`${A}: the changing class on a wrapper keeps it (the doc's advice works)`, cls.after[2] === true);
     }
     ok(`${A}: no page errors`, errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+// ---- MORPH (idiomorph, Turbo 8) ---------------------------------------------
+// A morph keeps the nodes and writes the server's markup over them. Turbo 8 and htmx's morph
+// swap both run idiomorph. Each run first proves the node survived, or it tests a plain swap.
+const IDIOMORPH = 'idiomorph@0.7.3/dist/idiomorph.min.js';
+{
+    const { page, errors } = await open([IDIOMORPH]);
+    await page.evaluate((html) => {
+        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+        host.id = 'm-host';
+        host.innerHTML = html;
+        NDS.Init.mount(host);
+        host.querySelector('#m-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
+        window.__morph = () => {
+            window.__destroy(host);
+            Idiomorph.morph(host, html, { morphStyle: 'innerHTML' });
+            return NDS.Init.mount(host);
+        };
+    }, VIEW('m'));
+    const kept = await page.evaluate(() => {
+        const before = document.getElementById('m-dm');
+        window.__morph();
+        return document.getElementById('m-dm') === before;
+    });
+    ok('idiomorph: setup, the morph kept the node', kept);
+    const swap = () => page.evaluate(() => window.__morph());
+    await lifecycle(page, 'idiomorph', 'm', swap, async () => {});
+    ok('idiomorph: no page errors', errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+{
+    // The doc's warning: a morph with refresh() alone, no destroy().
+    const { page } = await open([IDIOMORPH]);
+    const r = await page.evaluate(async (html) => {
+        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+        host.innerHTML = html;
+        await NDS.Init.mount(host);
+        const dm = host.querySelector('#w-dm');
+        const first = dm.ndsDropmenu;
+        Idiomorph.morph(host, html, { morphStyle: 'innerHTML' });
+        NDS.Init.refresh(host);
+        await window.__wait(300);
+        const picks = [];
+        dm.addEventListener('nds:dropmenu:selected', (e) => picks.push(e.detail.value));
+        dm.querySelector('.nds-dropmenu-trigger').click();
+        await window.__wait();
+        const menu = NDS.Dropmenu.menuOf(dm);
+        const opened = !!menu && !menu.hidden;
+        menu?.querySelector('[data-value="AE"]')?.click();
+        await window.__wait();
+        return { sameNode: host.querySelector('#w-dm') === dm, newInstance: dm.ndsDropmenu !== first, opened, picks };
+    }, VIEW('w'));
+    ok('idiomorph, refresh() alone: a second instance on the same node fires each pick twice (the doc\'s warning holds)',
+        r.sameNode && r.newInstance && r.picks.length === 2, JSON.stringify(r));
+    await page.close();
+}
+
+{
+    // Turbo 8: a frame with refresh="morph" morphs when it reloads.
+    const { page, errors } = await open(['@hotwired/turbo@8.0.12/dist/turbo.es2017-umd.js']);
+    await page.route('**/nds-turbo8*', (route) => route.fulfill({ contentType: 'text/html',
+        body: `<html><body><turbo-frame id="t8-frame" refresh="morph">${VIEW('t8')}</turbo-frame></body></html>` }));
+    await page.evaluate((url) => {
+        const frame = document.createElement('turbo-frame');
+        frame.id = 't8-frame';
+        frame.setAttribute('refresh', 'morph');
+        document.querySelector('.nds-section-body').appendChild(frame);
+        window.__released_count = 0;
+        document.addEventListener('turbo:before-frame-render', (e) => { window.__released_count += window.__destroy(e.target); });
+        document.addEventListener('turbo:frame-render', (e) => NDS.Init.mount(e.target));
+        document.addEventListener('nds:dropmenu:selected', (e) => { if (e.target.id === 't8-dm') window.__picks.push(e.detail.value); });
+        window.__swap = () => new Promise((r) => {
+            frame.addEventListener('turbo:frame-load', () => r(), { once: true });
+            if (frame.src) frame.reload(); else frame.src = url;
+        });
+    }, `${BASE}/nds-turbo8`);
+    const swap = () => page.evaluate(() => window.__swap());
+    await swap();
+    const kept = await page.evaluate(async () => {
+        const before = document.getElementById('t8-dm');
+        await window.__swap();
+        return document.getElementById('t8-dm') === before;
+    });
+    ok('Turbo 8: setup, the frame reload morphed (kept the node)', kept);
+    await lifecycle(page, 'Turbo 8 morph', 't8', swap, async () => {});
+    ok("Turbo 8 morph: each frame render released the old view's instances", (await page.evaluate(() => window.__released_count)) > 0);
+    ok('Turbo 8 morph: no page errors', errors.length === 0, errors.join(' | '));
     await page.close();
 }
 
