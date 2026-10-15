@@ -399,6 +399,159 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
     await page.close();
 }
 
+// ---- NATIVE SELECT --------------------------------------------------------
+{
+    const page = await open('components/forms.html');
+    for (const lib of ['react@18.3.1/umd/react.production.min.js', 'react-dom@18.3.1/umd/react-dom.production.min.js',
+        'vue@3.4.38/dist/vue.global.prod.js']) await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
+    const res = await page.evaluate(async () => {
+        const body = document.querySelector('.nds-section-body');
+        const opts = ['a', 'b'];
+        const rHost = body.appendChild(document.createElement('div'));
+        let rState = '';
+        function Sel() {
+            const [v, setV] = React.useState('a');
+            rState = v;
+            return React.createElement('select', { id: 'r-sel', value: v, onChange: (e) => setV(e.target.value) },
+                opts.map((o) => React.createElement('option', { key: o, value: o }, o)));
+        }
+        ReactDOM.createRoot(rHost).render(React.createElement(Sel));
+        const vHost = body.appendChild(document.createElement('div'));
+        const vm = Vue.createApp({ data: () => ({ v: 'a' }),
+            template: '<select id="v-sel" v-model="v"><option value="a">a</option><option value="b">b</option></select>' }).mount(vHost);
+        const tick = () => new Promise((r) => setTimeout(r, 50));
+        await tick();
+        NDS.setValue(document.getElementById('r-sel'), 'b');
+        NDS.setValue(document.getElementById('v-sel'), 'b');
+        await tick();
+        return { react: rState, vue: vm.v };
+    });
+    ok('Native select: NDS.setValue reaches React state', res.react === 'b', JSON.stringify(res));
+    ok('Native select: NDS.setValue reaches Vue v-model', res.vue === 'b');
+    await page.close();
+}
+
+// ---- VUE, MORE FIELDS -----------------------------------------------------
+{
+    const page = await open('components/forms.html');
+    await page.addScriptTag({ url: 'https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js' });
+    await page.evaluate(() => {
+        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+        const digit = '<div class="nds-form-container nds-otp-container"><div class="nds-form-control">'
+            + '<input type="text" inputmode="numeric" maxlength="1" pattern="[0-9]" aria-label="d"></div></div>';
+        const step = (dir, side) => '<div class="nds-form-action nds-' + side + '"><button class="nds-btn nds-subtle nds-number-'
+            + dir + ' nds-icon-only" type="button" aria-label="' + dir + '"><i class="nds-icon nds-hgi-plus-sign"></i></button></div>';
+        window.__vue2 = Vue.createApp({
+            data: () => ({ lo: '20000', hi: '60000', otp: '', service: '', country: '', iban: '', qty: '1' }),
+            template: ''
+                + '<div class="nds-form-container nds-slider-container nds-slider-range" id="v2-slider"><div class="nds-form-control">'
+                + '<output class="nds-slider-value nds-slider-value-min">20000</output><div class="nds-slider-track">'
+                + '<input type="range" class="nds-slider nds-slider-min" min="0" max="100000" step="1000" aria-label="lo" v-model="lo">'
+                + '<input type="range" class="nds-slider nds-slider-max" min="0" max="100000" step="1000" aria-label="hi" v-model="hi">'
+                + '</div><output class="nds-slider-value nds-slider-value-max">60000</output></div></div>'
+                + '<fieldset class="nds-form-group nds-otp-group" id="v2-otp"><legend><span class="nds-label">Code</span></legend>'
+                + '<div class="nds-otp">' + digit + digit + digit + digit + '</div>'
+                + '<input type="hidden" class="nds-otp-value" v-model="otp"></fieldset>'
+                + '<div class="nds-form-container" id="v2-ac" data-url="../docs-assets/data/services-autocomplete.json" data-name="Title" data-fetch="once">'
+                + '<div class="nds-form-control"><input type="text" id="v2-service" class="nds-input" autocomplete="on" v-model="service"></div></div>'
+                + '<div class="nds-dropmenu" id="v2-dm" data-select-name="country">'
+                + '<input type="hidden" data-nds-select-value v-model="country">'
+                + '<button type="button" class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger"><span class="nds-label">Choose</span></button>'
+                + '<div class="nds-dropmenu-menu" hidden><div class="nds-dropmenu-scroll">'
+                + '<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="SA"><span class="nds-label">Saudi Arabia</span></button>'
+                + '<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="AE"><span class="nds-label">UAE</span></button>'
+                + '</div></div></div>'
+                + '<div class="nds-form-container"><div class="nds-form-control"><input type="text" id="v2-iban" class="nds-input nds-iban" v-model="iban"></div></div>'
+                + '<div class="nds-form-container"><div class="nds-form-control">' + step('decrement', 'prefix')
+                + '<input type="text" id="v2-qty" class="nds-input nds-center" inputmode="numeric" min="1" max="20" step="1" v-model="qty">'
+                + step('increment', 'suffix') + '</div></div>'
+        }).mount(host);
+        NDS.Init.mount(host);
+    });
+    const vm = (k) => page.evaluate((k) => window.__vue2[k], k);
+
+    // Slider: the dragged low thumb passes the high one and is clamped back to it.
+    await page.evaluate(async () => {
+        const lo = document.querySelector('#v2-slider .nds-slider-min');
+        lo.focus();
+        NDS.setValue(lo, '80000', { change: false });
+        await new Promise((r) => setTimeout(r, 50));
+    });
+    let r = { shown: await page.evaluate(() => document.querySelector('#v2-slider .nds-slider-min').value), model: await vm('lo') };
+    ok('Vue: a clamped slider thumb reaches v-model', r.shown === '60000' && r.model === '60000', JSON.stringify(r));
+
+    await page.evaluate(() => NDS.OTP.setValue(document.getElementById('v2-otp'), '1234'));
+    ok('Vue: OTP reaches v-model on .nds-otp-value', (await vm('otp')) === '1234', await vm('otp'));
+
+    await page.locator('#v2-dm .nds-dropmenu-trigger').scrollIntoViewIfNeeded();
+    await page.locator('#v2-dm .nds-dropmenu-trigger').click();
+    await page.locator('.nds-dropmenu-item[data-value="AE"]').click();
+    ok('Vue: a Dropmenu pick reaches v-model on its hidden field', (await vm('country')) === 'AE', await vm('country'));
+
+    await page.locator('#v2-iban').scrollIntoViewIfNeeded();
+    await page.locator('#v2-iban').focus();
+    await page.keyboard.insertText('sa03 80');
+    ok('Vue: a pasted IBAN reaches v-model cleaned', (await vm('iban')) === 'SA0380', await vm('iban'));
+
+    await page.locator('#v2-qty').fill('70');
+    await page.locator('#v2-qty').blur();
+    ok('Vue: a number clamped on blur reaches v-model', (await vm('qty')) === '20', await vm('qty'));
+
+    const svc = page.locator('#v2-service');
+    await svc.scrollIntoViewIfNeeded();
+    await svc.click();
+    await svc.pressSequentially('ser', { delay: 30 });
+    const item = page.locator('.nds-autocomplete-menu .nds-dropmenu-item, .nds-autocomplete-menu li').first();
+    const shown = await item.waitFor({ state: 'visible', timeout: 8000 }).then(() => true, () => false);
+    if (shown) await item.click();
+    r = { shown: await svc.inputValue(), model: await vm('service') };
+    ok('Vue: an Autocomplete pick reaches v-model', shown && r.model === r.shown && r.shown.length > 3, JSON.stringify(r));
+    await page.close();
+}
+
+// ---- EDITOR TYPING --------------------------------------------------------
+{
+    const page = await open('components/editor.html');
+    await page.waitForFunction(() => document.querySelector('.nds-editor')?.ndsEditor, null, { timeout: 15000 });
+    await page.evaluate(() => {
+        const src = document.querySelector('.nds-editor').ndsEditor.source;
+        src.__bound = null;
+        for (const t of ['input', 'change']) src.addEventListener(t, () => { src.__bound = src.value; });
+    });
+    const surface = page.locator('.nds-editor [contenteditable]').first();
+    await surface.scrollIntoViewIfNeeded();
+    await surface.click();
+    await page.keyboard.press('End');
+    await page.keyboard.type(' typed', { delay: 20 });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+        const src = document.querySelector('.nds-editor').ndsEditor.source;
+        return { bound: src.__bound, value: src.value };
+    });
+    ok('Editor: typing reaches a binding on its textarea', r.bound !== null && r.bound === r.value && r.value.includes('typed'),
+        JSON.stringify({ ...r, value: r.value.slice(-60), bound: r.bound && r.bound.slice(-60) }));
+    await page.close();
+}
+
+// ---- USER FEEDBACK RESET --------------------------------------------------
+{
+    const page = await open('components/forms.html');
+    const uf = page.locator('.nds-user-feedback').first();
+    await uf.scrollIntoViewIfNeeded();
+    await uf.locator('[data-answer="Yes"]').click();
+    const box = uf.locator('.nds-user-feedback-details input[type="checkbox"]:visible').first();
+    await box.check();
+    await page.evaluate(() => { window.__log.length = 0; });
+    await uf.locator('.nds-user-feedback-close').click();
+    const r = await page.evaluate(() => ({
+        ticked: document.querySelectorAll('.nds-user-feedback input[type="checkbox"]:checked').length,
+        log: window.__log.filter((l) => /check/.test(l))
+    }));
+    ok('User Feedback: close unticks each box with input + change', r.ticked === 0
+        && r.log.includes('input:nds-check') && r.log.includes('change:nds-check'), JSON.stringify(r));
+    await page.close();
+}
+
 // ---- DROPMENU SELECT ------------------------------------------------------
 {
     const page = await open('components/dropmenu.html');
