@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 11:49 PM"
+last_edit: "16/10/2026 - 12:06 AM"
 ---
 
 <section id="init-overview" class="nds-content-section nds-doc-overview">
@@ -149,7 +149,7 @@ A library that replaces or morphs server HTML in place, such as Turbo, htmx or L
 ### Hydration
 {: .nds-block-title}
 
-A framework that hydrates server HTML, such as Next.js or Nuxt, needs that HTML unchanged until hydration ends. NDS changes some of it when it starts: the clock writes the time, and Main Navigation sets classes. React then throws the server HTML away and renders again, and the page stays hidden. Write `data-nds-auto-init="false"` on `<html>`, and call `NDS.Init.initialize()` once hydration ends: in React from an effect in the root component, in Vue from `onMounted` in the root component. That call must run after `nds-main.min.js`. Put the NDS script tag above your app's script and check the built HTML, because a bundler can move its own script above it.
+A framework that hydrates server HTML, such as Next.js or Nuxt, needs that HTML unchanged until hydration ends. NDS changes some of it when it starts: the clock writes the time, and Main Navigation sets classes. React then throws the server HTML away and renders it again, without what NDS wrote. When React renders `<html>` too, as the Next.js App Router does, it also removes `data-nds-loaded`, the mark that shows the page, so the page stays hidden. Write `data-nds-auto-init="false"` on `<html>`, and call `NDS.Init.initialize()` once hydration ends: in React from an effect in the root component, in Vue from `onMounted` in the root component. That call must run after `nds-main.min.js`. Put the NDS script tag above your app's script and check the built HTML, because a bundler can move its own script above it.
 
 When the framework renders `<html>` too, as the Next.js App Router does, put `suppressHydrationWarning` on `<html>`. The head inline script writes the saved theme to its `data-theme` before hydration, and React reports that in development. React 18 also reports the `data-nds-defer` that the script removes from each preload link, so put the same prop on those links.
 

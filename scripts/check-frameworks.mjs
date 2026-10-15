@@ -16,6 +16,7 @@
 //             React a sibling added before a bare FAB crashes the app, a wrapper of its own does not.
 //   HYDRATION React and Vue hydrate server HTML from their own server renderers: NDS starting at
 //             load breaks it; data-nds-auto-init="false" + initialize() after hydration does not.
+//             React rendering <html> too (Next.js) drops the reveal stamp, so the page stays hidden.
 //   INFO rows print a class-binding result the doc does not claim yet; they never fail the run.
 //
 //   node scripts/check-frameworks.mjs [baseUrl]
@@ -365,6 +366,70 @@ for (const v of REACT) {
     ok(`${R} hydration: NDS works after the late initialize()`, manual.works);
 }
 
+// React rendering <html> too (the Next.js App Router shape) hydrates the whole document, with
+// the built page's gate, inline script, CSS and main bundle. The clock NDS fills makes the
+// mismatch: React renders again and drops data-nds-loaded with <html>'s other attributes.
+const built = await (await fetch(`${BASE}/components/forms.html`)).text();
+const HEAD = {
+    gate: built.match(/<head[\s\S]*?<style>([\s\S]*?)<\/style>/)[1],
+    inline: built.match(/<head[\s\S]*?<script>([\s\S]*?)<\/script>/)[1],
+    css: [...built.matchAll(/<link rel="preload" href="([^"]+)"[^>]*data-nds-defer(?:="(\w+)")?/g)].map((m) => [m[1], m[2] || '']),
+    js: built.match(/<script defer src="([^"]*nds-main\.min\.js[^"]*)"/)[1],
+};
+const DOC_APP = `(h, P, o) => {
+    const view = h('main', null, h('div', { className: 'nds-content-layout' },
+        h('p', { id: 'probe' }, 'hello'), h('span', { id: 'nds-real-time-clock' })));
+    const doc = () => h('html', { lang: 'en', dir: 'ltr', 'data-nds-auto-init': o.manual ? 'false' : undefined },
+        h('head', null, h('meta', { charSet: 'UTF-8' }), h('title', null, 't'),
+            h('style', { dangerouslySetInnerHTML: { __html: P.gate } }),
+            ...P.css.map(([href, d]) => h('link', { key: href, rel: 'preload', href, as: 'style', 'data-nds-defer': d })),
+            h('script', { dangerouslySetInnerHTML: { __html: P.inline } })),
+        h('body', null, h('div', { id: 'app' }, view), h('script', { defer: true, src: P.js })));
+    return function App() { React.useEffect(() => { if (o.manual) NDS.Init.initialize(); }, []); return o.whole ? doc() : view; };
+}`;
+// No script tags: an extra node in <head> is a mismatch of its own.
+const IMPORT_REACT = `async (v) => { window.React = await import('https://esm.sh/react@' + v + '?dev');
+    window.ReactDOM = await import('https://esm.sh/react-dom@' + v + '/client?dev'); }`;
+
+async function docRun(v, o) {
+    const page = await browser.newPage();
+    const args = [v, DOC_APP, HEAD, o, IMPORT_REACT];
+    let html = await page.evaluate(async ([v, APP, P, o, imp]) => {
+        await eval(imp)(v);
+        const S = await import(`https://esm.sh/react-dom@${v}/server?dev`);
+        return S.renderToString(React.createElement(eval(APP)(React.createElement, P, o)));
+    }, args);
+    html = o.whole ? '<!DOCTYPE html>' + html
+        : `<!DOCTYPE html><html lang="en" dir="ltr"><head><meta charset="UTF-8"><style>${HEAD.gate}</style>`
+          + HEAD.css.map(([h, d]) => `<link rel="preload" href="${h}" as="style" data-nds-defer="${d}">`).join('')
+          + `<script>${HEAD.inline}</script></head><body><div id="root">${html}</div><script defer src="${HEAD.js}"></script></body></html>`;
+    await page.route(`${BASE}/__hydrate.html`, (r) => r.fulfill({ contentType: 'text/html', body: html }));
+    await page.goto(`${BASE}/__hydrate.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.NDS?.Init, null, { timeout: 15000 });
+    await page.waitForTimeout(500);
+    const r = await page.evaluate(async ([v, APP, P, o, imp]) => {
+        await eval(imp)(v);
+        const probe = document.getElementById('probe');
+        ReactDOM.hydrateRoot(o.whole ? document : document.getElementById('root'),
+            React.createElement(eval(APP)(React.createElement, P, o)), { onRecoverableError: () => {} });
+        await new Promise((r) => setTimeout(r, 1500));
+        return { shown: getComputedStyle(document.querySelector('.nds-content-layout')).visibility === 'visible',
+            renderedAgain: document.getElementById('probe') !== probe };
+    }, args);
+    await page.close();
+    return r;
+}
+
+for (const v of REACT) {
+    const R = 'React ' + major(v);
+    let r = await docRun(v, { whole: true });
+    ok(`${R} renders <html>: NDS starting at load leaves the page hidden (the doc's warning holds)`, r.renderedAgain && !r.shown, JSON.stringify(r));
+    r = await docRun(v, { whole: true, manual: true });
+    ok(`${R} renders <html>: with data-nds-auto-init="false" the page shows after hydration`, !r.renderedAgain && r.shown, JSON.stringify(r));
+    r = await docRun(v, { whole: false });
+    ok(`${R} renders a div: NDS starting at load makes it render again, and the page still shows`, r.renderedAgain && r.shown, JSON.stringify(r));
+}
+
 for (const v of VUE) {
     // Vue: renderToString from vue/server-renderer, createSSRApp().mount() to hydrate. Dev builds log mismatches.
     const V = 'Vue ' + v.split('.').slice(0, 2).join('.');
@@ -597,12 +662,14 @@ const IDIOMORPH = 'idiomorph@0.7.3/dist/idiomorph.min.js';
 // NDS moves some nodes the app wrote: a FAB into its dock, an open menu to <body>, a pinned
 // nav item into the minimal bar. The framework still holds each one and may insert a
 // sibling before it or remove it. NDS.relocate keeps the node's old spot answering for it.
-const FAB = '<button type="button" class="nds-btn nds-fab nds-primary nds-circle nds-icon-only" id="f-fab" data-fab-pos="right" aria-label="Open" hidden><i class="nds-icon nds-hgi-menu-01" aria-hidden="true"></i></button>';
+// Left: the page's accessibility FAB holds the right dock, so only a dock of its own can empty.
+const FAB = '<button type="button" class="nds-btn nds-fab nds-primary nds-circle nds-icon-only" id="f-fab" data-fab-pos="left" aria-label="Open" hidden><i class="nds-icon nds-hgi-menu-01" aria-hidden="true"></i></button>';
 async function fabRun(page, name, errors) {
     const state = () => page.evaluate(() => {
         const fab = document.getElementById('f-fab');
         return { docked: !!fab?.parentElement?.classList.contains('nds-fab-dock'), shown: !!fab && !fab.hidden,
-            extra: !!document.getElementById('f-extra'), inPage: !!fab };
+            extra: !!document.getElementById('f-extra'), inPage: !!fab,
+            emptyDock: [...document.querySelectorAll('.nds-fab-dock')].some((d) => !d.children.length) };
     });
     const set = (k, v) => page.evaluate(([k, v]) => { window.__fabSet(k, v); return window.__wait(400); }, [k, v]);
     await page.evaluate(() => window.__wait(600));
@@ -623,7 +690,7 @@ async function fabRun(page, name, errors) {
     before = errors.length;
     await set('fab', false);
     s = await state();
-    ok(`${name} FAB: the view removing the docked FAB takes it off the page`, !s.inPage && errors.length === before,
+    ok(`${name} FAB: the view removing the docked FAB takes it and its empty dock off the page`, !s.inPage && !s.emptyDock && errors.length === before,
         JSON.stringify({ ...s, thrown: errors.slice(before) }));
 }
 
