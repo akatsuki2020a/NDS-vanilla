@@ -1010,7 +1010,7 @@
             var radioGroupContainer = changedRadio.closest('.nds-form-group');
             if (!radioGroupContainer) return;
 
-            var radioGroup = radioGroupContainer.querySelectorAll('input[type="radio"][name="' + changedRadio.name + '"]');
+            var radioGroup = radioGroupContainer.querySelectorAll('input[type="radio"][name="' + CSS.escape(changedRadio.name) + '"]');
             radioGroup.forEach(function(radio) {
                 if (radio !== changedRadio) {
                     var radioFormControl = radio.closest('.nds-form-control');
@@ -1405,7 +1405,7 @@
                     }
                 });
 
-                var label = formControl.querySelector('label[for="' + switchInput.id + '"]');
+                var label = formControl.querySelector('label[for="' + CSS.escape(switchInput.id) + '"]');
                 if (label && !switchElement.contains(label)) {
                     label.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -1662,8 +1662,8 @@
                 var itemText = item.textContent.trim().replace(/\s+/g, ' ');
 
                 var targetInput = document.getElementById(targetId) ||
-                    document.querySelector('[name="' + targetId + '"]') ||
-                    document.querySelector('[data-name="' + targetId + '"]');
+                    document.querySelector('[name="' + CSS.escape(targetId) + '"]') ||
+                    document.querySelector('[data-name="' + CSS.escape(targetId) + '"]');
 
                 if (targetInput && itemText) {
                     targetInput.value = itemText;

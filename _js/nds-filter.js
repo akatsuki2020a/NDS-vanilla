@@ -464,7 +464,8 @@
             // Dispatch preventable event
             const submitEvent = new CustomEvent('nds:filterFormSubmit', {
                 detail: {
-                    criteria: this.criteria,
+                    // A copy, as nds:filter:change hands out: a handler must not edit live filter state.
+                    criteria: this.getCriteria(),
                     form: this.submissionForm
                 },
                 cancelable: true,
@@ -509,7 +510,7 @@
             // Dispatch preventable AJAX submit event
             const ajaxEvent = new CustomEvent('nds:filterFormAjax', {
                 detail: {
-                    criteria: this.criteria,
+                    criteria: this.getCriteria(),
                     form: this.submissionForm,
                     hiddenInputsContainer: this.hiddenInputsContainer,
                     // Chips, badge and URL are already committed above, so a

@@ -259,17 +259,21 @@
         if (track(el, seconds !== null ? parseInt(seconds, 10) : el.getAttribute('data-countdown'))) el.setAttribute(WIRED_ATTR, '');
     }
 
+    // A page with no countdown at load never runs init(), so set() binds this too.
+    function bindVisibility() {
+        if (visibilityBound) return;
+        visibilityBound = true;
+        document.addEventListener('visibilitychange', () => { document.hidden ? stopTimer() : tick(); });
+    }
+
     function init() {
         document.querySelectorAll(SEL).forEach(wire);
-        if (!visibilityBound) {
-            visibilityBound = true;
-            document.addEventListener('visibilitychange', () => { document.hidden ? stopTimer() : tick(); });
-        }
+        bindVisibility();
     }
 
     NDS.Countdown = {
         init,
         reinit: init,
-        set(el, target) { if (el) track(el, target); }
+        set(el, target) { if (el) { bindVisibility(); track(el, target); } }
     };
 })();

@@ -191,6 +191,7 @@
         }
 
         destroy() {
+            this._destroyed = true;
             this.abortController.abort();
             if (this.renderAbortController) { this.renderAbortController.abort(); this.renderAbortController = null; }
             if (this._offResize) { this._offResize(); this._offResize = null; }
@@ -424,6 +425,8 @@
         // ── Render orchestrator ──────────────────────────────────
 
         render() {
+            // A deferred or throttled frame can land after destroy(); it must not draw into the emptied element.
+            if (this._destroyed) return;
             if (!this.el.clientWidth) {
                 this._deferCount = (this._deferCount || 0) + 1;
                 if (this._deferCount < 10) {
