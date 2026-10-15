@@ -597,6 +597,8 @@
                 this.trigger.addEventListener('keydown', (e) => this.handleTriggerKeydown(e), { signal });
 
                 this.menu.addEventListener('keydown', (e) => {
+                    // A nested sub-menu's keys bubble here; that menu handles its own.
+                    if (e.target.closest('.nds-dropmenu-menu') !== this.menu) return;
                     // For inputs: only handle Tab and Alt+Arrow
                     if (this.isInputElement(e.target)) {
                         const isNavKey = e.key === 'Tab'

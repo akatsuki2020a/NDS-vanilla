@@ -98,7 +98,7 @@
     }
 
     /* Suppress init-time transition for auto-expanded sections. JS stamps
-       data-nds-accordion-initialized two rAFs after setupInitialState so
+       data-nds-accordion-initialized one rAF after setupInitialState so
        the browser paints state="open" with this rule still applying — no
        0fr → 1fr animation on load. User-driven toggles after init animate
        normally via the .nds-accordion-collapse transition above. */

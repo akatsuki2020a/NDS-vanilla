@@ -1700,7 +1700,22 @@
     function initDynamicContentObserver() {
         if (NDS.Forms._dynamicObserver) return;
 
-        NDS.onDOMAdd('.nds-form-control', function() { initFormControlClasses(); });
+        // Sweep only the outermost form, group or field around each added control:
+        // a page-wide sweep cost 63 ms per added row at 1,000 fields (6.6x CPU).
+        NDS.onDOMAdd('.nds-form-control', function(controls) {
+            var roots = new Set();
+            controls.forEach(function(control) {
+                var root = control;
+                for (var n = control; n; n = n.parentElement) {
+                    if (n.matches('.nds-form, .nds-form-group, .nds-form-container')) root = n;
+                }
+                roots.add(root);
+            });
+            roots.forEach(function(root) {
+                for (var other of roots) if (other !== root && other.contains(root)) return;
+                initializeContainer(root);
+            });
+        });
         NDS.onDOMAdd('.nds-auto-fill', function() { initInputAutoFill(); });
         NDS.Forms._dynamicObserver = true;
     }
@@ -1711,13 +1726,17 @@
     // Elements the init tail (autofocus, FOUC reveal) has already handled.
     var _initTail = new WeakSet();
 
+    // The container itself counts: the sweep can start on a form, a group or a field.
+    function selfAndInner(container, sel) {
+        var inner = Array.from(container.querySelectorAll(sel));
+        return container.matches && container.matches(sel) ? [container].concat(inner) : inner;
+    }
+
     function initializeContainer(container) {
         if (!container) return;
 
         // Initialize form controls
-        var formControls = container.classList && container.classList.contains('nds-form-control')
-            ? [container]
-            : Array.from(container.querySelectorAll('.nds-form-control'));
+        var formControls = selfAndInner(container, '.nds-form-control');
 
         formControls.forEach(function(formControl) {
             if (formControl.closest('code')) return;
@@ -1737,25 +1756,21 @@
         });
 
         // Initialize auto-fill containers
-        var autoFillContainers = container.classList && container.classList.contains('nds-auto-fill')
-            ? [container]
-            : Array.from(container.querySelectorAll('.nds-auto-fill'));
+        var autoFillContainers = selfAndInner(container, '.nds-auto-fill');
 
         autoFillContainers.forEach(initAutoFillContainer);
 
         // Initialize form groups
-        container.querySelectorAll('.nds-form-group').forEach(function(group) {
+        selfAndInner(container, '.nds-form-group').forEach(function(group) {
             initGroupState(group);
             if (group.querySelector('input[type="checkbox"]')) initCheckboxGroupValidation(group);
             if (group.querySelector('input[type="radio"]')) initRadioGroupValidation(group);
         });
 
-        container.querySelectorAll('.nds-multiselect').forEach(initMultiselectValidation);
+        selfAndInner(container, '.nds-multiselect').forEach(initMultiselectValidation);
 
         // Initialize forms
-        var forms = container.classList && container.classList.contains('nds-form')
-            ? [container]
-            : Array.from(container.querySelectorAll('.nds-form'));
+        var forms = selfAndInner(container, '.nds-form');
 
         forms.forEach(initForm);
 
@@ -1774,7 +1789,7 @@
 
         // Reveal [hidden] FOUC-guard wrappers now their controls carry state — on a
         // wrapper's first sweep only, so one hidden later by the page or a component stays hidden.
-        container.querySelectorAll('.nds-form-group, .nds-form-container, .nds-form-action').forEach(function(el) {
+        selfAndInner(container, '.nds-form-group, .nds-form-container, .nds-form-action').forEach(function(el) {
             if (_initTail.has(el)) return;
             _initTail.add(el);
             el.removeAttribute('hidden');

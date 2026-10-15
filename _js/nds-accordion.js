@@ -77,8 +77,8 @@
         setupInitialState() {
             // The init-time 0fr → 1fr transition is suppressed by a CSS
             // gate keyed on `:not([data-nds-accordion-initialized])` on the
-            // container. initializeAccordions defers the marker stamp by two
-            // rAFs so the browser commits the state change in a paint where
+            // container. activate() defers the marker stamp by one
+            // rAF so the browser commits the state change in a paint where
             // the rule still applies; the marker then lands in the next
             // paint and future user clicks animate normally.
             this.buttons.forEach((button, index) => this._syncItem(button, this.collapses[index]));

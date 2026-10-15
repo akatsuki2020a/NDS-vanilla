@@ -82,7 +82,8 @@ const inModal = async (page, { rows = 8, row = 3 } = {}) => page.evaluate(async 
     const input = field.querySelector('.nds-date-input');
     input.scrollIntoView({ block: 'center' });
     await new Promise((r) => setTimeout(r, 100));
-    input.click();
+    // A field with a calendar button opens from the button only.
+    (field.querySelector('.date-picker-toggle') || input).click();
     await new Promise((r) => setTimeout(r, 400));
 
     const control = field.querySelector('.nds-form-control');
@@ -165,7 +166,8 @@ const plain = await page.evaluate(async () => {
     const input = field.querySelector('.nds-date-input');
     input.scrollIntoView({ block: 'center' });
     await new Promise((r) => setTimeout(r, 100));
-    input.click();
+    // A field with a calendar button opens from the button only.
+    (field.querySelector('.date-picker-toggle') || input).click();
     await new Promise((r) => setTimeout(r, 400));
     const control = field.querySelector('.nds-form-control');
     const menu = NDS.Dropmenu.menuOf(control);
@@ -187,9 +189,14 @@ await tablePage.setViewportSize({ width: 1280, height: 900 });
 await tablePage.goto(`${BASE}/components/dropmenu.html`, { waitUntil: 'networkidle' });
 await tablePage.waitForFunction('window.NDS?.Dropmenu');
 const table = await tablePage.evaluate(async () => {
-    const pair = [...document.querySelectorAll('.nds-table-wrapper')]
-        .map((c) => [c, c.querySelector('.nds-dropmenu')]).find(([, w]) => w);
-    if (!pair) return { skip: true };
+    // The page shows no table: put the row-menu canon in a table wrapper.
+    const canon = document.getElementById('dm-row')?.textContent;
+    if (!canon) return { skip: true };
+    const host = document.createElement('div');
+    host.innerHTML = `<div class="nds-table-wrapper"><table class="nds-table"><tbody><tr><td>20481</td><td>${canon}</td></tr></tbody></table></div>`;
+    document.querySelector('main, .nds-content, body').append(host);
+    await NDS.Init.mount(host);
+    const pair = [host.querySelector('.nds-table-wrapper'), host.querySelector('.nds-dropmenu')];
     const [container, wrapper] = pair;
     const cs = getComputedStyle(container);
     wrapper.removeAttribute('data-portal');           // prove the auto path, not the attribute
@@ -225,7 +232,7 @@ const optOut = await page.evaluate(async () => {
     control.setAttribute('data-no-portal', '');
     control.setAttribute('data-portal', '');          // opt-out must still win
     const input = control.querySelector('.nds-date-input');
-    input.click();
+    (control.querySelector('.date-picker-toggle') || input).click();
     await new Promise((r) => setTimeout(r, 400));
     const menu = NDS.Dropmenu.menuOf(control);
     return { stayed: menu.parentElement === control, portaled: control.ndsDropmenu.shouldPortal };
@@ -241,11 +248,12 @@ const forced = await page.evaluate(async () => {
     const control = field.querySelector('.nds-form-control');
     control.setAttribute('data-portal', '');
     const input = field.querySelector('.nds-date-input');
-    input.click();
+    // A field with a calendar button opens from the button only.
+    (field.querySelector('.date-picker-toggle') || input).click();
     await new Promise((r) => setTimeout(r, 400));
     const menu = NDS.Dropmenu.menuOf(control);
     const portaled = menu.parentElement === document.body;
-    input.click();
+    (field.querySelector('.date-picker-toggle') || input).click();
     await new Promise((r) => setTimeout(r, 500));
     return { portaled, wrapperKeptAttr: control.hasAttribute('data-portal') };
 });
