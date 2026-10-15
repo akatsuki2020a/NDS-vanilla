@@ -21,6 +21,8 @@
 //
 //   node scripts/check-frameworks.mjs [baseUrl]
 //   NO_DESTROY=1 skips every destroy() call: the TEARDOWN rows must fail, which proves they can.
+//   NO_CALLS=1 skips every view's mount() and destroy() too: NDS's own view watcher must pass the
+//   same rows (morph rows keep their calls, as a morph adds and removes no node).
 // Defaults to the dev server. Start it with `bundle exec jekyll serve` if down.
 import { launch } from './lib/browser.mjs';
 import { REACT, VUE, SVELTE, ANGULAR, major, loadReact, loadVue, SVELTE_APP, ANGULAR_LOAD } from './lib/frameworks.mjs';
@@ -66,16 +68,18 @@ async function open(libs) {
     await page.addStyleTag({ content: '#nds-cookies-panel { display: none !important; }' });
     if (typeof libs === 'function') await libs(page);
     else for (const lib of libs) await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
-    await page.evaluate(([VIEW, SELECT, noDestroy]) => {
+    await page.evaluate(([VIEW, SELECT, noDestroy, noCalls]) => {
         window.__VIEW = new Function('p', 'return `' + VIEW + '`');
         window.__SELECT = SELECT;
         window.__picks = [];
-        window.__destroy = (el) => (window.__noDestroy ? 0 : NDS.Init.destroy(el));
+        window.__destroy = (el) => (window.__noDestroy || window.__noCalls ? 0 : NDS.Init.destroy(el));
+        window.__mount = (el) => (window.__noCalls ? 0 : NDS.Init.mount(el));
         window.__wait = (ms = 350) => new Promise((r) => setTimeout(r, ms));
         window.__strays = () => document.body.querySelectorAll(':scope > .nds-dropmenu-menu').length;
         window.__released = () => !NDS.Modal.isOpen() && !document.body.style.top && !NDS.Backdrop.isActive();
         window.__noDestroy = noDestroy;
-    }, [VIEW('${p}'), SELECT, !!process.env.NO_DESTROY]);
+        window.__noCalls = noCalls;
+    }, [VIEW('${p}'), SELECT, !!process.env.NO_DESTROY, !!process.env.NO_CALLS]);
     return { page, errors };
 }
 
@@ -147,7 +151,7 @@ for (const v of REACT) {
             const ref = React.useRef(null);
             React.useEffect(() => {
                 const el = ref.current; // the ref is empty by cleanup time
-                window.NDS?.Init.mount(el);
+                window.__mount(el);
                 const dm = el.querySelector('#r-dm');
                 const on = (e) => window.__picks.push(e.detail.value);
                 dm.addEventListener('nds:dropmenu:selected', on);
@@ -159,7 +163,7 @@ for (const v of REACT) {
             const [on, setOn] = React.useState(false);
             window.__setReactClass = setOn;
             const ref = React.useRef(null);
-            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.NDS?.Init.destroy(el); }, []);
+            React.useEffect(() => { const el = ref.current; window.__mount(el); return () => window.__destroy(el); }, []);
             return h('div', { ref },
                 h('div', { className: 'nds-form-container nds-select', id: 'rc-bound' },
                     h('div', { className: 'nds-form-control' + (on ? ' is-on' : '') }, ...tree(window.__SELECT))),
@@ -201,7 +205,7 @@ for (const v of VUE) {
             template: '<div ref="root">' + window.__VIEW('v') + '</div>',
             mounted() {
                 this.$refs.root.querySelector('#v-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
-                window.NDS?.Init.mount(this.$refs.root);
+                window.__mount(this.$refs.root);
             },
             beforeUnmount() { window.__destroy(this.$refs.root); }
         };
@@ -213,7 +217,7 @@ for (const v of VUE) {
                 + '<div class="nds-form-container nds-select" id="vc-bound"><div class="nds-form-control" :class="{ \'is-on\': on }">' + window.__SELECT + '</div></div>'
                 + '<div class="nds-form-container nds-select" :class="{ \'is-on\': on }" id="vc-wrapper"><div class="nds-form-control">' + window.__SELECT + '</div></div>'
                 + '</div>',
-            mounted() { window.NDS?.Init.mount(this.$refs.cls); }
+            mounted() { window.__mount(this.$refs.cls); }
         }).mount(host);
     });
     const flip = (show) => page.evaluate((show) => { window.__vueApp.show = show; return window.__wait(100); }, show);
@@ -242,8 +246,8 @@ for (const v of VUE) {
         const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
         host.id = 'x-target';
         window.__released_count = 0;
-        document.addEventListener('htmx:beforeSwap', (e) => { window.__released_count += window.__destroy(e.detail.target); });
-        document.addEventListener('htmx:afterSwap', (e) => NDS.Init.mount(e.detail.target));
+        document.addEventListener('htmx:beforeSwap', (e) => { window.__old = e.detail.target.querySelector('.nds-dropmenu'); window.__released_count += window.__destroy(e.detail.target); });
+        document.addEventListener('htmx:afterSwap', (e) => window.__mount(e.detail.target));
         // Delegated, since each swap brings a new dropmenu element.
         document.addEventListener('nds:dropmenu:selected', (e) => { if (e.target.id === 'x-dm') window.__picks.push(e.detail.value); });
         window.__swap = () => new Promise((r) => {
@@ -255,7 +259,7 @@ for (const v of VUE) {
     await swap();
     // A swap is the unmount and the remount in one step, so both drive it.
     await lifecycle(page, 'htmx', 'x', swap, async () => {});
-    ok('htmx: each swap released the old view\'s instances', (await page.evaluate(() => window.__released_count)) > 0);
+    ok('htmx: each swap released the old view\'s instances', await page.evaluate(() => window.__released_count > 0 || (window.__noCalls && !!window.__old && !window.__old.ndsDropmenu)));
     ok('htmx: no page errors', errors.length === 0, errors.join(' | '));
     await page.close();
 }
@@ -270,8 +274,8 @@ for (const v of VUE) {
         frame.id = 't-frame';
         document.querySelector('.nds-section-body').appendChild(frame);
         window.__released_count = 0;
-        document.addEventListener('turbo:before-frame-render', (e) => { window.__released_count += window.__destroy(e.target); });
-        document.addEventListener('turbo:frame-render', (e) => NDS.Init.mount(e.target));
+        document.addEventListener('turbo:before-frame-render', (e) => { window.__old = e.target.querySelector('.nds-dropmenu'); window.__released_count += window.__destroy(e.target); });
+        document.addEventListener('turbo:frame-render', (e) => window.__mount(e.target));
         document.addEventListener('nds:dropmenu:selected', (e) => { if (e.target.id === 't-dm') window.__picks.push(e.detail.value); });
         let n = 0;
         window.__swap = () => new Promise((r) => {
@@ -282,7 +286,7 @@ for (const v of VUE) {
     const swap = () => page.evaluate(() => window.__swap());
     await swap();
     await lifecycle(page, 'Turbo', 't', swap, async () => {});
-    ok("Turbo: each frame render released the old view's instances", (await page.evaluate(() => window.__released_count)) > 0);
+    ok("Turbo: each frame render released the old view's instances", await page.evaluate(() => window.__released_count > 0 || (window.__noCalls && !!window.__old && !window.__old.ndsDropmenu)));
     ok('Turbo: no page errors', errors.length === 0, errors.join(' | '));
     await page.close();
 }
@@ -490,10 +494,10 @@ for (const v of SVELTE) {
   export let on = false;
   function nds(node) {
     node.querySelector('#s-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
-    window.NDS?.Init.mount(node);
+    window.__mount(node);
     return { destroy() { window.__destroy(node); } };
   }
-  function ndsPlain(node) { window.NDS?.Init.mount(node); return { destroy() { window.__destroy(node); } }; }
+  function ndsPlain(node) { window.__mount(node); return { destroy() { window.__destroy(node); } }; }
 <\/script>
 {#if show}<div use:nds>${VIEW}</div>{/if}
 <div use:ndsPlain>
@@ -539,7 +543,7 @@ for (const [v, zone] of ANGULAR) {
             ngAfterViewInit() {
                 const root = this.el.nativeElement;
                 root.querySelector('#a-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
-                window.NDS?.Init.mount(root);
+                window.__mount(root);
             }
             ngOnDestroy() { window.__destroy(this.el.nativeElement); }
         }
@@ -549,7 +553,7 @@ for (const [v, zone] of ANGULAR) {
             show = true;
             on = false;
             el = inject(ElementRef);
-            ngAfterViewInit() { window.NDS?.Init.mount(this.el.nativeElement.querySelector('#a-cls')); }
+            ngAfterViewInit() { window.__mount(this.el.nativeElement.querySelector('#a-cls')); }
         }
         Component({ selector: 'nds-app', standalone: true, imports: [ViewCmp], template: '@if (show) { <nds-view /> }'
             + '<div id="a-cls">'
@@ -598,7 +602,7 @@ const IDIOMORPH = 'idiomorph@0.7.3/dist/idiomorph.min.js';
         NDS.Init.mount(host);
         host.querySelector('#m-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
         window.__morph = () => {
-            window.__destroy(host);
+            if (!window.__noDestroy) NDS.Init.destroy(host);   // kept under NO_CALLS: a morph removes no node
             Idiomorph.morph(host, html, { morphStyle: 'innerHTML' });
             return NDS.Init.mount(host);
         };
@@ -653,7 +657,8 @@ const IDIOMORPH = 'idiomorph@0.7.3/dist/idiomorph.min.js';
         frame.setAttribute('refresh', 'morph');
         document.querySelector('.nds-section-body').appendChild(frame);
         window.__released_count = 0;
-        document.addEventListener('turbo:before-frame-render', (e) => { window.__released_count += window.__destroy(e.target); });
+        // Kept under NO_CALLS: a morph removes no node, so the view watcher never sees it.
+        document.addEventListener('turbo:before-frame-render', (e) => { window.__released_count += window.__noDestroy ? 0 : NDS.Init.destroy(e.target); });
         document.addEventListener('turbo:frame-render', (e) => NDS.Init.mount(e.target));
         document.addEventListener('nds:dropmenu:selected', (e) => { if (e.target.id === 't8-dm') window.__picks.push(e.detail.value); });
         window.__swap = () => new Promise((r) => {
@@ -670,7 +675,7 @@ const IDIOMORPH = 'idiomorph@0.7.3/dist/idiomorph.min.js';
     });
     ok('Turbo 8: setup, the frame reload morphed (kept the node)', kept);
     await lifecycle(page, 'Turbo 8 morph', 't8', swap, async () => {});
-    ok("Turbo 8 morph: each frame render released the old view's instances", (await page.evaluate(() => window.__released_count)) > 0);
+    ok("Turbo 8 morph: each frame render released the old view's instances", await page.evaluate(() => window.__released_count > 0 || (window.__noCalls && !!window.__old && !window.__old.ndsDropmenu)));
     ok('Turbo 8 morph: no page errors', errors.length === 0, errors.join(' | '));
     await page.close();
 }
@@ -718,7 +723,7 @@ for (const v of REACT) {
         const tree = eval(TO_TREE)(h, { class: 'className', for: 'htmlFor', readonly: 'readOnly' });
         function View({ extra, fab }) {
             const ref = React.useRef(null);
-            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
+            React.useEffect(() => { const el = ref.current; window.__mount(el); return () => window.__destroy(el); }, []);
             return h('div', { ref }, extra ? h('span', { id: 'f-extra' }, 'extra') : null, ...(fab ? tree(FAB) : []));
         }
         function App() {
@@ -739,7 +744,7 @@ for (const v of REACT) {
         const View = {
             props: ['extra', 'fab'],
             template: '<div ref="root"><span v-if="extra" id="f-extra">extra</span><template v-if="fab">' + FAB + '</template></div>',
-            mounted() { window.NDS?.Init.mount(this.$refs.root); },
+            mounted() { window.__mount(this.$refs.root); },
             beforeUnmount() { window.__destroy(this.$refs.root); }
         };
         const vm = Vue.createApp({ components: { View }, data: () => ({ show: true, extra: false, fab: true }),
@@ -758,7 +763,7 @@ for (const v of REACT) {
   export let show = true;
   export let extra = false;
   export let fab = true;
-  function nds(node) { window.NDS?.Init.mount(node); return { destroy() { window.__destroy(node); } }; }
+  function nds(node) { window.__mount(node); return { destroy() { window.__destroy(node); } }; }
 <\/script>
 {#if show}<div use:nds>{#if extra}<span id="f-extra">extra</span>{/if}{#if fab}${FAB}{/if}</div>{/if}`;
         const App = await eval(SVELTE_APP)(src, v);
@@ -779,7 +784,7 @@ for (const v of REACT) {
             extra = false;
             fab = true;
             el = inject(ElementRef);
-            ngAfterViewInit() { window.NDS?.Init.mount(this.el.nativeElement); }
+            ngAfterViewInit() { window.__mount(this.el.nativeElement); }
             ngOnDestroy() { window.__destroy(this.el.nativeElement); }
         }
         Component({ selector: 'nds-fab-view', standalone: true, inputs: ['extra', 'fab'],
@@ -804,7 +809,7 @@ for (const v of REACT) {
         const h = React.createElement;
         function View({ before, keep }) {
             const ref = React.useRef(null);
-            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
+            React.useEffect(() => { const el = ref.current; window.__mount(el); return () => window.__destroy(el); }, []);
             return h('div', { ref },
                 h('div', { id: 'mv-box' }, before ? h('i', { id: 'mv-before' }) : null, keep ? h('span', { id: 'mv-node' }, 'node') : null),
                 h('div', { className: 'nds-dropmenu', id: 'mv-dm', 'data-portal': '' },
@@ -924,7 +929,7 @@ for (const v of REACT) {
         const h = React.createElement;
         function View({ before, fab }) {
             const ref = React.useRef(null);
-            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
+            React.useEffect(() => { const el = ref.current; window.__mount(el); return () => window.__destroy(el); }, []);
             return h('div', { ref }, before ? h('i', { id: 'a11y-before' }) : null, fab ? h('button', {
                 className: 'nds-btn nds-primary nds-circle nds-icon-only nds-fab nds-accessibility-toggle', type: 'button', id: 'r-a11y',
                 'aria-label': 'Accessibility settings', 'aria-expanded': 'false', 'data-fab-pos': 'auto', 'data-panel-side': 'end',

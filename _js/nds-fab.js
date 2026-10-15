@@ -240,6 +240,11 @@
             destroy(fab);
             fab.remove();   // destroy() put it back at its marker
         })));
+        // A removed view takes its FAB along, though the FAB sits in the dock outside it.
+        runtimeOffs.push(NDS.onDOMRemove(null, () => document.querySelectorAll('.nds-fab[' + INIT_ATTR + ']').forEach(fab => {
+            const home = NDS.homeOf(fab);
+            if (home && !home.isConnected) destroy(fab);
+        })));
 
         // Re-route on a runtime direction flip: a logical start/end (or auto)
         // FAB resolves to the opposite edge, so it must move to stay with its

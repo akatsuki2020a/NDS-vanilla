@@ -800,7 +800,7 @@
     })();
 
     // ── DOM Mutation Bus ─────────────────────────────────────────────
-    // Single MutationObserver on body, selector-based dispatch.
+    // Single MutationObserver on <html>, selector-based dispatch (a null selector gets the raw roots).
     // Each subscriber returns an unsubscribe handle so per-instance callers
     // (component constructors / init() methods called per re-init) can
     // release their subscription without the pool's array growing
@@ -821,6 +821,8 @@
 
         function dispatch(nodes, subs) {
             each(subs, sub => {
+                // No selector: the raw added / removed roots, for a caller that filters them itself.
+                if (!sub.sel) { sub.fn(nodes.slice()); return; }
                 // A Set: a parent and its child added in one batch both reach the child.
                 const hits = new Set();
                 for (let i = 0; i < nodes.length; i++) {
@@ -841,7 +843,7 @@
         }
 
         function start() {
-            if (started || !document.body) return;
+            if (started) return;
             started = true;
             new MutationObserver(mutations => {
                 const added = [], removed = [], parents = new Set();
@@ -870,7 +872,7 @@
                 if (realRemoved.length) dispatch(realRemoved, removeSubs);
                 if (realAdded.length) dispatch(realAdded, addSubs);
                 if (parents.size && childrenSubs.length) dispatchParents(parents, childrenSubs);
-            }).observe(document.body, { childList: true, subtree: true });
+            }).observe(document.documentElement, { childList: true, subtree: true });   // <html>: a whole-body swap (Turbo Drive) stays in view
         }
 
         return { addSubs, removeSubs, childrenSubs, start };
