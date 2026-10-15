@@ -68,7 +68,7 @@
     background-repeat: no-repeat;
     background-position: bottom left;
     background-size: cover;
-    background-color: var(--background-stripe);   // DGA: neutral-50 (light) / neutral-850 (dark)
+    background-color: var(--background-stripe);   // neutral-50 (light) / neutral-850 (dark, NDS-added step)
   }
 
   &::after {

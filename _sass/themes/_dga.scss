@@ -64,8 +64,6 @@
     --colors-tertiary-800: #3d1d5e;
     --colors-tertiary-900: #281047;
     --colors-tertiary-950: #16072e;
-    --colors-tertiary-alpha-10: #80519f19;
-    --colors-tertiary-alpha-20: #80519f33;
     
     // ── Brand slot: neutral ──
     --colors-neutral-25: #fcfcfd;
@@ -77,9 +75,9 @@
     --colors-neutral-500: #6c727e;
     --colors-neutral-600: #4d5761;
     --colors-neutral-700: #384250;
-    --colors-neutral-750: #2b3643;
+    --colors-neutral-750: #2b3643; // NDS-added, not DGA: dark-mode contrast step (midpoint 700/800)
     --colors-neutral-800: #1f2a37;
-    --colors-neutral-850: #18212f;
+    --colors-neutral-850: #18212f; // NDS-added, not DGA: dark-mode contrast step (midpoint 800/900)
     --colors-neutral-900: #111927;
     --colors-neutral-950: #0c111b;
 

@@ -131,7 +131,7 @@ not the obvious thing. Match the density of the file you are in; do not out-comm
 ## Design Tokens (CRITICAL)
 
 **Four tiers, one file each — light block first, `:root[data-theme~="dark"]` block at the bottom of the same file** (+ knobs):
-1. **Palette** `--colors-*` (`themes/_dga.scss` — vendored, DO NOT MODIFY; runtime ramps in `themes/_register.scss`): raw values, zero meaning.
+1. **Palette** `--colors-*` (`themes/_dga.scss` — vendored, DO NOT MODIFY, except the NDS-added `neutral-750`/`-850` dark steps a re-vendor must keep; runtime ramps in `themes/_register.scss`): raw values, zero meaning.
 2. **Primitives** (`tokens/_primitives.scss`): dimension vocabulary — direct values on the size names (`--spacing-md`, `--radius-sm`, typo ladders, app-shell dims, transition + font knobs). No numeric rungs, no color.
 3. **Semantic** (`tokens/_semantic.scss`, critical bundle): ONE name per meaning, system-wide (e.g. `--background-overlay`, `--text-oncolor-primary`). Its dark block matches `themes/_register.scss` on specificity, so crit `@use`s it AFTER register — keep that order.
 4. **Component** (`tokens/_components.scss`, main bundle): `--{component}-{property}-{variant}-{state}` — a per-component dial.

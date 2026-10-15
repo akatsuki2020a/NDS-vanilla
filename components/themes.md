@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.1.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "15/10/2026 - 08:45 AM"
 ---
 
 <section id="themes-overview" class="nds-content-section nds-doc-overview">
@@ -207,10 +207,8 @@ A stylesheet theme is your own CSS file that sets the color tokens at `:root`. L
   --colors-tertiary-800: #3d1d5e;
   --colors-tertiary-900: #281047;
   --colors-tertiary-950: #16072e;
-  --colors-tertiary-alpha-10: #80519f19;
-  --colors-tertiary-alpha-20: #80519f33;
 
-  /* Neutral ramp: it also has 750 and 850 steps */
+  /* Neutral ramp: NDS adds 750 and 850 for dark mode; the DGA palette does not have them */
   --colors-neutral-25:  #fcfcfd;
   --colors-neutral-50:  #f9fafb;
   --colors-neutral-100: #f3f4f6;

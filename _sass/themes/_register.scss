@@ -60,7 +60,6 @@ $sel: ':root[data-palette]';
     @include oklch.brand-ramp('secondary', '--brand-secondary');
     @include oklch.brand-ramp('tertiary',  '--brand-tertiary', 500);
     @include oklch.brand-alpha('primary',  '--brand-primary');
-    @include oklch.brand-alpha('tertiary', '--brand-tertiary');
     @include oklch.neutral-ramp('--brand-primary');   // honours --neutral-tint
 
     --background-primary-light:  var(--background-primary-faint); // derived ramps run hot; collapse light to the faint step

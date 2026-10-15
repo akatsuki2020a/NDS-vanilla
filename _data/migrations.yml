@@ -164,6 +164,8 @@
 - { kind: property, name: --hero-mask-angle, scope: .nds-hero, status: renamed, use: --hero-image-fade-angle, since: "2.0.0", fix: "Use --hero-image-fade-angle." }
 - { kind: property, name: --hero-mask-from, scope: .nds-hero, status: renamed, use: --hero-image-fade-from, since: "2.0.0", fix: "Use --hero-image-fade-from." }
 - { kind: property, name: --hero-mask-to, scope: .nds-hero, status: renamed, use: --hero-image-fade-to, since: "2.0.0", fix: "Use --hero-image-fade-to." }
+- { kind: property, name: --colors-tertiary-alpha-10, status: removed, since: "2.0.0", fix: "Use color-mix(in srgb, var(--colors-tertiary-500) 10%, transparent)." }
+- { kind: property, name: --colors-tertiary-alpha-20, status: removed, since: "2.0.0", fix: "Use color-mix(in srgb, var(--colors-tertiary-500) 20%, transparent)." }
 - { kind: property, name: --main-gap, scope: .nds-content, status: renamed, use: --content-gap, since: "2.0.0", fix: "Use --content-gap." }
 - { kind: property, name: --main-padding-block, scope: .nds-content, status: renamed, use: --content-padding-block, since: "2.0.0", fix: "Use --content-padding-block." }
 - { kind: property, name: --main-padding-inline, scope: .nds-content, status: renamed, use: --content-padding-inline, since: "2.0.0", fix: "Use --content-padding-inline." }
@@ -379,8 +381,8 @@
 - { kind: property, name: --accordion-md-header-padding, scope: .nds-accordion, status: renamed, use: --accordion-header-padding, since: "1.1.0", fix: "Use --accordion-header-padding. Set it on the size modifier.", inert: true }
 - { kind: property, name: --accordion-sm-header-gap, scope: .nds-accordion, status: removed, since: "1.1.0", fix: "Header gap is no longer a knob.", inert: true }
 - { kind: property, name: --accordion-sm-header-padding, scope: .nds-accordion, status: renamed, use: --accordion-header-padding, since: "1.1.0", fix: "Use --accordion-header-padding. Set it on the size modifier.", inert: true }
-- { kind: property, name: --alpha-lavender-10, status: renamed, use: --colors-tertiary-alpha-10, since: "1.1.0", fix: "Use --colors-tertiary-alpha-10." }
-- { kind: property, name: --alpha-lavender-20, status: renamed, use: --colors-tertiary-alpha-20, since: "1.1.0", fix: "Use --colors-tertiary-alpha-20." }
+- { kind: property, name: --alpha-lavender-10, status: removed, since: "1.1.0", fix: "Use color-mix(in srgb, var(--colors-tertiary-500) 10%, transparent)." }
+- { kind: property, name: --alpha-lavender-20, status: removed, since: "1.1.0", fix: "Use color-mix(in srgb, var(--colors-tertiary-500) 20%, transparent)." }
 - { kind: property, name: --autocomplete-active, status: renamed, use: --autocomplete-highlight, since: "1.1.0", fix: "Use --autocomplete-highlight.", inert: true }
 - { kind: property, name: --background-error-50, status: renamed, use: --background-error-light, since: "1.1.0", fix: "Use --background-error-light." }
 - { kind: property, name: --background-info-50, status: renamed, use: --background-info-light, since: "1.1.0", fix: "Use --background-info-light." }
