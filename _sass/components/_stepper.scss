@@ -496,13 +496,19 @@
     }
 }
 
-// Icons: the icon in each circle replaces the number. After the state rules, so it beats the completed check.
-.nds-stepper.nds-icons .nds-stepper-circle {
-    &::before {
+// Icons: the icon in each circle replaces the number; a completed step shows the check instead.
+// The icon reads a knob from the circle: a [data-state] rule may not tail on a shared icon class.
+.nds-stepper.nds-icons {
+    .nds-stepper-step:not([data-state~="completed"]) .nds-stepper-circle::before {
         display: none;
     }
 
-    > :is(.hgi, .nds-icon) {
+    .nds-stepper-step[data-state~="completed"] .nds-stepper-circle {
+        --_stepper-icon-display: none;
+    }
+
+    .nds-stepper-circle > :is(.hgi, .nds-icon) {
+        display: var(--_stepper-icon-display, inline-block);
         font-size: calc(var(--stepper-size) / 2);
         line-height: 1;
     }

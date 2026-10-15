@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 10:58 AM"
+last_edit: "15/10/2026 - 11:14 AM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -123,7 +123,7 @@ Pick another component when:
 <i class="hgi hgi-stroke hgi-file-search" aria-hidden="true"></i>
 </script>
 <script type="text/html" id="stepper-icon-4" data-canon>
-<i class="hgi hgi-stroke hgi-sent" aria-hidden="true"></i>
+<i class="hgi hgi-stroke hgi-cursor-magic-selection-02" aria-hidden="true"></i>
 </script>
 <script type="text/html" id="stepper-action" data-canon>
 <div class="nds-stepper-action">
@@ -170,7 +170,7 @@ Most classes go on `.nds-stepper`. The Card rows put `nds-card` on the stepper, 
 | Size | LG | `.nds-lg` | `.nds-stepper:not(.nds-dot)` | 40px circles, or an 80px ring |
 | Size | XL | `.nds-xl` | `.nds-stepper:not(.nds-dot)` | 48px circles, or a 120px ring with a larger title |
 | Dot | Dot (hint: Small dots with no numbers. Not radial) | `.nds-dot` | `.nds-stepper:not(.nds-lg):not(.nds-xl):not(.nds-radial):not(.nds-icons)` | 16px dots with no numbers. For a timeline, or a short flow where the order is plain. A dot has one size, and the radial layout shows no dots |
-| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | `.nds-icons` | `.nds-stepper:not(.nds-dot)` | An icon in each circle in place of the number. A completed step keeps its icon in the filled circle. Not with Dot. See Icons under Behavior |
+| Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | `.nds-icons` | `.nds-stepper:not(.nds-dot)` | An icon in each circle in place of the number. A completed step shows a check mark in place of its icon. Not with Dot. See Icons under Behavior |
 | Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-1` | `.nds-stepper-step:nth-child(2) .nds-stepper-circle` | The icon of step 1 |
 | Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-2` | `.nds-stepper-step:nth-child(3) .nds-stepper-circle` | The icon of step 2 |
 | Icons | Icons (hint: An icon in each circle in place of the number. Not with Dot) | canon `#stepper-icon-3` | `.nds-stepper-step:nth-child(4) .nds-stepper-circle` | The icon of step 3 |
@@ -251,7 +251,7 @@ A stepper with On color gives its cards the translucent white surface and the on
 ### Icons
 {: .nds-block-title}
 
-`nds-icons` on the stepper shows the icon in each circle in place of the number. Write one icon in every `.nds-stepper-circle`. The step states still color the circle, and a completed step keeps its icon in the filled circle. `data-step-text` shows nothing with icons.
+`nds-icons` on the stepper shows the icon in each circle in place of the number. Write one icon in every `.nds-stepper-circle`. The step states still color the circle, and a completed step shows a check mark in place of its icon. `data-step-text` shows nothing with icons.
 
 ### Static
 {: .nds-block-title}
