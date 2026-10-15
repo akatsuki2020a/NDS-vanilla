@@ -19,7 +19,8 @@ const ok = (name, pass, detail = '') => {
 
 async function open(path) {
     const page = await browser.newPage();
-    page.on('pageerror', (e) => ok(`no page error on ${path}`, false, e.message));
+    // WebKit's harmless ResizeObserver loop notice: TODO.md, Watch.
+    page.on('pageerror', (e) => { if (!/ResizeObserver loop/.test(e.message)) ok(`no page error on ${path}`, false, e.message); });
     await page.goto(`${BASE}/${path}`, { waitUntil: 'load' });
     await page.waitForFunction(() => window.NDS?.setValue && document.documentElement.hasAttribute('data-nds-ready')
         || window.NDS?.setValue, null, { timeout: 15000 });
@@ -174,9 +175,9 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
 // ---- DATE PICKER ----------------------------------------------------------
 {
     const page = await open('components/date-picker.html');
-    const res = await page.evaluate(() => {
+    const res = await page.evaluate(async () => {
         const input = document.querySelector('.nds-date-input');
-        const dp = NDS.DatePicker.create(input);
+        const dp = await NDS.DatePicker.create(input); // a stub's promise while the bundle loads
         window.__log.length = 0;
         dp.selectDate(new Date(2026, 9, 15));
         dp.updateInput();
@@ -549,6 +550,107 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
     }));
     ok('User Feedback: close unticks each box with input + change', r.ticked === 0
         && r.log.includes('input:nds-check') && r.log.includes('change:nds-check'), JSON.stringify(r));
+    await page.close();
+}
+
+// ---- SVELTE AND ANGULAR ---------------------------------------------------
+// The fields of the Vue section, bound with bind:value / bind:checked and [(ngModel)].
+// `bind(key, checkbox)` returns the framework's binding attribute.
+const FIELDS = (p, bind) => {
+    const opt = (v) => '<button type="button" class="nds-btn nds-subtle nds-select-option" data-value="' + v
+        + '"><span class="nds-option-text"><span class="nds-label">' + v + '</span></span></button>';
+    const act = (cls, icon) => '<div class="nds-form-action"><button type="button" class="nds-btn nds-subtle nds-md ' + cls
+        + ' nds-icon-only" aria-label="o"><i class="nds-icon ' + icon + '"></i></button></div>';
+    return ''
+        + `<div class="nds-form-container nds-select" id="${p}-cs"><div class="nds-form-control">`
+        + '<input type="text" class="nds-input nds-select-input" readonly>'
+        + `<input type="hidden" class="nds-select-value" ${bind('region')}>`
+        + '<div class="nds-select-dropdown" hidden><div class="nds-select-options">' + opt('riyadh') + opt('makkah') + '</div></div></div></div>'
+        + `<div class="nds-form-container nds-date-picker" id="${p}-dp"><div class="nds-form-control">` + act('date-picker-toggle', 'nds-hgi-calendar-03')
+        + `<input type="text" class="nds-input nds-date-input" ${bind('date')}></div></div>`
+        + `<div class="nds-form-container nds-time-picker" id="${p}-tp"><div class="nds-form-control">` + act('time-picker-toggle', 'nds-hgi-clock-01')
+        + `<input type="text" class="nds-input nds-time-input"><input type="hidden" class="nds-time-value" ${bind('time')}></div></div>`
+        + `<div class="nds-form-container"><div class="nds-form-control"><input type="tel" id="${p}-phone" class="nds-input nds-phone" ${bind('phone')}></div></div>`
+        + `<div class="nds-form-container"><div class="nds-form-control"><input type="text" id="${p}-text" class="nds-input" ${bind('text')}></div></div>`
+        + `<input type="checkbox" id="${p}-agree" ${bind('agree', true)}>`
+        + `<div class="nds-form-container" id="${p}-sw-box"><div class="nds-form-control"><div class="nds-switch">`
+        + `<input type="checkbox" id="${p}-sw" class="nds-switch-input" ${bind('sw', true)}>`
+        + '<div class="nds-switch-track"><div class="nds-switch-thumb"></div></div></div></div></div>';
+};
+// Every write the Vue section makes, against the fields with prefix p.
+async function driveFields(page, p) {
+    await page.evaluate(async (p) => {
+        await NDS.CustomSelect.setValue(document.getElementById(p + '-cs'), 'makkah');
+        const dp = await NDS.DatePicker.create(document.querySelector('#' + p + '-dp .nds-date-input'));
+        dp.selectDate(new Date(2026, 9, 15));
+        dp.updateInput();
+        await NDS.TimePicker.setValue(document.getElementById(p + '-tp'), '09:30');
+        NDS.setValue(document.getElementById(p + '-text'), 'hello');
+        NDS.setValue(document.getElementById(p + '-agree'), true);
+        document.querySelector('#' + p + '-sw-box .nds-switch-track').click();
+    }, p);
+    const phone = page.locator(`#${p}-phone`);
+    await phone.scrollIntoViewIfNeeded();
+    await phone.focus();
+    await page.keyboard.insertText('0501');
+    await page.waitForTimeout(100);
+}
+function checkModel(name, m) {
+    ok(`${name}: Custom Select reaches the model on .nds-select-value`, m.region === 'makkah', JSON.stringify(m));
+    ok(`${name}: a Date Picker pick reaches the model`, m.date === '15/10/2026');
+    ok(`${name}: Time Picker reaches the model on .nds-time-value`, m.time === '09:30');
+    ok(`${name}: NDS.setValue reaches the model on a text field`, m.text === 'hello');
+    ok(`${name}: NDS.setValue reaches the model on a checkbox`, m.agree === true);
+    ok(`${name}: a Switch track click reaches the model, flipped once`, m.sw === true);
+    ok(`${name}: a pasted phone number reaches the model stripped`, m.phone === '501');
+}
+const KEYS = ['region', 'date', 'time', 'phone', 'text', 'agree', 'sw'];
+
+{
+    const page = await open('components/forms.html');
+    await page.evaluate(async (markup) => {
+        const props = 'export let region = "", date = "", time = "", phone = "", text = "", agree = false, sw = false;';
+        const src = `<script>${props}
+  function nds(node) { window.NDS?.Init.mount(node); return { destroy() { NDS.Init.destroy(node); } }; }
+<\/script><div use:nds>${markup}</div>`;
+        const { compile } = await import('https://esm.sh/svelte@4.2.19/compiler');
+        const { js } = compile(src, { sveltePath: 'https://esm.sh/svelte@4.2.19', accessors: true });
+        const App = (await import(URL.createObjectURL(new Blob([js.code], { type: 'text/javascript' })))).default;
+        window.__sv = new App({ target: document.querySelector('.nds-section-body').appendChild(document.createElement('div')) });
+    }, FIELDS('s', (k, box) => (box ? `bind:checked={${k}}` : `bind:value={${k}}`)));
+    await driveFields(page, 's');
+    checkModel('Svelte', await page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, window.__sv[k]])), KEYS));
+    await page.close();
+}
+
+{
+    const page = await open('components/forms.html');
+    const booted = await page.evaluate(async (markup) => {
+        const v = '17.3.12';
+        // jsDelivr's +esm links every package to one @angular/core (see check-frameworks.mjs).
+        const pkg = (name) => import(`https://cdn.jsdelivr.net/npm/${name}/+esm`);
+        await pkg('zone.js@0.14.10');
+        await pkg(`@angular/compiler@${v}`);
+        const { Component, ElementRef, inject } = await pkg(`@angular/core@${v}`);
+        const { FormsModule } = await pkg(`@angular/forms@${v}`);
+        const { bootstrapApplication } = await pkg(`@angular/platform-browser@${v}`);
+        class AppCmp {
+            region = ''; date = ''; time = ''; phone = ''; text = ''; agree = false; sw = false;
+            el = inject(ElementRef);
+            ngAfterViewInit() { window.NDS?.Init.mount(this.el.nativeElement); }
+        }
+        Component({ selector: 'nds-model-app', standalone: true, imports: [FormsModule], template: markup })(AppCmp);
+        document.querySelector('.nds-section-body').appendChild(document.createElement('nds-model-app'));
+        const app = await bootstrapApplication(AppCmp);
+        window.__ngModel = app.components[0].instance;
+        return true;
+    }, FIELDS('a', (k) => `[(ngModel)]="${k}"`)).catch((e) => e.message);
+    ok('Angular (ngModel): bootstrapped', booted === true, booted === true ? '' : String(booted));
+    if (booted === true) {
+        await page.waitForTimeout(300);
+        await driveFields(page, 'a');
+        checkModel('Angular', await page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, window.__ngModel[k]])), KEYS));
+    }
     await page.close();
 }
 

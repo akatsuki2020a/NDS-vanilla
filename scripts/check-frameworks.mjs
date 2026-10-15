@@ -54,7 +54,8 @@ const SELECT = '<input type="text" class="nds-input nds-select-input" readonly>'
 async function open(libs) {
     const page = await browser.newPage();
     const errors = [];
-    page.on('pageerror', (e) => errors.push(e.message));
+    // WebKit's harmless ResizeObserver loop notice: TODO.md, Watch.
+    page.on('pageerror', (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); });
     await page.goto(`${BASE}/components/forms.html`, { waitUntil: 'load' });
     await page.waitForFunction(() => window.NDS?.Init?.mount, null, { timeout: 15000 });
     for (const lib of libs) await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
