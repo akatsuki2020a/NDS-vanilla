@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 11:40 AM"
+last_edit: "16/10/2026 - 12:29 AM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -131,6 +131,27 @@ Pick another component when:
   </div>
 </div>
 </script>
+<script type="text/html" id="card-progress" data-canon>
+<div class="nds-card nds-stroke">
+  <div class="nds-card-header">
+    <div class="nds-progress-circle nds-md" data-num="2" data-max="5" role="progressbar" aria-labelledby="card-progress-title">
+      <svg width="120" height="120" viewBox="0 0 24 24">
+        <circle class="nds-progress-bg" cx="12" cy="12" r="10" fill="none" stroke-width="2" />
+        <circle class="nds-progress-track" cx="12" cy="12" r="10" fill="none" stroke-width="2"
+          stroke-dasharray="62.83" stroke-dashoffset="62.83" stroke-linecap="round" />
+      </svg>
+      <div class="nds-progress-info">
+        <span class="nds-progress-steps"></span>
+      </div>
+    </div>
+  </div>
+  <div class="nds-card-content">
+    <div class="nds-card-text">
+      <span class="nds-card-title" id="card-progress-title">Journey in progress</span>
+    </div>
+  </div>
+</div>
+</script>
 <script type="text/html" id="card-tags" data-canon>
 <div class="nds-card-tags">
   <span class="nds-tag nds-blue nds-sm">
@@ -238,6 +259,7 @@ Pick another component when:
 | Structure | No header | canon `#card-no-header` | — | Text only |
 | Structure | Link card (hint: The whole card is one link) | canon `#card-link` | — | The whole card is one `<a>` (or `<button>`). Hover and press feedback come from the element. Do not put links or buttons inside it |
 | Structure | Statistic (hint: One headline number) (id: statistic) | canon `#card-statistic` | — | One headline number with a label, in a centered card. The number is `.nds-card-number`, which works in any card. With `data-counter`, it counts up from 0 when it scrolls into view. See [Numbers](../utilities/numbers#counter-animation) |
+| Structure | Progress (hint: A progress ring beside a short title. Turns on Row, Reverse and Middle) (demo: + row) (demo: + reverse) (demo: + middle) | canon `#card-progress` | — | A [progress ring](../components/progress) beside a short title, as on a life journey page. Write Row, Reverse and Middle too: the ring closes the row, and the title sits level with its middle |
 | Meta | None (default) | — | — | No tags or rating |
 | Meta | Tags | canon `#card-tags` | `.nds-card-content` | Tags alone go straight in the content |
 | Meta | Rating | canon `#card-rating` | `.nds-card-content` | A star rating with a count |
@@ -271,9 +293,10 @@ Pick another component when:
 | Color | On color (hint: For a dark or photo background) | `.nds-oncolor` | `.nds-tag:not([data-status])` | Tags do not follow the card either. Give each standard tag `.nds-oncolor`. A status tag keeps its colors |
 | Tinted | Tinted (hint: A light tint of the card color) | `.nds-color` | `.nds-card:not(.nds-oncolor)` | Fills the card with a light tint of its color. With no color class, the tint is the brand primary |
 | Layout | Stacked (default) | — | — | Header above content |
-| Layout | Row (hint: Header beside the content) | `.nds-horizontal` | `.nds-card` | Header beside content. The card stacks again when it is narrower than 324px |
+| Layout | Row (hint: Header beside the content) (id: row) | `.nds-horizontal` | `.nds-card` | Header beside content. The card stacks again when it is narrower than 324px |
 | Layout | Center (not: statistic) | `.nds-center` | `.nds-card` | Centers every part. Put it on the card root only: the featured icon reads it there, so on an inner part it centers nothing. It does not move the card: its container places it |
-| Reverse | Reverse (hint: Header at the end side. Row only) | `.nds-reverse` | `.nds-card.nds-horizontal` | Puts the header at the end side of the row, after the content. For a figure that closes the row, such as a progress ring. Row only |
+| Reverse | Reverse (hint: Header at the end side. Row only) (id: reverse) | `.nds-reverse` | `.nds-card.nds-horizontal` | Puts the header at the end side of the row, after the content. For a figure that closes the row, such as a progress ring. Row only |
+| Middle | Middle (hint: Short content in the middle, top to bottom) (id: middle) | `.nds-middle` | `.nds-card` | Puts short content in the middle of the card's height, instead of at the top. For a row card whose header is taller than its text, or a card stretched to its row in a grid. The text keeps its side: to center it across too, add Center |
 | Full width | Full width | `.nds-full` | `.nds-card` | Fills its container, instead of stopping at 360px. Do not use `.nds-full-width` on a card: inside a section, that class breaks out to the full screen width |
 | Number size | LG (default) | — | `.nds-card-number` | The display size |
 | Number size | MD | `.nds-md` | `.nds-card-number` | A smaller headline number |
@@ -350,6 +373,7 @@ Pick another component when:
 - Make a whole card clickable by using `<a>` or `<button>` as the card root. Do not wrap a card in a separate link, and do not put links or buttons inside a clickable card.
 - Use a stroke card in flat, content-heavy layouts, and a shadow card where the card floats over other content.
 - Put `nds-center` on the card root only. On an inner part, it centers nothing.
+- Add `nds-middle` when a row card's header is taller than its text, such as a progress ring beside one title. Without it, the text sits at the top.
 - `nds-center` centers the card's content, not the card. To center the card itself, center it with its container: `nds-center` on an `nds-grid`, or on an `nds-flex` wrapper for a single card.
 - To fill the container, use `nds-full` on a card, not `nds-full-width`. Inside a section, `nds-full-width` breaks out to the full screen width.
 - Put `.nds-card-actions` after `.nds-card-content`, not inside it. In a [modal](../components/modal), only the content scrolls. Actions inside the content still work there, because the modal pins them to the bottom.

@@ -240,6 +240,11 @@
 
   }
 
+  // Short content sits in the middle of a taller card, or beside a taller header in a row card.
+  &.nds-middle :is(.nds-card-content, .nds-card-text) {
+    justify-content: center;
+  }
+
 
   // ==============================================
   // CARD HEADER SECTION
