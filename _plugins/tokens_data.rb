@@ -11,7 +11,7 @@ require 'cgi'
 # Source of truth (names, values and selectors read verbatim):
 #   _sass/tokens/_primitives.scss   spacing / radius / typography / shell / font
 #   _sass/themes/_dga.scss          the --colors-* palette
-#   _sass/tokens/_semantic.scss     meanings, plus the status alpha ramp
+#   _sass/tokens/_semantic.scss     meanings
 #   _sass/tokens/_components.scss   per-component tokens, `// ── name ──` headers
 module NDS
   class TokensGenerator < Jekyll::Generator
