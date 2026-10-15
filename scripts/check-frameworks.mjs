@@ -1,4 +1,5 @@
-// core/init.md Framework Views, run in real React, Vue and htmx — not a plain-JS imitation.
+// core/init.md Framework Views, run in real React, Vue, Svelte, Angular, htmx and Turbo —
+// not a plain-JS imitation. Svelte compiles and Angular runs JIT in the page, so no build step.
 //
 //   MOUNT     mount(view) after mount, destroy(view) before unmount; React StrictMode runs
 //             mount → destroy → mount, so a view must end with ONE live instance.
@@ -7,8 +8,11 @@
 //             on the page: no menu in <body>, no backdrop, no scroll lock. The view mounts again.
 //   CLASSES   a changing class binding on an element NDS writes to wipes NDS's class; the
 //             doc's advice (put the changing class on a wrapper) keeps it.
-//   SWAPS     htmx swaps with destroy() before and mount() after: the new view works and
-//             nothing from the old one is left.
+//   SWAPS     htmx and Turbo swaps with destroy() before and mount() after: the new view works
+//             and nothing from the old one is left.
+//   HYDRATION React and Vue hydrate server HTML from their own server renderers: NDS starting at
+//             load breaks it; data-nds-auto-init="false" + initialize() after hydration does not.
+//   INFO rows print a class-binding result the doc does not claim yet; they never fail the run.
 //
 //   node scripts/check-frameworks.mjs [baseUrl]
 //   NO_DESTROY=1 skips every destroy() call: the TEARDOWN rows must fail, which proves they can.
@@ -19,7 +23,8 @@ const BASE = (process.argv[2] || 'http://localhost:4002/NDS-vanilla').replace(/\
 const LIBS = {
     react: ['react@18.3.1/umd/react.production.min.js', 'react-dom@18.3.1/umd/react-dom.production.min.js'],
     vue: ['vue@3.4.38/dist/vue.global.prod.js'],
-    htmx: ['htmx.org@1.9.12/dist/htmx.min.js']
+    htmx: ['htmx.org@1.9.12/dist/htmx.min.js'],
+    turbo: ['@hotwired/turbo@7.3.0/dist/turbo.es2017-umd.js']
 };
 const browser = await launch();
 let failed = 0;
@@ -242,6 +247,253 @@ async function lifecycle(page, name, p, unmount, remount) {
     await lifecycle(page, 'htmx', 'x', swap, async () => {});
     ok('htmx: each swap released the old view\'s instances', (await page.evaluate(() => window.__released_count)) > 0);
     ok('htmx: no page errors', errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+// ---- TURBO (frames) --------------------------------------------------------
+{
+    const { page, errors } = await open(LIBS.turbo);
+    await page.route('**/nds-turbo*', (route) => route.fulfill({ contentType: 'text/html',
+        body: `<html><body><turbo-frame id="t-frame">${VIEW('t')}</turbo-frame></body></html>` }));
+    await page.evaluate((url) => {
+        const frame = document.createElement('turbo-frame');
+        frame.id = 't-frame';
+        document.querySelector('.nds-section-body').appendChild(frame);
+        window.__released_count = 0;
+        document.addEventListener('turbo:before-frame-render', (e) => { window.__released_count += window.__destroy(e.target); });
+        document.addEventListener('turbo:frame-render', (e) => NDS.Init.mount(e.target));
+        document.addEventListener('nds:dropmenu:selected', (e) => { if (e.target.id === 't-dm') window.__picks.push(e.detail.value); });
+        let n = 0;
+        window.__swap = () => new Promise((r) => {
+            frame.addEventListener('turbo:frame-load', () => r(), { once: true });
+            frame.src = url + '?n=' + (++n);
+        });
+    }, `${BASE}/nds-turbo`);
+    const swap = () => page.evaluate(() => window.__swap());
+    await swap();
+    await lifecycle(page, 'Turbo', 't', swap, async () => {});
+    ok("Turbo: each frame render released the old view's instances", (await page.evaluate(() => window.__released_count)) > 0);
+    ok('Turbo: no page errors', errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+// ---- HYDRATION -------------------------------------------------------------
+// Server HTML from the framework's own server renderer, written into the page before NDS
+// starts, then hydrated: the Next.js / Nuxt shape without a server build. With NDS starting
+// at load the hydration must report a mismatch (the doc's warning); with
+// data-nds-auto-init="false" and NDS.Init.initialize() after hydration, none (its fix).
+// Markup → framework nodes, so the framework owns each element. `h(tag, props, ...kids)`.
+const TO_TREE = `(h, names) => function tree(html) {
+    const conv = (node) => {
+        if (node.nodeType === 3) return node.textContent.trim() ? node.textContent : null;
+        if (node.nodeType !== 1) return null;
+        const props = {};
+        for (const a of node.attributes) props[names[a.name] || a.name] = a.name === 'hidden' || a.name === 'readonly' ? true : a.value;
+        const kids = [...node.childNodes].map(conv).filter((k) => k !== null);
+        return h(node.tagName.toLowerCase(), props, ...kids);
+    };
+    return [...new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html').body.firstChild.childNodes]
+        .map(conv).filter((k) => k !== null);
+}`;
+const MISMATCH = /hydrat|did not match|did not expect|extra attributes|server html/i;
+
+async function hydrationRun(name, serverHtml, hydrate, manual) {
+    const page = await browser.newPage();
+    const logs = [];
+    // Vue's build notice names its hydration flag; it is not a mismatch.
+    page.on('console', (m) => { if (MISMATCH.test(m.text()) && !/^Feature flags/.test(m.text())) logs.push(m.text().slice(0, 140)); });
+    await page.route(/components\/forms\.html/, async (route) => {
+        const res = await route.fetch();
+        let body = await res.text();
+        body = body.replace(/<body([^>]*)>/, `<body$1><div id="ssr-root">${serverHtml}</div>`);
+        if (manual) body = body.replace(/<html([^>]*)>/, '<html$1 data-nds-auto-init="false">');
+        await route.fulfill({ response: res, body });
+    });
+    await page.goto(`${BASE}/components/forms.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.NDS?.Init, null, { timeout: 15000 });
+    if (!manual) await page.evaluate(() => window.NDS.Init.ready);
+    await hydrate(page, manual);
+    await page.waitForTimeout(800);
+    const works = await page.evaluate(async () => {
+        document.querySelector('#ssr-root .nds-dropmenu-trigger').click();
+        await new Promise((r) => setTimeout(r, 350));
+        const menu = NDS.Dropmenu.menuOf(document.querySelector('#ssr-root .nds-dropmenu'));
+        return !!menu && !menu.hidden;
+    });
+    await page.close();
+    return { logs, works };
+}
+
+{
+    // React: renderToString on a blank page, hydrateRoot on the real one.
+    const REACT_DEV = ['react@18.3.1/umd/react.development.js', 'react-dom@18.3.1/umd/react-dom.development.js'];
+    const APP = `(manual) => { const h = React.createElement;
+        const tree = (${TO_TREE})(h, { class: 'className', for: 'htmlFor', readonly: 'readOnly' });
+        return function App() {
+            React.useEffect(() => { if (manual) NDS.Init.initialize(); }, []);
+            return h('div', { id: 'h-app' }, ...tree(${JSON.stringify(VIEW('h'))}));
+        };
+    }`;
+    const srv = await browser.newPage();
+    for (const lib of [...REACT_DEV, 'react-dom@18.3.1/umd/react-dom-server-legacy.browser.development.js']) {
+        await srv.addScriptTag({ url: `https://unpkg.com/${lib}` });
+    }
+    const html = await srv.evaluate((APP) => ReactDOMServer.renderToString(React.createElement(eval(APP)(false))), APP);
+    await srv.close();
+
+    const hydrate = async (page, manual) => {
+        for (const lib of REACT_DEV) await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
+        await page.evaluate(([APP, manual]) => {
+            window.__hErr = [];
+            ReactDOM.hydrateRoot(document.getElementById('ssr-root'), React.createElement(eval(APP)(manual)),
+                { onRecoverableError: (e) => console.error('hydration error: ' + e.message) });
+        }, [APP, manual]);
+    };
+    const auto = await hydrationRun('React', html, hydrate, false);
+    ok('React hydration: NDS starting at load breaks it (the doc\'s warning holds)', auto.logs.length > 0, auto.logs[0] || 'no mismatch logged');
+    const manual = await hydrationRun('React', html, hydrate, true);
+    ok('React hydration: data-nds-auto-init="false" + initialize() after it: no mismatch', manual.logs.length === 0, manual.logs.join(' | '));
+    ok('React hydration: NDS works after the late initialize()', manual.works);
+}
+
+{
+    // Vue: renderToString from vue/server-renderer, createSSRApp().mount() to hydrate. Dev builds log mismatches.
+    const VUE = 'https://esm.sh/vue@3.4.38?dev';
+    const APP = `(Vue, manual) => {
+        const tree = (${TO_TREE})(Vue.h, {});
+        return { mounted() { if (manual) NDS.Init.initialize(); },
+            render: () => Vue.h('div', { id: 'h-app' }, tree(${JSON.stringify(VIEW('h'))})) };
+    }`;
+    const srv = await browser.newPage();
+    await srv.goto(`${BASE}/404.html`).catch(() => {});
+    const html = await srv.evaluate(async ([VUE, APP]) => {
+        const Vue = await import(VUE);
+        const { renderToString } = await import('https://esm.sh/vue@3.4.38/server-renderer?dev');
+        return renderToString(Vue.createSSRApp(eval(APP)(Vue, false)));
+    }, [VUE, APP]);
+    await srv.close();
+
+    const hydrate = (page, manual) => page.evaluate(async ([VUE, APP, manual]) => {
+        const Vue = await import(VUE);
+        Vue.createSSRApp(eval(APP)(Vue, manual)).mount('#ssr-root');
+    }, [VUE, APP, manual]);
+    const auto = await hydrationRun('Vue', html, hydrate, false);
+    ok('Vue hydration: NDS starting at load breaks it (the doc\'s warning holds)', auto.logs.length > 0, auto.logs[0] || 'no mismatch logged');
+    const manual = await hydrationRun('Vue', html, hydrate, true);
+    ok('Vue hydration: data-nds-auto-init="false" + initialize() after it: no mismatch', manual.logs.length === 0, manual.logs.join(' | '));
+    ok('Vue hydration: NDS works after the late initialize()', manual.works);
+}
+
+// A finding the doc does not claim yet: printed, never counted.
+const info = (name, detail) => console.log(`INFO  ${name}  — ${detail}`);
+const kept = (r) => (r ? 'keeps NDS\'s class' : 'wipes NDS\'s class');
+
+// ---- SVELTE (compiled in the page) ------------------------------------------
+{
+    const { page, errors } = await open([]);
+    await page.evaluate(async ([VIEW, SELECT]) => {
+        const src = `<script>
+  export let show = true;
+  export let on = false;
+  function nds(node) {
+    node.querySelector('#s-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
+    window.NDS?.Init.mount(node);
+    return { destroy() { window.__destroy(node); } };
+  }
+  function ndsPlain(node) { window.NDS?.Init.mount(node); return { destroy() { window.__destroy(node); } }; }
+<\/script>
+{#if show}<div use:nds>${VIEW}</div>{/if}
+<div use:ndsPlain>
+<div class="nds-form-container nds-select" id="sc-attr"><div class="nds-form-control {on ? 'is-on' : ''}">${SELECT}</div></div>
+<div class="nds-form-container nds-select" id="sc-directive"><div class="nds-form-control" class:is-on={on}>${SELECT}</div></div>
+<div class="nds-form-container nds-select {on ? 'is-on' : ''}" id="sc-wrapper"><div class="nds-form-control">${SELECT}</div></div>
+</div>`;
+        const { compile } = await import('https://esm.sh/svelte@4.2.19/compiler');
+        const { js } = compile(src, { sveltePath: 'https://esm.sh/svelte@4.2.19' });
+        const App = (await import(URL.createObjectURL(new Blob([js.code], { type: 'text/javascript' })))).default;
+        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+        window.__svelte = new App({ target: host });
+    }, [VIEW('s'), SELECT]);
+    const flip = (show) => page.evaluate((show) => { window.__svelte.$set({ show }); return window.__wait(100); }, show);
+    await lifecycle(page, 'Svelte', 's', () => flip(false), () => flip(true));
+
+    const cls = await page.evaluate(async () => {
+        const ids = ['sc-attr', 'sc-directive', 'sc-wrapper'];
+        for (const id of ids) await NDS.CustomSelect.create(document.getElementById(id));
+        const has = () => ids.map((id) => document.querySelector('#' + id + ' .nds-form-control').classList.contains('nds-dropmenu'));
+        const before = has();
+        window.__svelte.$set({ on: true });
+        await window.__wait(100);
+        return { before, after: has() };
+    });
+    ok('Svelte: setup, NDS marked every field', cls.before.every(Boolean), JSON.stringify(cls));
+    info('Svelte: class="… {expr}" on the field', kept(cls.after[0]));
+    info('Svelte: class:name={expr} on the field', kept(cls.after[1]));
+    ok('Svelte: the changing class on a wrapper keeps it (the doc\'s advice works)', cls.after[2] === true);
+    ok('Svelte: no page errors', errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+// ---- ANGULAR (JIT in the page) ----------------------------------------------
+{
+    const { page, errors } = await open([]);
+    const booted = await page.evaluate(async ([VIEW, SELECT]) => {
+        const v = '17.3.12';
+        // jsDelivr's +esm links every package to one @angular/core; esm.sh loaded two.
+        const pkg = (name) => import(`https://cdn.jsdelivr.net/npm/${name}/+esm`);
+        await pkg('zone.js@0.14.10');
+        await pkg(`@angular/compiler@${v}`);
+        const { Component, ElementRef, inject } = await pkg(`@angular/core@${v}`);
+        const { bootstrapApplication } = await pkg(`@angular/platform-browser@${v}`);
+
+        class ViewCmp {
+            el = inject(ElementRef);
+            ngAfterViewInit() {
+                const root = this.el.nativeElement;
+                root.querySelector('#a-dm').addEventListener('nds:dropmenu:selected', (e) => window.__picks.push(e.detail.value));
+                window.NDS?.Init.mount(root);
+            }
+            ngOnDestroy() { window.__destroy(this.el.nativeElement); }
+        }
+        Component({ selector: 'nds-view', standalone: true, template: VIEW })(ViewCmp);
+
+        class AppCmp {
+            show = true;
+            on = false;
+            el = inject(ElementRef);
+            ngAfterViewInit() { window.NDS?.Init.mount(this.el.nativeElement.querySelector('#a-cls')); }
+        }
+        Component({ selector: 'nds-app', standalone: true, imports: [ViewCmp], template: '@if (show) { <nds-view /> }'
+            + '<div id="a-cls">'
+            + '<div class="nds-form-container nds-select" id="ac-classmap"><div [class]="on ? \'nds-form-control is-on\' : \'nds-form-control\'">' + SELECT + '</div></div>'
+            + '<div class="nds-form-container nds-select" id="ac-classname"><div class="nds-form-control" [class.is-on]="on">' + SELECT + '</div></div>'
+            + '<div class="nds-form-container nds-select" [class.is-on]="on" id="ac-wrapper"><div class="nds-form-control">' + SELECT + '</div></div>'
+            + '</div>' })(AppCmp);
+
+        document.querySelector('.nds-section-body').appendChild(document.createElement('nds-app'));
+        const app = await bootstrapApplication(AppCmp);
+        window.__ng = { set: (k, val) => { app.components[0].instance[k] = val; app.tick(); } };
+        return true;
+    }, [VIEW('a'), SELECT]).catch((e) => e.message);
+    ok('Angular: bootstrapped', booted === true, booted === true ? '' : String(booted));
+    if (booted === true) {
+        const flip = (show) => page.evaluate((show) => { window.__ng.set('show', show); return window.__wait(100); }, show);
+        await lifecycle(page, 'Angular', 'a', () => flip(false), () => flip(true));
+        const cls = await page.evaluate(async () => {
+            const ids = ['ac-classmap', 'ac-classname', 'ac-wrapper'];
+            for (const id of ids) await NDS.CustomSelect.create(document.getElementById(id));
+            const has = () => ids.map((id) => document.querySelector('#' + id + ' .nds-form-control').classList.contains('nds-dropmenu'));
+            const before = has();
+            window.__ng.set('on', true);
+            await window.__wait(100);
+            return { before, after: has() };
+        });
+        ok('Angular: setup, NDS marked every field', cls.before.every(Boolean), JSON.stringify(cls));
+        info('Angular: [class]="expr" on the field', kept(cls.after[0]));
+        info('Angular: [class.name]="expr" on the field', kept(cls.after[1]));
+        ok('Angular: the changing class on a wrapper keeps it (the doc\'s advice works)', cls.after[2] === true);
+    }
+    ok('Angular: no page errors', errors.length === 0, errors.join(' | '));
     await page.close();
 }
 
