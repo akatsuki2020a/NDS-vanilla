@@ -231,16 +231,9 @@ NDS.UserFeedback = (() => {
             if (submitEl) submitEl.setAttribute('hidden', '');
 
             // Reset checkboxes
-            const checkboxes = feedbackComponent.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-
-            // Reset radio buttons
-            const radios = feedbackComponent.querySelectorAll('input[type="radio"]');
-            radios.forEach(radio => {
-                radio.checked = false;
-            });
+            // Reset checkboxes and radio buttons
+            feedbackComponent.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked')
+                .forEach(box => NDS.setValue(box, false));
 
             // Clear textarea
             const textarea = feedbackComponent.querySelector('textarea');

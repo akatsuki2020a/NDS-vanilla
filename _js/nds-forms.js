@@ -498,7 +498,7 @@
         }
         if (clean !== original) {
             var caret = Math.max(0, input.selectionStart - (original.length - clean.length));
-            input.value = clean;
+            NDS.setValue(input, clean, { change: false });
             try { input.setSelectionRange(caret, caret); } catch (_) {}
         }
         input.setCustomValidity(clean && !ok ? msg : '');
@@ -1126,11 +1126,11 @@
             // Clamp number input value to min/max on blur
             if (formControl.querySelector('.nds-number-increment, .nds-number-decrement')) {
                 var val = parseInt(input.value);
-                if (isNaN(val)) { input.value = ''; }
+                if (isNaN(val)) { if (input.value || input.validity.badInput) NDS.setValue(input, ''); }
                 else {
                     var rangeError = Utils.validateNumberRange(input);
                     if (rangeError) {
-                        input.value = rangeError.clamped;
+                        NDS.setValue(input, rangeError.clamped);
                         StatusManager.set({ element: formContainer, status: 'error', message: rangeError.message });
                     }
                 }
@@ -1182,7 +1182,7 @@
             var input = c.input;
             var cleaned = input.value.replace(/[\u0600-\u06FF]/g, '');
             if (cleaned === input.value) return;
-            input.value = cleaned;
+            NDS.setValue(input, cleaned, { change: false });
             e._ndsArabicStripped = true;
             var fc = c.formControl.closest('.nds-form-container');
             if (fc) {
@@ -1210,7 +1210,7 @@
                 var stripped = original.replace(/\D/g, '').replace(/^0+/, '');
                 if (stripped !== original) {
                     var diff = original.length - stripped.length;
-                    input.value = stripped;
+                    NDS.setValue(input, stripped, { change: false });
                     try {
                         input.setSelectionRange(Math.max(0, caret - diff), Math.max(0, caret - diff));
                     } catch (_) {}

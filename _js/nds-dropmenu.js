@@ -437,7 +437,7 @@
         //   - Optional per-item override:
         //       data-trigger-label="..."  custom short label for the trigger
         //                                 (falls back to the item's .nds-label)
-        //   - Events: hidden input fires `change`; dropmenu fires
+        //   - Events: hidden input fires `input` + `change`; dropmenu fires
         //     `nds:dropmenu:selected` with { item, value } in detail.
 
         setupSelectMode() {
@@ -488,7 +488,7 @@
 
         applySelection(item, opts = {}) {
             const value = item.getAttribute('data-value') || '';
-            if (this.selectHidden) this.selectHidden.value = value;
+            if (this.selectHidden && opts.silent) this.selectHidden.value = value;
 
             // Trigger label: prefer per-item data-trigger-label for cases
             // where the dropdown row is descriptive ("Saudi Arabia (+966)")
@@ -515,9 +515,7 @@
             NDS.State.set(item, 'selected');
 
             if (!opts.silent) {
-                if (this.selectHidden) {
-                    this.selectHidden.dispatchEvent(new Event('change', { bubbles: true }));
-                }
+                if (this.selectHidden) NDS.setValue(this.selectHidden, value);
                 this.dropmenu.dispatchEvent(new CustomEvent('nds:dropmenu:selected', {
                     detail: { dropmenu: this.dropmenu, item, value },
                     bubbles: true

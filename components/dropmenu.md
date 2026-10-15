@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "15/10/2026 - 04:17 PM"
 ---
 
 <section id="dropmenu-overview" class="nds-content-section nds-doc-overview">
@@ -399,7 +399,7 @@ A lazy menu keeps its items in a `<template>`, so they are not in the page until
 
 | Attribute | Element | Effect |
 |---|---|---|
-| `data-select-name` | `.nds-dropmenu` | Makes the dropmenu a picker. A hidden input with this name holds the picked value, and fires `change` when it changes |
+| `data-select-name` | `.nds-dropmenu` | Makes the dropmenu a picker. A hidden input with this name holds the picked value, and fires `input` and `change` when it changes |
 | `data-select-value` | `.nds-dropmenu` | The value picked at load. It wins over an item with `data-state="selected"` |
 | `data-required` | `.nds-dropmenu[data-select-name]` | The form does not submit until a value is picked. The error shows on the field that holds the picker |
 | `data-search` | `.nds-dropmenu` | Adds a search box. `data-search="20"` adds it only when the menu has 20 items or more |
