@@ -500,6 +500,13 @@
         }
 
         _goToFull(index, instant = NDS.prefersReducedMotion) {
+            // A move before the first resize callback lands the loop now; landing after
+            // would cancel the move and strand _aim. No layout yet = leave it to remeasure.
+            if (this._loopPending && this.slides[1].offsetLeft !== this.slides[0].offsetLeft) {
+                this._loopPending = false;
+                this._jumpTo(this._head);
+                this.detectCurrentSlide();
+            }
             if (this._loop) {
                 // Keep the animation inside the clone budget and off the end-aligned
                 // last page (a loop has no end, so that alignment would shift at the
