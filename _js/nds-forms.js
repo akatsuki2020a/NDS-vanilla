@@ -144,7 +144,7 @@
     // Any consumer (autocomplete, remote-validate, custom fetch) can flip
     // data-state="loading" on the form-container or form-group; forms
     // owns the visual UX in one place. The spinner is an authored
-    // [data-loading-slot] / legacy .nds-loading, else a shell forms creates in
+    // [data-loading-slot] (not .nds-loading: a loading button carries that class), else a shell forms creates in
     // the field's last non-prefix .nds-form-action (a suffix on a stepper,
     // which has no plain slot: a new slot would squeeze the input), creating a
     // slot if there is none. Its own button, so no styled button is repurposed.
@@ -155,7 +155,7 @@
     var LOADING_SLOTS = '.nds-form-action:not(.nds-prefix)';
 
     function _ensureLoadingShell(fc) {
-        var shell = fc.querySelector(LOADING_SLOTS + ' :is([data-loading-slot], .nds-loading)');
+        var shell = fc.querySelector(LOADING_SLOTS + ' [data-loading-slot]');
         if (shell) return shell;
         var slots = fc.querySelectorAll(LOADING_SLOTS);
         var action = slots[slots.length - 1];
