@@ -10,7 +10,7 @@
 [data-theme~="dark"]:not(:root) {
 
     // ── autocomplete ──
-    --autocomplete-highlight: var(--colors-primary-100);
+    --autocomplete-highlight: var(--background-mark);
 
     // ── avatar ──
     --avatar-background: var(--colors-neutral-100);
@@ -315,9 +315,6 @@
 
 :root[data-theme~="dark"],
 [data-theme~="dark"]:not(:root) {
-
-    // ── autocomplete ──
-    --autocomplete-highlight: var(--colors-primary-alpha-50);
 
     // ── avatar ──
     --avatar-background: var(--colors-neutral-700);
