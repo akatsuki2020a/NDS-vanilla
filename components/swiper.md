@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 05:08 PM"
+last_edit: "15/10/2026 - 05:45 PM"
 ---
 
 <section id="swiper-overview" class="nds-content-section nds-doc-overview">
@@ -321,7 +321,7 @@ A Per view choice has one row for each knob it changes: write them all in the sw
             <i class="hgi hgi-stroke hgi-image-02"></i>
             <span class="nds-label">Lazy Images</span>
           </span>
-          <p class="nds-item-desc">An image with <code class="nds-inline-code lang-html">data-src</code> or <code class="nds-inline-code lang-html">data-srcset</code> loads when its slide comes within 200px of the screen. Until then, its box shows a skeleton.</p>
+          <p class="nds-item-desc">An image with <code class="nds-inline-code lang-html">data-src</code> or <code class="nds-inline-code lang-html">data-srcset</code> loads when its slide comes within 200px of the screen. When the images on screen finish loading, the slides one page before and after them load ahead at low priority, so the next slide is ready before it moves in. Until then, its box shows a skeleton.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">

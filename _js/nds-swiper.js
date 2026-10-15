@@ -28,7 +28,9 @@
  *                                                more slides than the largest tier's count,
  *                                                else ignored. goTo/slideTo indices stay real
  *   on a slide's <img>: data-src · data-srcset   lazy sources, written to src/srcset when
- *                                                the slide nears the viewport
+ *                                                the slide nears the viewport; once the
+ *                                                images on screen finish, the page either
+ *                                                side loads ahead at low priority
  *   written by the component: --slides on the container, data-swiper-peek while peeking,
  *                             .nds-swiper-clone slides (aria-hidden, focusables dropped from
  *                             the tab order, data-swiper-clone = the real twin's index) when
@@ -843,21 +845,61 @@
         // ==============================================
 
         setupLazyLoading(lazySlides) {
-            const offs = [];
-            lazySlides.forEach(slide => {
+            const pending = new Set(lazySlides), offs = [];
+            const load = (slide, ahead) => {
+                if (!pending.delete(slide)) return;
+                // Activate <source> elements inside <picture> first.
+                this._lazyIn(slide, 'source[data-srcset]').forEach(source => {
+                    source.srcset = fixSrcsetSpaces(source.dataset.srcset);
+                    delete source.dataset.srcset;
+                });
+                this._lazyIn(slide, 'img[data-src], img[data-srcset]').forEach(img => {
+                    // Loaded ahead: yield the network to the slide on screen (and the LCP).
+                    if (ahead && !img.hasAttribute('fetchpriority')) img.fetchPriority = 'low';
+                    if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+                    if (img.dataset.srcset) { img.srcset = fixSrcsetSpaces(img.dataset.srcset); delete img.dataset.srcset; }
+                });
+            };
+            const loadReal = (r) => this.slides.forEach((s, j) => { if (this._realOf(j) === r) load(s, true); });
+            // Ahead loads wait until every image on screen has finished (or failed): low
+            // priority alone still starts them at once, sharing a slow link with the view.
+            // ponytail: a request that never settles holds them; they then load on arrival.
+            const { signal } = this.abortController;
+            const busy = new Set();
+            let queued = [];
+            const flush = () => {
+                if (busy.size) return;
+                const q = queued;
+                queued = [];
+                q.forEach(fn => fn());
+            };
+            const track = (img) => {
+                if (img.complete) return;
+                busy.add(img);
+                const done = () => { busy.delete(img); flush(); };
+                img.addEventListener('load', done, { once: true, signal });
+                img.addEventListener('error', done, { once: true, signal });
+            };
+            // The row clips its sides, so rootMargin never reaches the slide beside the view:
+            // it would load only as it slides in. A slide that shows also loads a page either
+            // side of it, loop twins included, so the next slide and the loop's silent jump
+            // land loaded. Every slide is watched, so a plain-src one triggers it too; a
+            // spotlight's or peek's side slides show, so they reach one further.
+            this.slides.forEach((slide, j) => {
                 const off = NDS.onIntersect(slide, (entry) => {
-                    if (entry.isIntersecting) {
-                        // Activate <source> elements inside <picture> first.
-                        this._lazyIn(slide, 'source[data-srcset]').forEach(source => {
-                            source.srcset = fixSrcsetSpaces(source.dataset.srcset);
-                            delete source.dataset.srcset;
-                        });
-                        this._lazyIn(slide, 'img[data-src], img[data-srcset]').forEach(img => {
-                            if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
-                            if (img.dataset.srcset) { img.srcset = fixSrcsetSpaces(img.dataset.srcset); delete img.dataset.srcset; }
-                        });
-                        off();
-                    }
+                    if (!entry.isIntersecting) return;
+                    off();
+                    load(slide, false);
+                    slide.querySelectorAll('img').forEach(track);
+                    queued.push(() => {
+                        const n = this._real, r = this._realOf(j);
+                        for (let k = r - this.slidesPerView; k <= r + this.slidesPerView; k++) {
+                            if (this._loop) loadReal((k % n + n) % n);
+                            else if (k >= 0 && k < n) loadReal(k);
+                        }
+                    });
+                    // After the batch, so every slide on screen is tracked first.
+                    queueMicrotask(flush);
                 }, { rootMargin: '200px' });
                 offs.push(off);
             });
