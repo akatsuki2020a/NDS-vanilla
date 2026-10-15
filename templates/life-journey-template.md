@@ -15,8 +15,8 @@ hero_float_actions:
   class: nds-minimal
   items:
     - html: >-
-        <div class="nds-form-container nds-switch-container nds-lg nds-stacked">
-        <div class="nds-form-header" data-feedback-target><label for="first-visit-toggle"><span class="nds-label">First visit <span class="nds-tooltip" data-tooltip-hover data-tooltip-message="On: the intro modal and the how-it-works alert. Off: a returning user's journey tabs."></span></span></label></div>
+        <div class="nds-form-container nds-switch-container nds-stacked" style="align-items: center;">
+        <div class="nds-form-header" data-feedback-target><label for="first-visit-toggle"><span class="nds-note">First visit</span></label></div>
         <div class="nds-form-control"><div class="nds-switch"><input type="checkbox" id="first-visit-toggle" class="nds-switch-input"><div class="nds-switch-track"><div class="nds-switch-thumb"></div></div></div></div>
         </div>
 last_edit: "04/12/2020 - 04:13 PM"

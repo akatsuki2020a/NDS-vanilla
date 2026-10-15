@@ -19,8 +19,8 @@ hero_float_actions:
   class: nds-minimal
   items:
     - html: >-
-        <div class="nds-form-container nds-switch-container nds-lg nds-stacked">
-        <div class="nds-form-header"><label for="journey-done-toggle"><span class="nds-label">Journey completed</span></label></div>
+        <div class="nds-form-container nds-switch-container nds-stacked" style="align-items: center;">
+        <div class="nds-form-header"><label for="journey-done-toggle"><span class="nds-note">Completed</span></label></div>
         <div class="nds-form-control"><div class="nds-switch"><input type="checkbox" id="journey-done-toggle" class="nds-switch-input"><div class="nds-switch-track"><div class="nds-switch-thumb"></div></div></div></div>
         </div>
 last_edit: "04/12/2020 - 04:13 PM"
@@ -126,7 +126,7 @@ related:
         </div>
         <aside class="nds-sideinfo" aria-label="Journey information">
             <!-- In progress -->
-            <div class="nds-card nds-stroke nds-shadow nds-horizontal nds-reverse" data-journey-progress>
+            <div class="nds-card nds-stroke nds-shadow nds-horizontal nds-reverse nds-middle" data-journey-progress>
                 <div class="nds-card-header">
                     <div class="nds-progress-circle nds-md" data-num="1" data-max="{{ page.steps.size }}" role="progressbar" aria-labelledby="journey-progress-title">
                         <svg width="120" height="120" viewBox="0 0 24 24">
@@ -146,7 +146,7 @@ related:
                 </div>
             </div>
             <!-- Completed -->
-            <div class="nds-card nds-stroke nds-shadow nds-horizontal nds-reverse" data-journey-done hidden>
+            <div class="nds-card nds-stroke nds-shadow nds-horizontal nds-reverse nds-middle" data-journey-done hidden>
                 <div class="nds-card-header">
                     <div class="nds-progress-circle nds-md" data-num="{{ page.steps.size }}" data-max="{{ page.steps.size }}" role="progressbar" aria-labelledby="journey-done-title">
                         <svg width="120" height="120" viewBox="0 0 24 24">
