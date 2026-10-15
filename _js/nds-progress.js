@@ -90,11 +90,16 @@
         }
     }
 
-    // Public API
-    function setValue(el, value) { el.dataset.value = value; }
-    function setOutOf(el, num, max) { el.dataset.num = num; el.dataset.max = max; }
-
     let _offAttrChange;
+    // A page with no indicator at load never runs init(), so the public writers wire this too.
+    function _watch() {
+        if (_offAttrChange) return;
+        _offAttrChange = NDS.onAttrChange(SEL, ATTRS, els => els.forEach(syncFromData));
+    }
+
+    // Public API
+    function setValue(el, value) { _watch(); el.dataset.value = value; }
+    function setOutOf(el, num, max) { _watch(); el.dataset.num = num; el.dataset.max = max; }
 
     function init() {
         const reduced = NDS.prefersReducedMotion;
@@ -110,18 +115,19 @@
 
             // Otherwise leave it empty and let the fill sweep when the indicator
             // scrolls into view — setting the value triggers the CSS transition.
-            if (el._ndsProgressOff) el._ndsProgressOff();
-            el._ndsProgressOff = NDS.onIntersect(el, entry => {
+            // The pending reveal sits on an nds* backref so NDS.Init.destroy(view) can release it.
+            el.ndsProgress?.destroy();
+            const off = NDS.onIntersect(el, entry => {
                 if (!entry.isIntersecting) return;
-                el._ndsProgressOff();
-                delete el._ndsProgressOff;
+                reveal.destroy();
                 syncFromData(el);
             }, { threshold: 0.5 });
+            const reveal = { destroy() { off(); if (el.ndsProgress === reveal) delete el.ndsProgress; } };
+            el.ndsProgress = reveal;
         });
 
-        if (_offAttrChange) _offAttrChange();
-        _offAttrChange = NDS.onAttrChange(SEL, ATTRS, els => els.forEach(syncFromData));
+        _watch();
     }
 
-    NDS.Progress = { init, initCircle: syncFromData, setValue, setOutOf };
+    NDS.Progress = { init, initCircle: el => { _watch(); syncFromData(el); }, setValue, setOutOf };
 })();
