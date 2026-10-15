@@ -125,8 +125,7 @@
         // Mark where the FAB was authored before the first move, so destroy() can put it back
         // and a framework holding it still finds its spot. A re-register (a direction flip
         // re-routes every FAB) keeps the first mark: relocate() skips a node already moved.
-        // An app that removes the FAB itself runs destroy(), so its empty dock goes too.
-        NDS.relocate(fab, destroy);
+        NDS.relocate(fab);
         const d = dock(resolvePos(fab, override));
         d.appendChild(fab);
         [...d.children].sort((a, b) => order(a) - order(b)).forEach(c => d.appendChild(c));
@@ -232,19 +231,6 @@
 
         // One pooled observer for every panel on the page.
         runtimeOffs.push(NDS.onAttrChange('.nds-panel', ['data-state'], (panels) => panels.forEach(ridePanel)));
-
-        // Vue, Svelte and Angular remove a FAB from the dock it sits in; React goes through
-        // its old spot, which runs destroy() already (relocate's exit).
-        runtimeOffs.push(NDS.onDOMRemove('.nds-fab[' + INIT_ATTR + ']', fabs => fabs.forEach(fab => {
-            if (fab.isConnected) return;
-            destroy(fab);
-            fab.remove();   // destroy() put it back at its marker
-        })));
-        // A removed view takes its FAB along, though the FAB sits in the dock outside it.
-        runtimeOffs.push(NDS.onDOMRemove(null, () => document.querySelectorAll('.nds-fab[' + INIT_ATTR + ']').forEach(fab => {
-            const home = NDS.homeOf(fab);
-            if (home && !home.isConnected) destroy(fab);
-        })));
 
         // Re-route on a runtime direction flip: a logical start/end (or auto)
         // FAB resolves to the opposite edge, so it must move to stay with its

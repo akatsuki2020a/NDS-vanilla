@@ -22,7 +22,7 @@
  *     NDS.transitionSpeed()            the token-sourced duration in ms
  *   DOM, portal-aware
  *     NDS.portal(el) / .unportal(el) / .needsPortal(el)
- *     NDS.relocate(el, exit?) / .restore(el) / .homeOf(el)   move a node the app owns; its old spot answers for it
+ *     NDS.relocate(el) / .restore(el) / .homeOf(el)   move a node the app owns; its old spot answers for it
  *     NDS.closest(el, sel) · NDS.queryAll(root, sel) · NDS.querySelector(root, sel)
  *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
  *     NDS.stackingZ(el)                highest z-index on el's ancestors: the layer a portaled popup matches
@@ -800,7 +800,7 @@
     })();
 
     // ── DOM Mutation Bus ─────────────────────────────────────────────
-    // Single MutationObserver on <html>, selector-based dispatch (a null selector gets the raw roots).
+    // Single MutationObserver on <html>, selector-based dispatch.
     // Each subscriber returns an unsubscribe handle so per-instance callers
     // (component constructors / init() methods called per re-init) can
     // release their subscription without the pool's array growing
@@ -821,8 +821,6 @@
 
         function dispatch(nodes, subs) {
             each(subs, sub => {
-                // No selector: the raw added / removed roots, for a caller that filters them itself.
-                if (!sub.sel) { sub.fn(nodes.slice()); return; }
                 // A Set: a parent and its child added in one batch both reach the child.
                 const hits = new Set();
                 for (let i = 0; i < nodes.length; i++) {
@@ -1664,10 +1662,9 @@
     // that still holds it (React inserts before it, or removes it) works on its old spot
     // instead of throwing "not a child of this node".
     // Usage: NDS.relocate(menu); document.body.appendChild(menu); … NDS.restore(menu);
-    // `exit(node)` is the owner's teardown, run when the app removes the node; it must restore it.
     // ponytail: only those three methods answer for the node; replaceChild or a textContent
     // write on the old parent still sees the move.
-    const _home = new WeakMap();   // moved node → { mark, parent, exit }
+    const _home = new WeakMap();   // moved node → { mark, parent }
     const _node = Node.prototype;
     const _standIn = (parent, n) => { const h = n && _home.get(n); return h && h.mark.parentNode === parent ? h.mark : n; };
     function _guard(parent) {
@@ -1678,7 +1675,7 @@
         parent.removeChild = function (node) {
             if (_standIn(this, node) === node) return _node.removeChild.call(this, node);
             // Back home first, through its owner's own exit, then out as the app asked.
-            (_home.get(node).exit || NDS.restore)(node);
+            if (node._ndsPortal) NDS.unportal(node); else NDS.restore(node);
             return _node.removeChild.call(this, node);
         };
     }
@@ -1690,12 +1687,12 @@
         delete parent.removeChild;
     }
 
-    NDS.relocate = (el, exit) => {
+    NDS.relocate = (el) => {
         const parent = el?.parentNode;
         if (!parent || _home.has(el)) return;
         const mark = document.createComment(' moved by NDS ');   // no nds- prefix: the audit reads those as class names
         _node.insertBefore.call(parent, mark, el);
-        _home.set(el, { mark, parent, exit });
+        _home.set(el, { mark, parent });
         _guard(parent);
     };
 
@@ -1742,7 +1739,7 @@
         }
         const setProps = [];
         el._ndsPortal = { setProps };
-        NDS.relocate(el, NDS.unportal);
+        NDS.relocate(el);
         document.body.appendChild(el);
         for (const k in snap) {
             el.style.setProperty(k, snap[k]);

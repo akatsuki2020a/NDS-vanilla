@@ -207,7 +207,7 @@
             // Critical: tags external links with no layout reads. Keep it read-free — a
             // getBoundingClientRect here once forced a full layout (~110ms@6.6x).
             name: 'Link',
-            selector: 'a[href*="//"]',
+            selector: null,
             critical: true,
         },
         {
@@ -579,7 +579,6 @@
         }
         // Markers translate once the pack settles; here, so auto-init off holds them too.
         NDS.i18n.start();
-        watchViews();
         const startTime = performance.now();
         presplitPaged();
 
@@ -818,27 +817,22 @@
     // skip their refresh. Registry order holds: Selection recounts before Filter.
     // ponytail: scanners re-scan the whole document, the same cost as reinit(); give
     // them a scope argument only if a large page measures slow.
-    // `found` (the view watcher's call): the component elements in roots, one per shape. A
-    // component runs only when one is its own, and an owner only for the roots that hold it.
-    function refreshRoots(roots, found) {
+    function refreshContainer(container) {
+        const root = container || document;
         // Words first: a component that reads its label at init reads the page language.
-        for (const root of roots) if (root !== document) NDS.i18n.translate(root);
+        if (root !== document) NDS.i18n.translate(root);
         for (const component of COMPONENTS) {
             const ns = NDS[component.name];
             if (!ns || ns.__ndsStub) continue;
-            const sel = component.selector;
-            if (found && !(sel && found.some((el) => el.matches(sel)))) continue;
-            // matches() covers a root that IS the component (a panel pulled from a template).
-            const has = (root) => !sel || root === document || root.matches?.(sel) || root.querySelector?.(sel);
             try {
-                if (component.refresh) (found ? roots.filter(has) : roots).forEach((root) => component.refresh(root));
-                else if (found || roots.some(has)) component.init();
+                if (component.refresh) component.refresh(root);
+                // matches() covers a root that IS the component (a panel pulled from a template).
+                else if (!component.selector || root === document || root.matches?.(component.selector) || root.querySelector?.(component.selector)) component.init();
             } catch (error) {
                 console.warn(`[NDS:refresh] ${component.name} failed:`, error);
             }
         }
     }
-    const refreshContainer = (container) => refreshRoots([container || document]);
 
     // "This container is going away." Three shapes:
     //   1. backref convention: an `nds{Name}` instance on the element with a no-arg
@@ -912,65 +906,19 @@
 
     // Markup built after detection: load only the bundles its own content needs, then
     // refresh. Loading every bundle would drag in audit, which must never auto-inject.
-    function mountRoots(roots, found) {
+    function mountContainer(container) {
+        const root = container || document;
         const needed = new Set();
         for (const c of COMPONENTS) {
             if (!c.selector) continue;
-            const here = found ? found.some((el) => el.matches(c.selector))
-                : roots.some((root) => root.matches?.(c.selector) || root.querySelector?.(c.selector));
+            const here = root.matches?.(c.selector) || root.querySelector?.(c.selector);
             const bundle = here && nsToBundle[c.name];
             // A lazy component stays lazy in a mounted view: armed, loaded on its first press.
             if (bundle && c.lazy) { armLazy(c, bundle); if (!c.eager?.()) continue; }
             if (bundle) needed.add(bundle);
         }
         // The pack too, as the injected groups wait for it: the view's components start in the page language.
-        return Promise.all([...needed].map(loadBundle).concat(NDS.i18n.settled)).then(() => refreshRoots(roots, found));
-    }
-    const mountContainer = (container) => mountRoots([container || document]);
-
-    // Views: markup that holds a component starts itself and markup that leaves is released,
-    // so a framework or a swap library calls neither mount() nor destroy(). Core's DOM bus
-    // drops a node removed and added in one batch, so a move is neither.
-    // ponytail: a node removed and put back in a LATER task is released and started again.
-    const ALL = COMPONENTS.map((c) => c.selector).filter(Boolean).join(',');
-    const holds = (n) => n.matches(ALL) || !!n.querySelector(ALL);
-    const topMost = (nodes) => {
-        const set = new Set(nodes);
-        return nodes.filter((n) => { for (let p = n.parentNode; p; p = p.parentNode) if (set.has(p)) return false; return true; });
-    };
-    const addedRoots = new Set(), removedRoots = new Set();
-    let watching = false, flushQueued = false;
-    function watchViews() {
-        if (watching) return;
-        watching = true;
-        const queue = (set) => (nodes) => {
-            nodes.forEach((n) => set.add(n));
-            if (flushQueued) return;
-            flushQueued = true;
-            // Idle: a node NDS builds during a click never runs inits inside that interaction.
-            ready.then(() => scheduleIdle(flushViews, { timeout: 100 }));
-        };
-        NDS.onDOMAdd(null, queue(addedRoots));
-        NDS.onDOMRemove(null, queue(removedRoots));
-    }
-    // One element per shape: 3,000 rows of the same markup test each component selector once.
-    const shapeOf = (el) => el.tagName + '#' + el.id + '.' + el.getAttribute('class') + '[' + el.getAttributeNames().join() + ']';
-    function flushViews() {
-        flushQueued = false;
-        const gone = topMost([...removedRoots].filter((n) => !n.isConnected && holds(n)));
-        const live = topMost([...addedRoots].filter((n) => n.isConnected));
-        removedRoots.clear();
-        addedRoots.clear();
-        const released = gone.reduce((sum, root) => sum + destroyContainer(root), 0);
-        const shapes = new Map();
-        const fresh = live.filter((root) => {
-            const els = [...root.querySelectorAll(ALL)];
-            if (root.matches(ALL)) els.push(root);
-            els.forEach((el) => { const k = shapeOf(el); if (!shapes.has(k)) shapes.set(k, el); });
-            return els.length > 0;
-        });
-        if (fresh.length) mountRoots(fresh, [...shapes.values()]);
-        if (CONFIG.enableLogging && (fresh.length || released)) console.log(`[NDS:views] ${fresh.length} mounted, ${released} released`);
+        return Promise.all([...needed].map(loadBundle).concat(NDS.i18n.settled)).then(() => refreshContainer(root));
     }
 
     NDS.Init = {
