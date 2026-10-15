@@ -146,7 +146,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Editor** — in dark mode, disabled toolbar buttons match the field's label.
 - **Editor** — an image or a link inserted before the user clicks in the text lands at the end; it was dropped. Insert with a file that is still uploading or failed says so.
 - **Editor** — The link, image and remove-component popups no longer show old data after a fast reopen, and a fast double-click on Insert or Unlink no longer loses the selection. Enter keeps a button label whose whole text is selected. Buttons, tags, chips, featured icons and avatar links stay on one line through cleanup, the toolbar and Enter. Undo puts the caret back in the right place. A read-only or disabled editor keeps its toolbar disabled. A selected image shows the focus ring.
-- **Editor** — A form reset, and a script write to the textarea followed by `NDS.triggerEvents(textarea)`, refill the editor.
+- **Editor** — A form reset, and `NDS.setValue(textarea, html)` from a script, refill the editor.
 - **Editor** — Focus that moves into a link or image menu on `<body>` (`data-dropmenu-portal`, or inside a modal or drawer) no longer counts as leaving the editor. The field keeps its focus state and fires no early `change`.
 - **Empty** — The placeholder spans every column of an `.nds-grid`, and `refresh()` updates a table placeholder's `colspan` when the columns change. An empty table's message stays in view while the table scrolls sideways.
 - **Event themes** — Switching theme removes the real event slide, not a loop clone, and the pack's tab labels keep their bold selected look.

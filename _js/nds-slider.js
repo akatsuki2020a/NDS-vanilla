@@ -106,8 +106,7 @@
         // Never let the thumbs cross: clamp the dragged one to the other's value.
         if (parseFloat(minInput.value) > parseFloat(maxInput.value)) {
             var clamped = document.activeElement === minInput ? minInput : maxInput;
-            clamped.value = clamped === minInput ? maxInput.value : minInput.value;
-            NDS.triggerEvents(clamped);
+            NDS.setValue(clamped, clamped === minInput ? maxInput.value : minInput.value);
         }
 
         var track = container.querySelector('.nds-slider-track');

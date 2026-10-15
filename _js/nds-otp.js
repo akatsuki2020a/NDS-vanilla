@@ -59,7 +59,7 @@
     function syncHidden(group) {
         var hidden = getHiddenInput(group);
         var value = getValue(group);
-        if (hidden && hidden.value !== value) { hidden.value = value; NDS.triggerEvents(hidden); }
+        if (hidden && hidden.value !== value) NDS.setValue(hidden, value);
     }
 
     function isAllFilled(group) {

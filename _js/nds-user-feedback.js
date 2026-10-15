@@ -206,7 +206,7 @@ NDS.UserFeedback = (() => {
             const value = picked.ndsRating ? picked.ndsRating.getRating() : Number(picked.dataset.rating) || 0;
 
             const field = feedbackComponent.querySelector('[data-rating-value]');
-            if (field) { field.value = value; NDS.triggerEvents(field); }
+            if (field) NDS.setValue(field, value);
 
             const score = feedbackComponent.querySelector('[data-rating-score]');
             if (score) score.textContent = '(' + value.toFixed(1) + ')';
@@ -244,14 +244,14 @@ NDS.UserFeedback = (() => {
 
             // Clear textarea
             const textarea = feedbackComponent.querySelector('textarea');
-            if (textarea) { textarea.value = ''; NDS.triggerEvents(textarea); }
+            if (textarea) NDS.setValue(textarea, '');
 
             // Rating variant: send the picked stars back to zero along with the rest.
             // Scoped away from .nds-user-feedback-score, which holds the average.
             const picked = feedbackComponent.querySelector('.nds-user-feedback-details .nds-rating');
             if (picked && picked.ndsRating) picked.ndsRating.setValue(0);
             const ratingField = feedbackComponent.querySelector('[data-rating-value]');
-            if (ratingField) { ratingField.value = '0'; NDS.triggerEvents(ratingField); }
+            if (ratingField) NDS.setValue(ratingField, '0');
             const recapScore = feedbackComponent.querySelector('[data-rating-score]');
             if (recapScore) recapScore.textContent = '(0.0)';
         }

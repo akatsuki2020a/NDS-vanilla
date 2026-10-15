@@ -88,7 +88,7 @@ await page.evaluate(() => {
 });
 
 const openPanel = async (id) => {
-    await page.evaluate((id) => document.querySelector('#' + id + ' .nds-time-input').click(), id);
+    await page.evaluate((id) => document.querySelector('#' + id + ' .time-picker-toggle').click(), id);
     await page.waitForFunction((id) => !!window.__tp.panel(id), id, { timeout: 4000 });
 };
 
@@ -198,13 +198,18 @@ ok('the Arabic meridiem parses too', (await carrier('typed12')) === '14:30',
     `carrier "${await carrier('typed12')}"`);
 await page.evaluate(() => document.documentElement.setAttribute('lang', 'en'));
 
+// Typing refuses an impossible hour, so junk only arrives from a script or autofill.
 await build('bad', { 'data-format': 'HH:mm' });
 await type('bad', '99:99');
-ok('typed junk blocks the submit via setCustomValidity', await page.evaluate(() => {
+ok('typing "99:99" never shows an impossible time', /^([01]\d|2[0-3]):[0-5]\d$|^$/.test(await shown('bad')),
+    `shown "${await shown('bad')}"`);
+await build('bad', { 'data-format': 'HH:mm' });
+await page.evaluate(() => NDS.setValue(document.querySelector('#bad .nds-time-input'), '99:99'));
+ok('written junk blocks the submit via setCustomValidity', await page.evaluate(() => {
     const i = document.querySelector('#bad .nds-time-input');
     return i.checkValidity() === false && i.validationMessage.length > 0;
 }));
-ok('typed junk leaves the carrier empty', (await carrier('bad')) === '', `carrier "${await carrier('bad')}"`);
+ok('written junk leaves the carrier empty', (await carrier('bad')) === '', `carrier "${await carrier('bad')}"`);
 await type('bad', '10:15');
 ok('a good value afterwards clears the validity stamp', await page.evaluate(() =>
     document.querySelector('#bad .nds-time-input').checkValidity() === true));

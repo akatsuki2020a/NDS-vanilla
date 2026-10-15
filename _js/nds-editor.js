@@ -25,7 +25,7 @@
  *   - Author a STANDARD NDS textarea field and put .nds-editor on its container. Nothing
  *     editor-specific is authored — the editing surface and the toolbar are generated.
  *   - The adopted textarea is still the form carrier and holds the sanitized HTML. Read
- *     and write THAT, not the contenteditable; after a write, NDS.triggerEvents(textarea)
+ *     and write THAT, not the contenteditable, with NDS.setValue(textarea, html)
  *     refills the surface. A form reset refills it too.
  *   - readonly and disabled are derived from the textarea's native attributes.
  *   - Pasted markup is reduced to the formatting vocabulary, but NDS component markup
@@ -923,7 +923,7 @@
             try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { /* older UAs */ }
 
             this._hydrate();
-            // A script write (announced by NDS.triggerEvents) and a form reset refill the surface.
+            // A script write (NDS.setValue) and a form reset refill the surface.
             // The editor's own leave-change carries the value it wrote, so it skips the refill (and keeps undo).
             const reload = () => {
                 if (this.source.value === this._synced) return;
@@ -2887,9 +2887,7 @@
                     .replace(/\n?<p><br><\/p>$/, '');
             this._synced = next;
             if (this.source.value === next) return;
-            this.source.value = next;
-            // Programmatic .value writes don't fire 'input' — dispatch so NDS.Forms delegation sees the change.
-            this.source.dispatchEvent(new Event('input', { bubbles: true }));
+            NDS.setValue(this.source, next, { change: false });
             this._pushHistory(coalesce);
         }
     }

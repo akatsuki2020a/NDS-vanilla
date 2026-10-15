@@ -478,15 +478,14 @@
         selectItem(itemData) {
             var text = String(itemData[this.nameField] || '');
 
-            this.input.value = text;
             this.selectedItem = itemData;
             if (this.carrier) this.carrier.value = text;
 
             // Trigger input/change events so forms JS updates state. Fetching on
             // the value we just picked would reopen the menu — suppress just this
-            // one dispatch (triggerEvents is synchronous, so the flag can't leak).
+            // one dispatch (setValue is synchronous, so the flag can't leak).
             this._suppressFetch = true;
-            NDS.triggerEvents(this.input);
+            NDS.setValue(this.input, text);
             this._suppressFetch = false;
 
             this.close();

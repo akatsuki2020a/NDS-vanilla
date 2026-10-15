@@ -234,10 +234,11 @@
             after = value.slice(e);
         }
 
-        function write(text) {
+        // Each partial result fires input, as typing does; the final one adds change.
+        function write(text, done) {
             if (text && before && !/\s$/.test(before)) text = ' ' + text;
             if (text && after && !/^\s/.test(after)) text += ' ';
-            input.value = before + text + after;
+            NDS.setValue(input, before + text + after, { change: !!done });
             var caret = before.length + text.length;
             try { input.setSelectionRange(caret, caret); } catch (err) {}
         }
@@ -283,14 +284,8 @@
 
             listen(recognition, {
                 onResult: function(result) {
-                    write(result.isFinal ? result.final.trim() : (result.final + result.interim).trim());
-
-                    if (result.isFinal) {
-                        stop();
-                        // Standard signal — forms (and any consumer) sync chrome
-                        // off the input/change events, no reach into forms internals.
-                        NDS.triggerEvents(input);
-                    }
+                    write(result.isFinal ? result.final.trim() : (result.final + result.interim).trim(), result.isFinal);
+                    if (result.isFinal) stop();
                 },
                 onError: function(error) {
                     stop();

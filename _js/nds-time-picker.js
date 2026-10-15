@@ -443,10 +443,9 @@
                     caret = r.caret ?? value.length;
                 }
                 if (value !== input.value) {
-                    input.value = value;
                     this._shaped = true;
                     // No inputType, so the shaping handler above skips it; Forms still hears it.
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    NDS.setValue(input, value, { change: false });
                 }
                 input.setSelectionRange(caret, caret);
             }, { signal });
@@ -642,15 +641,12 @@
             const input = this.elements.input;
             const carrier = this.elements.carrier;
 
-            const inputChanged = input.value !== display;
-            const carrierChanged = carrier && carrier.value !== stable;
-            if (inputChanged) input.value = display;
-            if (carrierChanged) carrier.value = stable;
             // Before the events: forms' input handler reads the validity, and a stale
             // message would keep an error painted on a value that is now valid.
-            this._validateInput();
-            if (inputChanged) NDS.triggerEvents(input);
-            if (carrierChanged) NDS.triggerEvents(carrier);
+            this._validateInput(false, display);
+            // Carrier first: the field's events then find both written.
+            if (carrier && carrier.value !== stable) NDS.setValue(carrier, stable);
+            if (input.value !== display) NDS.setValue(input, display);
         }
 
         // A hand-typed edit: parse it, adopt it, and let the panel catch up.
@@ -779,9 +775,9 @@
         // disabled options, so every change stamps setCustomValidity and
         // NDS.Forms.validateForm / checkValidity gate the submit. `silent` skips
         // the footer paint — used at construction.
-        _validateInput(silent) {
+        _validateInput(silent, value = this.elements.input.value) {
             const input = this.elements.input;
-            const raw = input.value.trim();
+            const raw = value.trim();
             const msg = raw ? this._validationError(raw) : '';
             input.setCustomValidity(msg);
             if (msg && !silent) {
@@ -990,7 +986,7 @@
             const value = secs === null || msg ? '' : format24(secs);
             if (value !== this.value) {
                 this.value = value;
-                if (carrier) { carrier.value = value; NDS.triggerEvents(carrier); }
+                if (carrier) NDS.setValue(carrier, value);
             }
             // An error paints on leaving the group; a fixed value clears it at once. Soft dependency, as in field mode.
             if (msg && !silent) NDS.Forms?.setStatus?.({ element: container, status: 'error', message: msg });

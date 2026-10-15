@@ -174,9 +174,6 @@
         var value = option ? (option.dataset.value || '') : '';
         var text = option ? (optionLabel(option) || value) : '';
 
-        selectInput.value = text;
-        if (hiddenInput) hiddenInput.value = value;
-
         var scope = menu || formControl._customSelectDropdown || formControl;
         scope.querySelectorAll('.nds-select-option').forEach(function (o) {
             if (option && o.dataset.value === value) NDS.State.add(o, 'selected');
@@ -184,8 +181,9 @@
         });
 
         // Dispatched input/change run forms' delegated field-state sync.
-        NDS.triggerEvents(selectInput);
-        if (hiddenInput) NDS.triggerEvents(hiddenInput);
+        // Value field first: the visible field's events then find both written.
+        if (hiddenInput) NDS.setValue(hiddenInput, value);
+        NDS.setValue(selectInput, text);
 
         formControl.dispatchEvent(new CustomEvent('nds:customselect:change', {
             detail: { value: value, text: text }

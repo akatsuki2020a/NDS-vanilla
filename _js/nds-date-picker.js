@@ -1639,9 +1639,8 @@
             this.state.selectedDate = null;
             this.state.rangeStart = null;
             this.state.rangeEnd = null;
-            this.elements.input.value = '';
             delete this.elements.input.dataset.convertedDate;
-            NDS.triggerEvents(this.elements.input);
+            NDS.setValue(this.elements.input, '');
             this.renderCalendarDates();
             if (this.dropmenuInstance && this.dropmenuInstance.isOpen) {
                 this.dropmenuInstance.close();
@@ -1683,9 +1682,7 @@
                 convertedValue = this.getConvertedDate(this.state.selectedDate);
             }
 
-            this.elements.input.value = value;
-            // input too: framework bindings (v-model, ngModel, bind:value) listen for it.
-            NDS.triggerEvents(this.elements.input);
+            NDS.setValue(this.elements.input, value);
 
             // Store converted date in dataset
             if (convertedValue) {
@@ -1712,7 +1709,7 @@
                     format: out.getAttribute('data-date-format') || format,
                     calendar: out.getAttribute('data-calendar') || (type === 'hijri' ? 'hijri' : 'gregory')
                 }) : '';
-                if (out.value !== v) { out.value = v; NDS.triggerEvents(out); }
+                if (out.value !== v) NDS.setValue(out, v);
             });
         },
 

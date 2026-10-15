@@ -49,7 +49,7 @@
  *     NDS.i18n.pack() → Promise         the page language's pack
  *     NDS.i18n.format(value, vars)     fill {name}; a plural value picks by vars.n
  *     NDS.i18n.safeMerge(target, src)  copy own keys, skipping __proto__ / constructor / prototype
- *     NDS.triggerEvents(el)            dispatch input + change so forms and consumers sync
+ *     NDS.setValue(el, value, { change }) write value (checked on a checkbox/radio), fire input + change
  *     NDS.badge(el, count) · NDS.buildChip(value, opts)
  * Events:
  *   nds:template:ready    on the stamped root, bubbles — detail.id is the summoned id.
@@ -1232,15 +1232,20 @@
         return null;
     };
 
-    // ── Programmatic Input Events ────────────────────────────────────
-    // Dispatch a bubbling input + change pair after a programmatic value
-    // write, so delegated form handlers (validation, counters, custom
-    // selects) observe it exactly as if the user had typed. Null el no-ops.
-    // Usage: input.value = text; NDS.triggerEvents(input);
-    NDS.triggerEvents = (el) => {
+    // ── Programmatic Value Write ─────────────────────────────────────
+    // Write a field's value (checked on a checkbox or radio) and fire a
+    // bubbling input + change pair, so forms and framework bindings see it
+    // as typing. { change: false } fires input only, as each keystroke does.
+    // Through the prototype setter: React's setter on the node would record
+    // the value, and its onChange would then skip the event. Null el no-ops.
+    // Usage: NDS.setValue(input, text);
+    NDS.setValue = (el, value, { change = true } = {}) => {
         if (!el) return;
+        const key = el.type === 'checkbox' || el.type === 'radio' ? 'checked' : 'value';
+        const native = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), key);
+        if (native?.set) native.set.call(el, value); else el[key] = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+        if (change) el.dispatchEvent(new Event('change', { bubbles: true }));
     };
 
     // ── Safe URL (scheme allowlist) ──────────────────────────────────

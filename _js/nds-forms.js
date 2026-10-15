@@ -247,8 +247,6 @@
             if (val > max) return { clamped: max, message: Validator.getNumberRangeMessage('max', max) };
             return null;
         },
-
-        triggerEvents: NDS.triggerEvents,
     };
 
     // A form-container's OWN field — skips fields living inside a NESTED
@@ -1376,8 +1374,7 @@
                 // Toggle + notify — shared by track-click, keyboard, and label-click.
                 function toggleSwitch() {
                     if (switchInput.disabled || switchInput.readOnly || switchElement.classList.contains('disabled')) return;
-                    switchInput.checked = !switchInput.checked;
-                    Utils.triggerEvents(switchInput);
+                    NDS.setValue(switchInput, !switchInput.checked);
                     FieldSync.update(switchInput, formControl);
                     switchElement.dispatchEvent(new CustomEvent('nds:switchChange', {
                         detail: { checked: switchInput.checked, value: switchInput.value, input: switchInput },
@@ -1446,8 +1443,7 @@
                     if (formContainer && NDS.Status.get(formContainer) === 'error') {
                         StatusManager.clear(formContainer);
                     }
-                    input.value = next;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    NDS.setValue(input, next, { change: false });
                     return true;
                 }
                 if (formContainer && NDS.Status.get(formContainer) !== 'error') {
@@ -1523,12 +1519,7 @@
                     // tags, restore seeds) — clear resets the visible field,
                     // never the committed values.
                     if (input.type === 'hidden') return;
-                    if (input.type === 'checkbox' || input.type === 'radio') {
-                        input.checked = false;
-                    } else {
-                        input.value = '';
-                    }
-                    Utils.triggerEvents(input);
+                    NDS.setValue(input, input.type === 'checkbox' || input.type === 'radio' ? false : '');
                     // Skip validation: clearing is an edit like typing, so it must
                     // not raise "required" on a field the user just emptied. The
                     // input event above already cleared any error being shown.
@@ -1675,9 +1666,8 @@
                     document.querySelector('[data-name="' + CSS.escape(targetId) + '"]');
 
                 if (targetInput && itemText) {
-                    targetInput.value = itemText;
                     targetInput.focus();
-                    Utils.triggerEvents(targetInput);
+                    NDS.setValue(targetInput, itemText);
 
                     var formControl = targetInput.closest('.nds-form-control');
                     if (formControl) {
