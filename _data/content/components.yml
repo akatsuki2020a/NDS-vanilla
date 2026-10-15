@@ -543,6 +543,15 @@
   url: "/components/loading.html"
   scss: _sass/components/_loading.scss
 
+- title: "Meta"
+  description: "A line of short facts, each with an icon, such as a time, a place and a person"
+  use_when: "A row of short icon-and-text details under a title: class time, room and teacher, a request's reference and date, an event's place. Fits inside a link, a button, a drawer row or a card. For labeled values use Definition List; for a status use Tags."
+  icon: '<i class="hgi hgi-stroke hgi-left-to-right-list-bullet"></i>'
+  category: "UI"
+  tags: ["CSS"]
+  url: "/components/meta.html"
+  scss: _sass/components/_meta.scss
+
 - title: "Main Navigation"
   description: "Primary navigation bar with branding, mega-menu dropdowns, utility actions, and a mobile drawer"
   use_when: "The primary navigation bar of a site: branding, top-level links, mega-menu dropdowns in column, row or multi-column layouts, utility actions, and the mobile hamburger drawer. Use for main nav, top nav, navbar, site navigation, primary menu, or mega menu requests. For section navigation inside a page tree use Side Menu. For the government branding strip above it use Top Bar."

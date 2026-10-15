@@ -1,0 +1,63 @@
+@use '../mixins' as *;
+
+/* ========================================
+   META
+   A wrapping line of short facts, each with an icon: time, place, person.
+   Phrasing-only (spans), so it sits inside a button or link, such as a
+   drawer row or a link card.
+   ======================================== */
+
+.nds-meta {
+    --_meta-gap: var(--meta-gap, var(--spacing-xs) var(--spacing-lg));
+    --_meta-color: var(--meta-color, var(--text-secondary-paragraph));
+    --_meta-FS: var(--typo-text-sm-FS);
+    --_meta-LH: var(--typo-text-sm-LH);
+    --_meta-icon-size: var(--typo-text-md-FS);
+
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--_meta-gap);
+    color: var(--_meta-color);
+    font-size: var(--_meta-FS);
+    line-height: var(--_meta-LH);
+    font-weight: var(--font-weight-regular);
+    white-space: normal;
+
+    &.nds-sm {
+        --_meta-FS: var(--typo-text-xs-FS);
+        --_meta-LH: var(--typo-text-xs-LH);
+        --_meta-icon-size: var(--typo-text-sm-FS);
+    }
+
+    &.nds-lg {
+        --_meta-FS: var(--typo-text-md-FS);
+        --_meta-LH: var(--typo-text-md-LH);
+        --_meta-icon-size: var(--typo-text-lg-FS);
+    }
+}
+
+.nds-meta-item {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+    // A fact moves down whole: it wraps inside only when wider than the line.
+    flex-shrink: 0;
+    max-width: 100%;
+
+    // (0,2,0) beats a host button's `i` box, which is (0,1,1) and sizes width and height too.
+    > :is(i, .nds-icon) {
+        flex-shrink: 0;
+        width: var(--_meta-icon-size);
+        height: var(--_meta-icon-size);
+        // Centers the icon on the first line, so a wrapped fact keeps it at the top.
+        margin-block-start: calc((var(--_meta-LH) - var(--_meta-icon-size)) / 2);
+        font-size: var(--_meta-icon-size);
+        line-height: var(--_meta-icon-size);
+    }
+
+    &[data-status="success"] { color: var(--text-success); }
+    &[data-status="info"] { color: var(--text-info); }
+    &[data-status="warning"] { color: var(--text-warning); }
+    &:is([data-status="error"], [data-status="critical"]) { color: var(--text-error); }
+    &[data-status="neutral"] { color: var(--text-default); }
+}
