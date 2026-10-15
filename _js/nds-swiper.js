@@ -7,7 +7,7 @@
  *   instance.next() / .prev()       move by one page
  *   instance.goTo(index)            move to a slide index
  *   instance.slideTo(index, animate = true)  move to a slide index, clamped to the
- *                                   last page; false = instant
+ *                                   last page (a loop has none); false = instant
  *   instance.destroy()
  * Events:
  *   nds:swiper:change (bubbles)     detail.index = the real slide now at rest, after every move
@@ -252,6 +252,13 @@
 
         init() {
             this.abortController = new AbortController();
+            // An unencoded space in a srcset URL breaks the candidate. Before setupLoop,
+            // so the clones copy the repaired value.
+            this.container.querySelectorAll('img[srcset], source[srcset]').forEach(el => {
+                const srcset = el.getAttribute('srcset');
+                const fixed = fixSrcsetSpaces(srcset);
+                if (fixed !== srcset) el.setAttribute('srcset', fixed);
+            });
             this.container.style.setProperty('--total', this._real);
             this.updateSlidesPerView();
 
@@ -924,8 +931,9 @@
         // ==============================================
 
         slideTo(index, animate = true) {
-            // Real index in, clamped to the last real page.
-            index = Math.max(0, Math.min(index, this._real - this.slidesPerView));
+            // Real index in, clamped to the last real page. A loop has no last page, so
+            // any slide goes — the index nds:swiper:change reports must restore.
+            index = Math.max(0, Math.min(index, this._real - (this._loop ? 1 : this.slidesPerView)));
             this._goToFull(this._full(index), !animate || NDS.prefersReducedMotion);
         }
 
@@ -979,21 +987,6 @@
     // ==============================================
 
     function initializeComponents() {
-        // Defer the page-wide srcset-space normalization to idle: it only rewrites
-        // malformed srcsets (unencoded spaces), so it never needs to block the eager
-        // init task, and the sweep is unbounded (every srcset-bearing node on the page).
-        // Covers both img[srcset] and <picture> source[srcset] — the lazy path handles
-        // the data-srcset variants, this catches eager (non-lazy) srcsets.
-        NDS.onIdle(() => {
-            document.querySelectorAll('img[srcset], source[srcset]').forEach(el => {
-                const srcset = el.getAttribute('srcset');
-                if (srcset && srcset.includes(' ') && !srcset.includes('%20')) {
-                    const fixed = fixSrcsetSpaces(srcset);
-                    if (fixed !== srcset) el.setAttribute('srcset', fixed);
-                }
-            });
-        });
-
         const swipers = document.querySelectorAll('.nds-swiper');
         swipers.forEach(swiper => {
             // A loop clone's nested swiper is a dead copy — reinit must not wire it.

@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "15/10/2026 - 05:08 PM"
 ---
 
 <section id="swiper-overview" class="nds-content-section nds-doc-overview">
@@ -449,7 +449,7 @@ A swiper in the page starts by itself. The instance is on the element as `el._nd
 | `NDS.Swiper.destroy(el)` | Stops one swiper and puts its markup back as written. `NDS.Init.destroy()` calls it |
 | `instance.next()`, `instance.prev()` | Moves one page |
 | `instance.goTo(index)` | Moves to a slide |
-| `instance.slideTo(index, animate)` | Moves to a slide, no further than the last page. `false` for `animate` moves at once |
+| `instance.slideTo(index, animate)` | Moves to a slide, no further than the last page. A looping swiper has no last page, so it moves to any slide. `false` for `animate` moves at once |
 | `instance.destroy()` | The same as `NDS.Swiper.destroy(el)` |
 {: .nds-table .nds-responsive}
 
