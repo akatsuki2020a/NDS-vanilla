@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:19 PM"
+last_edit: "15/10/2026 - 01:14 PM"
 ---
 
 <section id="accordion-overview" class="nds-content-section nds-doc-overview">
@@ -36,7 +36,7 @@ Pick another component when:
       <h2 class="nds-section-title">Markup</h2>
     </div>
     <div class="nds-section-body">
-<script type="text/html" id="accordion-text" data-canon data-variants="accordion-variants-table">
+<script type="text/html" id="accordion-text" data-canon data-variants="accordion-variants-table" data-preview-start>
 <div class="nds-accordion" id="service-faq">
   <div class="nds-accordion-item">
     <h3 class="nds-accordion-header" id="faq-heading-1">
@@ -142,7 +142,7 @@ Pick another component when:
     </div>
     <div class="nds-section-body" markdown="1">
 
-The first item is open in the markup: its button has `aria-expanded="true"` and `data-state="open"`, and its `nds-accordion-collapse` has `data-state="open"`. Keep all three, so the item shows open before the script runs. To open another item first, move the three to it. To start with all items closed, remove both `data-state="open"` and set `aria-expanded="false"`. Stroke and Shadow need Card.
+The first item is open in the markup: its button has `aria-expanded="true"` and `data-state="open"`, and its `nds-accordion-collapse` has `data-state="open"`. Keep all three, so the item shows open before the script runs. To open another item first, move the three to it. To start with all items closed, remove both `data-state="open"` and set `aria-expanded="false"`. Stroke and Shadow need Card. Minimal and Card do not combine.
 
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
@@ -151,7 +151,8 @@ The first item is open in the markup: its button has `aria-expanded="true"` and 
 | Size | LG (default) | — | — | 56px headings, for page content. It needs no class |
 | Size | MD | `.nds-md` | `.nds-accordion` | 48px headings, for a side column or a card |
 | Size | SM | `.nds-sm` | `.nds-accordion` | 40px headings, for a dense list in a panel or a filter |
-| Card | Card | `.nds-card` | `.nds-accordion` | A card background and rounded corners around the whole list. The first item loses its top line |
+| Minimal | Minimal | `.nds-minimal` | `.nds-accordion:not(.nds-card)` | Each heading is a short button in neutral link colors, as wide as its title, with no lines between items and no side padding. The headings take the button sizes: 40px, 32px with MD, 24px with SM. For a short list inside other content, such as a step or a card. Not with Card |
+| Card | Card | `.nds-card` | `.nds-accordion:not(.nds-minimal)` | A card background and rounded corners around the whole list. The first item loses its top line |
 | Stroke | Stroke | `.nds-stroke` | `.nds-accordion.nds-card` | A border around the card |
 | Shadow | Shadow | `.nds-shadow` | `.nds-accordion.nds-card` | A shadow under the card, to lift it off a colored background |
 | Always open | Always open (hint: Several items stay open at once) | `[data-state~="always-open"]` | `.nds-accordion` | Several items stay open at once. Without it, opening one item closes the others |
@@ -265,6 +266,7 @@ By default, one item is open at a time. When a person opens an item, the open on
 - Keep one button and one `nds-accordion-collapse` in each item. The script pairs them by their order in the markup.
 - Give each button `aria-controls` with the `id` of its collapse.
 - Do not add `role="region"`, `aria-label` or `aria-labelledby` to `nds-accordion-collapse`. On a long list, every panel becomes a landmark. On a plain `div`, the two labels are not allowed, so an accessibility audit fails.
+- Use `nds-minimal` for one or two items inside other content, such as the requirements of a step. On a page section, keep the full-width headings: they are easier to find and to tap.
 - Do not hide content that people must see to finish a task, such as a required step or a warning.
 - After you add items to a live accordion, call `NDS.Accordion.reinit()`. The new items start working, and the open items stay open.
 
@@ -297,8 +299,8 @@ Set them on `.nds-accordion`, in its `style` attribute.
 
 | Property | Default | Controls |
 |---|---|---|
-| `--accordion-header-height` | `56px`, `48px` with `nds-md`, `40px` with `nds-sm` | Minimum height of each heading button |
-| `--accordion-header-padding` | `var(--spacing-xl)`, `var(--spacing-lg)` with `nds-md`, `var(--spacing-md)` with `nds-sm` | Padding above and below the title in each heading button |
+| `--accordion-header-height` | `56px`, `48px` with `nds-md`, `40px` with `nds-sm` | Minimum height of each heading button. Not used with `nds-minimal` |
+| `--accordion-header-padding` | `var(--spacing-xl)`, `var(--spacing-lg)` with `nds-md`, `var(--spacing-md)` with `nds-sm` | Padding above and below the title in each heading button. With `nds-minimal`, padding above and below each panel instead |
 {: .nds-table .nds-responsive}
 
 ### JavaScript
