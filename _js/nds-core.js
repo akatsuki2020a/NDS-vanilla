@@ -67,8 +67,7 @@
  *   - NDS.request is a fetch wrapper and nothing more — no XHR, no upload progress, no
  *     retry, no cache layer and no interceptors.
  *   - data-state is a LIST. Never write it with setAttribute; go through NDS.State so
- *     other tokens survive and the onAdd/onRemove hooks fire. Only add / remove / apply
- *     fire the hooks: set and clear replace the list without them.
+ *     other tokens survive and the onAdd/onRemove hooks fire.
  */
 // NDS Core — shared namespace and utilities
 (() => {
@@ -779,16 +778,19 @@
                 const map = new Map();
                 const io = new IntersectionObserver(entries => {
                     for (let i = 0; i < entries.length; i++) {
-                        const cb = map.get(entries[i].target);
-                        if (cb) cb(entries[i]);
+                        const fns = map.get(entries[i].target);
+                        if (fns) fns.forEach(fn => fn(entries[i]));
                     }
                 }, { threshold: opts.threshold || 0, rootMargin: opts.rootMargin || '0px' });
                 group = { io, map };
                 pool.set(key, group);
             }
-            group.map.set(el, fn);
-            group.io.observe(el);
+            // A Set per element, as in onElementResize: two subscribers on one element both fire.
+            let fns = group.map.get(el);
+            if (!fns) { fns = new Set(); group.map.set(el, fns); group.io.observe(el); }
+            fns.add(fn);
             return () => {
+                if (!fns.delete(fn) || fns.size) return; // a repeat off() must not drop a newer subscriber
                 group.map.delete(el);
                 group.io.unobserve(el);
                 if (!group.map.size) { group.io.disconnect(); pool.delete(key); }
@@ -978,13 +980,27 @@
 
         const get = el => el ? (el.getAttribute('data-state') || '') : '';
 
-        const set = (el, ...states) => {
-            if (!el) return;
-            states.length ? el.setAttribute('data-state', states.join(' '))
-                          : el.removeAttribute('data-state');
+        // set and clear replace the list, so the hooks hear each token that left or arrived.
+        const _swap = (el, before) => {
+            const after = parse(el);
+            before.forEach(t => { if (!after.has(t)) _fire(_onRemove, t, el); });
+            after.forEach(t => { if (!before.has(t)) _fire(_onAdd, t, el); });
         };
 
-        const clear = el => { if (el) el.removeAttribute('data-state'); };
+        const set = (el, ...states) => {
+            if (!el) return;
+            const before = parse(el);
+            states.length ? el.setAttribute('data-state', states.join(' '))
+                          : el.removeAttribute('data-state');
+            _swap(el, before);
+        };
+
+        const clear = el => {
+            if (!el) return;
+            const before = parse(el);
+            el.removeAttribute('data-state');
+            _swap(el, before);
+        };
 
         const apply = (el, ...states) => {
             if (!el) return;

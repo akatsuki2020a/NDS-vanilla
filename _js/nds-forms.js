@@ -209,8 +209,8 @@
     }
 
     // A field state changes inputs and buttons, so it needs script however it is written:
-    // the hooks keep NDS.State.add() synchronous, the observer catches a bare attribute,
-    // State.set() or the class. _applied holds what each field has entered, so an effect runs once and a
+    // the hooks keep every NDS.State write synchronous, the observer catches a bare attribute
+    // or the class. _applied holds what each field has entered, so an effect runs once and a
     // native <input disabled> is never re-enabled by an unrelated token change.
     var FIELD_STATES = { disabled: _setDisabled, readonly: _setReadonly, loading: _setLoading };
     var _applied = new WeakMap();
