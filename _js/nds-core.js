@@ -4,6 +4,7 @@
  *   state + status
  *     NDS.State.add / .remove / .set / .has / .get / .clear / .apply (el, ...tokens)
  *                                     the data-state token list
+ *     NDS.State.parse(el)              the tokens as a Set
  *     NDS.State.onAdd / .onRemove (token, scope, fn)   react to a token; returns off()
  *     NDS.Status.set / .get / .clear (el, status)      the data-status value
  *     NDS.aria.expanded / .hidden / .pressed / .selected / .disabled / .label / .current
@@ -25,10 +26,10 @@
  *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
  *     NDS.stackingZ(el)                highest z-index on el's ancestors: the layer a portaled popup matches
  *     NDS.stickyHeaderBottom() · NDS.scrollBelowNav(el, opts) · NDS.scrollLock.lock/unlock
- *     NDS.gridLastRow(container) · NDS.trapFocus(getEl) · NDS.focusableSel
+ *     NDS.gridLastRow.update(container) · NDS.trapFocus(getEl) · NDS.focusableSel
  *   data + text
  *     NDS.request(url, opts) → Promise<{isJson, data}>     the shared fetch wrapper
- *     NDS.cache.get / .set (key, value, minutes)           localStorage with expiry
+ *     NDS.cache.get / .clear (key) · .set (key, value, minutes)   localStorage with expiry
  *     NDS.formatNumber(n, opts) · NDS.escapeHtml(s) · NDS.safeUrl(url) · NDS.uniqueId(prefix)
  *     NDS.date.parse(text, opts) · .format(date, opts) · .convert(text, from, to) · .today() · .site
  *     NDS.date.formatFor(el)           the nearest data-date-format (<html> is the site's)
@@ -38,7 +39,7 @@
  *                                      <html data-timezone / data-date-format>
  *     NDS.announce(text)               say something in the shared live region
  *     NDS.i18n.load(component, lang)   a promise of a section's words
- *     NDS.i18n.strings(component, defaults) → { text, set, load }   a component's strings;
+ *     NDS.i18n.strings(component, defaults) → { text, set, load, ready, has, defaults }   a component's strings;
  *                                      set() marks a fixed word for core, re-writes one with {vars}
  *     data-i18n="section.key" · data-i18n-{aria-label|aria-description|title|alt|placeholder|label}
  *                                      a marker: core writes the word in the page language, unless
@@ -47,6 +48,7 @@
  *     NDS.i18n.settled → Promise        the pack landed, failed, or 3 s passed; then <html data-nds-i18n>
  *     NDS.i18n.pack() → Promise         the page language's pack
  *     NDS.i18n.format(value, vars)     fill {name}; a plural value picks by vars.n
+ *     NDS.i18n.safeMerge(target, src)  copy own keys, skipping __proto__ / constructor / prototype
  *     NDS.triggerEvents(el)            dispatch input + change so forms and consumers sync
  *     NDS.badge(el, count) · NDS.buildChip(value, opts)
  * Events:
@@ -65,7 +67,8 @@
  *   - NDS.request is a fetch wrapper and nothing more — no XHR, no upload progress, no
  *     retry, no cache layer and no interceptors.
  *   - data-state is a LIST. Never write it with setAttribute; go through NDS.State so
- *     other tokens survive and the onAdd/onRemove hooks fire.
+ *     other tokens survive and the onAdd/onRemove hooks fire. Only add / remove / apply
+ *     fire the hooks: set and clear replace the list without them.
  */
 // NDS Core — shared namespace and utilities
 (() => {
