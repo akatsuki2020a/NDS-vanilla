@@ -381,32 +381,20 @@
     // ==============================================
     // PAB (Persistent Action Buttons) MANAGEMENT
     // ==============================================
-    // Where each pinned item came from: a comment marker left in its place.
-    const _pinnedHome = new WeakMap();
-
+    // A pinned item leaves a marker in its place (NDS.relocate), so a framework holding it still finds its spot.
     function managePABPlacement() {
         const pabs = DOM.nav ? DOM.nav.querySelectorAll('.nds-nav-item.nds-pinned') : [];
         if (!pabs.length || !DOM.minimal) return;
 
         if (state.isMinimal) {
-            pabs.forEach(item => {
-                if (_pinnedHome.has(item)) return;
-                const mark = document.createComment(' nds-pinned ');
-                item.before(mark);
-                _pinnedHome.set(item, mark);
-            });
+            pabs.forEach(item => NDS.relocate(item));
             // Calls to action first, then the rest, each in written order.
             const all = Array.from(pabs);
             const cta = all.filter(p => p.classList.contains('nds-nav-cta'));
             const rest = all.filter(p => !p.classList.contains('nds-nav-cta'));
             DOM.minimal.prepend(...cta, ...rest);
         } else {
-            pabs.forEach(item => {
-                const mark = _pinnedHome.get(item);
-                if (!mark) return;
-                mark.replaceWith(item);
-                _pinnedHome.delete(item);
-            });
+            pabs.forEach(item => NDS.restore(item));
         }
     }
 

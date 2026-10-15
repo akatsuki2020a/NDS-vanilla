@@ -12,6 +12,8 @@
 //             and nothing from the old one is left.
 //   MORPH     idiomorph and Turbo 8 frame morphs keep the nodes: the same two calls work, and
 //             refresh() alone leaves a second instance on a node (the doc's warning).
+//   FAB       a FAB docks on <body>, out of the framework's tree. Unmount leaves none behind; in
+//             React a sibling added before a bare FAB crashes the app, a wrapper of its own does not.
 //   HYDRATION React and Vue hydrate server HTML from their own server renderers: NDS starting at
 //             load breaks it; data-nds-auto-init="false" + initialize() after hydration does not.
 //   INFO rows print a class-binding result the doc does not claim yet; they never fail the run.
@@ -588,6 +590,318 @@ const IDIOMORPH = 'idiomorph@0.7.3/dist/idiomorph.min.js';
     await lifecycle(page, 'Turbo 8 morph', 't8', swap, async () => {});
     ok("Turbo 8 morph: each frame render released the old view's instances", (await page.evaluate(() => window.__released_count)) > 0);
     ok('Turbo 8 morph: no page errors', errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+// ---- MOVED NODES ------------------------------------------------------------
+// NDS moves some nodes the app wrote: a FAB into its dock, an open menu to <body>, a pinned
+// nav item into the minimal bar. The framework still holds each one and may insert a
+// sibling before it or remove it. NDS.relocate keeps the node's old spot answering for it.
+const FAB = '<button type="button" class="nds-btn nds-fab nds-primary nds-circle nds-icon-only" id="f-fab" data-fab-pos="right" aria-label="Open" hidden><i class="nds-icon nds-hgi-menu-01" aria-hidden="true"></i></button>';
+async function fabRun(page, name, errors) {
+    const state = () => page.evaluate(() => {
+        const fab = document.getElementById('f-fab');
+        return { docked: !!fab?.parentElement?.classList.contains('nds-fab-dock'), shown: !!fab && !fab.hidden,
+            extra: !!document.getElementById('f-extra'), inPage: !!fab };
+    });
+    const set = (k, v) => page.evaluate(([k, v]) => { window.__fabSet(k, v); return window.__wait(400); }, [k, v]);
+    await page.evaluate(() => window.__wait(600));
+    let s = await state();
+    ok(`${name} FAB: it docks on <body> and shows`, s.docked && s.shown, JSON.stringify(s));
+    let before = errors.length;
+    await set('extra', true);
+    s = await state();
+    ok(`${name} FAB: a sibling added before it renders, and the FAB stays docked`, s.extra && s.docked && errors.length === before,
+        JSON.stringify({ ...s, thrown: errors.slice(before) }));
+    await set('show', false);
+    s = await state();
+    ok(`${name} FAB: unmount leaves no FAB on the page`, !s.inPage, JSON.stringify(s));
+    await set('show', true);
+    await page.evaluate(() => window.__wait(600));
+    s = await state();
+    ok(`${name} FAB: it docks again after a remount`, s.docked && s.shown, JSON.stringify(s));
+    before = errors.length;
+    await set('fab', false);
+    s = await state();
+    ok(`${name} FAB: the view removing the docked FAB takes it off the page`, !s.inPage && errors.length === before,
+        JSON.stringify({ ...s, thrown: errors.slice(before) }));
+}
+
+for (const v of REACT) {
+    const { page, errors } = await open(loadReact(v));
+    await page.evaluate(([TO_TREE, FAB]) => {
+        const h = React.createElement;
+        const tree = eval(TO_TREE)(h, { class: 'className', for: 'htmlFor', readonly: 'readOnly' });
+        function View({ extra, fab }) {
+            const ref = React.useRef(null);
+            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
+            return h('div', { ref }, extra ? h('span', { id: 'f-extra' }, 'extra') : null, ...(fab ? tree(FAB) : []));
+        }
+        function App() {
+            const [s, setS] = React.useState({ show: true, extra: false, fab: true });
+            window.__fabSet = (k, val) => setS((o) => ({ ...o, [k]: val }));
+            return h(React.StrictMode, null, s.show ? h(View, s) : null);
+        }
+        ReactDOM.createRoot(document.querySelector('.nds-section-body').appendChild(document.createElement('div'))).render(h(App));
+    }, [TO_TREE, FAB]);
+    await fabRun(page, 'React ' + major(v), errors);
+    await page.close();
+}
+
+{
+    const v = VUE.at(-1);
+    const { page, errors } = await open(loadVue(v));
+    await page.evaluate((FAB) => {
+        const View = {
+            props: ['extra', 'fab'],
+            template: '<div ref="root"><span v-if="extra" id="f-extra">extra</span><template v-if="fab">' + FAB + '</template></div>',
+            mounted() { window.NDS?.Init.mount(this.$refs.root); },
+            beforeUnmount() { window.__destroy(this.$refs.root); }
+        };
+        const vm = Vue.createApp({ components: { View }, data: () => ({ show: true, extra: false, fab: true }),
+            template: '<View v-if="show" :extra="extra" :fab="fab" />' }).mount(document.querySelector('.nds-section-body').appendChild(document.createElement('div')));
+        window.__fabSet = (k, val) => { vm[k] = val; };
+    }, FAB);
+    await fabRun(page, 'Vue ' + v.split('.').slice(0, 2).join('.'), errors);
+    await page.close();
+}
+
+{
+    const v = SVELTE.at(-1);
+    const { page, errors } = await open([]);
+    await page.evaluate(async ([FAB, SVELTE_APP, v]) => {
+        const src = `<script>
+  export let show = true;
+  export let extra = false;
+  export let fab = true;
+  function nds(node) { window.NDS?.Init.mount(node); return { destroy() { window.__destroy(node); } }; }
+<\/script>
+{#if show}<div use:nds>{#if extra}<span id="f-extra">extra</span>{/if}{#if fab}${FAB}{/if}</div>{/if}`;
+        const App = await eval(SVELTE_APP)(src, v);
+        const app = new App({ target: document.querySelector('.nds-section-body').appendChild(document.createElement('div')) });
+        window.__fabSet = (k, val) => app.$set({ [k]: val });
+    }, [FAB, SVELTE_APP, v]);
+    await fabRun(page, 'Svelte ' + major(v), errors);
+    await page.close();
+}
+
+{
+    const [v, zone] = ANGULAR.at(-1);
+    const { page, errors } = await open([]);
+    await page.evaluate(async ([FAB, v, zone, ANGULAR_LOAD]) => {
+        const ng = await eval(ANGULAR_LOAD)(v, zone);
+        const { Component, ElementRef, inject } = ng.core;
+        class ViewCmp {
+            extra = false;
+            fab = true;
+            el = inject(ElementRef);
+            ngAfterViewInit() { window.NDS?.Init.mount(this.el.nativeElement); }
+            ngOnDestroy() { window.__destroy(this.el.nativeElement); }
+        }
+        Component({ selector: 'nds-fab-view', standalone: true, inputs: ['extra', 'fab'],
+            template: '@if (extra) { <span id="f-extra">extra</span> }@if (fab) {' + FAB + '}' })(ViewCmp);
+        class AppCmp { show = true; extra = false; fab = true; }
+        Component({ selector: 'nds-fab-app', standalone: true, imports: [ViewCmp],
+            template: '@if (show) { <nds-fab-view [extra]="extra" [fab]="fab" /> }' })(AppCmp);
+        document.querySelector('.nds-section-body').appendChild(document.createElement('nds-fab-app'));
+        const app = await ng.browser.bootstrapApplication(AppCmp);
+        window.__fabSet = (k, val) => { app.components[0].instance[k] = val; app.tick(); };
+    }, [FAB, v, zone, ANGULAR_LOAD]);
+    await fabRun(page, 'Angular ' + major(v), errors);
+    await page.close();
+}
+
+// React holds the moved node itself, so it is the framework these break. An open portaled
+// menu, and a plain node NDS.portal moved: React inserts a sibling before each, then drops it.
+for (const v of REACT) {
+    const R = 'React ' + major(v);
+    const { page, errors } = await open(loadReact(v));
+    await page.evaluate(() => {
+        const h = React.createElement;
+        function View({ before, keep }) {
+            const ref = React.useRef(null);
+            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
+            return h('div', { ref },
+                h('div', { id: 'mv-box' }, before ? h('i', { id: 'mv-before' }) : null, keep ? h('span', { id: 'mv-node' }, 'node') : null),
+                h('div', { className: 'nds-dropmenu', id: 'mv-dm', 'data-portal': '' },
+                    h('button', { type: 'button', className: 'nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger' },
+                        h('span', { className: 'nds-label' }, 'Choose')),
+                    before ? h('i', { id: 'mv-dm-before' }) : null,
+                    keep ? h('div', { className: 'nds-dropmenu-menu', hidden: true }, h('div', { className: 'nds-dropmenu-scroll' },
+                        h('button', { type: 'button', className: 'nds-btn nds-subtle nds-dropmenu-item', 'data-value': 'SA' },
+                            h('span', { className: 'nds-label' }, 'Saudi Arabia')))) : null));
+        }
+        function App() {
+            const [s, setS] = React.useState({ before: false, keep: true });
+            window.__mvSet = (k, val) => setS((o) => ({ ...o, [k]: val }));
+            return h(React.StrictMode, null, h(View, s));
+        }
+        ReactDOM.createRoot(document.querySelector('.nds-section-body').appendChild(document.createElement('div'))).render(h(App));
+    });
+    await page.evaluate(() => window.__wait(600));
+    await page.evaluate(() => NDS.portal(document.getElementById('mv-node'), { force: true }));
+    await page.locator('#mv-dm .nds-dropmenu-trigger').click();
+    await page.evaluate(() => window.__wait());
+    const moved = await page.evaluate(() => ({
+        node: document.getElementById('mv-node')?.parentElement === document.body,
+        menu: NDS.Dropmenu.menuOf(document.getElementById('mv-dm'))?.parentElement === document.body
+    }));
+    ok(`${R} moved nodes: setup, both nodes sit in <body>`, moved.node && moved.menu, JSON.stringify(moved));
+
+    let before = errors.length;
+    await page.evaluate(() => { window.__mvSet('before', true); return window.__wait(); });
+    const s = await page.evaluate(() => ({
+        siblings: !!document.getElementById('mv-before') && !!document.getElementById('mv-dm-before'),
+        // React's sibling lands where the moved node was: right before its marker.
+        order: document.getElementById('mv-before')?.nextSibling?.nodeType === 8,
+        menuOpen: !NDS.Dropmenu.menuOf(document.getElementById('mv-dm'))?.hidden
+    }));
+    ok(`${R} moved nodes: a sibling React adds before them renders, where they were`, s.siblings && s.order && s.menuOpen
+        && errors.length === before, JSON.stringify({ ...s, thrown: errors.slice(before) }));
+
+    before = errors.length;
+    await page.evaluate(() => { window.__mvSet('keep', false); return window.__wait(); });
+    const gone = await page.evaluate(() => ({
+        node: !document.getElementById('mv-node'),
+        menu: !document.querySelector('body > .nds-dropmenu-menu'),
+        markers: [...(document.getElementById('mv-box')?.childNodes || [])].filter((n) => n.nodeType === 8).length
+    }));
+    ok(`${R} moved nodes: React removing them takes them off the page`, gone.node && gone.menu && gone.markers === 0
+        && errors.length === before, JSON.stringify({ ...gone, thrown: errors.slice(before) }));
+    ok(`${R} moved nodes: no page errors`, errors.length === 0, errors.join(' | '));
+    await page.close();
+}
+
+// A modal, panel or the cookie panel may ship inside a <template> (core/init.md, Usage); the
+// first open unpacks it. React owns that <template>, then adds a node before it or drops it.
+for (const v of REACT) {
+    const R = 'React ' + major(v);
+    const page = await browser.newPage();
+    const errors = [];
+    page.on('pageerror', (e) => { if (!/ResizeObserver loop/.test(e.message)) errors.push(e.message); });
+    // data-cookies="false": no built panel races the app's own; open() still loads the bundle.
+    await page.route(/components\/forms\.html/, async (route) => {
+        const res = await route.fetch();
+        await route.fulfill({ response: res, body: (await res.text()).replace(/<html([^>]*)>/, '<html$1 data-cookies="false">') });
+    });
+    await page.goto(`${BASE}/components/forms.html`, { waitUntil: 'load' });
+    await page.waitForFunction(() => window.NDS?.Init?.mount, null, { timeout: 15000 });
+    await loadReact(v)(page);
+    await page.evaluate(() => {
+        const h = React.createElement;
+        const PANEL = '<aside id="nds-cookies-panel" class="nds-panel nds-cookies" aria-label="Cookies" hidden>'
+            + '<div class="nds-cookies-view" data-cookies-view="notice"><p>Own panel</p>'
+            + '<button type="button" class="nds-btn nds-primary" data-cookies-action="accept"><span class="nds-label">Accept</span></button></div></aside>';
+        const MODAL = '<div id="rt-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-hidden="true" hidden>'
+            + '<div class="nds-card-content"><span class="nds-card-title">Title</span></div></div>';
+        function App() {
+            const [s, setS] = React.useState({ before: false, keep: true });
+            window.__tplSet = (k, val) => setS((o) => ({ ...o, [k]: val }));
+            return h('div', { id: 'rt-host' },
+                s.before ? h('i', { id: 'rt-before-cookies' }) : null,
+                s.keep ? h('template', { dangerouslySetInnerHTML: { __html: PANEL } }) : null,
+                s.before ? h('i', { id: 'rt-before-modal' }) : null,
+                s.keep ? h('template', { dangerouslySetInnerHTML: { __html: MODAL } }) : null);
+        }
+        ReactDOM.createRoot(document.querySelector('.nds-section-body').appendChild(document.createElement('div'))).render(h(App));
+    });
+    await page.waitForTimeout(300);
+    const opened = await page.evaluate(async () => {
+        await NDS.CookieConsent.open();
+        await NDS.Modal.open('rt-modal');
+        await new Promise((r) => setTimeout(r, 400));
+        const host = document.getElementById('rt-host');
+        return { cookies: host.contains(document.getElementById('nds-cookies-panel')), modal: NDS.Modal.isOpen() };
+    });
+    ok(`${R} templates: setup, the own cookie panel and the modal unpack in the app's tree`, opened.cookies && opened.modal, JSON.stringify(opened));
+    await page.evaluate(() => { NDS.Modal.close(); NDS.CookieConsent.close(); return new Promise((r) => setTimeout(r, 400)); });
+
+    let before = errors.length;
+    await page.evaluate(() => { window.__tplSet('before', true); return new Promise((r) => setTimeout(r, 300)); });
+    const added = await page.evaluate(() => !!document.getElementById('rt-before-cookies') && !!document.getElementById('rt-before-modal'));
+    ok(`${R} templates: a node React adds before an unpacked <template> renders`, added && errors.length === before,
+        errors.slice(before).join(' | '));
+    before = errors.length;
+    await page.evaluate(() => { window.__tplSet('keep', false); return new Promise((r) => setTimeout(r, 300)); });
+    const alive = await page.evaluate(() => !!document.getElementById('rt-host'));
+    ok(`${R} templates: React removing an unpacked <template> does not crash the app`, alive && errors.length === before,
+        errors.slice(before).join(' | '));
+    await page.close();
+}
+
+// Accessibility: React renders its FAB (the _includes/accessibility-panel.html markup); the first
+// press loads the bundle and builds the panel. Then React adds a node before the docked FAB and drops it.
+for (const v of REACT) {
+    const R = 'React ' + major(v);
+    const { page, errors } = await open(loadReact(v));
+    await page.evaluate(() => {
+        // The page ships its own toggle: take it out, so the one under test is React's.
+        document.querySelectorAll('[data-accessibility-toggle]').forEach((b) => b.remove());
+        const h = React.createElement;
+        function View({ before, fab }) {
+            const ref = React.useRef(null);
+            React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
+            return h('div', { ref }, before ? h('i', { id: 'a11y-before' }) : null, fab ? h('button', {
+                className: 'nds-btn nds-primary nds-circle nds-icon-only nds-fab nds-accessibility-toggle', type: 'button', id: 'r-a11y',
+                'aria-label': 'Accessibility settings', 'aria-expanded': 'false', 'data-fab-pos': 'auto', 'data-panel-side': 'end',
+                'data-panel-toggle': 'nds-accessibility-panel', 'data-accessibility-toggle': '', hidden: true
+            }, h('i', { className: 'nds-icon nds-hgi-accessibility', 'aria-hidden': 'true' })) : null);
+        }
+        function App() {
+            const [s, setS] = React.useState({ before: false, fab: true });
+            window.__a11ySet = (k, val) => setS((o) => ({ ...o, [k]: val }));
+            return h(React.StrictMode, null, h(View, s));
+        }
+        ReactDOM.createRoot(document.querySelector('.nds-section-body').appendChild(document.createElement('div'))).render(h(App));
+    });
+    await page.waitForFunction(() => document.getElementById('r-a11y')?.parentElement?.classList.contains('nds-fab-dock'), null, { timeout: 10000 })
+        .catch(() => {});
+    const docked = await page.evaluate(() => !!document.getElementById('r-a11y')?.parentElement?.classList.contains('nds-fab-dock'));
+    ok(`${R} accessibility: its FAB docks`, docked);
+    await page.locator('#r-a11y').click();
+    const panelOpen = await page.waitForFunction(() => {
+        const p = document.getElementById('nds-accessibility-panel');
+        return p && !p.hidden && NDS.State.has(p, 'open');
+    }, null, { timeout: 15000 }).then(() => true, () => false);
+    ok(`${R} accessibility: a press loads the bundle and opens the built panel`, panelOpen);
+    await page.keyboard.press('Escape');
+    await page.evaluate(() => window.__wait(400));
+
+    let before = errors.length;
+    await page.evaluate(() => { window.__a11ySet('before', true); return window.__wait(); });
+    const s = await page.evaluate(() => ({ added: !!document.getElementById('a11y-before'),
+        docked: !!document.getElementById('r-a11y')?.parentElement?.classList.contains('nds-fab-dock') }));
+    ok(`${R} accessibility: a node React adds before the docked FAB renders`, s.added && s.docked && errors.length === before,
+        JSON.stringify({ ...s, thrown: errors.slice(before) }));
+    before = errors.length;
+    await page.evaluate(() => { window.__a11ySet('fab', false); return window.__wait(); });
+    const gone = await page.evaluate(() => !document.getElementById('r-a11y'));
+    ok(`${R} accessibility: React removing the FAB takes it off the page`, gone && errors.length === before, errors.slice(before).join(' | '));
+    await page.close();
+}
+
+{
+    // Main nav: a pinned item moves into the minimal bar on a narrow screen and back on a wide one.
+    const { page, errors } = await open([]);
+    const spots = () => page.evaluate(() => [...document.querySelectorAll('.nds-main-nav .nds-nav-item.nds-pinned')].map((item) => ({
+        inMinimal: !!item.closest('.nds-nav-minimal, [class*="minimal"]') && item.parentElement !== NDS.homeOf(item),
+        home: !!NDS.homeOf(item),
+        prev: item.previousSibling?.nodeType === 8 ? 'marker' : (item.previousElementSibling?.className || 'none')
+    })));
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.evaluate(() => window.__wait());
+    const wide = await spots();
+    await page.setViewportSize({ width: 600, height: 800 });
+    await page.evaluate(() => window.__wait(500));
+    const narrow = await spots();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.evaluate(() => window.__wait(500));
+    const back = await spots();
+    ok('Main nav: setup, the page has pinned items', wide.length > 0, String(wide.length));
+    ok('Main nav: narrow, each pinned item moved and left a marker', narrow.every((s) => s.home && s.prev !== 'marker'), JSON.stringify(narrow));
+    ok('Main nav: wide again, each is back in its own spot, no marker left', JSON.stringify(back) === JSON.stringify(wide)
+        && back.every((s) => !s.home), JSON.stringify({ wide, back }));
+    ok('Main nav: no page errors', errors.length === 0, errors.join(' | '));
     await page.close();
 }
 

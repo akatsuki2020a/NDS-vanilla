@@ -122,10 +122,10 @@
     // `override` forces a position, ignoring the FAB's own data-fab-pos.
     function register(fab, override) {
         if (!fab) return null;
-        // Remember where the FAB was authored BEFORE the first move, so destroy() can put
-        // it back. Recorded once: a re-register (a direction flip re-routes every FAB)
-        // reads the dock as the parent, which would overwrite the real origin with a slot.
-        if (!fab._ndsFabOrigin) fab._ndsFabOrigin = { parent: fab.parentNode, nextSibling: fab.nextSibling };
+        // Mark where the FAB was authored before the first move, so destroy() can put it back
+        // and a framework holding it still finds its spot. A re-register (a direction flip
+        // re-routes every FAB) keeps the first mark: relocate() skips a node already moved.
+        NDS.relocate(fab);
         const d = dock(resolvePos(fab, override));
         d.appendChild(fab);
         [...d.children].sort((a, b) => order(a) - order(b)).forEach(c => d.appendChild(c));
@@ -260,7 +260,7 @@
     // The container form is what NDS.Init.destroy needs, and it cannot be a plain scan:
     // register() MOVED the button to a dock on <body>, so a docked FAB is no longer inside
     // the view that authored it and no querySelectorAll on that view will ever find it.
-    // The origin recorded at register() time is the only link back, so the match is on
+    // The marker register() left (NDS.homeOf) is the only link back, so the match is on
     // where the FAB CAME FROM, not on where it sits now.
     //
     // Putting it back matters beyond tidiness: a framework unmounts the view by removing
@@ -274,15 +274,8 @@
         if (elOrRoot.classList?.contains('nds-fab')) {
             const fab = elOrRoot;
             if (!fab.hasAttribute(INIT_ATTR)) return 0;   // never routed — nothing was taken
-            const origin = fab._ndsFabOrigin;
-            if (origin?.parent?.isConnected) {
-                const before = origin.nextSibling?.parentNode === origin.parent ? origin.nextSibling : null;
-                origin.parent.insertBefore(fab, before);
-                fab.setAttribute('hidden', '');
-            } else {
-                fab.remove();   // authored inside a view the app already removed
-            }
-            delete fab._ndsFabOrigin;
+            // Back to its marker: with a view the app already removed, it leaves with that view.
+            if (NDS.restore(fab)) fab.setAttribute('hidden', '');
             fab.removeAttribute(INIT_ATTR);
             fab.removeAttribute('data-fab-riding');
             fab.style.removeProperty('--_fab-ride');
@@ -297,7 +290,7 @@
 
         let count = 0;
         document.querySelectorAll('.nds-fab[' + INIT_ATTR + ']').forEach(fab => {
-            const parent = fab._ndsFabOrigin?.parent;
+            const parent = NDS.homeOf(fab);
             if (elOrRoot === document || (parent && (parent === elOrRoot || elOrRoot.contains?.(parent)))) {
                 count += destroy(fab);
             }

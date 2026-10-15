@@ -163,7 +163,7 @@ report.push(...await records.evaluate(async () => {
     // so a scan of that view can never find it again. Prove the round trip, not just the
     // stamp: docked before, back where it was authored after, and hidden as it shipped.
     const fab = document.querySelector('.nds-fab-dock .nds-fab');
-    const fabOrigin = fab?._ndsFabOrigin?.parent;
+    const fabOrigin = fab && NDS.homeOf(fab);
     // Direct parent, not contains(): this page authors its FAB straight in <body>, and the
     // dock lives in <body> too, so containment reads true in both states.
     ok('setup: a FAB is docked away from its origin', !!fab && !!fabOrigin && fab.parentElement !== fabOrigin,

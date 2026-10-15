@@ -22,6 +22,7 @@
  *     NDS.transitionSpeed()            the token-sourced duration in ms
  *   DOM, portal-aware
  *     NDS.portal(el) / .unportal(el) / .needsPortal(el)
+ *     NDS.relocate(el) / .restore(el) / .homeOf(el)   move a node the app owns; its old spot answers for it
  *     NDS.closest(el, sel) · NDS.queryAll(root, sel) · NDS.querySelector(root, sel)
  *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
  *     NDS.stackingZ(el)                highest z-index on el's ancestors: the layer a portaled popup matches
@@ -1208,7 +1209,7 @@
     // Resolve an id that may still sit inside a <template>. A modal or panel
     // may ship template-wrapped so its nodes stay out of the DOM until first
     // open; on a live miss this scans the page's templates, moves the owning
-    // template's content into its place, inits the arrivals via
+    // template's content in right after it, inits the arrivals via
     // NDS.Init.refresh (loader inits are idempotent), fires a bubbling
     // nds:template:ready {id} on the element — page JS binds there, since
     // nothing it looked up at load existed — and returns the element.
@@ -1221,7 +1222,8 @@
         const tpls = document.querySelectorAll('template');
         for (let i = 0; i < tpls.length; i++) {
             if (!tpls[i].content.getElementById(id)) continue;
-            tpls[i].replaceWith(tpls[i].content);
+            // After it, not in its place: the emptied <template> stays where a framework put it.
+            tpls[i].after(tpls[i].content);
             el = document.getElementById(id);
             if (el) {
                 NDS.Init?.refresh?.(el);
@@ -1653,9 +1655,66 @@
         return false;
     };
 
+    // ── Relocate / Restore ───────────────────────────────────────────
+    // A node NDS moves out of markup the app owns (a portaled menu, a docked FAB, a pinned
+    // nav item) leaves a comment marker in its place. While it is away, the old parent's
+    // insertBefore / appendChild / removeChild take the marker for the node, so a framework
+    // that still holds it (React inserts before it, or removes it) works on its old spot
+    // instead of throwing "not a child of this node".
+    // Usage: NDS.relocate(menu); document.body.appendChild(menu); … NDS.restore(menu);
+    // ponytail: only those three methods answer for the node; replaceChild or a textContent
+    // write on the old parent still sees the move.
+    const _home = new WeakMap();   // moved node → { mark, parent }
+    const _node = Node.prototype;
+    const _standIn = (parent, n) => { const h = n && _home.get(n); return h && h.mark.parentNode === parent ? h.mark : n; };
+    function _guard(parent) {
+        parent._ndsMoved = (parent._ndsMoved || 0) + 1;
+        if (parent._ndsMoved > 1) return;
+        parent.insertBefore = function (node, ref) { return _node.insertBefore.call(this, _standIn(this, node), _standIn(this, ref)); };
+        parent.appendChild = function (node) { return _node.appendChild.call(this, _standIn(this, node)); };
+        parent.removeChild = function (node) {
+            if (_standIn(this, node) === node) return _node.removeChild.call(this, node);
+            // Back home first, through its owner's own exit, then out as the app asked.
+            if (node._ndsPortal) NDS.unportal(node); else NDS.restore(node);
+            return _node.removeChild.call(this, node);
+        };
+    }
+    function _unguard(parent) {
+        if (--parent._ndsMoved > 0) return;
+        delete parent._ndsMoved;
+        delete parent.insertBefore;
+        delete parent.appendChild;
+        delete parent.removeChild;
+    }
+
+    NDS.relocate = (el) => {
+        const parent = el?.parentNode;
+        if (!parent || _home.has(el)) return;
+        const mark = document.createComment(' moved by NDS ');   // no nds- prefix: the audit reads those as class names
+        _node.insertBefore.call(parent, mark, el);
+        _home.set(el, { mark, parent });
+        _guard(parent);
+    };
+
+    // Put a relocated node back at its marker. True when it went home; when the marker is
+    // gone it goes to the end of its old parent while that parent is on the page, else off it.
+    NDS.restore = (el) => {
+        const h = _home.get(el);
+        if (!h) return false;
+        _home.delete(el);
+        const parent = h.mark.parentNode;
+        if (parent) _node.replaceChild.call(parent, el, h.mark);
+        else if (h.parent.isConnected) _node.appendChild.call(h.parent, el);
+        else el.remove();
+        _unguard(h.parent);
+        return !!el.parentNode;
+    };
+
+    // The element a relocated node was moved out of, or null.
+    NDS.homeOf = (el) => _home.get(el)?.parent || null;
+
     // Move `el` to <body> when an ancestor would trap it; no-op otherwise.
-    // Records the original parent + next-sibling on the element so unportal
-    // can restore them. `opts.snapshotVars` lets callers preserve custom
+    // NDS.relocate keeps its old spot so unportal can restore it. `opts.snapshotVars` lets callers preserve custom
     // properties that consumers set on the wrapper (e.g.
     // `--dropmenu-min-width: 250px` on `.nds-filter`) — those values are
     // read from the inherited cascade BEFORE the move and re-applied as
@@ -1679,11 +1738,8 @@
             }
         }
         const setProps = [];
-        el._ndsPortal = {
-            parent: el.parentNode,
-            nextSibling: el.nextSibling,
-            setProps,
-        };
+        el._ndsPortal = { setProps };
+        NDS.relocate(el);
         document.body.appendChild(el);
         for (const k in snap) {
             el.style.setProperty(k, snap[k]);
@@ -1698,15 +1754,11 @@
         const state = el._ndsPortal;
         if (!state) return;
         _portaledCount--;
-        if (state.nextSibling && state.nextSibling.parentNode === state.parent) {
-            state.parent.insertBefore(el, state.nextSibling);
-        } else {
-            state.parent.appendChild(el);
-        }
+        delete el._ndsPortal;   // first: restore() below may run inside the guard's removeChild
+        NDS.restore(el);
         for (let i = 0; i < state.setProps.length; i++) {
             el.style.removeProperty(state.setProps[i]);
         }
-        delete el._ndsPortal;
     };
 
     // Highest z-index on el's ancestor chain: the layer a popup portaled to <body>
