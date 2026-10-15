@@ -228,6 +228,15 @@
   js: _js/nds-countdown.js
   scss: _sass/components/_countdown.scss
 
+- title: "Date Tile"
+  description: "One date in a small box, with the weekday, the day number and the month"
+  use_when: "A date shown as a small calendar box at the start of a list row: exam dates, deadlines, events, appointments, an academic calendar. For picking a date use Date Picker; for time left use Countdown."
+  icon: '<i class="hgi hgi-stroke hgi-calendar-03"></i>'
+  category: "UI"
+  tags: ["CSS"]
+  url: "/components/date-tile.html"
+  scss: _sass/components/_date-tile.scss
+
 - title: "Counter Animation"
   description: "Scroll-triggered animated counters that count up to a target value"
   use_when: "Numbers that count up to their value when scrolled into view: animated statistics, KPI counters, impact figures."
