@@ -97,7 +97,7 @@ related:
                                     </a>
                                 </div>
                                 {%- endif %}
-                                <div class="nds-accordion nds-sm" data-journey-progress>
+                                <div class="nds-accordion nds-md nds-minimal" data-journey-progress>
                                     <div class="nds-accordion-item">
                                         <h3 class="nds-accordion-header">
                                             <button type="button" class="nds-btn nds-subtle nds-menu-btn nds-accordion-btn" aria-expanded="false" aria-controls="step-{{ forloop.index }}-requirements">
@@ -238,7 +238,7 @@ related:
     <div class="nds-section-body">
         <div class="nds-block nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;">
             {% for journey in page.related %}
-            <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-card nds-stroke">
+            <div class="nds-card nds-stroke">
                 <div class="nds-card-header">
                     <div class="nds-card-featured-icon">
                         <span class="nds-featured-icon nds-circle nds-lg">
@@ -252,7 +252,12 @@ related:
                         <p class="nds-card-description">{{ journey.description }}</p>
                     </div>
                 </div>
-            </a>
+                <div class="nds-card-actions nds-end">
+                    <a href="{{ '/templates/life-journey-page-template' | relative_url }}" class="nds-btn nds-secondary nds-icon-only" aria-label="Open {{ journey.title }}">
+                        <i class="nds-icon nds-hgi-arrow-next-02" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
             {% endfor %}
         </div>
         <a href="{{ '/templates/life-journey-template' | relative_url }}" class="nds-btn nds-transparent nds-color nds-lg">

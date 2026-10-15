@@ -142,7 +142,7 @@ related:
                                         <span class="nds-stepper-title">{{ step.title }}</span>
                                         <span class="nds-stepper-description">{{ step.description }}</span>
                                     </div>
-                                    <div class="nds-accordion nds-sm">
+                                    <div class="nds-accordion nds-md nds-minimal">
                                         <div class="nds-accordion-item">
                                             <h3 class="nds-accordion-header">
                                                 <button type="button" class="nds-btn nds-subtle nds-menu-btn nds-accordion-btn" aria-expanded="false" aria-controls="service-{{ forloop.index }}-requirements">
@@ -188,7 +188,7 @@ related:
                                         <span class="nds-stepper-title">{{ step.title }}</span>
                                         <span class="nds-stepper-description">{{ step.description }}</span>
                                     </div>
-                                    <div class="nds-accordion nds-sm">
+                                    <div class="nds-accordion nds-md nds-minimal">
                                         <div class="nds-accordion-item">
                                             <h3 class="nds-accordion-header">
                                                 <button type="button" class="nds-btn nds-subtle nds-menu-btn nds-accordion-btn" aria-expanded="false" aria-controls="step-{{ forloop.index }}-requirements">

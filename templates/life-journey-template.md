@@ -44,6 +44,18 @@ journeys:
     icon: "hgi-store-01"
   - title: "Importing Goods"
     icon: "hgi-delivery-truck-01"
+  - title: "Buying a Car"
+    icon: "hgi-car-01"
+  - title: "Traveling Abroad"
+    icon: "hgi-airplane-01"
+  - title: "Renewing a Passport"
+    icon: "hgi-passport-01"
+  - title: "Studying at University"
+    icon: "hgi-graduation-scroll"
+  - title: "Starting a Farm"
+    icon: "hgi-plant-02"
+  - title: "Retiring from Work"
+    icon: "hgi-briefcase-01"
 completed:
   - title: "Getting a Driving License"
     steps: 3
@@ -132,9 +144,9 @@ completed:
             <div class="nds-tab-content">
                 <!-- Returning user only -->
                 <div class="nds-tab-panel nds-flush-inline" role="tabpanel" id="panel-current" aria-labelledby="tab-current" tabindex="-1" hidden>
-                    <div class="nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;">
+                    <div id="current-list" class="nds-paged-content nds-grid" style="--per-page: 6; --max-col: 3; --mid-col: 2; --min-col: 1;">
                         {% for journey in page.current %}
-                        <div class="nds-card nds-stroke nds-horizontal nds-reverse">
+                        <div class="nds-page-item nds-card nds-stroke nds-horizontal nds-reverse">
                             <div class="nds-card-header">
                                 <div class="nds-progress-circle nds-md" data-num="{{ journey.step }}" data-max="{{ journey.steps }}" role="progressbar" aria-labelledby="current-{{ forloop.index }}-title">
                                     <svg width="120" height="120" viewBox="0 0 24 24">
@@ -163,14 +175,12 @@ completed:
                         </div>
                         {% endfor %}
                     </div>
-                    <a href="#" class="nds-btn nds-transparent nds-color nds-lg">
-                        <span class="nds-label">More</span>
-                    </a>
+                    <nav class="nds-pagination" data-auto-pagination="current-list" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
                 </div>
                 <div class="nds-tab-panel nds-flush-inline" role="tabpanel" id="panel-all" aria-labelledby="tab-all" tabindex="0">
-                    <div class="nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;">
+                    <div id="all-list" class="nds-paged-content nds-grid" style="--per-page: 6; --max-col: 3; --mid-col: 2; --min-col: 1;">
                         {% for journey in page.journeys %}
-                        <div class="nds-card nds-stroke">
+                        <div class="nds-page-item nds-card nds-stroke">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon nds-circle nds-lg">
@@ -194,15 +204,13 @@ completed:
                         </div>
                         {% endfor %}
                     </div>
-                    <a href="#" class="nds-btn nds-transparent nds-color nds-lg">
-                        <span class="nds-label">More</span>
-                    </a>
+                    <nav class="nds-pagination" data-auto-pagination="all-list" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
                 </div>
                 <!-- Returning user only -->
                 <div class="nds-tab-panel nds-flush-inline" role="tabpanel" id="panel-completed" aria-labelledby="tab-completed" tabindex="-1" hidden>
-                    <div class="nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;">
+                    <div id="completed-list" class="nds-paged-content nds-grid" style="--per-page: 6; --max-col: 3; --mid-col: 2; --min-col: 1;">
                         {% for journey in page.completed %}
-                        <div class="nds-card nds-stroke nds-horizontal nds-reverse">
+                        <div class="nds-page-item nds-card nds-stroke nds-horizontal nds-reverse">
                             <div class="nds-card-header">
                                 <div class="nds-progress-circle nds-md" data-num="{{ journey.steps }}" data-max="{{ journey.steps }}" role="progressbar" aria-labelledby="completed-{{ forloop.index }}-title">
                                     <svg width="120" height="120" viewBox="0 0 24 24">
@@ -228,9 +236,7 @@ completed:
                         </div>
                         {% endfor %}
                     </div>
-                    <a href="#" class="nds-btn nds-transparent nds-color nds-lg">
-                        <span class="nds-label">More</span>
-                    </a>
+                    <nav class="nds-pagination" data-auto-pagination="completed-list" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
                 </div>
             </div>
         </div>
