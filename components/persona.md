@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "15/10/2026 - 11:40 AM"
 ---
 
 <section id="persona-overview" class="nds-content-section nds-doc-overview">
@@ -203,7 +203,7 @@ Set these knobs in the `style` attribute of `.nds-persona`. The MD and SM classe
 |---|---|---|
 | `--persona-name-FS` | `var(--typo-text-xl-FS)` | Name font size |
 | `--persona-name-LH` | `var(--typo-text-xl-LH)` | Name line height |
-| `--persona-name-color` | `var(--text-default)` | Name color |
+| `--persona-name-color` | `var(--text-display)` | Name color |
 | `--persona-role-FS` | `var(--typo-text-lg-FS)` | Role font size |
 | `--persona-role-LH` | `var(--typo-text-lg-LH)` | Role line height |
 | `--persona-role-color` | `var(--text-primary-paragraph)` | Role color |

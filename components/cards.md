@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "14/10/2026 - 12:22 AM"
+last_edit: "15/10/2026 - 11:40 AM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -401,8 +401,8 @@ Set these on `.nds-card`, except the image properties, which go on `.nds-card-im
 | `--card-width-min` | `0` | Minimum width |
 | `--card-width-max` | `360px` | Maximum width |
 | `--card-title` | `var(--text-display)` | Title color |
-| `--card-subtitle` | `var(--text-primary-paragraph)` | Subtitle color |
-| `--card-text` | `var(--text-display)` | Description color |
+| `--card-subtitle` | `var(--text-secondary)` | Subtitle color |
+| `--card-text` | `var(--text-primary-paragraph)` | Description color |
 | `--card-number` | `var(--text-primary-strong)` | Color of the headline number, `.nds-card-number` |
 | `--card-rating` | `var(--text-secondary-paragraph)` | Rating count color |
 | `--featuredicon-color` | `var(--featuredicons-icon-primary)` | Featured icon and avatar color. Color classes change it |

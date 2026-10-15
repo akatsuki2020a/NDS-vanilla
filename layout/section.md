@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 11:45 AM"
+last_edit: "15/10/2026 - 11:40 AM"
 ---
 
 <section id="section-overview" class="nds-content-section nds-doc-overview">
@@ -416,7 +416,7 @@ Set these on `.nds-content-section`. The block title properties are on the [Bloc
 | `--section-border-radius` | `0` | Corner radius |
 | `--section-title-color` | `var(--text-display)` | Title color |
 | `--section-subtitle-color` | `var(--text-secondary-paragraph)` | Subtitle color |
-| `--section-description-color` | `var(--text-default)` | Description color |
+| `--section-description-color` | `var(--text-primary-paragraph)` | Description color |
 | `--section-text-color` | `inherit` | Text color of everything else in the section |
 | `--section-padding-block` | `var(--spacing-5xl)` | Top and bottom padding. On a desktop page with no side column, the layout sets it to `var(--spacing-7xl)` |
 | `--section-padding-block-start` | `var(--section-padding-block)` | Top padding |

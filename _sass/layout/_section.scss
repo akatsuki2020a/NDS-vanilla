@@ -18,7 +18,7 @@
     --_section-title-color: var(--section-title-color, var(--_section-title-color-base));
     --_section-subtitle-color-base: var(--text-secondary-paragraph);
     --_section-subtitle-color: var(--section-subtitle-color, var(--_section-subtitle-color-base));
-    --_section-description-color-base: var(--text-default);
+    --_section-description-color-base: var(--text-primary-paragraph);
     --_section-description-color: var(--section-description-color, var(--_section-description-color-base));
     --_section-text-color-base: inherit;
     --_section-text-color: var(--section-text-color, var(--_section-text-color-base));
@@ -62,7 +62,7 @@
         --_section-bg-base: var(--background-primary-light);
         --_section-title-color-base: var(--text-display);
         --_section-subtitle-color-base: var(--text-default);
-        --_section-description-color-base: var(--text-default);
+        --_section-description-color-base: var(--text-primary-paragraph);
         --_section-text-color-base: var(--text-default);
     }
 

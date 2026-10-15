@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.0"
-updated: "1.2.0"
-last_edit: "10/10/2026 - 05:28 PM"
+updated: "1.12.x"
+last_edit: "15/10/2026 - 11:40 AM"
 ---
 
 <section id="quote-overview" class="nds-content-section nds-doc-overview">
@@ -166,7 +166,7 @@ Set these on `.nds-quote`. On phones the quote sets `--quote-mark-size`, `--quot
 | `--quote-mark-size` | `48px` (`28px` on phones) | Width and height of each quote mark |
 | `--quote-title-FS` | `var(--typo-display-xs-FS)` | Title font size |
 | `--quote-title-LH` | `var(--typo-display-xs-LH)` | Title line height |
-| `--quote-title-color` | `var(--text-default)` | Title color |
+| `--quote-title-color` | `var(--text-display)` | Title color |
 | `--quote-text-FS` | `var(--typo-text-xl-FS)` (`var(--typo-text-lg-FS)` on phones) | Quoted text font size |
 | `--quote-text-LH` | `var(--typo-text-xl-LH)` (`var(--typo-text-lg-LH)` on phones) | Quoted text line height |
 | `--quote-text-color` | `var(--text-primary-paragraph)` | Quoted text color |

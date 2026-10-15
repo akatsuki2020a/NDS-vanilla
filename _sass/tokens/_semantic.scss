@@ -80,7 +80,7 @@
     // lavender) — for text hierarchy use --text-default / --text-display /
     // --text-{primary,secondary}-paragraph instead.
     --text-primary: var(--colors-primary-600);
-    --text-secondary: var(--colors-secondary-600);
+    --text-secondary: var(--colors-secondary-800); // DGA's 600 is 2.3:1 on white; 800/400 pass AA on every theme, like --text-primary
     --text-tertiary: var(--colors-tertiary-500);
     --text-primary-light: var(--colors-primary-300);
     --text-secondary-light: var(--colors-secondary-300);
@@ -244,6 +244,7 @@
     --text-secondary-paragraph: var(--colors-neutral-400);
     --text-primary-strong: var(--colors-primary-400);
     --text-primary: var(--colors-primary-400);
+    --text-secondary: var(--colors-secondary-400);
     --text-success: var(--colors-green-400);
     --text-info: var(--colors-blue-400);
     --text-warning: var(--colors-yellow-400);
