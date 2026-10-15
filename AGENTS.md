@@ -197,6 +197,17 @@ Verify a whitespace change by rendered text, not by eyeballing: build before/aft
 
 **A component is UI plus an event API; a built-in server call is an optional shortcut.** It is fine when it is simple and never limits usage: the events and methods must do everything the call does, so a developer with CSRF, custom headers or their own client skips it (Session Timeout: `data-session-extend` is the shortcut; `nds:session:extend` + `end()`/`reset()` is the full path). A bug in the call is a bug to fix, not a reason to remove it.
 
+## Framework Hosts
+
+**NDS is plain HTML, CSS and JS, and a consumer can integrate it into any stack: a plain page, a server-rendered app, or a framework such as React, Vue or Angular. Judge every component and API change against all of them, never against how this repo's own pages use it.** A framework host mounts and unmounts views, rebuilds nodes, and keeps state in its own code. `core/init.md` → Framework Views is the contract the consumer follows: `NDS.Init.mount(view)` after mount, `NDS.Init.destroy(view)` before unmount.
+
+- **The instance lives on the element.** `el.nds{Name}`, with a `destroy()` that drops its stamps: `NDS.Init.destroy()` finds instances by that backref. No module-level registry keyed by id or selector. It outlives an unmounted node, and a reused id resolves to the dead instance.
+- **`create(el)` stands alone.** A view mounted after load gets everything `init()` wires (document listeners, observers), not just an instance.
+- **State round-trips.** What a component reports in its events can be written back through its `data-*` hooks and restores the same look after a re-mount (Stepper: `currentStep` ↔ `data-current`).
+- **A change to an observable value is breaking** (event detail, return value, a `data-*` the script writes), even when every page here still works. It ships in a major with a Migration line, or takes an additive path. Before changing one, `git log -S` the code and read why it is that way.
+
+`nds-js-audit` checks the first three as JSA-23 (the first two in full-tree runs too) and gates the fourth in its shared rule conventions.
+
 ## Adding New Components
 
 **Phase 1: Build & test** — verify behavior in `playground.md` before registering anywhere.
