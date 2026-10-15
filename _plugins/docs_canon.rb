@@ -57,6 +57,7 @@ module DocsCanon
               '.nds-card.nds-doc-frame{--card-width:100%;--card-radius:var(--radius-md);min-height:200px;display:flex;justify-content:center;align-items:center}' \
               '.nds-card.nds-doc-preview{padding-block:56px;--card-gap:0}' \
               '.nds-doc-preview[data-preview-page]:not([data-screen]){justify-content:flex-start;align-items:flex-start}' \
+              '.nds-doc-preview[data-preview-start]{align-items:flex-start}' \
               '.nds-doc-oncolor{--card-bg:var(--background-primary-strong)}' \
               '.nds-divider.nds-doc-divider{margin-block-start:0;--divider-line-start:24px}' \
               '.nds-doc-view{position:absolute;inset-block-start:12px;inset-inline-end:12px;display:flex;gap:var(--spacing-md)}' \
@@ -485,7 +486,8 @@ module DocsCanon
         page = attr(attrs, 'data-preview') == 'page'
         demo = '' if page
         # A builder's card names its builder, so Dark reaches the code too.
-        card = %( nds-doc-preview" data-preview-of="#{id}"#{%( data-builder-card="#{id}") if builder}#{' data-preview-page' if page})
+        # data-preview-start: top-aligned, so markup that grows on open (an accordion) grows down, not both ways.
+        card = %( nds-doc-preview" data-preview-of="#{id}"#{%( data-builder-card="#{id}") if builder}#{' data-preview-page' if page}#{' data-preview-start' if attrs.include?('data-preview-start')})
         # On-color markup sits on the deep primary surface; data-theme gives the grid and toggles their look on it.
         oncolor = !page && src.include?('nds-oncolor')
         out << %(<div class="nds-block nds-card nds-doc-frame nds-doc-grid#{' nds-doc-oncolor' if oncolor}#{card}#{' data-theme="dark"' if oncolor}>\n#{view(attr(attrs, 'data-screens') != 'none') unless stage_panel}#{demo}\n</div>\n)
