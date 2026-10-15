@@ -65,6 +65,57 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
     ok('React input: onChange runs and the value stays', res.out['r-new'] >= 1 && res.v[0] === 'hello', JSON.stringify(res));
     ok('React textarea: onChange runs and the value stays', res.out['r-area'] >= 1 && res.v[1] === 'line');
     ok('A/B: the old write-then-dispatch is lost to React (no onChange)', !res.out['r-old']);
+
+    // Boxes: React reads a checkbox or radio from its click, so setValue flips it with one.
+    const box = await page.evaluate(async () => {
+        const h = React.createElement, out = {};
+        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+        function Box({ type, id, name }) {
+            const [on, setOn] = React.useState(false);
+            return h('span', null,
+                h('input', { type, id, name, checked: on, onChange: (e) => { out[id] = (out[id] || 0) + 1; setOn(e.target.checked); } }),
+                h('b', { id: id + '-state' }, String(on)));
+        }
+        // The switch canon, rendered by React: NDS wires its track after the mount.
+        function Switch() {
+            const [on, setOn] = React.useState(false);
+            return h('div', { className: 'nds-form-container', id: 'r-sw-box' }, h('div', { className: 'nds-form-control' },
+                h('div', { className: 'nds-switch' },
+                    h('input', { type: 'checkbox', id: 'r-sw', className: 'nds-switch-input', checked: on, onChange: (e) => setOn(e.target.checked) }),
+                    h('div', { className: 'nds-switch-track' }, h('div', { className: 'nds-switch-thumb' }))),
+                h('b', { id: 'r-sw-state' }, String(on))));
+        }
+        ReactDOM.createRoot(host).render(h('div', null,
+            h(Box, { type: 'checkbox', id: 'r-cb' }), h(Box, { type: 'radio', id: 'r-rd', name: 'r-rd' }), h(Switch)));
+        const tick = () => new Promise((r) => setTimeout(r, 50));
+        await tick();
+        NDS.Init.mount(document.getElementById('r-sw-box'));
+        const read = (id) => ({ dom: document.getElementById(id).checked, state: document.getElementById(id + '-state').textContent });
+        NDS.setValue(document.getElementById('r-cb'), true);
+        NDS.setValue(document.getElementById('r-rd'), true);
+        await tick();
+        const on = { cb: read('r-cb'), rd: read('r-rd') };
+        NDS.setValue(document.getElementById('r-cb'), false);
+        document.querySelector('#r-sw-box .nds-switch-track').click();
+        await tick();
+        return { out, on, cbOff: read('r-cb'), sw: read('r-sw') };
+    });
+    ok('React checkbox: setValue on and off reaches its state', box.on.cb.state === 'true' && box.cbOff.state === 'false'
+        && box.cbOff.dom === false && box.out['r-cb'] === 2, JSON.stringify(box));
+    ok('React radio: setValue reaches its state', box.on.rd.state === 'true' && box.out['r-rd'] === 1);
+    ok('React switch: a track click reaches its state, flipped once', box.sw.dom === true && box.sw.state === 'true', JSON.stringify(box.sw));
+
+    // A disabled box takes the plain write: no click lands, the value and events still do.
+    const dis = await page.evaluate(() => {
+        const cb = document.body.appendChild(document.createElement('input'));
+        cb.type = 'checkbox';
+        cb.disabled = true;
+        window.__log.length = 0;
+        NDS.setValue(cb, true);
+        return { checked: cb.checked, log: window.__log.slice() };
+    });
+    ok('Disabled checkbox: setValue still writes it with input + change', dis.checked
+        && dis.log.join() === 'input:checkbox,change:checkbox', JSON.stringify(dis));
     await page.close();
 }
 

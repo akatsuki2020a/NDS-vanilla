@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 04:08 PM"
+last_edit: "15/10/2026 - 04:26 PM"
 ---
 
 <section id="init-overview" class="nds-content-section nds-doc-overview">
@@ -159,7 +159,7 @@ NDS adds classes to some elements, such as `nds-dropmenu` on a picker's field an
 
 An NDS field fires the native `input` and `change` events each time it writes a value, so a two-way binding that listens for them sees the user's pick. Vue's `v-model`, Angular's `ngModel` and Svelte's `bind:value` are examples. Bind the input that holds the value: for Custom Select that is `.nds-select-value`, because its visible field holds the option's text. Tag Input, Multiselect and Rating have no single value field, so read their value from their event.
 
-A controlled React text field sees each value that NDS writes: its `onChange` runs, so keep the value in state there. Write your own values with `NDS.setValue(el, value)` for the same result. A checkbox is different, because React listens for its click, not its `change`. Read a switch from its `nds:switchChange` event.
+A controlled React field sees each value that NDS writes, a checkbox and a switch too: its `onChange` runs, so keep the value in state there. Write your own values with `NDS.setValue(el, value)` for the same result.
 
 ### Events
 {: .nds-block-title}

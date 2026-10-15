@@ -49,7 +49,7 @@
  *     NDS.i18n.pack() → Promise         the page language's pack
  *     NDS.i18n.format(value, vars)     fill {name}; a plural value picks by vars.n
  *     NDS.i18n.safeMerge(target, src)  copy own keys, skipping __proto__ / constructor / prototype
- *     NDS.setValue(el, value, { change }) write value (checked on a checkbox/radio), fire input + change
+ *     NDS.setValue(el, value, { change }) write value (checked: a click), fire input + change
  *     NDS.badge(el, count) · NDS.buildChip(value, opts)
  * Events:
  *   nds:template:ready    on the stamped root, bubbles — detail.id is the summoned id.
@@ -1242,6 +1242,12 @@
     NDS.setValue = (el, value, { change = true } = {}) => {
         if (!el) return;
         const key = el.type === 'checkbox' || el.type === 'radio' ? 'checked' : 'value';
+        // React reads a box from its click: flip it with one, as a user does. A radio can't click off;
+        // a disabled box or a cancelled click falls through to the plain write.
+        if (key === 'checked' && el.checked !== !!value && (value || el.type === 'checkbox')) {
+            el.click();
+            if (el.checked === !!value) return;
+        }
         const native = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), key);
         if (native?.set) native.set.call(el, value); else el[key] = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
