@@ -25,6 +25,8 @@
  *   - Closing without a choice stores none and hides the auto-open for 30 minutes under
  *     cookieConsentDismissed. That key is never read as consent.
  *   - The auto-open never takes focus, and waits while another panel is open.
+ *   - Before the auto-open, the panel is built (or a page's template unpacked) while the
+ *     page is idle, hidden: #nds-cookies-panel exists before it first shows.
  */
 (() => {
     'use strict';
@@ -222,8 +224,9 @@
         _initDone = true;
         wire();
         if (skipAuto()) return;
-        // The strings load during the wait, so the panel is ready when it opens.
-        if (!document.getElementById(PANEL_ID)) strings.load();
+        // Build and unpack the panel during the wait: hidden, it costs no styling, so
+        // the open at DELAY is left only the first paint of it, not one long block.
+        NDS.onIdle(resolvePanel);
         setTimeout(autoOpen, DELAY);
     }
 
