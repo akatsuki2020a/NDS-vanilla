@@ -291,7 +291,7 @@ for (const v of VUE) {
 // Server HTML from the framework's own server renderer, written into the page before NDS
 // starts, then hydrated: the Next.js / Nuxt shape without a server build. With NDS starting
 // at load the hydration must report a mismatch (the doc's warning); with
-// data-nds-auto-init="false" and NDS.Init.initialize() after hydration, none (its fix).
+// data-nds-auto-init="false" and START after hydration, none (its fix).
 // Markup → framework nodes, so the framework owns each element. `h(tag, props, ...kids)`.
 const TO_TREE = `(h, names) => function tree(html) {
     const conv = (node) => {
@@ -305,6 +305,8 @@ const TO_TREE = `(h, names) => function tree(html) {
     return [...new DOMParser().parseFromString('<div>' + html + '</div>', 'text/html').body.firstChild.childNodes]
         .map(conv).filter((k) => k !== null);
 }`;
+// core/init.md Hydration: drop the hold and start NDS, whichever loaded first.
+const START = "document.documentElement.removeAttribute('data-nds-auto-init'); window.NDS?.Init.initialize();";
 const MISMATCH = /hydrat|did not match|did not expect|extra attributes|server html/i;
 
 async function hydrationRun(name, serverHtml, hydrate, manual) {
@@ -340,7 +342,7 @@ for (const v of REACT) {
     const APP = `(manual) => { const h = React.createElement;
         const tree = (${TO_TREE})(h, { class: 'className', for: 'htmlFor', readonly: 'readOnly' });
         return function App() {
-            React.useEffect(() => { if (manual) NDS.Init.initialize(); }, []);
+            React.useEffect(() => { if (manual) { ${START} } }, []);
             return h('div', { id: 'h-app' }, ...tree(${JSON.stringify(VIEW('h'))}));
         };
     }`;
@@ -385,7 +387,7 @@ const DOC_APP = `(h, P, o) => {
             ...P.css.map(([href, d]) => h('link', { key: href, rel: 'preload', href, as: 'style', 'data-nds-defer': d })),
             h('script', { dangerouslySetInnerHTML: { __html: P.inline } })),
         h('body', null, h('div', { id: 'app' }, view), h('script', { defer: true, src: P.js })));
-    return function App() { React.useEffect(() => { if (o.manual) NDS.Init.initialize(); }, []); return o.whole ? doc() : view; };
+    return function App() { React.useEffect(() => { if (o.manual) { ${START} } }, []); return o.whole ? doc() : view; };
 }`;
 // No script tags: an extra node in <head> is a mismatch of its own.
 const IMPORT_REACT = `async (v) => { window.React = await import('https://esm.sh/react@' + v + '?dev');
@@ -404,20 +406,33 @@ async function docRun(v, o) {
           + HEAD.css.map(([h, d]) => `<link rel="preload" href="${h}" as="style" data-nds-defer="${d}">`).join('')
           + `<script>${HEAD.inline}</script></head><body><div id="root">${html}</div><script defer src="${HEAD.js}"></script></body></html>`;
     await page.route(`${BASE}/__hydrate.html`, (r) => r.fulfill({ contentType: 'text/html', body: html }));
-    await page.goto(`${BASE}/__hydrate.html`, { waitUntil: 'load' });
-    await page.waitForFunction(() => window.NDS?.Init, null, { timeout: 15000 });
+    // late: NDS loads after hydration ends, as on a slow network under Next.js's async scripts.
+    let release;
+    const held = new Promise((r) => { release = r; });
+    if (o.late) await page.route(/nds-main\.min\.js/, async (r) => { await held; await r.continue(); });
+    await page.goto(`${BASE}/__hydrate.html`, { waitUntil: o.late ? 'commit' : 'load' });
+    if (o.late) await page.waitForSelector('#probe', { state: 'attached' });
+    else await page.waitForFunction(() => window.NDS?.Init, null, { timeout: 15000 });
     await page.waitForTimeout(500);
-    const r = await page.evaluate(async ([v, APP, P, o, imp]) => {
+    const ndsFirst = await page.evaluate(async ([v, APP, P, o, imp]) => {
         await eval(imp)(v);
-        const probe = document.getElementById('probe');
+        document.getElementById('probe').__server = true;   // a node React renders again lacks it
+        const ndsFirst = !!window.NDS;
         ReactDOM.hydrateRoot(o.whole ? document : document.getElementById('root'),
             React.createElement(eval(APP)(React.createElement, P, o)), { onRecoverableError: () => {} });
         await new Promise((r) => setTimeout(r, 1500));
-        return { shown: getComputedStyle(document.querySelector('.nds-content-layout')).visibility === 'visible',
-            renderedAgain: document.getElementById('probe') !== probe };
+        return ndsFirst;
     }, args);
+    if (o.late) {
+        release();
+        await page.waitForFunction(() => window.NDS?.Init, null, { timeout: 15000 });
+        await page.waitForTimeout(1500);
+    }
+    const r = await page.evaluate(() => ({ shown: getComputedStyle(document.querySelector('.nds-content-layout')).visibility === 'visible',
+        renderedAgain: !document.getElementById('probe').__server,
+        clock: !!document.getElementById('nds-real-time-clock').textContent.trim() }));
     await page.close();
-    return r;
+    return { ndsFirst, ...r };
 }
 
 for (const v of REACT) {
@@ -425,7 +440,9 @@ for (const v of REACT) {
     let r = await docRun(v, { whole: true });
     ok(`${R} renders <html>: NDS starting at load leaves the page hidden (the doc's warning holds)`, r.renderedAgain && !r.shown, JSON.stringify(r));
     r = await docRun(v, { whole: true, manual: true });
-    ok(`${R} renders <html>: with data-nds-auto-init="false" the page shows after hydration`, !r.renderedAgain && r.shown, JSON.stringify(r));
+    ok(`${R} renders <html>: with data-nds-auto-init="false" the page shows after hydration`, !r.renderedAgain && r.shown && r.clock, JSON.stringify(r));
+    r = await docRun(v, { whole: true, manual: true, late: true });
+    ok(`${R} renders <html>: NDS loading after hydration starts on its own and shows the page`, !r.ndsFirst && !r.renderedAgain && r.shown && r.clock, JSON.stringify(r));
     r = await docRun(v, { whole: false });
     ok(`${R} renders a div: NDS starting at load makes it render again, and the page still shows`, r.renderedAgain && r.shown, JSON.stringify(r));
 }
@@ -436,7 +453,7 @@ for (const v of VUE) {
     const VUE_URL = `https://esm.sh/vue@${v}?dev`;
     const APP = `(Vue, manual) => {
         const tree = (${TO_TREE})(Vue.h, {});
-        return { mounted() { if (manual) NDS.Init.initialize(); },
+        return { mounted() { if (manual) { ${START} } },
             render: () => Vue.h('div', { id: 'h-app' }, tree(${JSON.stringify(VIEW('h'))})) };
     }`;
     const srv = await browser.newPage();
