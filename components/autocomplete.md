@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "15/10/2026 - 01:03 PM"
 ---
 
 <section id="autocomplete-overview" class="nds-content-section nds-doc-overview">
@@ -98,7 +98,7 @@ With `data-fetch="each"`, the default, the script requests `data-url` with the t
 ### Strict Mode
 {: .nds-block-title}
 
-`data-strict` on the container makes the form accept only a picked result. At submit, the field shows "Choose from the suggestions" when its text is not the last pick. Typed text that matches a result exactly still fails until the user picks it. An empty field passes, so add `data-required` to the container when the field is required. Text that the server writes into the field passes until the user focuses the field.
+`data-strict` on the container makes the form accept only a picked result. At submit, the field shows "Choose from the suggestions" when its text is not the last pick. Typed text that matches a result exactly still fails until the user picks it. An empty field passes, so add `data-required` to the container when the field is required. Text that the server writes into the field counts as picked, so it still passes after the user focuses the field.
 
 When nothing matches, a strict field's menu stays open and shows "No results", in Arabic on an Arabic page. A screen reader reads the message. Without `data-strict`, any typed text is valid, so the menu closes instead.
 
@@ -202,7 +202,7 @@ When the autocomplete is in a `.nds-search-box`, a pick also clicks the box's `.
 | Class | Element | Effect |
 |---|---|---|
 | `.nds-autocomplete-menu` | the menu | The script adds the menu, with `.nds-dropmenu-menu`, in the `.nds-form-control`. Style the menu through this class: it stays on the menu when the menu moves to `<body>` |
-| `.nds-autocomplete-value` | a hidden `<input>` | The script adds it with `data-strict`. It holds the picked text. It has no `name`, so the form data does not change |
+| `.nds-autocomplete-value` | a hidden `<input>` | The script adds it with `data-strict`. It holds the picked text, or the text already in the field when the field builds. It has no `name`, so the form data does not change |
 {: .nds-table .nds-responsive}
 
 ### Data Attributes

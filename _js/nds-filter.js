@@ -783,17 +783,15 @@
         // URL PARAMETERS
         // ==============================================
 
-        sanitizeInput(str) {
-            if (!str) return '';
-            return str
-                .replace(/<[^>]*>/g, '')
-                .replace(/[<>"'&]/g, '')
-                .substring(0, 100);
+        // One write path for the search keyword (typed, dropmenu, URL, API), so a
+        // shared link reproduces the list. It is only matched and written to
+        // value / textContent, never rendered as HTML, so nothing is stripped.
+        _setSearch(raw) {
+            this.criteria.search = String(raw || '').trim().toLowerCase();
         }
 
         // Sanitize a URL-supplied value for *matching* against existing DOM
-        // input values (filter checkboxes/radios/switches). Unlike sanitizeInput
-        // — which strips & " ' < > for free-text search — this keeps characters
+        // input values (filter checkboxes/radios/switches). It keeps characters
         // that are legitimately part of a filter value (e.g. "Healthcare & Social")
         // so the equality match against input.value succeeds. Safe because the
         // value is only compared, never rendered as HTML (stored criteria come
@@ -814,9 +812,8 @@
             const searchParam = params.get(searchParamName);
 
             if (searchParam) {
-                const sanitized = this.sanitizeInput(searchParam);
-                this.criteria.search = sanitized.trim().toLowerCase();
-                this._mirrorSearchInputs(sanitized);
+                this._setSearch(searchParam);
+                this._mirrorSearchInputs(searchParam);
                 hasParams = true;
             }
 
@@ -1007,7 +1004,7 @@
         // to settle search state from the dropmenu surface.
         _syncSearchFromDropmenu() {
             if (!this.searchInputs.dropmenu) return;
-            this.criteria.search = this.searchInputs.dropmenu.input.value.trim().toLowerCase();
+            this._setSearch(this.searchInputs.dropmenu.input.value);
             if (this.searchInputs.direct) {
                 this.searchInputs.direct.input.value = this.searchInputs.dropmenu.input.value;
                 this.updateClearButtonVisibility(
@@ -1060,7 +1057,9 @@
                 onChange: ({ orderedItems }) => {
                     this.items = orderedItems;
                     this.updatePagination();
-                    this.dispatchFilterEvent();
+                    // Counts are null in form mode only, as filter.md documents for nds:filter:change.
+                    if (this.isFormMode) this.dispatchFilterEvent();
+                    else this.dispatchFilterEvent(this.getVisibleItems().length);
                 }
             });
         }
@@ -1579,7 +1578,7 @@
         }
 
         applyDirectSearch(searchInput) {
-            this.criteria.search = searchInput.value.trim().toLowerCase();
+            this._setSearch(searchInput.value);
             if (this.searchInputs.dropmenu) {
                 this.searchInputs.dropmenu.input.value = searchInput.value;
                 this.updateClearButtonVisibility(
@@ -2866,7 +2865,7 @@
         }
 
         setSearchValue(value) {
-            this.criteria.search = value.trim().toLowerCase();
+            this._setSearch(value);
 
             this._mirrorSearchInputs(value);
 

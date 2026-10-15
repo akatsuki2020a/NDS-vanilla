@@ -17,8 +17,7 @@
  *   - data-strict adds a hidden NAMELESS .nds-autocomplete-value carrier at build: a pick
  *     fills it, typing or clear empties it, and NDS.Forms.validateForm() rejects text that
  *     doesn't match it ("Choose from the suggestions"). It never changes what submits.
- *     Server-prefilled text in a never-focused field passes — the carrier only exists
- *     after the field builds.
+ *     Text already in the field when it builds (server-prefilled) counts as picked.
  *   - Activates on an input[autocomplete="on"] inside .nds-form-container[data-url], built
  *     on the field's FIRST FOCUS.
  *   - renderItem() output is inserted as HTML — you own the escaping. The default renderer
@@ -121,6 +120,9 @@
                 this.carrier = document.createElement('input');
                 this.carrier.type = 'hidden';
                 this.carrier.className = 'nds-autocomplete-value';
+                // Text already in the field (server-written, or a host's restored pick) counts as picked,
+                // so focusing it without a change doesn't turn it invalid.
+                this.carrier.value = this.input.value.trim();
                 this.formControl.appendChild(this.carrier);
             }
 

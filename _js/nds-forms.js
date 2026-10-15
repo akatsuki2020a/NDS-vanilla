@@ -683,9 +683,9 @@
 
         // Autocomplete strict: data-strict says typed text must match a picked
         // suggestion. The hidden .nds-autocomplete-value carrier (JS-created at
-        // build under data-strict) holds the last picked text; typing or clear
-        // empties it. No carrier = the field never built (e.g. server-prefilled
-        // and untouched) — sanctioned as-is. Empty text is the required rule's
+        // build under data-strict, seeded with any prefilled text) holds the last
+        // picked text; typing or clear empties it. No carrier = the field never
+        // built, so its text is the prefilled pick. Empty text is the required rule's
         // business, not strict's. Internal — reached via validateForm.
         validateAutocomplete: function(acElement, options) {
             options = options || { showMessage: true };
