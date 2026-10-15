@@ -8,6 +8,7 @@
 //   node scripts/check-set-value.mjs [baseUrl]
 // Defaults to the dev server. Start it with `bundle exec jekyll serve` if down.
 import { launch } from './lib/browser.mjs';
+import { REACT, VUE, SVELTE, ANGULAR, major, loadReact, loadVue, SVELTE_APP, ANGULAR_LOAD } from './lib/frameworks.mjs';
 
 const BASE = (process.argv[2] || 'http://localhost:4002/NDS-vanilla').replace(/\/$/, '');
 const browser = await launch();
@@ -22,6 +23,8 @@ async function open(path) {
     // WebKit's harmless ResizeObserver loop notice: TODO.md, Watch.
     page.on('pageerror', (e) => { if (!/ResizeObserver loop/.test(e.message)) ok(`no page error on ${path}`, false, e.message); });
     await page.goto(`${BASE}/${path}`, { waitUntil: 'load' });
+    // The cookie panel can open mid-run and take the clicks meant for a menu.
+    await page.addStyleTag({ content: '#nds-cookies-panel { display: none !important; }' });
     await page.waitForFunction(() => window.NDS?.setValue && document.documentElement.hasAttribute('data-nds-ready')
         || window.NDS?.setValue, null, { timeout: 15000 });
     // Log input/change in dispatch order, named by the field's own class (or type).
@@ -38,11 +41,10 @@ async function open(path) {
 const log = (page) => page.evaluate(() => window.__log.splice(0));
 
 // ---- REACT ---------------------------------------------------------------
-{
+for (const v of REACT) {
+    const R = 'React ' + major(v);
     const page = await open('components/forms.html');
-    for (const lib of ['react@18.3.1/umd/react.production.min.js', 'react-dom@18.3.1/umd/react-dom.production.min.js']) {
-        await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
-    }
+    await loadReact(v)(page);
     const res = await page.evaluate(async () => {
         const h = React.createElement, out = {};
         const host = document.body.appendChild(document.createElement('div'));
@@ -63,9 +65,9 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
         await tick();
         return { out, v: ['r-new', 'r-area', 'r-old'].map((id) => document.getElementById(id).value) };
     });
-    ok('React input: onChange runs and the value stays', res.out['r-new'] >= 1 && res.v[0] === 'hello', JSON.stringify(res));
-    ok('React textarea: onChange runs and the value stays', res.out['r-area'] >= 1 && res.v[1] === 'line');
-    ok('A/B: the old write-then-dispatch is lost to React (no onChange)', !res.out['r-old']);
+    ok(`${R} input: onChange runs and the value stays`, res.out['r-new'] >= 1 && res.v[0] === 'hello', JSON.stringify(res));
+    ok(`${R} textarea: onChange runs and the value stays`, res.out['r-area'] >= 1 && res.v[1] === 'line');
+    ok(`${R} A/B: the old write-then-dispatch is lost to React (no onChange)`, !res.out['r-old']);
 
     // Boxes: React reads a checkbox or radio from its click, so setValue flips it with one.
     const box = await page.evaluate(async () => {
@@ -101,10 +103,10 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
         await tick();
         return { out, on, cbOff: read('r-cb'), sw: read('r-sw') };
     });
-    ok('React checkbox: setValue on and off reaches its state', box.on.cb.state === 'true' && box.cbOff.state === 'false'
+    ok(`${R} checkbox: setValue on and off reaches its state`, box.on.cb.state === 'true' && box.cbOff.state === 'false'
         && box.cbOff.dom === false && box.out['r-cb'] === 2, JSON.stringify(box));
-    ok('React radio: setValue reaches its state', box.on.rd.state === 'true' && box.out['r-rd'] === 1);
-    ok('React switch: a track click reaches its state, flipped once', box.sw.dom === true && box.sw.state === 'true', JSON.stringify(box.sw));
+    ok(`${R} radio: setValue reaches its state`, box.on.rd.state === 'true' && box.out['r-rd'] === 1);
+    ok(`${R} switch: a track click reaches its state, flipped once`, box.sw.dom === true && box.sw.state === 'true', JSON.stringify(box.sw));
 
     // A disabled box takes the plain write: no click lands, the value and events still do.
     const dis = await page.evaluate(() => {
@@ -115,7 +117,7 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
         NDS.setValue(cb, true);
         return { checked: cb.checked, log: window.__log.slice() };
     });
-    ok('Disabled checkbox: setValue still writes it with input + change', dis.checked
+    ok(`${R} page, disabled checkbox: setValue still writes it with input + change`, dis.checked
         && dis.log.join() === 'input:checkbox,change:checkbox', JSON.stringify(dis));
     await page.close();
 }
@@ -307,35 +309,38 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
     ok('Number: a blur clamp reaches the binding', same(r) && r.shown === '20', JSON.stringify(r));
 
     // React, password: a pasted Arabic letter is stripped, and React's state follows.
-    for (const lib of ['react@18.3.1/umd/react.production.min.js', 'react-dom@18.3.1/umd/react-dom.production.min.js']) {
-        await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
+    // Each version loads over the last; a root keeps the React it was made with.
+    for (const v of REACT) {
+        const id = 'r-pw-' + major(v);
+        await loadReact(v)(page);
+        await page.evaluate((id) => {
+            const h = React.createElement;
+            const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+            function Pw() {
+                const [val, setVal] = React.useState('');
+                return h('div', { className: 'nds-form-container' },
+                    h('div', { className: 'nds-form-control' },
+                        h('input', { id, type: 'password', className: 'nds-input', value: val, onChange: (e) => setVal(e.target.value) })),
+                    h('span', { id: id + '-state' }, val));
+            }
+            ReactDOM.createRoot(host).render(h(Pw));
+        }, id);
+        await page.locator('#' + id).waitFor();
+        await page.locator('#' + id).focus();
+        await page.keyboard.insertText('abcب');
+        await page.waitForTimeout(50);
+        r = await page.evaluate((id) => ({ shown: document.getElementById(id).value, state: document.getElementById(id + '-state').textContent }), id);
+        ok(`Password: React ${major(v)} state drops a pasted Arabic letter`, r.shown === 'abc' && r.state === 'abc', JSON.stringify(r));
     }
-    await page.evaluate(() => {
-        const h = React.createElement;
-        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
-        function Pw() {
-            const [v, setV] = React.useState('');
-            return h('div', { className: 'nds-form-container' },
-                h('div', { className: 'nds-form-control' },
-                    h('input', { id: 'r-pw', type: 'password', className: 'nds-input', value: v, onChange: (e) => setV(e.target.value) })),
-                h('span', { id: 'r-pw-state' }, v));
-        }
-        ReactDOM.createRoot(host).render(h(Pw));
-    });
-    await page.locator('#r-pw').waitFor();
-    await page.locator('#r-pw').focus();
-    await page.keyboard.insertText('abcب');
-    await page.waitForTimeout(50);
-    r = await page.evaluate(() => ({ shown: document.getElementById('r-pw').value, state: document.getElementById('r-pw-state').textContent }));
-    ok('Password: React state drops a pasted Arabic letter', r.shown === 'abc' && r.state === 'abc', JSON.stringify(r));
     await page.close();
 }
 
 // ---- VUE ------------------------------------------------------------------
 // v-model on the field each component's docs name; NDS wires the markup after Vue mounts it.
-{
+for (const ver of VUE) {
+    const V = 'Vue ' + ver.split('.').slice(0, 2).join('.');
     const page = await open('components/forms.html');
-    await page.addScriptTag({ url: 'https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js' });
+    await loadVue(ver)(page);
     await page.evaluate(() => {
         const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
         host.id = 'v-app';
@@ -384,27 +389,28 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
             time: vm.time, text: vm.text, agree: vm.agree, sw: vm.sw, swDom: document.getElementById('v-sw').checked
         };
     });
-    ok('Vue: Custom Select reaches v-model on .nds-select-value', res.region === 'makkah', JSON.stringify(res));
-    ok('Vue: a Date Picker pick reaches v-model', res.date && res.date === res.shownDate);
-    ok('Vue: Time Picker reaches v-model on .nds-time-value', res.time === '09:30');
-    ok('Vue: NDS.setValue reaches v-model on a text field', res.text === 'hello');
-    ok('Vue: NDS.setValue reaches v-model on a checkbox', res.agree === true);
-    ok('Vue: a Switch track click reaches v-model, flipped once', res.sw === true && res.swDom === true);
+    ok(`${V}: Custom Select reaches v-model on .nds-select-value`, res.region === 'makkah', JSON.stringify(res));
+    ok(`${V}: a Date Picker pick reaches v-model`, res.date && res.date === res.shownDate);
+    ok(`${V}: Time Picker reaches v-model on .nds-time-value`, res.time === '09:30');
+    ok(`${V}: NDS.setValue reaches v-model on a text field`, res.text === 'hello');
+    ok(`${V}: NDS.setValue reaches v-model on a checkbox`, res.agree === true);
+    ok(`${V}: a Switch track click reaches v-model, flipped once`, res.sw === true && res.swDom === true);
 
     await page.locator('#v-phone').scrollIntoViewIfNeeded();
     await page.locator('#v-phone').focus();
     await page.keyboard.insertText('0501');
     await page.waitForTimeout(50);
     const ph = await page.evaluate(() => ({ shown: document.getElementById('v-phone').value, model: window.__vue.phone }));
-    ok('Vue: a pasted phone number reaches v-model stripped', ph.shown === '501' && ph.model === '501', JSON.stringify(ph));
+    ok(`${V}: a pasted phone number reaches v-model stripped`, ph.shown === '501' && ph.model === '501', JSON.stringify(ph));
     await page.close();
 }
 
 // ---- NATIVE SELECT --------------------------------------------------------
-{
+for (const [i, rv] of REACT.entries()) {
     const page = await open('components/forms.html');
-    for (const lib of ['react@18.3.1/umd/react.production.min.js', 'react-dom@18.3.1/umd/react-dom.production.min.js',
-        'vue@3.4.38/dist/vue.global.prod.js']) await page.addScriptTag({ url: `https://unpkg.com/${lib}` });
+    await loadReact(rv)(page);
+    await loadVue(VUE[i])(page);
+    const tag = `React ${major(rv)}, Vue ${VUE[i].split('.').slice(0, 2).join('.')}`;
     const res = await page.evaluate(async () => {
         const body = document.querySelector('.nds-section-body');
         const opts = ['a', 'b'];
@@ -427,15 +433,16 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
         await tick();
         return { react: rState, vue: vm.v };
     });
-    ok('Native select: NDS.setValue reaches React state', res.react === 'b', JSON.stringify(res));
-    ok('Native select: NDS.setValue reaches Vue v-model', res.vue === 'b');
+    ok(`Native select (${tag}): NDS.setValue reaches React state`, res.react === 'b', JSON.stringify(res));
+    ok(`Native select (${tag}): NDS.setValue reaches Vue v-model`, res.vue === 'b');
     await page.close();
 }
 
 // ---- VUE, MORE FIELDS -----------------------------------------------------
-{
+for (const ver of VUE) {
+    const V = 'Vue ' + ver.split('.').slice(0, 2).join('.');
     const page = await open('components/forms.html');
-    await page.addScriptTag({ url: 'https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js' });
+    await loadVue(ver)(page);
     await page.evaluate(() => {
         const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
         const digit = '<div class="nds-form-container nds-otp-container"><div class="nds-form-control">'
@@ -479,24 +486,24 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
         await new Promise((r) => setTimeout(r, 50));
     });
     let r = { shown: await page.evaluate(() => document.querySelector('#v2-slider .nds-slider-min').value), model: await vm('lo') };
-    ok('Vue: a clamped slider thumb reaches v-model', r.shown === '60000' && r.model === '60000', JSON.stringify(r));
+    ok(`${V}: a clamped slider thumb reaches v-model`, r.shown === '60000' && r.model === '60000', JSON.stringify(r));
 
     await page.evaluate(() => NDS.OTP.setValue(document.getElementById('v2-otp'), '1234'));
-    ok('Vue: OTP reaches v-model on .nds-otp-value', (await vm('otp')) === '1234', await vm('otp'));
+    ok(`${V}: OTP reaches v-model on .nds-otp-value`, (await vm('otp')) === '1234', await vm('otp'));
 
     await page.locator('#v2-dm .nds-dropmenu-trigger').scrollIntoViewIfNeeded();
     await page.locator('#v2-dm .nds-dropmenu-trigger').click();
     await page.locator('.nds-dropmenu-item[data-value="AE"]').click();
-    ok('Vue: a Dropmenu pick reaches v-model on its hidden field', (await vm('country')) === 'AE', await vm('country'));
+    ok(`${V}: a Dropmenu pick reaches v-model on its hidden field`, (await vm('country')) === 'AE', await vm('country'));
 
     await page.locator('#v2-iban').scrollIntoViewIfNeeded();
     await page.locator('#v2-iban').focus();
     await page.keyboard.insertText('sa03 80');
-    ok('Vue: a pasted IBAN reaches v-model cleaned', (await vm('iban')) === 'SA0380', await vm('iban'));
+    ok(`${V}: a pasted IBAN reaches v-model cleaned`, (await vm('iban')) === 'SA0380', await vm('iban'));
 
     await page.locator('#v2-qty').fill('70');
     await page.locator('#v2-qty').blur();
-    ok('Vue: a number clamped on blur reaches v-model', (await vm('qty')) === '20', await vm('qty'));
+    ok(`${V}: a number clamped on blur reaches v-model`, (await vm('qty')) === '20', await vm('qty'));
 
     const svc = page.locator('#v2-service');
     await svc.scrollIntoViewIfNeeded();
@@ -506,7 +513,7 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
     const shown = await item.waitFor({ state: 'visible', timeout: 8000 }).then(() => true, () => false);
     if (shown) await item.click();
     r = { shown: await svc.inputValue(), model: await vm('service') };
-    ok('Vue: an Autocomplete pick reaches v-model', shown && r.model === r.shown && r.shown.length > 3, JSON.stringify(r));
+    ok(`${V}: an Autocomplete pick reaches v-model`, shown && r.model === r.shown && r.shown.length > 3, JSON.stringify(r));
     await page.close();
 }
 
@@ -606,34 +613,29 @@ function checkModel(name, m) {
 }
 const KEYS = ['region', 'date', 'time', 'phone', 'text', 'agree', 'sw'];
 
-{
+for (const v of SVELTE) {
     const page = await open('components/forms.html');
-    await page.evaluate(async (markup) => {
+    await page.evaluate(async ([markup, SVELTE_APP, v]) => {
         const props = 'export let region = "", date = "", time = "", phone = "", text = "", agree = false, sw = false;';
         const src = `<script>${props}
   function nds(node) { window.NDS?.Init.mount(node); return { destroy() { NDS.Init.destroy(node); } }; }
 <\/script><div use:nds>${markup}</div>`;
-        const { compile } = await import('https://esm.sh/svelte@4.2.19/compiler');
-        const { js } = compile(src, { sveltePath: 'https://esm.sh/svelte@4.2.19', accessors: true });
-        const App = (await import(URL.createObjectURL(new Blob([js.code], { type: 'text/javascript' })))).default;
+        const App = await eval(SVELTE_APP)(src, v, { accessors: true });
         window.__sv = new App({ target: document.querySelector('.nds-section-body').appendChild(document.createElement('div')) });
-    }, FIELDS('s', (k, box) => (box ? `bind:checked={${k}}` : `bind:value={${k}}`)));
+    }, [FIELDS('s', (k, box) => (box ? `bind:checked={${k}}` : `bind:value={${k}}`)), SVELTE_APP, v]);
     await driveFields(page, 's');
-    checkModel('Svelte', await page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, window.__sv[k]])), KEYS));
+    checkModel('Svelte ' + major(v), await page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, window.__sv[k]])), KEYS));
     await page.close();
 }
 
-{
+for (const [v, zone] of ANGULAR) {
+    const A = 'Angular ' + major(v);
     const page = await open('components/forms.html');
-    const booted = await page.evaluate(async (markup) => {
-        const v = '17.3.12';
-        // jsDelivr's +esm links every package to one @angular/core (see check-frameworks.mjs).
-        const pkg = (name) => import(`https://cdn.jsdelivr.net/npm/${name}/+esm`);
-        await pkg('zone.js@0.14.10');
-        await pkg(`@angular/compiler@${v}`);
-        const { Component, ElementRef, inject } = await pkg(`@angular/core@${v}`);
-        const { FormsModule } = await pkg(`@angular/forms@${v}`);
-        const { bootstrapApplication } = await pkg(`@angular/platform-browser@${v}`);
+    const booted = await page.evaluate(async ([markup, v, zone, ANGULAR_LOAD]) => {
+        const ng = await eval(ANGULAR_LOAD)(v, zone);
+        const { Component, ElementRef, inject } = ng.core;
+        const { FormsModule } = ng.forms;
+        const { bootstrapApplication } = ng.browser;
         class AppCmp {
             region = ''; date = ''; time = ''; phone = ''; text = ''; agree = false; sw = false;
             el = inject(ElementRef);
@@ -644,12 +646,12 @@ const KEYS = ['region', 'date', 'time', 'phone', 'text', 'agree', 'sw'];
         const app = await bootstrapApplication(AppCmp);
         window.__ngModel = app.components[0].instance;
         return true;
-    }, FIELDS('a', (k) => `[(ngModel)]="${k}"`)).catch((e) => e.message);
-    ok('Angular (ngModel): bootstrapped', booted === true, booted === true ? '' : String(booted));
+    }, [FIELDS('a', (k) => `[(ngModel)]="${k}"`), v, zone, ANGULAR_LOAD]).catch((e) => e.message);
+    ok(`${A} (ngModel): bootstrapped`, booted === true, booted === true ? '' : String(booted));
     if (booted === true) {
         await page.waitForTimeout(300);
         await driveFields(page, 'a');
-        checkModel('Angular', await page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, window.__ngModel[k]])), KEYS));
+        checkModel(A, await page.evaluate((keys) => Object.fromEntries(keys.map((k) => [k, window.__ngModel[k]])), KEYS));
     }
     await page.close();
 }
