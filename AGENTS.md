@@ -157,7 +157,7 @@ Otherwise it is a knob: declare it on the component, `--_x: var(--x, default)`. 
 3. No meaning match, no dial needed → palette-direct `--colors-*`, whole family as a unit. Raw hex: never.
 
 **Naming grammar:**
-- Semantic: `--{property}-{role}-{modifier}-{state}`; property ∈ `background/text/border/icon/shadow/focus/controls`; modifiers are words with ONE fixed meaning (`light` = tinted wash, `strong` = deep emphasis, `oncolor` = on colored fill — always spelled `oncolor`, never `on-color`, placed last before state).
+- Semantic: `--{property}-{role}-{modifier}-{state}`; property ∈ `background/text/border/icon/shadow/focus/controls` (one owner-kept exception: `--divider-color`, for readability); modifiers are words with ONE fixed meaning (`light` = tinted wash, `strong` = deep emphasis, `oncolor` = on colored fill — always spelled `oncolor`, never `on-color`, placed last before state).
 - States: `default/hovered/pressed/selected/focused/disabled` (token `pressed` feeds the `-active` knob — established precedent).
 - NO color names, NO shade numbers in semantic names; one name per meaning (no synonyms); no rename-only layers.
 - Element widths are meaning-named knobs/tokens (`--nds-sidemenu-width`), never scale rungs; breakpoints stay literals (CSS forbids `var()` in `@media`).

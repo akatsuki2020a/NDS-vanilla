@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.1.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 08:45 AM"
+last_edit: "15/10/2026 - 10:08 AM"
 ---
 
 <section id="themes-overview" class="nds-content-section nds-doc-overview">
@@ -227,7 +227,7 @@ A stylesheet theme is your own CSS file that sets the color tokens at `:root`. L
   /* Deep brand surfaces: hero, footer, image overlay */
   --background-primary-strong: var(--colors-primary-900);
   --background-primary-light:  var(--colors-primary-50);
-  --img-overlay-color:         var(--colors-primary-950);
+  --background-image-overlay:  var(--colors-primary-950);
 }
 
 /* Dark mode fixes. The second selector reaches dark areas. :root:root wins even if this sheet loads before NDS. */
@@ -404,7 +404,7 @@ Set the `--brand-*` seeds and `--neutral-tint` on `<html>` with `data-palette`. 
 | `--font-weight-regular`, `-medium`, `-semibold`, `-bold` | `400`, `500`, `600`, `700` | The four font weights. Corporate and Sunset set `300`, `400`, `500`, `600` |
 | `--background-primary-strong` | `var(--colors-primary-900)` | The deep primary surface of the hero and the footer |
 | `--background-primary-light` | `var(--colors-primary-50)` | The light primary surface, such as the sub hero. A custom palette sets it to `--background-primary-faint` |
-| `--img-overlay-color` | `var(--colors-primary-950)` | The overlay color on hero images. A custom palette sets it to `--colors-neutral-950` |
+| `--background-image-overlay` | `var(--colors-primary-950)` | The overlay color on hero images. A custom palette sets it to `--colors-neutral-950` |
 | `--colors-*` | the DGA palette | The color ramps: primary, secondary, tertiary, neutral and status. Set them in a stylesheet theme for exact colors |
 {: .nds-table .nds-responsive}
 

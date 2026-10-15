@@ -62,7 +62,7 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: color-mix(in srgb, var(--img-overlay-color) calc(var(--_overlay) * 100%), transparent);
+            background: color-mix(in srgb, var(--background-image-overlay) calc(var(--_overlay) * 100%), transparent);
             pointer-events: none;
         }
     }

@@ -21,7 +21,7 @@
   @include oklch.brand-alpha-static('primary', #946124);
   @include oklch.neutral-ramp-static(#946124, 0);   // 0 = true gray (no warmth)
   --background-primary-light:  var(--background-primary-faint); // event themes collapse light to the faint step
-  --img-overlay-color:       var(--colors-neutral-950);
+  --background-image-overlay:  var(--colors-neutral-950);
 }
 
 // ── Hero slide — a normal-section layout (centred column, start-aligned) with

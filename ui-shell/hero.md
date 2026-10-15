@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "15/10/2026 - 10:08 AM"
 ---
 
 <section id="hero-overview" class="nds-content-section nds-doc-overview">
@@ -382,7 +382,7 @@ The main hero shows one slide at a time, and the Swiper script moves between the
 - Give each later slide's `img` a `data-src`, and each of its `source` elements a `data-srcset`. A plain `srcset` loads at once.
 - Keep a photo in the main hero. If the photo is not ready, point the `picture` at a placeholder image and replace it later.
 - Set `--overlay` on each slide for its image: about 0.4 to 0.5 for a dark image, and 0.6 to 0.8 for a bright one.
-- Do not set `--img-overlay-color`. It follows the brand, and a fixed value stops that.
+- Do not set `--background-image-overlay`. It follows the brand, and a fixed value stops that.
 - For a photo in the sub hero, pick one with its subject on one side. The fade keeps the end side and hides the side of the title.
 - Do not write `nds-oncolor` on text in a flat hero: it shows white on a light page.
 
@@ -417,7 +417,7 @@ The main hero shows one slide at a time, and the Swiper script moves between the
 | `--hero-image-fade-from` | `0%` | Where the fade starts. Up to this point, the photo is solid |
 | `--hero-image-fade-to` | `70%` | Where the photo is gone |
 | `--overlay` | `0.7` on a slide, `0.5` on the sub hero | The strength of the tint over the image, from `0` (none) to `1` (solid). On the main hero, set it in the `style` of each `.nds-hero-image-wrapper`. On the sub hero, set it in the `style` of the section, with `--hero-image` |
-| `--img-overlay-color` | `var(--colors-primary-950)` | The color of that tint, a theme token. A custom brand sets it to `var(--colors-neutral-950)`. Do not set it |
+| `--background-image-overlay` | `var(--colors-primary-950)` | The color of that tint, a theme token. A custom brand sets it to `var(--colors-neutral-950)`. Do not set it |
 | `--background-hero` | `var(--background-primary-strong)` | The color behind the main hero, a theme token. It shows until the first image loads |
 | `--background-sub-hero` | `var(--background-primary-light)` | The color of the sub hero, a theme token. High contrast mode changes it |
 {: .nds-table .nds-responsive}
