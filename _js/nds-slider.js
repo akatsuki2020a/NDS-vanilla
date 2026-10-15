@@ -185,6 +185,7 @@
             document.querySelectorAll('.nds-slider-container').forEach(initOne);
         },
         reinit: function (el) {
+            bindOnce();
             var list = el ? [el] : document.querySelectorAll('.nds-slider-container');
             list.forEach(function (c) {
                 c.removeAttribute(SENTINEL);
@@ -201,6 +202,7 @@
             // reinit re-uses it. Upgrade to AbortController if a future variant
             // needs per-instance teardown (e.g. native vertical orientation).
         },
-        create: function (el) { initOne(el); return el; }
+        // A page with no slider at load never runs init(), so create() binds the delegates too.
+        create: function (el) { bindOnce(); initOne(el); return el; }
     };
 })();

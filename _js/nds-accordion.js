@@ -142,9 +142,9 @@
 
         handleKeyDown(e) {
             const currentButton = e.target;
-            if (!currentButton.classList.contains('nds-accordion-btn')) return;
-
             const currentIndex = this.buttons.indexOf(currentButton);
+            // A nested accordion's keys bubble here; they are not this accordion's.
+            if (currentIndex === -1) return;
             let targetIndex = currentIndex;
 
             switch (e.key) {
@@ -398,7 +398,7 @@
         });
     }
 
-    // CRITICAL: Expose global API immediately (called by unified init system)
+    // Assigned at module eval so the loader's lazy stub resolves.
     NDS.Accordion = {
         init: initializeAccordions,
         reinit: initializeAccordions,

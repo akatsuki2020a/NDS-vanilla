@@ -175,6 +175,7 @@
 
             // One abort releases every listener plus the bridged pooled subscribers.
             abortController.abort();
+            delete accMenu.ndsSidemenu;
             currentInstance = null;
         }
     }
@@ -199,6 +200,8 @@
 
         // Store for cleanup
         currentInstance = ctx;
+        // NDS.Init.destroy(view) finds instances through an nds* backref on the element.
+        accMenu.ndsSidemenu = { destroy: () => { if (currentInstance === ctx) destroy(); } };
 
         // Closed is the start state; open/close only write on a flip.
         if (!toggleBtn.hasAttribute('aria-expanded')) NDS.aria.expanded(toggleBtn, false);

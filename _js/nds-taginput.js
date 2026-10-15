@@ -230,6 +230,7 @@
                 return;
             }
             if (this.tags.some(t => t.toLowerCase() === value.toLowerCase())) {
+                // Same macrotask deferral as the max rejection above.
                 setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: strings.text('duplicate') }), 0);
                 NDS.announce(strings.text('duplicate'));
                 return;

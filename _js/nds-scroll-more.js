@@ -158,7 +158,8 @@
         if (!content) return;
 
         wrapper._content = content;
-        const btn = wrapper.querySelector(CONFIG.selectors.btn);
+        // The content can hold a nested scroll-more, whose button comes first in document order.
+        const btn = [...wrapper.querySelectorAll(CONFIG.selectors.btn)].find(b => b.closest(CONFIG.selectors.wrapper) === wrapper);
 
         // Auto-inject a separator between the content and the show-more button
         // so authors opting in via .nds-divided don't have to. Always inject —

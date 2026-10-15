@@ -180,7 +180,7 @@
             removeState(panel, 'opening');
             if (!panel._noFocus) {
                 // Skips a close inside a hidden view: focus() on it does nothing.
-                const target = [...panel.querySelectorAll('[data-panel-close]')].find(el => !el.closest('[hidden]')) || panel;
+                const target = ownControls(panel, '[data-panel-close]').find(el => !el.closest('[hidden]')) || panel;
                 if (target === panel && !panel.hasAttribute('tabindex')) panel.tabIndex = -1;
                 target.focus();
             }
@@ -333,11 +333,14 @@
         return panel.offsetWidth >= window.innerWidth - 1;
     }
 
+    // A panel's body is open content, so a nested panel's controls are not this panel's.
+    const ownControls = (panel, sel) => [...panel.querySelectorAll(sel)].filter(el => el.closest(SELECTOR) === panel);
+
     // aria-disabled, not disabled: a disabled button drops the focus the user just clicked into.
     function syncResize(panel) {
         const i = sizeIndex(panel);
         const full = i === SIZES.length - 1 || atMax(panel);
-        panel.querySelectorAll('[data-panel-resize]').forEach(btn => {
+        ownControls(panel, '[data-panel-resize]').forEach(btn => {
             NDS.aria.disabled(btn, btn.dataset.panelResize === 'grow' ? full : i === 0);
         });
     }
@@ -383,6 +386,8 @@
 
     function createPanel(panel) {
         if (panel.hasAttribute(INIT_ATTR)) return;
+        // A page with no panel at load never runs init(), so create() wires the toggles too.
+        bindToggles();
 
         if (!panel.id) {
             console.warn('NDS Panel: panel has no id — toggles cannot target it', panel);
@@ -401,7 +406,7 @@
                 return;
             }
             const resizer = e.target.closest('[data-panel-resize]');
-            if (resizer) resize(panel, resizer.dataset.panelResize === 'grow' ? 1 : -1);
+            if (resizer && resizer.closest(SELECTOR) === panel) resize(panel, resizer.dataset.panelResize === 'grow' ? 1 : -1);
         }, { signal });
         syncResize(panel);
 

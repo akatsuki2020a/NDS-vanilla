@@ -645,7 +645,7 @@
                 }
                 dates.push(parsed);
             }
-            if (dates.length === 2 && dates[0] > dates[1]) return messages.rangeOrder;
+            if (dates.length === 2 && dates[0] > dates[1]) return msg('range_order');
             return '';
         },
 
@@ -1971,6 +1971,8 @@
         if (dateInput._ndsDatePicker) return dateInput._ndsDatePicker;
         formControl = formControl || dateInput.closest('.nds-form-control');
         if (!formControl) return null;
+        // A page with no picker at load never runs init(), so create() wires the bounds watch too.
+        watchBounds();
         var instance = new DatePickerCalendar(dateInput, formControl);
         if (!instance.valid) return null;
         dateInput._ndsDatePicker = instance;
@@ -1979,9 +1981,12 @@
 
     // Self-driven: sweep every .nds-date-input and attach a calendar. create()
     // is idempotent (skips inputs already wired) so this is reinit-safe.
-    var boundsWatched = false;
     function initializeCalendar() {
         document.querySelectorAll('.nds-date-input').forEach((input) => createInstance(input));
+    }
+
+    var boundsWatched = false;
+    function watchBounds() {
         if (boundsWatched) return;
         boundsWatched = true;
         // A new bound re-checks the value silently (submit shows the error) and redraws an open calendar.

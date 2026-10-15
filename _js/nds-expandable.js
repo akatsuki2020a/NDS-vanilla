@@ -325,7 +325,7 @@
         });
     }
 
-    // CRITICAL: Expose global API immediately (called by unified init system)
+    // Assigned at module eval so the loader's lazy stub resolves.
     NDS.Expandable = {
         init: initializeExpandableContent,
         reinit: reinitializeExpandableContent,

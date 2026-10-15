@@ -57,6 +57,8 @@
    * Open modal by ID or element
    */
   function open(target) {
+    // A page with no modal at load never runs init(), so open() wires the close controls too.
+    init();
     // Get modal element — fromTemplate covers an id still inside a <template>
     const modal = typeof target === 'string'
       ? NDS.fromTemplate(target)

@@ -226,6 +226,11 @@
         // listeners install once. Cosmetic only: the submit value is already in
         // the hidden input from markup — this just paints the derived label.
         document.querySelectorAll('.nds-select-input').forEach(restoreDisplay);
+        wireDocument();
+    }
+
+    // A page with no select at load never runs init(), so create() wires these too.
+    function wireDocument() {
         if (_initDone) return;
         _initDone = true;
         document.addEventListener('focusin', onFocusIn);
@@ -241,7 +246,9 @@
             var input = (el.classList && el.classList.contains('nds-select-input'))
                 ? el
                 : (el.querySelector && el.querySelector('.nds-select-input'));
-            if (input) build(input);
+            if (!input) return;
+            wireDocument();
+            build(input);
         },
         // Programmatic pick: the same write sequence as a user click (display
         // label, hidden value, selected markers, input/change events,

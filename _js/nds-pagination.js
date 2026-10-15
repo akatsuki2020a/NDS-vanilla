@@ -397,53 +397,57 @@
                 return;
             }
 
-            if (!container.hasAttribute('data-nds-pagination-initialized')) {
-                // Check if auto-generation is requested via data-total-pages
-                const totalPages = parseInt(container.dataset.totalPages);
-                const activePage = parseInt(container.dataset.activePage) || 1;
-
-                // Only auto-generate if data-total-pages is set AND container doesn't already have .nds-pagination-list
-                const hasPaginationList = container.classList.contains('nds-pagination-list') ||
-                                         container.querySelector('.nds-pagination-list');
-
-                if (totalPages && totalPages > 0 && !hasPaginationList) {
-                    // Auto-generate pagination HTML, collapsed directly (no
-                    // build-all-then-collapse round trip). data-page-url (a
-                    // "?page={page}" template) makes the controls navigable links
-                    // for no-JS, server-reload pagination; without it they're buttons.
-                    container.innerHTML = generatePaginationHTML(totalPages, activePage, container.getAttribute('data-page-url'));
-                    wireGeneratedPagination(container, activePage, totalPages);
-                }
-
-                // Only a valid construction stamps, so a bailed (empty) nav stays eligible.
-                new NDSPagination(container);
-
-                initializePaginationStates(container);
-
-                // Wire the per-nav click handler. Auto-paginations are wired
-                // separately by _wireAutoNav (with a live items getter) and skip
-                // this path. Listener is scoped to the nav — DOM removal GCs it
-                // automatically; the AbortController stash on the element is the
-                // explicit handle a future destroy() can abort.
-                if (!container.hasAttribute('data-auto-pagination')) {
-                    _wireManualNavClicks(container);
-                    _wireCollapseWatch(); // live ellipsis re-collapse on dynamic <li> changes
-
-                    _restoreUrlPage(container);
-                }
-
-                // Universal reveal: a non-auto pagination releases its paged-content's
-                // skeleton hold at init. Auto navs are skipped here — setupAutoContainer
-                // stamps after it collapses, so pre-collapse content stays held.
-                // No .nds-pagination class gate: a standalone .nds-pagination-list root
-                // owns paged content the same way, and gating on the class left its
-                // items past --per-page hidden by the crit skeleton forever.
-                if (!container.hasAttribute('data-auto-pagination')) {
-                    const content = contentForNav(container);
-                    if (content) content.setAttribute('data-paged-initialized', '');
-                }
-            }
+            if (!container.hasAttribute('data-nds-pagination-initialized')) _initNav(container);
         });
+    }
+
+    // One nav's full init path, shared by the init sweep and create().
+    function _initNav(container) {
+        // Check if auto-generation is requested via data-total-pages
+        const totalPages = parseInt(container.dataset.totalPages);
+        const activePage = parseInt(container.dataset.activePage) || 1;
+
+        // Only auto-generate if data-total-pages is set AND container doesn't already have .nds-pagination-list
+        const hasPaginationList = container.classList.contains('nds-pagination-list') ||
+                                 container.querySelector('.nds-pagination-list');
+
+        if (totalPages && totalPages > 0 && !hasPaginationList) {
+            // Auto-generate pagination HTML, collapsed directly (no
+            // build-all-then-collapse round trip). data-page-url (a
+            // "?page={page}" template) makes the controls navigable links
+            // for no-JS, server-reload pagination; without it they're buttons.
+            container.innerHTML = generatePaginationHTML(totalPages, activePage, container.getAttribute('data-page-url'));
+            wireGeneratedPagination(container, activePage, totalPages);
+        }
+
+        // Only a valid construction stamps, so a bailed (empty) nav stays eligible.
+        const inst = new NDSPagination(container);
+
+        initializePaginationStates(container);
+
+        // Wire the per-nav click handler. Auto-paginations are wired
+        // separately by _wireAutoNav (with a live items getter) and skip
+        // this path. Listener is scoped to the nav — DOM removal GCs it
+        // automatically; the AbortController stash on the element is the
+        // explicit handle a future destroy() can abort.
+        if (!container.hasAttribute('data-auto-pagination')) {
+            _wireManualNavClicks(container);
+            _wireCollapseWatch(); // live ellipsis re-collapse on dynamic <li> changes
+
+            _restoreUrlPage(container);
+        }
+
+        // Universal reveal: a non-auto pagination releases its paged-content's
+        // skeleton hold at init. Auto navs are skipped here — setupAutoContainer
+        // stamps after it collapses, so pre-collapse content stays held.
+        // No .nds-pagination class gate: a standalone .nds-pagination-list root
+        // owns paged content the same way, and gating on the class left its
+        // items past --per-page hidden by the crit skeleton forever.
+        if (!container.hasAttribute('data-auto-pagination')) {
+            const content = contentForNav(container);
+            if (content) content.setAttribute('data-paged-initialized', '');
+        }
+        return inst;
     }
 
     // Collect the dropmenu items inside a pagination's ellipsis menus. Queried
@@ -1620,13 +1624,13 @@
             // A live nav is returned as-is — re-wiring its click handler would
             // stack a second listener on the same element.
             if (container.ndsPagination) return container.ndsPagination;
-            const inst = new NDSPagination(container);
-            // Match initializePagination: wire the per-nav click handler for
-            // manual navs; auto-paginations are wired by _wireAutoNav.
-            if (!container.hasAttribute('data-auto-pagination')) {
-                _wireManualNavClicks(container);
-                _wireCollapseWatch();
-            }
+            // A page with no pagination at load never runs init(), so create() wires the cleanup too.
+            _wireNavCleanup();
+            // Manual navs take init's full path (URL page, states, reveal); auto-paginations
+            // are wired by _wireAutoNav.
+            const inst = container.hasAttribute('data-auto-pagination')
+                ? new NDSPagination(container)
+                : _initNav(container);
             return inst.valid ? inst : null;
         },
         refresh: refreshAutoPagination,
