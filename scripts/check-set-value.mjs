@@ -330,6 +330,75 @@ const log = (page) => page.evaluate(() => window.__log.splice(0));
     await page.close();
 }
 
+// ---- VUE ------------------------------------------------------------------
+// v-model on the field each component's docs name; NDS wires the markup after Vue mounts it.
+{
+    const page = await open('components/forms.html');
+    await page.addScriptTag({ url: 'https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js' });
+    await page.evaluate(() => {
+        const host = document.querySelector('.nds-section-body').appendChild(document.createElement('div'));
+        host.id = 'v-app';
+        const opt = (v) => '<button type="button" class="nds-btn nds-subtle nds-select-option" data-value="' + v
+            + '"><span class="nds-option-text"><span class="nds-label">' + v + '</span></span></button>';
+        window.__vue = Vue.createApp({
+            data: () => ({ region: '', date: '', time: '', phone: '', text: '', agree: false, sw: false }),
+            template: ''
+                + '<div class="nds-form-container nds-select" id="v-cs"><div class="nds-form-control">'
+                + '<input type="text" class="nds-input nds-select-input" readonly>'
+                + '<input type="hidden" class="nds-select-value" v-model="region">'
+                + '<div class="nds-select-dropdown" hidden><div class="nds-select-options">' + opt('riyadh') + opt('makkah') + '</div></div>'
+                + '</div></div>'
+                + '<div class="nds-form-container nds-date-picker" id="v-dp"><div class="nds-form-control">'
+                + '<div class="nds-form-action"><button type="button" class="nds-btn nds-subtle nds-md date-picker-toggle nds-icon-only" aria-label="d"><i class="nds-icon nds-hgi-calendar-03"></i></button></div>'
+                + '<input type="text" class="nds-input nds-date-input" v-model="date"></div></div>'
+                + '<div class="nds-form-container nds-time-picker" id="v-tp"><div class="nds-form-control">'
+                + '<div class="nds-form-action"><button type="button" class="nds-btn nds-subtle nds-md time-picker-toggle nds-icon-only" aria-label="t"><i class="nds-icon nds-hgi-clock-01"></i></button></div>'
+                + '<input type="text" class="nds-input nds-time-input"><input type="hidden" class="nds-time-value" v-model="time"></div></div>'
+                + '<div class="nds-form-container"><div class="nds-form-control"><input type="tel" id="v-phone" class="nds-input nds-phone" v-model="phone"></div></div>'
+                + '<div class="nds-form-container"><div class="nds-form-control"><input type="text" id="v-text" class="nds-input" v-model="text"></div></div>'
+                + '<input type="checkbox" id="v-agree" v-model="agree">'
+                + '<div class="nds-form-container" id="v-sw-box"><div class="nds-form-control"><div class="nds-switch">'
+                + '<input type="checkbox" id="v-sw" class="nds-switch-input" v-model="sw">'
+                + '<div class="nds-switch-track"><div class="nds-switch-thumb"></div></div></div></div></div>'
+        }).mount(host);
+        NDS.Init.mount(host);
+    });
+    await page.waitForFunction(() => document.querySelector('#v-dp .nds-date-input')?._ndsDatePicker
+        || window.NDS?.DatePicker?.create, null, { timeout: 10000 });
+    const res = await page.evaluate(async () => {
+        const vm = window.__vue;
+        const tick = () => new Promise((r) => setTimeout(r, 50));
+        // A component's code may still be loading: its stub returns a promise.
+        await NDS.CustomSelect.setValue(document.getElementById('v-cs'), 'makkah');
+        const dp = await NDS.DatePicker.create(document.querySelector('#v-dp .nds-date-input'));
+        dp.selectDate(new Date(2026, 9, 15));
+        dp.updateInput();
+        await NDS.TimePicker.setValue(document.getElementById('v-tp'), '09:30');
+        NDS.setValue(document.getElementById('v-text'), 'hello');
+        NDS.setValue(document.getElementById('v-agree'), true);
+        document.querySelector('#v-sw-box .nds-switch-track').click();
+        await tick();
+        return {
+            region: vm.region, date: vm.date, shownDate: document.querySelector('#v-dp .nds-date-input').value,
+            time: vm.time, text: vm.text, agree: vm.agree, sw: vm.sw, swDom: document.getElementById('v-sw').checked
+        };
+    });
+    ok('Vue: Custom Select reaches v-model on .nds-select-value', res.region === 'makkah', JSON.stringify(res));
+    ok('Vue: a Date Picker pick reaches v-model', res.date && res.date === res.shownDate);
+    ok('Vue: Time Picker reaches v-model on .nds-time-value', res.time === '09:30');
+    ok('Vue: NDS.setValue reaches v-model on a text field', res.text === 'hello');
+    ok('Vue: NDS.setValue reaches v-model on a checkbox', res.agree === true);
+    ok('Vue: a Switch track click reaches v-model, flipped once', res.sw === true && res.swDom === true);
+
+    await page.locator('#v-phone').scrollIntoViewIfNeeded();
+    await page.locator('#v-phone').focus();
+    await page.keyboard.insertText('0501');
+    await page.waitForTimeout(50);
+    const ph = await page.evaluate(() => ({ shown: document.getElementById('v-phone').value, model: window.__vue.phone }));
+    ok('Vue: a pasted phone number reaches v-model stripped', ph.shown === '501' && ph.model === '501', JSON.stringify(ph));
+    await page.close();
+}
+
 // ---- DROPMENU SELECT ------------------------------------------------------
 {
     const page = await open('components/dropmenu.html');
