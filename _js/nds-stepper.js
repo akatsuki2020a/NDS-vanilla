@@ -5,13 +5,14 @@
  * Methods:
  *   NDS.Stepper.init() / .reinit()        instance every stepper, wire the delegated control listener
  *   NDS.Stepper.create(el)                instance one stepper
- *   NDS.Stepper.get(id)                   the instance for that stepper id
+ *   NDS.Stepper.get(id)                   the instance of the stepper with that id in the page
  *   NDS.Stepper.next(id) / .previous(id)  move one step
  *   NDS.Stepper.goTo(id, step)            move to a step number
  *   NDS.Stepper.control(id, action, val)  the same entry point the buttons use
  *                                         (action: next | previous | goto)
  * Events (bubble from the .nds-stepper):
  *   nds:stepper:change   detail {currentStep, totalSteps, progressPercentage}
+ *                        (currentStep is totalSteps + 1 once the flow is completed)
  * Hooks:
  *   data-current · data-total   on the .nds-stepper — live: write either and the display
  *                               re-stamps itself
@@ -54,7 +55,6 @@
     'use strict';
 
     let _globalsWired = false;
-    const steppers = new Map();
 
     // Page-wide and shared by every stepper, so create(el) wires them too.
     function _wireGlobals() {
@@ -133,7 +133,6 @@
 
         destroy() {
             const el = this.element;
-            if (el.id) steppers.delete(el.id);
             delete el.ndsStepper;
             el.removeAttribute('data-nds-stepper-initialized');
             // The shared control listener and data-current observer stay — they serve every stepper.
@@ -152,7 +151,7 @@
         }
 
         updateProgressDisplay() {
-            // Past the last step only: arriving on it leaves it current. next() marks it done.
+            // Past the last step only: arriving on it leaves it current. next() moves past it.
             if (this.currentStep > this.totalSteps) {
                 NDS.State.add(this.element, 'completed');
             } else {
@@ -184,36 +183,26 @@
 
         goTo(stepNumber) {
             if (!this.isValidStep(stepNumber)) return false;
+            return this._moveTo(stepNumber);
+        }
+
+        // One past the last step is the completed flow, the same state data-current
+        // writes: next() reaches it, goTo() does not, previous() leaves it.
+        next() {
+            if (this.currentStep > this.totalSteps) return false;
+            return this._moveTo(this.currentStep + 1);
+        }
+
+        previous() {
+            return this.goTo(this.currentStep - 1);
+        }
+
+        _moveTo(stepNumber) {
             this.currentStep = stepNumber;
             this.updateProgress();
             this.syncStepStates();
             this.dispatchEvent();
             return true;
-        }
-
-        // Completion lives on the stepper, not the last step: nds-static writes no step state.
-        next() {
-            // On the last step, next() completes the flow
-            if (this.currentStep === this.totalSteps) {
-                if (!NDS.State.has(this.element, 'completed')) {
-                    if (!this.element.classList.contains('nds-static')) NDS.State.set(this.steps[this.totalSteps - 1], 'completed');
-                    NDS.State.add(this.element, 'completed');
-                    this.dispatchEvent();
-                }
-                return true;
-            }
-            return this.goTo(this.currentStep + 1);
-        }
-
-        previous() {
-            // Un-complete last step instead of going back
-            if (this.currentStep === this.totalSteps && NDS.State.has(this.element, 'completed')) {
-                if (!this.element.classList.contains('nds-static')) NDS.State.set(this.steps[this.totalSteps - 1], 'current');
-                NDS.State.remove(this.element, 'completed');
-                this.dispatchEvent();
-                return true;
-            }
-            return this.goTo(this.currentStep - 1);
         }
 
         dispatchEvent() {
@@ -233,8 +222,9 @@
         get progress() { return Math.min(100, Math.round((this.currentStep / this.totalSteps) * 100)); }
     }
 
+    // Read off the element, so an unmounted stepper (a framework removing it without destroy()) is gone.
     function get(id) {
-        return steppers.get(id);
+        return document.getElementById(id)?.ndsStepper;
     }
 
     function control(id, action, value) {
@@ -249,7 +239,6 @@
         }
     }
 
-    // Registers on the element + id-keyed Map so get(id)/control(id, …) work.
     // A page with no stepper at load never runs init(), so this wires the globals too.
     function create(el) {
         if (el.ndsStepper) return el.ndsStepper;
@@ -257,7 +246,6 @@
         const stepper = new NDSStepper(el);
         el.setAttribute('data-nds-stepper-initialized', 'true');
         el.ndsStepper = stepper;
-        if (el.id) steppers.set(el.id, stepper);
         return stepper;
     }
 

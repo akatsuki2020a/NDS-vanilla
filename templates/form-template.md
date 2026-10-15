@@ -532,8 +532,7 @@ sidemenu_mode: false
                 const ref = document.getElementById('ft-reference');
                 if (ref) ref.textContent = generateReference();
                 // Deferred so the second change event does not fire mid-handler.
-                // It is a no-op once the last step is already completed, so this
-                // settles after one extra pass.
+                // That event reports one past the last step, so it does not loop.
                 if (step === last) queueMicrotask(() => { NDS.Stepper.next('form-stepper'); });
             }
         });

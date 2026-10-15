@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "14/10/2026 - 11:39 PM"
+last_edit: "15/10/2026 - 10:29 AM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -276,7 +276,7 @@ When something can refuse the move, such as validation or a request, call `NDS.S
 ### Completion
 {: .nds-block-title}
 
-`next()` on the last step marks it completed and writes `completed` in the stepper's `data-state`. `previous()` then makes the last step current again. To show a finished flow at page load, write a `data-current` one past the last step. In the radial layout, the last step stays in view with a full ring.
+`next()` on the last step completes the flow. It moves `data-current` one past the last step, marks every step completed, and writes `completed` in the stepper's `data-state`. `previous()` then makes the last step current again. To show a finished flow at page load, write that same `data-current`. In the radial layout, the last step stays in view with a full ring.
 
 </div>
   </div>
@@ -432,18 +432,18 @@ A stepper in the page starts by itself. The instance is on the element as `el.nd
 |---|---|
 | `NDS.Stepper.init()` | Starts every `.nds-stepper` that has not started. `reinit()` is the same |
 | `NDS.Stepper.create(el)` | Starts one stepper, such as one added after load, and returns its instance |
-| `NDS.Stepper.get(id)` | Returns the instance of the stepper with that id |
-| `NDS.Stepper.next(id)`, `NDS.Stepper.previous(id)` | Moves one step. On the last step, `next()` marks it completed |
+| `NDS.Stepper.get(id)` | Returns the instance of the stepper with that id in the page |
+| `NDS.Stepper.next(id)`, `NDS.Stepper.previous(id)` | Moves one step. On the last step, `next()` completes the flow |
 | `NDS.Stepper.goTo(id, step)` | Moves to a step number. Returns `false` for a number outside the steps |
 | `NDS.Stepper.control(id, action, value)` | What a control button calls. `action` is `next`, `previous` or `goto`, and `value` is the step for `goto` |
 | `instance.next()`, `instance.previous()`, `instance.goTo(step)` | The same moves on one instance |
-| `instance.current`, `instance.total`, `instance.progress` | The current step, the number of steps, and the percent done |
+| `instance.current`, `instance.total`, `instance.progress` | The current step, the number of steps, and the percent done. `current` is one past the last step when the flow is completed |
 | `instance.destroy()` | Removes the instance and its start marks, so `init()` can start the stepper again |
 {: .nds-table .nds-responsive}
 
 | Event | Fired on | Detail |
 |---|---|---|
-| `nds:stepper:change` | `.nds-stepper`, and bubbles | `currentStep`, `totalSteps`, `progressPercentage`. Fires after every move, and after a script writes `data-current` or `data-total`. It does not fire when the stepper starts |
+| `nds:stepper:change` | `.nds-stepper`, and bubbles | `currentStep`, `totalSteps`, `progressPercentage`. `currentStep` is one past the last step when the flow is completed, the same number `data-current` takes. Fires after every move, and after a script writes `data-current` or `data-total`. It does not fire when the stepper starts |
 {: .nds-table .nds-responsive}
 
 <script type="text/html" id="stepper-js" data-canon data-lang="js">
