@@ -119,7 +119,8 @@
     opener = document.activeElement;
     const focusTarget = modal.querySelector('[data-modal-close], .nds-modal-close') || modal;
     if (focusTarget === modal && !modal.hasAttribute('tabindex')) modal.tabIndex = -1;
-    focusTarget.focus({ preventScroll: true });
+    // Ring only if the opener had one: a script open at load otherwise paints it (Chrome treats pre-input focus as keyboard).
+    focusTarget.focus({ preventScroll: true, focusVisible: !!opener?.matches(':focus-visible') });
 
     activeModal = modal;
   }
