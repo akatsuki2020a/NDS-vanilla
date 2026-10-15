@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "15/10/2026 - 03:13 PM"
 ---
 
 <section id="date-picker-overview" class="nds-content-section nds-doc-overview">
@@ -104,7 +104,7 @@ A Picker choice changes two elements: write `data-format` on `.nds-date-picker` 
 
 The calendar button, `.date-picker-toggle`, opens the calendar. A click in the text box only places the cursor, so the user can type.
 
-A pick shows in the calendar, but the field does not change until the user presses Save. Save writes the date in the field and fires a native `change` event on it. Close, Escape or a click outside the calendar closes it and drops the pick. Today moves the calendar to this month and picks today. In Range, Today only moves the calendar. The Today button is off when today is outside the bounds.
+A pick shows in the calendar, but the field does not change until the user presses Save. Save writes the date in the field and fires native `input` and `change` events on it. Close, Escape or a click outside the calendar closes it and drops the pick. Today moves the calendar to this month and picks today. In Range, Today only moves the calendar. The Today button is off when today is outside the bounds.
 
 ### Date Range
 {: .nds-block-title}
@@ -145,7 +145,7 @@ The field sends the date as the user sees it, such as `15/09/1447`. To send the 
 ### Clear Button
 {: .nds-block-title}
 
-`data-clearable` on `.nds-date-picker` adds a Clear button to the calendar. Clear empties the field, fires `change` and closes the calendar, with no Save. Range always has the Clear button.
+`data-clearable` on `.nds-date-picker` adds a Clear button to the calendar. Clear empties the field, fires `input` and `change` and closes the calendar, with no Save. Range always has the Clear button.
 
 ### Validation
 {: .nds-block-title}
@@ -312,7 +312,8 @@ Source: the `date-picker` group in `_sass/tokens/_components.scss`.
 
 | Event | Fired on | Detail |
 |---|---|---|
-| `change` | `.nds-date-input`, and it bubbles | A native event, with no detail. It fires when the user presses Save or Clear, and when the user types a date and leaves the field. Read the date from `input.value` |
+| `input`, `change` | `.nds-date-input`, and they bubble | Native events, with no detail. They fire when the user presses Save or Clear. A typed date fires them as on any field. Read the date from `input.value` |
+| `input`, `change` | each `.nds-date-value`, and they bubble | Native events, with no detail. They fire when the picker writes a new server value |
 {: .nds-table .nds-responsive}
 
 <script type="text/html" id="date-picker-js" data-canon data-lang="js">

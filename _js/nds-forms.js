@@ -256,6 +256,15 @@
     // textarea in DOM order; a multiselect option checkbox belongs to its
     // check-container, not the wrapper being validated). Groups/feedback keep
     // the legacy first-match behavior.
+    // dismissAll would also take a nested field's message and leave its error outline.
+    function dismissOwn(container) {
+        container.querySelectorAll('.nds-feedback').forEach(function(fb) {
+            if (fb.parentElement.closest('.nds-form-container, .nds-form-group') !== container || fb.closest('code')) return;
+            if (fb.hasAttribute('data-permanent')) fb.removeAttribute('hidden');
+            else NDS.Feedback.dismiss(fb);
+        });
+    }
+
     function ownField(container) {
         // Never a hidden carrier: a picker in the prefix slot puts one before the real input.
         var fields = container.querySelectorAll('input:not([type="hidden"]), textarea, select');
@@ -362,7 +371,7 @@
                     // A blank message (Validator's blank custom error) drops the old one: the
                     // component shows the cause itself. An omitted message keeps it.
                     container.removeAttribute('data-message');
-                    NDS.Feedback.dismissAll(container);
+                    dismissOwn(container);
                 }
 
                 // Accessibility
@@ -403,7 +412,7 @@
             NDS.Status.clear(container);
             container.removeAttribute('data-message');
 
-            NDS.Feedback.dismissAll(container);
+            dismissOwn(container);
 
             var input = ownField(container);
             if (input) {

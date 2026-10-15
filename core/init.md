@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "12/10/2026 - 06:32 PM"
+last_edit: "15/10/2026 - 03:42 PM"
 ---
 
 <section id="init-overview" class="nds-content-section nds-doc-overview">
@@ -117,14 +117,57 @@ Some parts reach outside `el`. A FAB docks on `<body>`, a dropmenu with `data-po
 
 Only components inside `el` are reached. A filter toolbar can sit beside the grid it drives, so pass the root of the view you remove, not the list inside it.
 
-### Framework Views
+</div>
+  </div>
+</section>
+
+<section id="init-frameworks" class="nds-content-section nds-doc-frameworks">
+  <div class="nds-section-wrapper">
+    <div class="nds-section-head">
+      <h2 class="nds-section-title">Framework Views</h2>
+    </div>
+    <div class="nds-section-body nds-prose" markdown="1">
+
+NDS is plain HTML, CSS and JS, so any stack can host it: a framework such as React, Vue, Angular or Svelte, or server HTML that a library such as Turbo or htmx swaps in. The framework owns the nodes it renders, and NDS writes to some of them. These rules keep the two in step.
+
+### Mount and Destroy
 {: .nds-block-title}
 
 Call `window.NDS?.Init.mount(view)` after a view mounts, and `window.NDS?.Init.destroy(view)` before it unmounts. Do not wait for `NDS.Init.ready`, poll or retry before these calls. A view that mounts before NDS loads is found by NDS's own startup scan, and the `?.` skips each call while `NDS` does not exist yet.
 
-Build rows with the framework, not with the `<template>` pattern above. The framework owns every node it renders.
+`destroy()` also works on a view the framework has already removed, so a cleanup that runs after the removal, such as React's `useEffect` cleanup, is in time. Keep the view's element in a variable when the effect runs: React has emptied the ref by the time the cleanup runs.
 
-A framework that hydrates server HTML, such as Next.js or Nuxt, needs that HTML unchanged until hydration ends, and NDS changes some of it when it starts: the clock writes the time, and Main Navigation sets classes. React then discards the page, and it stays hidden. Write `data-nds-auto-init="false"` on `<html>`, and call `NDS.Init.initialize()` once hydration ends: in React, from an effect in the root component. That call must run after `nds-main.min.js`. Put the NDS script tag above your app's script and check the built HTML, because a bundler can move its own script above it.
+Build rows with the framework, not with the `<template>` pattern in [Usage](#init-markup). The framework owns every node it renders.
+
+### HTML Swaps
+{: .nds-block-title}
+
+A library that replaces or morphs server HTML in place, such as Turbo, htmx or Livewire, takes the same two calls around each swap: `destroy(view)` before it and `mount(view)` after it. A morph keeps the nodes but writes the server's attributes back, so `refresh()` alone can start a second instance on a node that still holds the first.
+
+### Hydration
+{: .nds-block-title}
+
+A framework that hydrates server HTML, such as Next.js or Nuxt, needs that HTML unchanged until hydration ends. NDS changes some of it when it starts: the clock writes the time, and Main Navigation sets classes. React then throws the server HTML away and renders again, and the page stays hidden. Write `data-nds-auto-init="false"` on `<html>`, and call `NDS.Init.initialize()` once hydration ends: in React from an effect in the root component, in Vue from `onMounted` in the root component. That call must run after `nds-main.min.js`. Put the NDS script tag above your app's script and check the built HTML, because a bundler can move its own script above it.
+
+### Classes
+{: .nds-block-title}
+
+NDS adds classes to some elements, such as `nds-dropmenu` on a picker's field and `nds-external` on a link. When a class binding changes, React's `className` and Vue's `class` write the whole attribute again and remove those classes. On an element that NDS writes to, keep the bound classes fixed, or put the changing class on a wrapper. The same holds for an attribute that NDS writes, such as `data-state` or `hidden`: do not bind it.
+
+### Field Values
+{: .nds-block-title}
+
+An NDS field fires the native `input` and `change` events each time it writes a value, so a two-way binding that listens for them sees the user's pick. Vue's `v-model`, Angular's `ngModel` and Svelte's `bind:value` are examples. Bind the input that holds the value: for Custom Select that is `.nds-select-value`, because its visible field holds the option's text. Tag Input, Multiselect and Rating have no single value field, so read their value from their event.
+
+A controlled React input does not see a value that a script writes, and its next render erases that value. In React, give an NDS field `defaultValue`, and read the pick from the component's event.
+
+### Events
+{: .nds-block-title}
+
+Listen for NDS events with `addEventListener`, through a ref, on the element that the component's API table names. Template event syntax cannot always name them, because their names hold colons, such as `nds:customselect:change`. React has no prop for them, and Angular reads the part before the first colon as a target, as in `(window:resize)`.
+
+### Content Security Policy
+{: .nds-block-title}
 
 Keep the `<style>` gate and the inline script out of your bundler. A minifier changes their bytes, so a CSP hash no longer matches (see [Content Security Policy](../ui-shell/head#csp)).
 

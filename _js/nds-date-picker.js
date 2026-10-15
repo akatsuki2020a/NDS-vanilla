@@ -1641,7 +1641,7 @@
             this.state.rangeEnd = null;
             this.elements.input.value = '';
             delete this.elements.input.dataset.convertedDate;
-            this.elements.input.dispatchEvent(new Event('change', { bubbles: true }));
+            NDS.triggerEvents(this.elements.input);
             this.renderCalendarDates();
             if (this.dropmenuInstance && this.dropmenuInstance.isOpen) {
                 this.dropmenuInstance.close();
@@ -1684,7 +1684,8 @@
             }
 
             this.elements.input.value = value;
-            this.elements.input.dispatchEvent(new Event('change', { bubbles: true }));
+            // input too: framework bindings (v-model, ngModel, bind:value) listen for it.
+            NDS.triggerEvents(this.elements.input);
 
             // Store converted date in dataset
             if (convertedValue) {
@@ -1707,10 +1708,11 @@
                 var date = null;
                 var part = range ? parts[i] : text;
                 try { date = part && CalendarConfig[type].parseDate(part.trim(), format); } catch (e) {}
-                out.value = date ? NDS.date.format(date, {
+                var v = date ? NDS.date.format(date, {
                     format: out.getAttribute('data-date-format') || format,
                     calendar: out.getAttribute('data-calendar') || (type === 'hijri' ? 'hijri' : 'gregory')
                 }) : '';
+                if (out.value !== v) { out.value = v; NDS.triggerEvents(out); }
             });
         },
 

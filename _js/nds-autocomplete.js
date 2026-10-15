@@ -342,8 +342,8 @@
                     this.cache = this._extractResults(data);
                 } catch (error) {
                     if (error.name !== 'AbortError') {
+                        // No cache: the next input retries.
                         console.warn('NDS Autocomplete: Fetch failed', error);
-                        this.cache = [];
                         this.close();
                     }
                     return;

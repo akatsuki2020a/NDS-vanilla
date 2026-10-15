@@ -491,7 +491,11 @@
     NDS.Multiselect = {
         init: initializeMultiselects,
         reinit: initializeMultiselects,
-        create: (element) => element.ndsMultiselect || new NDSMultiselect(element),
+        create: (element) => {
+            if (element.ndsMultiselect) return element.ndsMultiselect;
+            const inst = new NDSMultiselect(element);
+            return inst.valid ? inst : null;
+        },
         destroy: (element) => element.ndsMultiselect?.destroy()
     };
 })();

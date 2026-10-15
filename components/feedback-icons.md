@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "15/10/2026 - 03:13 PM"
 ---
 
 <section id="feedback-overview" class="nds-content-section nds-doc-overview">
@@ -155,7 +155,7 @@ A permanent message is a hint that stays in place, such as "Use 8 characters or 
             <i class="hgi hgi-stroke hgi-arrow-reload-horizontal"></i>
             <span class="nds-label">One Message per Place</span>
           </span>
-          <p class="nds-item-desc">A new message replaces the one already in the same place, so messages never pile up. A target with <code class="nds-inline-code lang-html">hidden</code> shows while a message is in it, and hides again when the last one is dismissed.</p>
+          <p class="nds-item-desc">A new message replaces the one already in the same place, so messages never pile up. A group's message leaves the messages of the fields inside the group. A target with <code class="nds-inline-code lang-html">hidden</code> shows while a message is in it, and hides again when the last one is dismissed.</p>
         </div>
       </div>
     </div>
@@ -230,7 +230,7 @@ There is no `init()`: nothing scans the page for feedback. The script only build
 
 | Method | Effect |
 |---|---|
-| `NDS.Feedback.create(options)` | Builds a message, puts it in place and returns the element. It replaces the message already in the same place |
+| `NDS.Feedback.create(options)` | Builds a message, puts it in place and returns the element. It replaces the message already in the same place, but not a message that belongs to a field inside it |
 | `NDS.Feedback.dismiss(elOrSelector)` | Removes one message, and shows again a permanent message it hid. Returns `true` when it existed |
 | `NDS.Feedback.dismissAll(container)` | Removes every message in a container except the permanent ones, which show again |
 {: .nds-table .nds-responsive}

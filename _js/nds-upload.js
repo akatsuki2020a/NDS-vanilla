@@ -876,7 +876,7 @@
     });
 
     // Paired teardown so a removed upload instance detaches its listeners,
-    // aborts in-flight XHRs, disconnects its MutationObserver, and clears the
+    // aborts in-flight XHRs and clears the
     // init marker — without which a re-added node would short-circuit re-init
     // behind the stale marker.
     NDS.onDOMRemove('.nds-file-upload', function (nodes) {

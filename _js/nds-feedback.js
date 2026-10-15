@@ -15,7 +15,7 @@
  *                    removed, and comes back when that newer message is dismissed
  * Gotchas:
  *   - There is no init(): this is a programmatic API, nothing scans for markup.
- *   - Creating a message REPLACES the existing feedback in the same target.
+ *   - Creating a message REPLACES the existing feedback in the same target, except a nested field's.
  *   - position is 'before' | 'after' | 'prepend' | 'append' (default 'append'); the first
  *     two insert as siblings of the target, the last two inside it.
  *   - role and aria-live are derived from status — error and warning announce assertively.
@@ -240,8 +240,11 @@
 
             // Handle existing feedback from target area before adding new one
             if (position === 'prepend' || position === 'append') {
+                // A group's message leaves the messages of the fields inside it.
+                const FIELD = '.nds-form-container, .nds-form-group';
+                const owner = targetEl.closest(FIELD);
                 targetEl.querySelectorAll('.nds-feedback').forEach(existingFeedback => {
-                    if (!existingFeedback.closest('code')) {
+                    if (!existingFeedback.closest('code') && existingFeedback.parentElement.closest(FIELD) === owner) {
                         if (existingFeedback.hasAttribute('data-permanent') && !newIsPermanent) {
                             existingFeedback.setAttribute('hidden', '');
                             hiddenPermanent.push(existingFeedback);

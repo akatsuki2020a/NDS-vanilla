@@ -68,6 +68,8 @@
     });
 
     // The "is this row selected" rule is NDS.Selection.isSelected: init() loads it.
+    // Before Selection loads (a JS-only export), its stub returns a truthy Promise: nothing is selected yet.
+    const isSelected = (row) => !NDS.Selection.__ndsStub && NDS.Selection.isSelected(row);
 
     // A row filtered OUT by NDS.Filter carries data-filtered (hidden via the
     // critical-layer rule [data-filtered]{display:none!important}). This is a
@@ -115,7 +117,7 @@
                 ? Array.from(tbody.querySelectorAll(':scope > tr.nds-page-item'))
                 : Array.from(tbody.rows))
                 .filter(row => !row.classList.contains('nds-sub') && !isRowFiltered(row));
-            if (scope === 'selected') return rows.filter(NDS.Selection.isSelected);
+            if (scope === 'selected') return rows.filter(isSelected);
             return rows;
         },
 
@@ -142,7 +144,7 @@
                 ? NDS.queryAll(source, sel)
                 : Array.from(source.children))
                 .filter(row => !isRowFiltered(row));
-            if (scope === 'selected') return rows.filter(NDS.Selection.isSelected);
+            if (scope === 'selected') return rows.filter(isSelected);
             return rows;
         },
 
@@ -196,7 +198,7 @@
     // getRows doesn't own (an unmarked <tr> in a paginated table), which flips
     // the scope to 'selected' and then exports nothing.
     function inferScope(source, adapter) {
-        return adapter.getRows(source, 'all').some(NDS.Selection.isSelected) ? 'selected' : 'all';
+        return adapter.getRows(source, 'all').some(isSelected) ? 'selected' : 'all';
     }
 
     function collect(source, scope) {
