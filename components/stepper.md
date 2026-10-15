@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 10:29 AM"
+last_edit: "15/10/2026 - 10:58 AM"
 ---
 
 <section id="stepper-overview" class="nds-content-section nds-doc-overview">
@@ -434,7 +434,7 @@ A stepper in the page starts by itself. The instance is on the element as `el.nd
 | `NDS.Stepper.create(el)` | Starts one stepper, such as one added after load, and returns its instance |
 | `NDS.Stepper.get(id)` | Returns the instance of the stepper with that id in the page |
 | `NDS.Stepper.next(id)`, `NDS.Stepper.previous(id)` | Moves one step. On the last step, `next()` completes the flow |
-| `NDS.Stepper.goTo(id, step)` | Moves to a step number. Returns `false` for a number outside the steps |
+| `NDS.Stepper.goTo(id, step)` | Moves to a step number. One past the last step completes the flow. Returns `false` for any other number outside the steps |
 | `NDS.Stepper.control(id, action, value)` | What a control button calls. `action` is `next`, `previous` or `goto`, and `value` is the step for `goto` |
 | `instance.next()`, `instance.previous()`, `instance.goTo(step)` | The same moves on one instance |
 | `instance.current`, `instance.total`, `instance.progress` | The current step, the number of steps, and the percent done. `current` is one past the last step when the flow is completed |

@@ -7,7 +7,7 @@
  *   NDS.Stepper.create(el)                instance one stepper
  *   NDS.Stepper.get(id)                   the instance of the stepper with that id in the page
  *   NDS.Stepper.next(id) / .previous(id)  move one step
- *   NDS.Stepper.goTo(id, step)            move to a step number
+ *   NDS.Stepper.goTo(id, step)            move to a step number; one past the last completes the flow
  *   NDS.Stepper.control(id, action, val)  the same entry point the buttons use
  *                                         (action: next | previous | goto)
  * Events (bubble from the .nds-stepper):
@@ -127,8 +127,9 @@
             this.syncStepStates();
         }
 
+        // One past the last step is the completed flow, the same state data-current writes.
         isValidStep(stepNumber) {
-            return stepNumber >= 1 && stepNumber <= this.totalSteps;
+            return stepNumber >= 1 && stepNumber <= this.totalSteps + 1;
         }
 
         destroy() {
@@ -183,26 +184,19 @@
 
         goTo(stepNumber) {
             if (!this.isValidStep(stepNumber)) return false;
-            return this._moveTo(stepNumber);
-        }
-
-        // One past the last step is the completed flow, the same state data-current
-        // writes: next() reaches it, goTo() does not, previous() leaves it.
-        next() {
-            if (this.currentStep > this.totalSteps) return false;
-            return this._moveTo(this.currentStep + 1);
-        }
-
-        previous() {
-            return this.goTo(this.currentStep - 1);
-        }
-
-        _moveTo(stepNumber) {
             this.currentStep = stepNumber;
             this.updateProgress();
             this.syncStepStates();
             this.dispatchEvent();
             return true;
+        }
+
+        next() {
+            return this.goTo(this.currentStep + 1);
+        }
+
+        previous() {
+            return this.goTo(this.currentStep - 1);
         }
 
         dispatchEvent() {
