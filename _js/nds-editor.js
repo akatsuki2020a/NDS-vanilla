@@ -924,8 +924,11 @@
 
             this._hydrate();
             // A script write (announced by NDS.triggerEvents) and a form reset refill the surface.
-            // _syncSource fires only 'input', so a 'change' here is never the editor's own.
-            const reload = () => { this._hydrate(); this._updateToolbarState(); };
+            // The editor's own leave-change carries the value it wrote, so it skips the refill (and keeps undo).
+            const reload = () => {
+                if (this.source.value === this._synced) return;
+                this._hydrate(); this._updateToolbarState();
+            };
             this.source.addEventListener('change', reload, { signal });
             // The browser restores the textarea's default value only after the reset event.
             this.source.form?.addEventListener('reset', () => setTimeout(reload), { signal });
@@ -1047,7 +1050,7 @@
 
         // Mirror NDS.Forms interactive states on the container — forms only
         // delegates to input/textarea/select, so the contenteditable is
-        // skipped. Tracked with focusin/focusout on the ROOT: the source
+        // skipped. Tracked for the whole editor (focusin on the root, focusout below): the source
         // textarea and the link popover's URL input are separate focus
         // targets inside the editor, so an editable-only focus/blur pair
         // drops the field's focus state (and fires a premature change
@@ -1059,8 +1062,11 @@
                 NDS.State.add(this.root, 'focus');
                 this._valueAtFocus = this.source.value;
             }, { signal });
-            this.root.addEventListener('focusout', (e) => {
-                if (this.root.contains(e.relatedTarget)) return; // moving within the editor
+            // On document, not the root: a link/image menu portaled to <body> leaves from there.
+            // NDS.closest follows that menu back to its editor.
+            document.addEventListener('focusout', (e) => {
+                if (!this._focusWithin || NDS.closest(e.target, '.nds-editor') !== this.root) return;
+                if (NDS.closest(e.relatedTarget, '.nds-editor') === this.root) return; // moving within the editor
                 this._focusWithin = false;
                 NDS.State.remove(this.root, 'focus');
                 NDS.State.remove(this.root, 'typing');
@@ -2267,12 +2273,11 @@
         // style is editing-only — sanitize strips it from the value.
         _syncColumnAlign() {
             for (const table of this.editable.querySelectorAll('table')) {
-                const rows = table.tHead?.rows;
-                const heads = rows?.length ? rows[rows.length - 1].cells : null;
                 for (const body of table.tBodies) {
                     for (const tr of body.rows) {
                         for (const td of tr.cells) {
-                            const a = heads?.[td.cellIndex]?.getAttribute('data-align');
+                            // Same lookup the toolbar reads, so the painted and pressed alignment agree.
+                            const a = columnHead(td)?.getAttribute('data-align');
                             if (COLUMN_ALIGN.has(a)) td.style.textAlign = a;
                             else td.style.removeProperty('text-align');
                             if (!td.getAttribute('style')) td.removeAttribute('style');
@@ -2880,6 +2885,7 @@
                     // The trailing caret-escape paragraph is an editing
                     // affordance, not content — it stays out of the value.
                     .replace(/\n?<p><br><\/p>$/, '');
+            this._synced = next;
             if (this.source.value === next) return;
             this.source.value = next;
             // Programmatic .value writes don't fire 'input' — dispatch so NDS.Forms delegation sees the change.

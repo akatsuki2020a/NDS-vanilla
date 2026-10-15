@@ -28,12 +28,6 @@
  *   - Inside a .nds-search-box, picking a suggestion clicks the .nds-search-btn.
  *   - No results shows the empty state only under data-strict; otherwise the menu closes.
  */
-/**
- * NDS Autocomplete Component
- * Enhances form inputs with remote typeahead/autocomplete functionality
- * Uses NDSDropmenu component for dropdown behavior (open/close, positioning, animation, outside-click)
- * Activated on inputs with autocomplete="on" inside .nds-form-container[data-url]
- */
 
 (function () {
     'use strict';
@@ -105,10 +99,9 @@
             this.cache = null;
             this.results = [];
             this.activeIndex = -1;
-            // Cached NodeList of rendered items — keyboard nav reads this on
-            // every arrow keypress, so re-querying per keydown is waste.
-            // Refreshed at the end of renderResults, invalidated at its start.
-            this._items = null;
+            // Rendered items — keyboard nav reads this on every arrow keypress,
+            // so re-querying per keydown is waste. Reset at the start of renderResults.
+            this._items = [];
             // Two lifetimes: abortController spans the instance and releases every
             // listener; fetchAbortController is re-armed per request to cancel the
             // in-flight suggestion fetch when a newer keystroke supersedes it.
@@ -133,6 +126,8 @@
 
             this.init();
             containerElement.setAttribute('data-nds-autocomplete-initialized', 'true');
+            // NDS.Init.destroy(view) reaches an instance only through its nds* backref.
+            containerElement.ndsAutocomplete = this;
         }
 
         // ==============================================
@@ -398,7 +393,7 @@
         renderResults(data, query) {
             this.scroll.innerHTML = '';
             this.activeIndex = -1;
-            this._items = null;
+            this._items = [];
 
             if (!data || data.length === 0) {
                 // Soft dependency — NDS.Empty ships in the main bundle; without
@@ -526,9 +521,7 @@
 
         handleKeydown(e) {
             var isOpen = this.dropmenuInstance && this.dropmenuInstance.isOpen;
-            // Cached from renderResults; falls back to a fresh query if the
-            // menu opened without a prior render (defensive, never seen in practice).
-            var items = this._items || this.menu.querySelectorAll('.nds-dropmenu-item');
+            var items = this._items;
             var itemCount = items.length;
 
             switch (e.key) {
@@ -601,8 +594,6 @@
 
         navigateItems(direction, items) {
             var count = items.length;
-            if (count === 0) return;
-
             var newIndex = this.activeIndex + direction;
             if (newIndex < 0) newIndex = count - 1;
             if (newIndex >= count) newIndex = 0;
@@ -619,14 +610,10 @@
 
             this.activeIndex = index;
 
-            if (index >= 0 && items[index]) {
-                NDS.aria.selected(items[index], true);
-                addState(items[index], 'active');
-                items[index].scrollIntoView({ block: 'nearest' });
-                this.input.setAttribute('aria-activedescendant', items[index].id);
-            } else {
-                this.input.removeAttribute('aria-activedescendant');
-            }
+            NDS.aria.selected(items[index], true);
+            addState(items[index], 'active');
+            items[index].scrollIntoView({ block: 'nearest' });
+            this.input.setAttribute('aria-activedescendant', items[index].id);
         }
 
         // ==============================================
@@ -641,7 +628,7 @@
         }
 
         destroy() {
-            // create() on a built or incomplete field hands back an instance that owns nothing.
+            // create() on an incomplete field hands back an instance that owns nothing.
             if (!this.abortController) return;
             this.abortController.abort();
             this.fetchAbortController?.abort();
@@ -666,21 +653,13 @@
             ['role', 'aria-expanded', 'aria-autocomplete', 'aria-controls', 'aria-activedescendant']
                 .forEach((a) => this.input.removeAttribute(a));
             this.container.removeAttribute('data-nds-autocomplete-initialized');
+            if (this.container.ndsAutocomplete === this) delete this.container.ndsAutocomplete;
         }
     }
 
     // ==============================================
     // AUTO-INITIALIZATION
     // ==============================================
-
-    // Build a container's autocomplete instance (once). Shared by the delegated
-    // focusin and the programmatic create().
-    function buildAutocomplete(container) {
-        if (!container || container.hasAttribute('data-nds-autocomplete-initialized')) return;
-        if (container.closest('code')) return;
-        if (!container.querySelector('input[autocomplete="on"]')) return;
-        new NDSAutocomplete(container);
-    }
 
     var _delegationWired = false;
 
@@ -697,7 +676,9 @@
         document.addEventListener('focusin', function (e) {
             var t = e.target;
             if (!t || !t.closest) return;
-            buildAutocomplete(t.closest('.nds-form-container[data-url]'));
+            // The constructor skips an incomplete field itself.
+            var container = t.closest('.nds-form-container[data-url]');
+            if (container && !container.ndsAutocomplete && !container.closest('code')) new NDSAutocomplete(container);
         });
     }
 
@@ -710,7 +691,7 @@
         reinit: initializeAutocompletes,
         // Programmatic construction. Pass { filter, renderItem } to override
         // the default substring match and dropdown-row renderer.
-        create: function (element, options) { return new NDSAutocomplete(element, options); }
+        create: function (element, options) { return (element && element.ndsAutocomplete) || new NDSAutocomplete(element, options); }
     };
 
 })();

@@ -654,17 +654,19 @@
             this.targetContainer.setAttribute('data-nds-filter-initialized', 'true');
         }
 
+        // Undo what handleAjaxSubmit set on start; success and failure both release through here.
+        _releaseSubmitUi() {
+            if (this.targetContainer) this.targetContainer.classList.remove('nds-loading');
+            NDS.State.clear(this.filterContainer);
+            if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
+        }
+
         /**
          * Settle UI state after a successful response: clear loading, refresh
          * dependent UI, fire the complete event.
          */
         _finishAjaxSubmit(eventDetail, isJson) {
-            if (this.targetContainer) {
-                this.targetContainer.classList.remove('nds-loading');
-            }
-
-            NDS.State.clear(this.filterContainer);
-            if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
+            this._releaseSubmitUi();
 
             this._commitAppliedUi();
 
@@ -690,14 +692,8 @@
 
             console.error('NDS Filter: AJAX submission failed:', error);
 
-            if (this.targetContainer) {
-                this.targetContainer.classList.remove('nds-loading');
-            }
-
+            this._releaseSubmitUi();
             if (appliedUrl !== undefined) this._rollbackApplied(appliedUrl);
-
-            NDS.State.clear(this.filterContainer);
-            if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
 
             // Cancelable so a consumer with its own error UI can suppress the
             // toast — same opt-out idiom as nds:filterFormAjax.
@@ -2035,9 +2031,6 @@
             this.items.forEach(card => {
                 const filterElements = card.querySelectorAll(`[data-filter="${filterName}"]`);
                 const itemHasFilter = card.getAttribute('data-filter') === filterName;
-
-                if (!filterElements.length && !itemHasFilter) return;
-
                 filterElements.forEach(harvest);
                 // The item itself can carry the marker too
                 if (itemHasFilter) harvest(card);
@@ -2826,7 +2819,7 @@
             this._targetRoots = this.resolveTargetRoots();
             // Re-stamp: a container or surface rendered (or re-rendered) after
             // createInstance is otherwise held by the skeleton gate under a live instance.
-            (this._targetRoots || []).forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
+            this._targetRoots.forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
             this.targetContainer?.setAttribute('data-nds-filter-initialized', 'true');
 
             // A replaced search box leaves the cached ref (and its listeners) on a
@@ -2949,8 +2942,7 @@
             if (this.filterContainer.ndsFilter === this) {
                 // _targetRoots covers every stamped surface (incl. the
                 // representative); the target container is stamped separately.
-                this._targetRoots?.forEach(r => r.removeAttribute('data-nds-filter-initialized'));
-                this.filterContainer.removeAttribute('data-nds-filter-initialized');
+                this._targetRoots.forEach(r => r.removeAttribute('data-nds-filter-initialized'));
                 this.targetContainer?.removeAttribute('data-nds-filter-initialized');
                 delete this.filterContainer.ndsFilter;
             }
@@ -3002,7 +2994,7 @@
         // _targetRoots, not the passed-in surfaces: it is the authoritative set in
         // both paths — the loader's grouped surfaces, or the document scan a manual
         // create() falls back to — so neither leaves a linked surface unstamped.
-        (instance._targetRoots || [representative]).forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
+        instance._targetRoots.forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
         instance.targetContainer?.setAttribute('data-nds-filter-initialized', 'true');
         if (instance.targetId) {
             _instancesByTarget.set(instance.targetId, instance);

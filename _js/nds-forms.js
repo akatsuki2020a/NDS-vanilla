@@ -1699,6 +1699,9 @@
     // ==============================================
     // CONTAINER INITIALIZATION
     // ==============================================
+    // Elements the init tail (autofocus, FOUC reveal) has already handled.
+    var _initTail = new WeakSet();
+
     function initializeContainer(container) {
         if (!container) return;
 
@@ -1750,17 +1753,23 @@
         // Restore autofocus — browser native autofocus may be lost during init.
         // preventScroll: a plain focus() scrolls the element into view, which
         // forces a synchronous layout in the middle of the component-init burst.
+        // Once per element: the dynamic-content observer re-runs this sweep on every
+        // added control, and a re-run would pull focus from the field the user is in.
         var autofocusEl = container.querySelector('input[autofocus], textarea[autofocus], select[autofocus]');
-        if (autofocusEl) {
+        if (autofocusEl && !_initTail.has(autofocusEl)) {
+            _initTail.add(autofocusEl);
             autofocusEl.focus({ preventScroll: true });
             var fc = autofocusEl.closest('.nds-form-container');
             if (fc) NDS.State.add(fc, 'focus');
         }
 
-        // Reveal [hidden] FOUC-guard wrappers now their controls carry state.
-        container.querySelectorAll(
-            '.nds-form-group[hidden], .nds-form-container[hidden], .nds-form-action[hidden]'
-        ).forEach(function(el) { el.removeAttribute('hidden'); });
+        // Reveal [hidden] FOUC-guard wrappers now their controls carry state — on a
+        // wrapper's first sweep only, so one hidden later by the page or a component stays hidden.
+        container.querySelectorAll('.nds-form-group, .nds-form-container, .nds-form-action').forEach(function(el) {
+            if (_initTail.has(el)) return;
+            _initTail.add(el);
+            el.removeAttribute('hidden');
+        });
     }
 
     // ==============================================
