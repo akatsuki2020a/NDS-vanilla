@@ -533,21 +533,6 @@
                 }, { signal });
             }
 
-            // Outside click — registered at CAPTURE phase so it fires before
-            // any other dropmenu's trigger handler can `stopPropagation` and
-            // block this listener at bubble. Without capture, clicking trigger
-            // B doesn't close the already-open dropmenu A (A.open() does run
-            // an auto-close-others loop, but only after A's trigger handler
-            // returns — by then A is still "open").
-            const handleOutsideClick = (e) => {
-                if (this.dropmenu.contains(e.target)) return;
-                // Clicking away during a delayed first-open cancels it — otherwise
-                // the menu would still pop open once the timer fired.
-                if (this._cancelDelayedOpen()) return;
-                if (this.isOpen) this.close();
-            };
-            document.addEventListener('click', handleOutsideClick, { capture: true, signal });
-
             // Trigger + menu keyboard (skip if the consumer owns its own
             // keyboard navigation — date-picker uses 2D grid keys for the
             // day cells; autocomplete already stopPropagation's its own).
@@ -586,16 +571,9 @@
                 }
             };
             this.dropmenu.addEventListener('keydown', onEscape, { signal });
+            this._onEscape = onEscape;
             // Something else hid the menu (a closing modal): close with it, so the state follows.
             this.menu.addEventListener('toggle', (e) => { if (e.newState === 'closed' && this.isOpen) this.close(); }, { signal });
-            // Safari leaves focus on the page or the modal around a clicked trigger: Escape there closes
-            // the newest open menu, before a <dialog> around it reads the key as its own close.
-            document.addEventListener('keydown', (e) => {
-                if (e.key !== 'Escape' || [..._openDropmenus].pop() !== this.dropmenu
-                    || this.dropmenu.contains(e.target) || !e.target.contains?.(this.dropmenu)) return;
-                e.stopImmediatePropagation();
-                onEscape(e);
-            }, { capture: true, signal });
 
             // Item click auto-close.
             this.menu.addEventListener('click', (e) => {
@@ -606,6 +584,36 @@
                     setTimeout(() => this.close(), 100);
                 }
             }, { signal });
+        }
+
+        // On document only while open or opening: a closed menu has nothing to close, and a
+        // page with a hundred menus ran a hundred listeners on every click and keypress.
+        _listenDocument() {
+            if (this._docAC) return;
+            this._docAC = new AbortController();
+            const { signal } = this._docAC;
+            // Outside click, at CAPTURE: another menu's trigger stops its click at bubble,
+            // and that click must still close this one.
+            document.addEventListener('click', (e) => {
+                if (this.dropmenu.contains(e.target)) return;
+                // Clicking away during a delayed first-open cancels it — otherwise
+                // the menu would still pop open once the timer fired.
+                if (this._cancelDelayedOpen()) return;
+                if (this.isOpen) this.close();
+            }, { capture: true, signal });
+            // Safari leaves focus on the page or the modal around a clicked trigger: Escape there closes
+            // the newest open menu, before a <dialog> around it reads the key as its own close.
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape' || [..._openDropmenus].pop() !== this.dropmenu
+                    || this.dropmenu.contains(e.target) || !e.target.contains?.(this.dropmenu)) return;
+                e.stopImmediatePropagation();
+                this._onEscape(e);
+            }, { capture: true, signal });
+        }
+
+        _unlistenDocument() {
+            this._docAC?.abort();
+            this._docAC = null;
         }
 
         // ==============================================
@@ -735,6 +743,7 @@
             clearTimeout(this._delayTimer);
             this._delaying = false;
             removeState(this.trigger, 'loading');
+            if (!this.isOpen) this._unlistenDocument();
             return true;
         }
 
@@ -756,6 +765,7 @@
             if (this.dropmenu.hasAttribute('data-delay')) {
                 const delay = parseInt(this.dropmenu.getAttribute('data-delay'), 10) || 0;
                 this._delaying = true;
+                this._listenDocument();
                 addState(this.trigger, 'loading');
                 this._delayTimer = setTimeout(() => {
                     this._delaying = false;
@@ -784,6 +794,7 @@
             removeState(this.menu,     'closing');
             this.isOpen = true;
             _openDropmenus.add(this.dropmenu);
+            this._listenDocument();
 
             // A % width (`--dropmenu-min-width: 100%` on custom-select, autocomplete,
             // filter, …) means the wrapper's width, but the top layer resolves it
@@ -860,6 +871,7 @@
         close() {
             this.isOpen = false;
             _openDropmenus.delete(this.dropmenu);
+            this._unlistenDocument();
             // A nested open menu (date-picker month/year) is its own popover: it
             // would stay in the top layer after this one leaves.
             _openDropmenus.forEach(el => {
