@@ -291,6 +291,8 @@
         // an explicit labelRotate/labelDecimate overrides the auto decision.
         _xaxisStrategy(catLabels, plotW) {
             const xaxis = this.opts.xaxis || {};
+            // Hidden labels take no room: a tilt reserved for them shrank a sparkline's plot.
+            if (!xaxis.show) return { step: 1, rotate: 0, extraPad: 0, startReach: 0 };
             const isMobile = window.matchMedia(NDS.breakpoints['tablet-max']).matches;
             const fontSize = isMobile ? 11 : 13;
             const charW = fontSize * 0.6;
