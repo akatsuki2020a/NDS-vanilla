@@ -898,7 +898,11 @@
   .nds-paged-content:not([data-paged-initialized])) .nds-card,
 .nds-card.nds-loading,
 html:not([data-nds-loaded]) .nds-card {
-  @include skeleton-pulse;
+  // Shown cards only: restyling a card that carries the pulse costs ~5x, and a
+  // paged list hides ~100 of them before the reveal (~100 ms at CPU ×6.6).
+  &:not([hidden]) {
+    @include skeleton-pulse;
+  }
 
   :is(.nds-card-title, .nds-card-subtitle, .nds-card-description,
     .nds-card-number, .nds-card-rating-text) {
