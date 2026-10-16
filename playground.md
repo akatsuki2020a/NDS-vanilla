@@ -66,6 +66,22 @@ direction: rtl
     .pg-dialog .nds-card-actions .nds-btn { width: 100%; }
     .pg-dialog .nds-card-actions .nds-label { text-align: center; }
   }
+  /* A Panel on <dialog>: show() for plain and static (no top layer, so the main nav stays above), showModal() for modal. */
+  .pg-panel { position: fixed; z-index: 999; inset-block: var(--_header-offset, var(--nds-nav-height, 72px)) 0; inset-inline: auto 0; width: min(420px, 100vw); height: auto; max-width: none; max-height: none;
+    margin: 0; padding: 0; border: 0; overflow: hidden; flex-direction: column; background: var(--background-menu); color: var(--text-default); box-shadow: var(--shadow-md);
+    transform: translateX(-100%); transition: transform var(--nds-transition), display var(--nds-transition) allow-discrete, overlay var(--nds-transition) allow-discrete; }
+  [dir="ltr"] .pg-panel { transform: translateX(100%); }
+  .pg-panel[open] { display: flex; transform: none; }
+  @starting-style { .pg-panel[open] { transform: translateX(-100%); } }
+  [dir="ltr"] .pg-panel[open] { transform: none; }
+  @starting-style { [dir="ltr"] .pg-panel[open] { transform: translateX(100%); } }
+  .pg-panel:not([open]) { display: none; }
+  /* A modal Panel covers the nav anyway: full height, no header offset. */
+  .pg-panel:modal { inset-block-start: var(--panel-top, 0); }
+  .pg-panel::backdrop { background: transparent; }
+  .pg-panel:modal::backdrop { background: var(--background-overlay, rgb(0 0 0 / .5)); transition: opacity var(--nds-transition); }
+  /* Stacked dim layers: the dialog under the top modal drops its own. */
+  [data-pg-under]::backdrop { opacity: 0; }
 </style>
 
 <section class="nds-content-section pg-demo">
@@ -208,7 +224,50 @@ direction: rtl
               </div>
             </form>
           </dialog>
-          <p class="pg-out">Try Tab, Esc, a click outside and scrolling the page. Native: no scroll lock, so NDS would keep that part.</p>
+          <p class="pg-out">Try Tab, Esc, a click outside and scrolling the page. The scroll lock is NDS's: <code>&lt;dialog&gt;</code> has none.</p>
+        </div>
+      </div>
+
+      <h3>5. A Panel, and a Modal over a modal Panel</h3>
+      <div class="pg-row">
+        <div class="pg-box"><b>Old: NDS Panel</b>
+          <div class="nds-btn-group">
+            <button type="button" class="nds-btn nds-secondary-outline" data-panel-toggle="pg-old-panel"><span class="nds-label">Plain</span></button>
+            <button type="button" class="nds-btn nds-secondary-outline" data-panel-toggle="pg-old-spanel"><span class="nds-label">Static</span></button>
+            <button type="button" class="nds-btn nds-secondary-outline" data-panel-toggle="pg-old-mpanel"><span class="nds-label">Modal</span></button>
+          </div>
+          {%- assign pg_panels = "pg-old-panel:Plain,pg-old-spanel:Static,pg-old-mpanel:Modal" | split: "," %}
+          {%- for p in pg_panels %}
+          {%- assign kv = p | split: ":" %}
+          <aside id="{{ kv[0] }}" class="nds-panel" aria-label="{{ kv[1] }} Panel"{% if kv[1] == "Static" %} data-panel-static{% endif %}{% if kv[1] == "Modal" %} data-panel-modal{% endif %} hidden>
+            <div class="nds-panel-header">
+              <div class="nds-panel-text"><span class="nds-panel-title">{{ kv[1] }} Panel (old)</span></div>
+              <div class="nds-panel-action"><button type="button" class="nds-btn nds-subtle nds-icon-only" data-panel-close aria-label="Close panel"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button></div>
+            </div>
+            <div class="nds-panel-body">
+              <button type="button" class="nds-btn nds-primary" data-modal-target="pg-old-modal"><span class="nds-label">Open Modal</span></button>
+            </div>
+          </aside>
+          {%- endfor %}
+          <p class="pg-out">Open the modal Panel, then Open Modal inside it: one dim layer.</p>
+        </div>
+        <div class="pg-box"><b>New: one &lt;dialog&gt;, two ways</b>
+          <div class="nds-btn-group">
+            <button type="button" class="nds-btn nds-secondary-outline" data-pg-panel="show"><span class="nds-label">Plain or Static</span></button>
+            <button type="button" class="nds-btn nds-secondary-outline" data-pg-panel="modal"><span class="nds-label">Modal</span></button>
+          </div>
+          <dialog id="pg-new-panel" class="pg-panel" aria-labelledby="pg-new-panel-title">
+            <div class="nds-panel-header">
+              <div class="nds-panel-text"><span class="nds-panel-title" id="pg-new-panel-title">Panel (new)</span></div>
+              <div class="nds-panel-action"><button type="button" class="nds-btn nds-subtle nds-icon-only" data-pg-close aria-label="Close panel"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button></div>
+            </div>
+            <div class="nds-panel-body">
+              <button type="button" class="nds-btn nds-primary" data-pg-dialog="pg-new-modal"><span class="nds-label">Open Modal</span></button>
+              <form method="dialog" class="nds-form"><button class="nds-btn nds-secondary-outline"><span class="nds-label">Close (method="dialog")</span></button></form>
+            </div>
+          </dialog>
+          <p class="pg-out">Open each kind; then try Esc, a click outside, both close buttons, Open Modal, and Item 2 in the main nav.</p>
+          <p class="pg-out" data-pg-log></p>
         </div>
       </div>
 
@@ -262,14 +321,62 @@ direction: rtl
       box.addEventListener('click', function (e) { if (e.target.closest('.nds-dropmenu-item')) out.textContent = ++n; });
     });
 
+    // Open modals, bottom first: each one under the top drops its ::backdrop.
+    var modals = [];
+    // <dialog> does not lock scroll: the first modal locks it, the last one to close unlocks it.
+    var showModal = function (dlg) {
+      if (!modals.length) NDS.scrollLock.lock();
+      modals.forEach(function (d) { d.setAttribute('data-pg-under', ''); });
+      dlg.showModal();
+      modals.push(dlg);
+    };
+    document.querySelectorAll('dialog').forEach(function (dlg) {
+      dlg.addEventListener('close', function () {
+        modals = modals.filter(function (d) { return d !== dlg; });
+        dlg.removeAttribute('data-pg-under');
+        if (modals.length) modals[modals.length - 1].removeAttribute('data-pg-under');
+        else NDS.scrollLock.unlock();
+      });
+    });
+
+    // A Panel on <dialog>: show() (plain, static) or showModal(). NDS keeps Esc and click-outside for a plain one.
+    var panel = document.getElementById('pg-new-panel');
+    var log = document.querySelector('[data-pg-log]');
+    var say = function (what) {
+      var cs = getComputedStyle(panel);
+      log.textContent = what + ': visible ' + (cs.display !== 'none') + ', [open] ' + panel.open + ', :modal ' + panel.matches(':modal') +
+        ' · Modal open ' + document.getElementById('pg-new-modal').open;
+    };
+    document.querySelectorAll('[data-pg-panel]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (panel.open) return;
+        var kind = btn.getAttribute('data-pg-panel');
+        try {
+          syncTop();
+          if (kind === 'modal') showModal(panel); else panel.show();
+          say('Opened ' + kind);
+        } catch (err) { log.textContent = 'Opened ' + kind + ' threw: ' + err.name + ' ' + err.message; }
+      });
+    });
+    // Below the sticky header (topbar + nav) while the page scrolls, as nds-panels.js does.
+    var syncTop = function () { var b = NDS.stickyHeaderBottom(); b > 0 ? panel.style.setProperty('--_header-offset', b + 'px') : panel.style.removeProperty('--_header-offset'); };
+    addEventListener('scroll', function () { if (panel.open) requestAnimationFrame(syncTop); }, { passive: true });
+    panel.querySelector('[data-pg-close]').addEventListener('click', function () {
+      panel.close();
+    });
+    panel.addEventListener('close', function () { say('close'); });
+    document.getElementById('pg-new-modal').addEventListener('close', function () { say('Modal closed'); });
+
     // <dialog>: showModal() gives the top layer, the backdrop, Esc and the inert page.
     document.querySelectorAll('[data-pg-dialog]').forEach(function (btn) {
       var dlg = document.getElementById(btn.getAttribute('data-pg-dialog'));
-      btn.addEventListener('click', function () { dlg.showModal(); });
-      // A click on the backdrop lands on the dialog itself, outside its box.
+      btn.addEventListener('click', function () { showModal(dlg); say('Opened Modal'); });
+    });
+    // A click on a modal's backdrop lands on the dialog itself, outside its box.
+    document.querySelectorAll('dialog').forEach(function (dlg) {
       dlg.addEventListener('click', function (e) {
         var r = dlg.getBoundingClientRect();
-        if (e.target === dlg && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dlg.close();
+        if (e.target === dlg && dlg.matches(':modal') && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dlg.close();
       });
     });
   })();

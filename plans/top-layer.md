@@ -4,7 +4,7 @@ Owner decisions (2026-10-16): do it before v2.0.0 · speed is not the reason · 
 
 **Verdict (2026-10-16).** Steps 1–3 before v2: Dropmenu and Tooltip; Modal on `<dialog>`; every Panel on `<dialog>`. Steps 4 and on are judged again, each on its own benefit and cost, once 1–3 have shipped.
 
-**Start here.** (1) In the playground demo, prove `popover` on a `<dialog>` next to `showModal()`, and the look of a Modal over a modal Panel (stacked dim layers). (2) Then step 1. The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: four old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>` and the phone bottom sheet.
+**Start here.** Step 1. The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`.
 
 ## Why
 
@@ -23,7 +23,7 @@ The speed gain is small: most of a click's cost is the page-wide handlers (`TODO
 
 1. **Dropmenu and Tooltip.** One change reaches about 12 components. `data-portal` and `data-no-portal` stop doing anything: removed in v2 with Migration rows.
 2. **Modal on `<dialog>`.** `showModal()` makes the page behind `inert`. Today's `NDS.trapFocus` only keeps Tab inside: a screen reader's swipe or reading cursor still reaches the page behind the modal, an accessibility gap the dialog closes. It also removes Modal's own trap, its Escape handling and its Backdrop use. Migration row: `<div class="nds-modal" role="dialog" aria-modal="true" aria-hidden="true" hidden>` becomes `<dialog class="nds-modal">`, and the migration audit flags a leftover `div.nds-modal`.
-3. **Every Panel on `<dialog>`.** One markup for the three kinds, `<dialog class="nds-panel">`: a modal Panel opens with `showModal()` (inert page, as Modal), a plain or static one carries `popover` (`auto` / `manual`) and leaves the page usable. Prove `popover` on a `<dialog>` next to `showModal()` in the playground first; if it misbehaves, plain and static Panels stay `<div popover>` and only modal Panels become `<dialog>`.
+3. **Every Panel on `<dialog>`.** One markup for the three kinds, `<dialog class="nds-panel">`: a modal Panel opens with `showModal()` (inert page, as Modal), a plain or static one opens with `show()`: no top layer, so it keeps `--panel-z` and stays under the main nav, as today. Proven in the playground (see Open decisions).
 4. **FAB.** It stays where it is authored and floats in the top layer; NDS works out the stacking offsets. `.nds-fab-dock`, `data-fab-dock-pos` and `NDS.Fab.dock()` change: Migration rows.
 5. **Main Navigation menus and drawer.** It is on every page and in the first paint. Popover replaces the open set, `closeAll()`, `handleDocumentClick`, the `[hidden]` dance and most of the 14 `overflow: unset` / `!important` overrides. More, phone mode, pinned items, wheel and drag scroll, and the fit shift stay.
 6. **Side Menu (the phone drawer) and Image Popup Viewer.** Side Menu works like a Panel, the viewer like a Modal. With them moved, Backdrop has no user left.
@@ -38,11 +38,11 @@ The speed gain is small: most of a click's cost is the page-wide handlers (`TODO
 | Owner stack | native top-layer order |
 | Escape | native on `<dialog>` |
 | Click-outside | a few lines of JS (`closedby` is not in every browser yet) |
-| Scroll lock | stays: `<dialog>` does not lock scroll; Modal and Panel call `NDS.scrollLock` directly |
+| Scroll lock | stays: `<dialog>` does not lock scroll; Modal and Panel call `NDS.scrollLock` directly: the first modal locks, the last to close unlocks (checked in the playground, both engines: holds under a stacked Modal, gives the scroll position back) |
 
 After steps 2–3 Backdrop serves Main Navigation, Side Menu and the viewer only; after steps 5–6 it is deleted. No Migration row: nothing public names it.
 
-**Stacked dim layers.** Each open dialog brings its own `::backdrop`, so a Modal over a modal Panel shows two layers and the page reads darker than today's one shared layer. NDS marks the lower dialog and CSS makes its `::backdrop` clear; check the look in the playground.
+**Stacked dim layers.** Each open dialog brings its own `::backdrop`, so a Modal over a modal Panel would show two layers. NDS keeps a list of open modals, marks every one under the top, and CSS sets the marked `::backdrop` to `opacity: 0`; Escape on the top one hands the dim layer back. Checked in the playground: it looks like today's one shared layer.
 
 ## Step 1 in detail: Dropmenu and its users (mapped 2026-10-16)
 
@@ -78,8 +78,13 @@ Two public components with their own uses and options; the markup and API do not
 ## Open decisions
 
 - **Modal markup:** decided 2026-10-16, `<dialog>` (step 2): a major may change markup, and the inert page is an accessibility fix the `<div>` cannot give.
-- **`popover` on `<dialog>` with `showModal()`:** to prove in the playground before step 3.
-- **Layer order:** a top-layer element covers everything outside it, Main Navigation and the cookie banner too. Panels keep `--panel-top`; a nav menu opened over a panel needs step 5.
+- **`popover` on `<dialog>` with `showModal()`:** proven 2026-10-16, same results in Chrome and WebKit, no page errors. One `<dialog>` opens as a popover or with `showModal()`, and the stacked look matches today's one dim layer. Findings for step 3:
+  - Plain and static Panels open with `show()`, not `popover`. A popover is in the top layer and painted over the main nav's open menu (z-index cannot reach it); `show()` kept the nav menu on top, as today. `popover="auto"` also closed the Panel when a Modal opened from it; `show()` does not.
+  - `show()` gives no Escape and no click-outside: Panel keeps its own rules for a plain Panel. `<form method="dialog">` does close it.
+  - A plain Panel's top edge carries over: `updateHeaderOffset` (`NDS.stickyHeaderBottom()` on open and scroll) works on a `<dialog>` unchanged. Checked with the topbar showing and after a scroll, both engines: it starts at the header's bottom (112 px, then 72 px), never under it.
+  - A plain Panel gains nothing from the top layer: it never moved to `<body>`. The top layer is for modal Panels only.
+  - **A modal Panel covers the main nav** (decided 2026-10-16, to keep it simple). `showModal()` dims and blocks everything outside the dialog; today the dim layer sits under the nav (998 vs 1000) and the nav stays live. So a modal Panel goes full height, `inset-block-start: var(--panel-top, 0)`, with no header offset. Migration row: the nav dims behind a modal Panel.
+- **Layer order:** a top-layer element covers everything outside it, Main Navigation and the cookie banner too. Plain Panels stay out of it (`show()`). Step 1 must check an open menu scrolled up under the sticky nav: today its z-index (998, `BASE_Z`) keeps it under the nav's 1000; in the top layer it paints over. Close it or clip it when its trigger goes under the nav, and keep `respectNav` in the flip math for every menu outside a modal.
 
 ## Known costs
 
