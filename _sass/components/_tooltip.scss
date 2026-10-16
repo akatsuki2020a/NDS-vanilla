@@ -1,8 +1,8 @@
 /**
  * NDS Tooltip Component
  * Floating balloon with a title + body (and optional leading icon),
- * anchored to a trigger via a visible arrow. Viewport-aware fixed
- * positioning with flip-up and horizontal clamping.
+ * anchored to a trigger via a visible arrow. Viewport-aware placement
+ * with flip-up and horizontal clamping.
  */
 
 @use '../mixins' as *;

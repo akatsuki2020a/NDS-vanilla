@@ -34,7 +34,7 @@
  */
 /**
  * NDS Tooltip Component
- * Viewport-aware fixed-position tooltip. Click the trigger to toggle;
+ * Viewport-aware tooltip in the top layer. Click the trigger to toggle;
  * click outside, scroll, or Escape to dismiss.
  *
  * Markup modes:
@@ -340,8 +340,7 @@
             };
             document.addEventListener('click', this._onDocClick);
 
-            // Close on outer scroll — the balloon is position: fixed, so
-            // scrolling would leave it detached from the trigger.
+            // Close on scroll: a scroll box around the trigger would leave it detached.
             // NDS.onOutsideScroll ignores scrolls inside the balloon itself.
             this._offScroll = NDS.onOutsideScroll(this.balloon, () => this.close());
 
@@ -404,7 +403,7 @@
             let left = p.triggerRect.left + (p.triggerRect.width / 2) - (bW / 2);
             left = Math.max(pad, Math.min(left, p.viewportWidth - bW - pad));
 
-            NDS.placeFixed(this.balloon, top, left);
+            NDS.place(this.balloon, top, left);
 
             // Arrow points at the trigger center, clamped inside balloon edges
             const triggerCenterX = p.triggerRect.left + p.triggerRect.width / 2;

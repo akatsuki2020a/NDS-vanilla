@@ -23,7 +23,7 @@
  *   DOM
  *     NDS.relocate(el) / .restore(el) / .homeOf(el)   move a node the app owns; its old spot answers for it
  *     NDS.topLayer(el, on)             show or hide a [popover] in the top layer, in place
- *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
+ *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.place(el, t, l)
  *     NDS.stickyHeaderBottom() · NDS.scrollBelowNav(el, opts) · NDS.scrollLock.lock/unlock
  *     NDS.gridLastRow.update(container) · NDS.trapFocus(getEl) · NDS.focusableSel
  *   data + text
@@ -1610,21 +1610,15 @@
         else if (el.isConnected) el.showPopover();
     };
 
-    // ── Place `position: fixed` element at viewport coords ─────────────
-    // Writes `top`/`left` then measures and corrects. The CSS spec says
-    // top/left on a `position: fixed` element resolve against the
-    // viewport — but only when no ancestor establishes a containing block.
-    // When one does (transform, filter, container-type, etc.), the values
-    // resolve against that ancestor instead, leaving the element offset.
-    // The set of triggering properties varies per engine (Safari notably
-    // honors `container-type: inline-size` strictly), so a static heuristic
-    // misfires. Reading the actual rect after the write reveals any
-    // discrepancy; subtracting it lands the element at the intended
-    // viewport coords across engines.
+    // ── Place a positioned element at viewport coords ─────────────────
+    // Writes `top`/`left` then measures and corrects, so the element lands at
+    // the viewport coords whatever its containing block: the page for an
+    // absolute popover in the top layer (the correction adds the scroll), the
+    // wrapper where popover is missing, the viewport for a fixed element.
     // The transform back-out handles in-flight slide animations on the
     // element itself (e.g. dropmenu's opening translateY).
-    // Usage: NDS.placeFixed(menu, top, leftPx);
-    NDS.placeFixed = (el, top, left) => {
+    // Usage: NDS.place(menu, top, leftPx);
+    NDS.place = (el, top, left) => {
         el.style.top = top + 'px';
         el.style.left = left + 'px';
         const r = el.getBoundingClientRect();

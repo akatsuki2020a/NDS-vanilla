@@ -15,7 +15,7 @@
 //            the reasoning that page scroll reveals it. False for a fixed menu:
 //            position:fixed carries the menu along with its trigger.
 //   NAV      outside a modal the sticky nav painted over a scrolled menu; in the
-//            top layer the menu would paint over the nav, so it is clipped there.
+//            top layer the menu would paint over the nav, so it closes there.
 //
 // The date picker is the probe because its calendar is the tallest menu in the
 // system AND has no inner .nds-dropmenu-scroll, so it is the only component
@@ -208,16 +208,25 @@ const table = await tablePage.evaluate(async () => {
         inTopLayer: menu.matches(':popover-open') && wrapper.contains(menu),
         inViewport: r.top >= 0 && r.bottom <= window.innerHeight,
     };
-    // Scroll the trigger up under the sticky nav: the menu follows and is clipped there.
+    // Page scroll carries the absolute menu: the gap holds and no script rewrote its top.
+    const gapOf = () => menu.getBoundingClientRect().top - trigger.getBoundingClientRect().bottom;
+    const g0 = gapOf(), top0 = menu.style.top;
+    scrollBy({ top: 40, behavior: 'instant' });
+    await new Promise((r) => setTimeout(r, 150));
+    out.carried = { held: Math.abs(gapOf() - g0) < 1, untouched: menu.style.top === top0 };
+    // Scroll the trigger up under the sticky nav: the menu closes there.
     const nav = document.querySelector('.nds-main-nav');
     // Twice: the topbar scrolls away on the first move, which moves the nav's bottom.
     for (let i = 0; i < 2; i++) {
-        scrollBy({ top: menu.getBoundingClientRect().top - nav.getBoundingClientRect().bottom + 30, behavior: 'instant' });
+        scrollBy({ top: menu.getBoundingClientRect().top - nav.getBoundingClientRect().bottom + 10, behavior: 'instant' });
         await new Promise((r) => setTimeout(r, 200));
     }
-    const navBottom = nav.getBoundingClientRect().bottom, mTop = menu.getBoundingClientRect().top;
-    const clip = /inset\((\d+(?:\.\d+)?)px/.exec(menu.style.clipPath);
-    out.navClip = { under: mTop < navBottom, clipped: !!clip && Math.abs(mTop + parseFloat(clip[1]) - navBottom) < 2 };
+    await new Promise((r) => setTimeout(r, 400));
+    out.navClose = !menu.matches(':popover-open') && !wrapper.ndsDropmenu.isOpen;
+    trigger.scrollIntoView({ block: 'center' });
+    await new Promise((r) => setTimeout(r, 150));
+    trigger.click();
+    await new Promise((r) => setTimeout(r, 300));
     menu.querySelector('.nds-dropmenu-item').click();
     await new Promise((r) => setTimeout(r, 400));
     out.heard = heard;
@@ -237,8 +246,9 @@ if (table.skip) {
 } else {
     ok('table: row menu opens in the top layer, still in its row', table.inTopLayer);
     ok('table: row menu is inside the viewport', table.inViewport);
-    ok('nav: a menu scrolled under the sticky nav is clipped at its edge', table.navClip.under && table.navClip.clipped,
-        JSON.stringify(table.navClip));
+    ok('page scroll: the menu moves with its trigger, no script writes', table.carried.held && table.carried.untouched,
+        JSON.stringify(table.carried));
+    ok('nav: the menu closes when it reaches the sticky nav', table.navClose);
     ok('bubbling: the box around the menu hears the item click', table.heard === 1, `heard ${table.heard}`);
     ok('dark area: the open menu stays dark', table.darkDiffers, table.darkBg);
 }

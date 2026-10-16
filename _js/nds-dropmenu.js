@@ -28,9 +28,9 @@
  *   - data-position-vertical is written by the component (a CSS hook), never set it yourself.
  *   - The open menu sits in the browser's top layer (popover="manual", stamped at init):
  *     nothing clips it and it stays in place in the DOM, so closest(), bubbling and the
- *     wrapper's knobs and theme reach it. Outside a modal it slides under the sticky nav
- *     while the page scrolls, as an in-page menu does. Without popover support (Safari
- *     < 17, Firefox < 125) it stays a fixed menu that a clipping ancestor may cut.
+ *     wrapper's knobs and theme reach it. Page scroll carries it; it closes when its trigger
+ *     leaves view or, outside a modal, when it reaches the sticky nav. Without popover support
+ *     (Safari < 17, Firefox < 125) it stays in its wrapper, where a clipping ancestor may cut it.
  */
 
 /**
@@ -586,6 +586,8 @@
                 }
             };
             this.dropmenu.addEventListener('keydown', onEscape, { signal });
+            // Something else hid the menu (a closing modal): close with it, so the state follows.
+            this.menu.addEventListener('toggle', (e) => { if (e.newState === 'closed' && this.isOpen) this.close(); }, { signal });
             // Safari leaves focus on the page or the modal around a clicked trigger: Escape there closes
             // the newest open menu, before a <dialog> around it reads the key as its own close.
             document.addEventListener('keydown', (e) => {
@@ -797,8 +799,8 @@
                 }
             }
 
-            // A modal covers the sticky nav; anywhere else the nav paints over the
-            // menu, so placement keeps clear of it and scrolling clips under it.
+            // A modal covers the sticky nav; anywhere else the menu would paint over
+            // it, so placement keeps clear of it and the menu closes when it gets there.
             // ponytail: a Panel raised over the nav with its own --panel-z is not
             // detected; read the trigger's layer if one ever needs it.
             this._respectNav = !this.trigger.closest('.nds-modal, dialog:modal');
@@ -817,10 +819,23 @@
 
             this.applyPosition();
 
-            // The menu is fixed in the top layer, so it follows its trigger on
-            // scroll. rAF-throttled: one read + write per frame.
+            // Absolute in the top layer: page scroll carries the menu with no JS. Only a
+            // scroll box around the trigger moves one without the other. rAF-throttled.
             const reposition = NDS.rafThrottle(() => this.trackPosition());
-            this._offScroll = NDS.onOutsideScroll(this.menu, reposition);
+            const onScroll = (e) => { if (e.target !== document && e.target.contains?.(this.trigger)) reposition(); };
+            document.addEventListener('scroll', onScroll, { capture: true, passive: true });
+            this._offScroll = () => document.removeEventListener('scroll', onScroll, { capture: true });
+            // Close when the trigger leaves view (its scroll box hid it) or the menu reaches the sticky nav.
+            const leave = () => { if (this.isOpen) this.close(); };
+            this._offView = [NDS.onIntersect(this.trigger, (e) => { if (!e.isIntersecting) leave(); })];
+            if (this._nav) {
+                // The nav's stuck bottom: until it sticks it scrolls with the menu and never meets it.
+                // ponytail: a nav that hides on scroll would need a live line, not one read at open.
+                const navBottom = (parseFloat(getComputedStyle(this._nav).top) || 0) + this._nav.offsetHeight;
+                // Only the top edge counts: the huge margins keep the rest of the menu "in view".
+                this._offView.push(NDS.onIntersect(this.menu, (e) => { if (e.intersectionRatio < 1) leave(); },
+                    { threshold: 1, rootMargin: `${-navBottom}px 100000px 100000px 100000px` }));
+            }
             // Resize-reposition (not close) — mobile browsers fire resize as
             // the address bar shows/hides during scroll, which would close
             // the menu mid-interaction otherwise. NDS.onResize is debounced
@@ -859,6 +874,7 @@
             NDS.aria.expanded(this.trigger, false);
 
             if (this._offScroll) { this._offScroll(); this._offScroll = null; }
+            if (this._offView) { this._offView.forEach((off) => off()); this._offView = null; }
             if (this._unsubResize) { this._unsubResize(); this._unsubResize = null; }
             if (this._offListSize) { this._offListSize(); this._offListSize = null; }
 
@@ -904,8 +920,8 @@
         // ==============================================
 
         /**
-         * Compute placement in viewport coords and write them as `position:
-         * fixed` pixels. Vertical flips up when space below is tight;
+         * Compute placement in viewport coords; NDS.place writes them for the
+         * absolute menu in the top layer. Vertical flips up when space below is tight;
          * horizontal prefers trigger-edge alignment (RTL-aware) then clamps
          * to the viewport.
          */
@@ -919,7 +935,7 @@
             if (scroll) scroll.style.maxHeight = '';
 
             // Lock width in px before measurement. fit-content/max-content
-            // are unreliable for position:fixed + block when children use
+            // are unreliable for a positioned block when children use
             // flex/grid or width:100%.
             this.menu.style.width = '';
             // Same for a previous run's own-height clamp, or the menu measures
@@ -957,8 +973,7 @@
 
             // Last resort, after the flip has already picked the roomier side:
             // the menu still doesn't fit, so give it a scrollbar rather than let
-            // it run off the edge. The menu is position:fixed, so an
-            // off-edge part is unreachable — page scroll carries the menu along
+            // it run off the edge. An off-edge part is unreachable — page scroll carries the menu along
             // with its trigger and never reveals it.
             let clamped = false;
             if (p.menuRect.height > available) {
@@ -1005,8 +1020,7 @@
             // scrolled off-screen).
             this._flipUp = flipUp;
 
-            NDS.placeFixed(this.menu, top, leftPx);
-            this._clipUnderNav(top);
+            NDS.place(this.menu, top, leftPx);
         }
 
         /**
@@ -1054,7 +1068,7 @@
             return Math.max(pad, Math.min(left, vw - menuWidth - pad));
         }
 
-        // Lightweight scroll-time placement. Reuses the
+        // Placement while a scroll box around the trigger scrolls. Reuses the
         // flip direction cached by applyPosition() and only re-reads the
         // trigger rect + menu size, so each frame is a single read + write
         // pair. Critically: no vertical viewport clamp — letting the menu
@@ -1071,15 +1085,7 @@
             // Same horizontal rule as the opening placement, including its
             // viewport clamp — users can't scroll sideways to recover
             // off-screen content.
-            NDS.placeFixed(this.menu, top, this._leftFor(tRect, mRect.width));
-            this._clipUnderNav(top);
-        }
-
-        // The sticky nav painted over an in-page menu before the top layer; clip the
-        // part of the menu that scrolls under it so it still reads that way.
-        _clipUnderNav(top) {
-            const clip = this._nav ? this._nav.getBoundingClientRect().bottom - top : 0;
-            this.menu.style.clipPath = clip > 0 ? `inset(${clip}px 0 0 0)` : '';
+            NDS.place(this.menu, top, this._leftFor(tRect, mRect.width));
         }
 
         // ==============================================
@@ -1111,7 +1117,7 @@
             // stuck there after a destroy mid-delay.
             this._cancelDelayedOpen();
             // Drain the open-lifecycle subscriptions before releasing the rest.
-            // close() releases this._offScroll (NDS.onOutsideScroll) and
+            // close() releases this._offScroll, this._offView (NDS.onIntersect) and
             // this._unsubResize (NDS.onResize) synchronously at the top of its
             // body — without this guard, destroy-while-open strands both pooled
             // subscribers for the page lifetime.

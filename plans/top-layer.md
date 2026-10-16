@@ -4,7 +4,14 @@ Owner decisions (2026-10-16): do it before v2.0.0 · speed is not the reason · 
 
 **Verdict (2026-10-16).** Steps 1–3 before v2: Dropmenu and Tooltip; Modal on `<dialog>`; every Panel on `<dialog>`. Steps 4 and on are judged again, each on its own benefit and cost, once 1–3 have shipped.
 
-**Start here.** Step 3 (steps 1 and 2 are built, see their status sections). The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`.
+**Start here (end of 2026-10-16).**
+1. **Step 1 follow-up is committed** (`fix(dropmenu): absolute in the top layer, …`): menus are absolute in the top layer; see "Step 1 follow-up".
+2. **Next: step 3, Panel on `<dialog>`** (owner's pick: it shares Modal's work). Lift the shared core out of `nds-modal.js` (`finish()`, the scroll lock, the outside-click test, `hideMenus`), drop the `data-nds-under` stopgap on `.nds-backdrop`, and give stacked dialogs the under-marking. Findings for it are under Open decisions.
+3. **Test fast** (owner, 2026-10-16: an hour of testing was too long). Read the component's canon first; iterate in Chrome on one case; run `check-menus-in-modal.mjs`, `check-modal-dialog`-style cases, `check-init-destroy.mjs` and `check-frameworks.mjs` in both engines once at the end, in parallel. Minutes, not an hour.
+
+**Owner's goals for the rest (2026-10-16):** simpler code, render perf, framework compatibility. Scored that way, steps 4 (FAB) and 5 (Main Navigation) carry the biggest framework win left: they remove `NDS.relocate`, which moves nodes the app owns and patches DOM methods. Judge them on those goals after step 3; measure perf before claiming it.
+
+The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`. Row 4's "Old" box now runs the real NDS Modal.
 
 ## Why
 
@@ -82,6 +89,17 @@ Built, not committed: Dropmenu and Tooltip open with `popover="manual"` through 
 - **Checked, Chrome and WebKit:** `check-dropmenu-placement.mjs` 16/16 (new cases: top layer, nav clip, nested close, dark area, bubbling), a sweep of 18 pages' menus and tooltips, `check-init-destroy.mjs` 36/36, `check-frameworks.mjs` all passed, `check-css.py` and `check-data-state-tails.py` clean, `check-docs.py` on the 9 edited pages, the audit flags a leftover `data-portal`.
 - **Not run yet:** the menu-open timing against the old code, and `doc-check.mjs` on the touched pages (owner's go-ahead).
 - **Owner:** `.claude/skills/nds-iq-eval/scenarios/S15-menu-clipping-in-modal.md` expects `data-portal` as the fix; it needs a rewrite before the next IQ eval run.
+
+## Step 1 follow-up: absolute, not fixed (2026-10-16)
+
+Step 1 made every open menu `position: fixed` and moved it with JS on every scroll frame, plus a `clip-path` under the sticky nav. Before it, the default menu was `position: absolute` in its wrapper (`1cc022a8`, 2026-05-27): page scroll carried it with no JS. The top layer keeps that: an absolute popover's containing block is the page, so page scroll carries it. Proven in Chrome 155, WebKit 26.6 and WebKit 17.0, LTR and RTL, sideways scroll too.
+
+- **Placement:** `@include top-layer` is `position: absolute`; `NDS.placeFixed` is now `NDS.place` (it measures and corrects, so it lands right for any containing block).
+- **Scroll:** JS follows only a scroll box around the trigger (a table wrapper, a modal's content); page scroll is skipped.
+- **Close rule (owner pick):** the menu closes when its trigger leaves view (`NDS.onIntersect` on the trigger: clipped by its scroll box or off screen) or, outside a modal, when the menu reaches the nav's stuck bottom (`NDS.onIntersect` on the menu, top edge only). `_clipUnderNav` is gone.
+- **Menus in a modal:** a closing Modal hides the popovers inside it, and Dropmenu closes itself when something else hides its menu (`toggle`).
+- **Checked:** `check-dropmenu-placement.mjs` 17/17 (new: page scroll moves the menu with no script write; the menu closes at the nav), `scripts/check-menus-in-modal.mjs` (custom select, date picker + month menu, time picker + hour select, multiselect, autocomplete and dropmenu in a scrolling Modal), desktop and phone, Chrome, WebKit 26.6 and 17.0, all passed; `check-init-destroy.mjs`, `check-frameworks.mjs` and the modal harness both engines; tooltip placement at 7,000px scroll.
+- **Later:** CSS anchor positioning would follow inner scroll boxes natively too; it needs Safari 26, so it waits for that floor.
 
 ## Step 2 status (2026-10-16)
 

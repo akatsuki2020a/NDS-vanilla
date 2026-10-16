@@ -43,6 +43,9 @@
   const dimUnder = (on) => document.querySelector('.nds-backdrop')
     ?.toggleAttribute('data-nds-under', on && !!NDS.Backdrop?.isActive());
 
+  // A menu inside is a popover of its own: closing the dialog leaves it open in the top layer.
+  const hideMenus = (modal) => modal.querySelectorAll(':popover-open').forEach((p) => p.hidePopover());
+
   // A click on the dim layer lands on the dialog itself, outside its box.
   const outside = (modal, e) => {
     if (e.target !== modal) return false;
@@ -119,6 +122,7 @@
 
   // Close the dialog and, after the last modal, give the page back.
   function finish(modal) {
+    hideMenus(modal);
     modal.close();
     NDS.State.clear(modal);
     if (activeModal) return;
@@ -140,6 +144,7 @@
     if (!modal) return;
     activeModal = null;
     openAbortController?.abort();
+    hideMenus(modal);
     NDS.State.set(modal, 'closing');
     // The dialog stays in the top layer for the fade; the unlock reflow stays out of the click frame.
     setTimeout(() => {
