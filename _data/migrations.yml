@@ -80,6 +80,7 @@
 - { kind: class, name: nds-main-content, status: renamed, use: nds-content, since: "2.0.0", fix: "Use nds-content." }
 - { kind: class, name: nds-mainNav-toggler, scope: .nds-main-nav, status: renamed, use: nds-nav-toggler, since: "2.0.0", fix: "Use nds-nav-toggler." }
 - { kind: class, name: nds-mask, status: removed, since: "2.0.0", fix: "Remove it: the scroll-edge fade has no replacement." }
+- { kind: class, name: nds-modal, scope: "&div", status: removed, since: "2.0.0", fix: "Make the modal a <dialog class=\"nds-modal\">, and drop its role=\"dialog\", aria-modal, aria-hidden and hidden. A role=\"alertdialog\" stays." }
 - { kind: class, name: nds-multi-column-list, scope: .nds-main-nav, status: renamed, use: nds-multi-col, since: "2.0.0", fix: "Use nds-multi-col." }
 - { kind: class, name: nds-nationalDay, status: renamed, use: nds-national-day, since: "2.0.0", fix: "Use nds-national-day." }
 - { kind: class, name: nds-nationalDay-logo, status: renamed, use: nds-national-day-logo, since: "2.0.0", fix: "Use nds-national-day-logo." }

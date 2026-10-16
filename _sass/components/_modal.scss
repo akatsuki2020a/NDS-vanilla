@@ -1,15 +1,6 @@
 /**
- * NDS Modal Component - SCSS Version
- * Modal dialog built on top of the card component with backdrop overlay
- *
- * Features:
- * - Uses existing .nds-card component structure
- * - Close button in card-header (top-right LTR, top-left RTL)
- * - Backdrop overlay with blur effect
- * - Smooth fade/scale animations
- * - Size variants: SM (400px), MD (600px), LG (800px), Full
- * - Responsive: Full-screen on mobile
- * - Accessibility: Focus trap, ESC key, ARIA attributes
+ * NDS Modal — a <dialog class="nds-modal nds-card"> opened with showModal().
+ * Sizes: SM (400px), MD (600px), LG (800px), Full. A bottom sheet on phones.
  */
 
 @use '../mixins' as *;
@@ -18,19 +9,32 @@
 // MODAL CONTAINER (extends card)
 // ==============================================
 
-// Note: Backdrop styles moved to _backdrop.scss
-// Modal now uses the unified NDSBackdrop API
-
 .nds-modal {
   position: fixed;
   inset: 0;
-  z-index: 1101;
   max-height: 80svh;
   height: fit-content;
   margin: auto;
   overflow: visible;
   transition: transform var(--nds-transition), opacity var(--nds-transition);
   opacity: 0; // base hidden state; mobile overrides to 1 (slides instead)
+
+  // .nds-card's display would show a closed dialog.
+  &:not([open]) {
+    display: none;
+  }
+
+  // The dim layer: the top layer paints it under the dialog.
+  &::backdrop {
+    background-color: var(--backdrop-bg, var(--background-overlay));
+    opacity: 0;
+    transition: opacity var(--nds-transition);
+  }
+
+  &[data-state="open"]::backdrop {
+    opacity: 1;
+    backdrop-filter: var(--backdrop-blur, none);
+  }
 
   // Extend card component styles
   &.nds-card {
@@ -155,8 +159,6 @@
 // ==============================================
 // ACCESSIBILITY
 // ==============================================
-
-// Note: Body scroll lock moved to _backdrop.scss (body[data-nds-scroll-lock])
 
 // open() focuses the box when it has no close control: a focus target, not a control, so no ring (alertdialog too).
 // :where() holds 0,1,0, so .nds-card.nds-shadow keeps its shadow.

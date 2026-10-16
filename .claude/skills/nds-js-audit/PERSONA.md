@@ -87,9 +87,9 @@ The verb pair encodes the concept, not the DOM mutation. Two components making a
 
 **Canonical:** `open()` / `close()` as the public lifecycle pair.
 
-**Concept:** the surface fully captures attention. Singleton-open. Focus-trapped (`NDS.trapFocus`) and typically backdrop-paired (`NDS.Backdrop.show`). Opening is a state transition for the whole page.
+**Concept:** the surface fully captures attention. Singleton-open. Focus-trapped and dimmed: a `<dialog>` opened with `showModal()`, or `NDS.trapFocus` with `NDS.Backdrop.show`. Opening is a state transition for the whole page.
 
-**Discriminator** (mechanically checkable): file invokes `NDS.trapFocus` OR `NDS.Backdrop.show`, OR enforces singleton-open another way — delegating its lifecycle to `NDS.Dropmenu` (`NDS.Dropmenu.create` + `open()`/`close()` passthrough: `_js/nds-tooltip.js`, `_js/nds-autocomplete.js`), closing every other open instance on open (`_js/nds-dropmenu.js` `_openDropmenus`), or a deliberate no-trap disclosure panel that still owns the page's attention (`_js/nds-accessibility.js`, `"No inert / no backdrop"` comment).
+**Discriminator** (mechanically checkable): file invokes `showModal()`, `NDS.trapFocus` OR `NDS.Backdrop.show`, OR enforces singleton-open another way — delegating its lifecycle to `NDS.Dropmenu` (`NDS.Dropmenu.create` + `open()`/`close()` passthrough: `_js/nds-tooltip.js`, `_js/nds-autocomplete.js`), closing every other open instance on open (`_js/nds-dropmenu.js` `_openDropmenus`), or a deliberate no-trap disclosure panel that still owns the page's attention (`_js/nds-accessibility.js`, `"No inert / no backdrop"` comment).
 
 **Examples:** `_js/nds-modal.js`, `_js/nds-ipv.js`, `_js/nds-dropmenu.js`, `_js/nds-tooltip.js`, `_js/nds-autocomplete.js`, `_js/nds-accessibility.js`.
 
@@ -99,7 +99,7 @@ The verb pair encodes the concept, not the DOM mutation. Two components making a
 
 **Concept:** multiple instances can be visible simultaneously (sections within a single component, submenus within a drawer). No focus trap; no backdrop; no attention capture. The mutation is a per-instance visibility flip, not a singleton state transition.
 
-**Discriminator:** multi-instance simultaneous visibility AND file does NOT invoke `NDS.trapFocus` / `NDS.Backdrop.show`. Then: does the method act on the instance's own surface (bare `show()`/`hide()`) or on an addressed child (suffixed pair, verb from the child's state vocabulary)?
+**Discriminator:** multi-instance simultaneous visibility AND file does NOT invoke `showModal()`, `NDS.trapFocus` / `NDS.Backdrop.show`. Then: does the method act on the instance's own surface (bare `show()`/`hide()`) or on an addressed child (suffixed pair, verb from the child's state vocabulary)?
 
 **Examples:** `_js/nds-accordion.js` — `openItem(i)` / `closeItem(i)` / `toggleItem(i)` on the container instance; the item's markup contract is `data-state="open"` plus `aria-expanded`, so `open`/`close` is the verb a reader can verify against the DOM. `_js/nds-drawer.js` `showSubmenu` / `hideSubmenu` — module-private functions, not a public instance pair; cited for the naming shape only.
 
@@ -136,7 +136,7 @@ The pair reads as the concept reads. `open` evokes a doorway; `show` evokes reve
 **Audit behavior**
 
 For each component file:
-1. Apply the discriminators (`NDS.trapFocus` / `NDS.Backdrop.show` invocation → 3.1; multi-instance no-backdrop → 3.2; factory-create with finite lifetime → 3.3; `toggle()`-only → 3.4).
+1. Apply the discriminators (`showModal()` / `NDS.trapFocus` / `NDS.Backdrop.show` invocation → 3.1; multi-instance no-backdrop → 3.2; factory-create with finite lifetime → 3.3; `toggle()`-only → 3.4).
 2. Check the file's exposed lifecycle pair against the bucket's canonical.
 3. If the file's concept is ambiguous (multiple discriminators match, or none match), record it as an open question in the report rather than flagging a finding — ambiguity does not clear the evolve bar, so nothing auto-changes.
 
@@ -150,7 +150,7 @@ For each component file:
 
 ```js
 console.warn('NDS Filter: target container not found');
-console.error('NDS Modal: requires NDSBackdrop API. Please include nds-backdrop.js first.');
+console.error('NDS Modal: .nds-modal must be a <dialog>.', modal);
 ```
 
 **Why (and rejected alternatives)**

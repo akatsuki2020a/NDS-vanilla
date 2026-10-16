@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 06:10 AM"
 ---
 
 <section id="modal-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "13/10/2026 - 12:21 AM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-A modal is a [card](../components/cards) with the `nds-modal` class. A button with `data-modal-target` opens it. The modal keeps the card's parts: a header with a featured icon and a close button, the content, and the actions.
+A modal is a `<dialog>` [card](../components/cards) with the `nds-modal` class. A button with `data-modal-target` opens it. The modal keeps the card's parts: a header with a featured icon and a close button, the content, and the actions.
 
 Pick another component when:
 
@@ -40,7 +40,7 @@ Pick another component when:
 <button type="button" class="nds-btn nds-primary nds-lg" data-modal-target="withdraw-modal">
   <span class="nds-label">Open Modal</span>
 </button>
-<div id="withdraw-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="withdraw-modal-title" aria-hidden="true" hidden>
+<dialog id="withdraw-modal" class="nds-modal nds-card nds-stroke" aria-labelledby="withdraw-modal-title">
   <div class="nds-card-header">
     <div class="nds-card-featured-icon">
       <span class="nds-featured-icon nds-circle">
@@ -65,13 +65,13 @@ Pick another component when:
       <span class="nds-label">Cancel</span>
     </button>
   </div>
-</div>
+</dialog>
 </script>
 <script type="text/html" id="modal-status" data-canon>
 <button type="button" class="nds-btn nds-primary nds-lg" data-modal-target="submitted-modal">
   <span class="nds-label">Open Modal</span>
 </button>
-<div id="submitted-modal" class="nds-modal nds-card nds-stroke nds-center" data-status="success" role="dialog" aria-modal="true" aria-labelledby="submitted-modal-title" aria-hidden="true" hidden>
+<dialog id="submitted-modal" class="nds-modal nds-card nds-stroke nds-center" data-status="success" aria-labelledby="submitted-modal-title">
   <div class="nds-card-header">
     <div class="nds-card-featured-icon">
       <span class="nds-featured-icon nds-xl nds-circle">
@@ -90,14 +90,14 @@ Pick another component when:
       <span class="nds-label">Done</span>
     </button>
   </div>
-</div>
+</dialog>
 </script>
 <script type="text/html" id="modal-lazy" data-canon>
 <button type="button" class="nds-btn nds-primary nds-lg" data-modal-target="terms-modal">
   <span class="nds-label">Open Modal</span>
 </button>
 <template class="nds-modal-template">
-  <div id="terms-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="terms-modal-title" aria-hidden="true" hidden>
+  <dialog id="terms-modal" class="nds-modal nds-card nds-stroke" aria-labelledby="terms-modal-title">
     <div class="nds-card-header">
       <div class="nds-card-featured-icon">
         <span class="nds-featured-icon nds-circle">
@@ -122,7 +122,7 @@ Pick another component when:
         <span class="nds-label">Cancel</span>
       </button>
     </div>
-  </div>
+  </dialog>
 </template>
 </script>
 <script type="text/html" id="modal-icon-error" data-canon>
@@ -218,7 +218,7 @@ A lazy modal keeps its markup in a `<template class="nds-modal-template">`, so i
             <i class="hgi hgi-stroke hgi-focus-point"></i>
             <span class="nds-label">Focus Management</span>
           </span>
-          <p class="nds-item-desc">Focus moves to the first close control when the modal opens, or to the modal when it has none. The modal itself shows no focus ring. Tab and Shift + Tab stay inside the modal. Focus goes back to the trigger when it closes.</p>
+          <p class="nds-item-desc">Focus moves to the first close control when the modal opens, or to the modal when it has none. The modal itself shows no focus ring. The page behind the modal is inert: Tab, a click and a screen reader cannot reach it. Focus goes back to the trigger when it closes.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -294,13 +294,13 @@ A lazy modal keeps its markup in a `<template class="nds-modal-template">`, so i
 - Write a title that names the action, and keep the content to one message or one task.
 - Give the modal a clear primary action and a way out, such as Confirm and Cancel.
 - Give every modal an `id`, and give its trigger that `id` in `data-modal-target`.
-- Ship the modal with `hidden` and `aria-hidden="true"`, so it never shows before the script loads.
-- Give the modal `role="dialog"`, `aria-modal="true"` and an `aria-labelledby` that points to its title. Give the close button an `aria-label`.
+- Make the modal a `<dialog>`. A closed dialog stays hidden, also before the script loads. `NDS.Init.audit()` flags a `div.nds-modal`.
+- Give the modal an `aria-labelledby` that points to its title. Give the close button an `aria-label`.
 - Use `role="alertdialog"` instead for an urgent message the user did not ask for, such as a session that is about to end.
 - Give every button `type="button"`. In a form, a button without it submits the form.
 - Put `.nds-card-actions` after `.nds-card-content`, not inside it.
 - For a form, wrap `.nds-card-content` and `.nds-card-actions` in one `<form class="nds-form">`. A form without `nds-form` breaks the layout: the content runs out of the modal and the actions leave the screen. It also gets no submit validation. `NDS.Init.audit()` flags it.
-- A [Dropmenu](../components/dropmenu), a select, a [Multiselect](../components/multiselect), an [Autocomplete](../components/autocomplete) or a [Filter](../components/filter) works in a modal with no extra attribute. Its menu moves to `<body>` when it opens, so the modal's edge does not cut it off.
+- A [Dropmenu](../components/dropmenu), a select, a [Multiselect](../components/multiselect), an [Autocomplete](../components/autocomplete) or a [Filter](../components/filter) works in a modal with no extra attribute. Its menu opens in the browser's top layer, so the modal's edge does not cut it off.
 - Do not look up a lazy modal when the page loads: it is not in the page yet. Listen on `document` for `nds:template:ready`, which fires on the modal after it joins the page and its components start.
 
 </div>
@@ -319,7 +319,7 @@ A lazy modal keeps its markup in a `<template class="nds-modal-template">`, so i
 
 | Class | Element | Effect |
 |---|---|---|
-| `nds-modal` | `.nds-card` | Turns the card into a dialog over the page |
+| `nds-modal` | `<dialog class="nds-card">` | Turns the card into a dialog over the page |
 | `nds-md` | `.nds-modal` | 600px wide, the same as no size class |
 | `nds-modal-close` | a button in the modal | Closes the modal, like `data-modal-close`, and removes the button's padding |
 | `nds-modal-template` | `<template>` | Holds a lazy modal |
@@ -342,7 +342,7 @@ The card parts, colors and `nds-center` are on the [Cards](../components/cards) 
 ### CSS Custom Properties
 {: .nds-block-title}
 
-The overlay is one element that every modal and panel shares. Set these on `:root`.
+Set these on `:root`. They style the overlay behind every modal and modal panel.
 
 | Property | Default | Controls |
 |---|---|---|
@@ -353,15 +353,13 @@ The overlay is one element that every modal and panel shares. Set these on `:roo
 ### JavaScript
 {: .nds-block-title}
 
-The modal needs `nds-backdrop.js` in the bundle. Without it, the modal logs an error and does not open.
-
 | Method | Effect |
 |---|---|
 | `NDS.Modal.open(modal)` | Opens the modal. It takes the element or its `id`. An open modal closes first. For a lazy modal, pass its `id`: the element is not in the page yet |
 | `NDS.Modal.close()` | Closes the open modal. It takes no argument |
 | `NDS.Modal.isOpen()` | Returns `true` while a modal is open |
-| `NDS.Modal.init()` | Starts the trigger, close and Escape handlers on `document`. NDS calls it when the page loads, and a second call does nothing |
-| `NDS.Modal.destroy(root)` | Closes an open modal inside `root` at once, before you remove its markup. Without it, the overlay and the scroll lock stay. `NDS.Init.destroy(root)` calls it for you |
+| `NDS.Modal.init()` | Starts the trigger and close handlers on `document`. NDS calls it when the page loads, and a second call does nothing |
+| `NDS.Modal.destroy(root)` | Closes an open modal inside `root` at once, before you remove its markup. Without it, the page does not scroll. `NDS.Init.destroy(root)` calls it for you |
 {: .nds-table .nds-responsive}
 
 | Event | Fired on | Detail |

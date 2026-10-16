@@ -245,7 +245,7 @@ completed:
 
 <!-- First visit only: the intro modal, opened by the script below. "Learn more" also opens it.
      Three slides, one shown at a time; the footer buttons move between them (script after the modal). -->
-<div id="journeys-intro" class="nds-modal nds-card nds-stroke nds-lg" role="dialog" aria-modal="true" aria-labelledby="journeys-intro-title-1" aria-hidden="true" hidden>
+<dialog id="journeys-intro" class="nds-modal nds-card nds-stroke nds-lg" aria-labelledby="journeys-intro-title-1">
     <div class="nds-card-header">
         <span class="nds-card-title" id="journeys-intro-title-1" data-journeys-slide-title>Life Journeys: An Easier Way to Complete Your Services</span>
         <span class="nds-card-title" id="journeys-intro-title-2" data-journeys-slide-title hidden>An Integrated Journey for Easier Completion</span>
@@ -358,7 +358,7 @@ completed:
             <span class="nds-label">Skip</span>
         </button>
     </div>
-</div>
+</dialog>
 
 <script>
 // The intro slides: each slide has its title in the header. Next and Previous move one slide; Skip shows on the first slide only, Close on the last.

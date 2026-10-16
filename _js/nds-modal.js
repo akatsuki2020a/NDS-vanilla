@@ -1,14 +1,14 @@
 /* NDS.Modal — public surface
- * Rides: nds-backdrop (the overlay layer, plus ESC and click-outside dismiss)
+ * Rides: <dialog> showModal() (the top layer, the dim layer, an inert page, focus return)
  * Requires:
  *   [data-modal-target] points at .nds-modal via data-modal-target — the click opens nothing
  * Methods:
- *   NDS.Modal.init()            wire the delegated trigger, close and ESC handlers
- *   NDS.Modal.open(idOrEl)      open a .nds-modal
+ *   NDS.Modal.init()            wire the delegated trigger and close handlers
+ *   NDS.Modal.open(idOrEl)      open a dialog.nds-modal
  *   NDS.Modal.close()           close whatever is open — takes no argument
  *   NDS.Modal.isOpen()          is a modal open?
  *   NDS.Modal.destroy(root)     release an open modal inside root before its markup is
- *                               removed — drops the backdrop and the scroll lock at once.
+ *                               removed — closes it and drops the scroll lock at once.
  *                               NDS.Init.destroy(view) calls it for you
  * Events (bubble from the .nds-modal):
  *   nds:modal:opened   detail (none) — after the open state paints
@@ -16,218 +16,169 @@
  * Hooks:
  *   data-modal-target   on a trigger — the id of the modal to open
  *   data-modal-close    on any control that should close it (.nds-modal-close works too)
- *   data-modal-static   on the .nds-modal — no ESC, no backdrop click. It closes only
+ *   data-modal-static   on the .nds-modal — no Escape, no click outside. It closes only
  *                       through a [data-modal-close] control or NDS.Modal.close()
  *   data-state          open | closing — written by JS on the .nds-modal while it is
  *                       shown and while it animates out. Read-only for consumers
  * Gotchas:
+ *   - The modal is a <dialog>. A div.nds-modal logs an error and does not open.
  *   - One modal at a time: open() closes the current one first.
  *   - Enter while the modal box itself has focus clicks the first .nds-primary button in .nds-card-actions.
  *   - open() focuses the first close control (or the modal itself); close() returns focus
  *     to whatever held it before the open.
- *   - nds-backdrop.js must be in the bundle. Without it init() and open() log an error
- *     and do nothing.
+ *   - <dialog> does not lock scroll: the modal calls NDS.scrollLock itself.
  */
-/**
- * NDS Modal Component
- * Simple modal dialog with backdrop overlay using unified NDSBackdrop API
- *
- * Usage:
- * 1. Button trigger: <button data-modal-target="myModal">Open</button>
- * 2. Programmatic: NDS.Modal.open('myModal')
- * 3. Close: NDS.Modal.close()
- */
-
 (function () {
   'use strict';
 
-  // State
   let activeModal = null;
   let initAbortController = null;
-  let trapAbortController = null; // scopes the per-open-cycle focus-trap listener; aborted in close() and destroy()
+  let openAbortController = null; // the open modal's own listeners; aborted when it closes
   let _initDone = false;
   let opener = null; // element focused before open; close() returns focus to it
+  let locked = false; // this modal session holds a scroll lock, from the first open to the last close
 
-  // Tab focus trap — delegates to the shared NDS.trapFocus factory.
-  // The arrow form re-evaluates `activeModal` on every Tab press, so this
-  // single handler instance works across open/close cycles.
-  const trapFocus = NDS.trapFocus(() => activeModal);
+  // ponytail: a modal Panel and the nav still dim through NDS.Backdrop (soft dependency: a page with neither may not
+  // bundle it); the modal hides that layer so the page shows one. Goes when Panel moves to <dialog> (plans/top-layer.md step 3).
+  const dimUnder = (on) => document.querySelector('.nds-backdrop')
+    ?.toggleAttribute('data-nds-under', on && !!NDS.Backdrop?.isActive());
 
-  /**
-   * Open modal by ID or element
-   */
+  // A click on the dim layer lands on the dialog itself, outside its box.
+  const outside = (modal, e) => {
+    if (e.target !== modal) return false;
+    const r = modal.getBoundingClientRect();
+    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
+  };
+
   function open(target) {
     // A page with no modal at load never runs init(), so open() wires the close controls too.
     init();
-    // Get modal element — fromTemplate covers an id still inside a <template>
-    const modal = typeof target === 'string'
-      ? NDS.fromTemplate(target)
-      : target;
-
+    // fromTemplate covers an id still inside a <template>
+    const modal = typeof target === 'string' ? NDS.fromTemplate(target) : target;
     if (!modal || !modal.classList.contains('nds-modal')) return;
-
-    // Soft dependency — same loud bail as init(): programmatic NDS.Modal.open()
-    // must not TypeError when a consumer bundle excludes nds-backdrop.js.
-    if (!NDS.Backdrop) {
-      console.error('NDS Modal: requires NDSBackdrop API. Please include nds-backdrop.js first.');
+    if (!(modal instanceof HTMLDialogElement)) {
+      console.error('NDS Modal: .nds-modal must be a <dialog>.', modal);
       return;
     }
 
-    // Already the active modal: re-assert the open state and stop (a framework
-    // re-render can put [hidden] back). close()+show here would leave close()'s
-    // deferred teardown to hide it again after the fade and pop the backdrop.
+    // Already the active modal: re-assert the open state and stop.
     if (activeModal === modal) {
-      modal.removeAttribute('hidden');
-      NDS.aria.hidden(modal, false);
       NDS.State.set(modal, 'open');
       return;
     }
-    // Swapping modals hands the overlay over in place: close()'s deferred hide() would pop the NEW config.
-    const swap = !!activeModal;
-    if (swap) close(true);
+    if (activeModal) close();
 
-    // Show backdrop. A [data-modal-static] modal drops both dismiss paths, so
-    // it closes only through a [data-modal-close] control or NDS.Modal.close()
-    // — same contract as [data-panel-static].
-    const isStatic = modal.hasAttribute('data-modal-static');
+    if (!locked) {
+      opener = document.activeElement;
+      NDS.scrollLock.lock();
+      locked = true;
+    }
+    dimUnder(true);
+    // Re-opened during its fade, it is still modal: showModal() then does nothing.
+    modal.showModal();
+    activeModal = modal;
 
-    NDS.Backdrop.show({
-      zIndex: 1100,
-      onClick: () => close(),
-      escapeClose: !isStatic,
-      clickToClose: !isStatic,
-      replace: swap
-    });
-
-    // Show modal
-    modal.removeAttribute('hidden');
-    NDS.aria.hidden(modal, false);
-
-    // Force reflow to ensure initial state is painted before transition
+    // The from-state paints first, so the CSS transition runs.
     modal.offsetHeight;
-
-    // Schedule the open state for after the from-state paint so the CSS
-    // transition fires instead of jumping.
     NDS.afterPaint(() => {
+      if (activeModal !== modal) return;
       NDS.State.set(modal, 'open');
       modal.dispatchEvent(new CustomEvent('nds:modal:opened', { bubbles: true }));
     });
 
-    // Enable focus trap
-    trapAbortController = new AbortController();
-    document.addEventListener('keydown', trapFocus, { signal: trapAbortController.signal });
+    openAbortController = new AbortController();
+    const { signal } = openAbortController;
+    const isStatic = () => modal.hasAttribute('data-modal-static');
+    // On the dialog, not document: a menu inside that handles Escape stops it first.
+    modal.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        // The native close skips the fade.
+        e.preventDefault();
+        if (!isStatic()) close();
+      }
+      // Enter on the box itself (focused when there is no close control) presses the primary action.
+      if (e.key === 'Enter' && e.target === modal) {
+        const primary = modal.querySelector('.nds-card-actions .nds-btn.nds-primary');
+        if (primary) { e.preventDefault(); primary.click(); }
+      }
+    }, { signal });
+    // An Escape a control inside stopped short of the handler above.
+    modal.addEventListener('cancel', (e) => e.preventDefault(), { signal });
+    // Down and up both outside: a text selection dragged out of the box is not a dismiss.
+    let downOutside = false;
+    modal.addEventListener('pointerdown', (e) => { downOutside = outside(modal, e); }, { signal });
+    modal.addEventListener('click', (e) => {
+      if (downOutside && outside(modal, e) && !isStatic()) close();
+    }, { signal });
 
-    // Focus moves in, so the trap has something to hold; close() hands it back to the opener.
-    opener = document.activeElement;
     const focusTarget = modal.querySelector('[data-modal-close], .nds-modal-close') || modal;
     if (focusTarget === modal && !modal.hasAttribute('tabindex')) modal.tabIndex = -1;
     // Ring only if the opener had one: a script open at load otherwise paints it (Chrome treats pre-input focus as keyboard).
-    focusTarget.focus({ preventScroll: true, focusVisible: !!opener?.matches(':focus-visible') });
-
-    activeModal = modal;
+    focusTarget.focus({ preventScroll: true, focusVisible: !!opener?.matches?.(':focus-visible') });
   }
 
-  /**
-   * Close active modal
-   */
-  function close(swap) {
-    if (!activeModal) return;
-
-    const modal = activeModal;
-
-    // Disable focus trap
-    trapAbortController?.abort();
-    trapAbortController = null;
-
-    // Focus leaves before aria-hidden lands (the browser warns otherwise): back to the opener, else nowhere
-    if (document.activeElement && modal.contains(document.activeElement)) {
-      if (opener && opener !== document.body && document.contains(opener) && !modal.contains(opener)) {
-        opener.focus({ preventScroll: true });
-      } else {
-        document.activeElement.blur();
-      }
+  // Close the dialog and, after the last modal, give the page back.
+  function finish(modal) {
+    modal.close();
+    NDS.State.clear(modal);
+    if (activeModal) return;
+    dimUnder(false);
+    if (locked) {
+      NDS.scrollLock.unlock();
+      locked = false;
+    }
+    // The browser hands focus back on close(); after a swap it aims at the closed first modal.
+    const focused = document.activeElement;
+    if (opener?.isConnected && (!focused || focused === document.body || focused.closest('dialog:not([open])'))) {
+      opener.focus({ preventScroll: true });
     }
     opener = null;
+  }
 
-    // Trigger closing animation
+  function close() {
+    const modal = activeModal;
+    if (!modal) return;
+    activeModal = null;
+    openAbortController?.abort();
     NDS.State.set(modal, 'closing');
-    NDS.aria.hidden(modal, true);
-
-    // Tear down backdrop + modal only after the close animation finishes.
-    // Backdrop.hide() runs a synchronous scrollLock.unlock() (full-page reflow);
-    // keeping it out of the click frame is what holds the close INP down.
+    // The dialog stays in the top layer for the fade; the unlock reflow stays out of the click frame.
     setTimeout(() => {
-      if (!swap) NDS.Backdrop.hide();
-      // Re-opened during the fade: open() pushed a fresh backdrop owner, so the
-      // pop above stays balanced and the modal must stay up.
-      if (activeModal === modal) return;
-      modal.setAttribute('hidden', '');
-      NDS.State.clear(modal);
+      if (activeModal === modal) return; // re-opened during the fade
+      finish(modal);
       modal.dispatchEvent(new CustomEvent('nds:modal:closed', { bubbles: true }));
     }, NDS.transitionSpeed() + 100);
-
-    activeModal = null;
   }
 
   /**
-   * Release an open modal whose element is inside `root`, before that markup is removed.
-   *
-   * The listeners this component installs are delegated on document and belong to the page,
-   * not to any modal, so there is nothing per-element to release. What CANNOT survive the
-   * removal is the open state: the backdrop is showing, the page is scroll-locked (body
-   * carries an inline top offset), and the focus trap is reading `activeModal`. Remove the
-   * markup without this and the app is left with an overlay it cannot dismiss and a page
-   * that will not scroll — the modal element is gone, so nothing can call close().
-   *
-   * Teardown is immediate, with no closing animation and no nds:modal:closed event: the
-   * view is leaving, so there is nothing to animate, and re-entering app code mid-unmount
-   * is a hazard rather than a courtesy.
+   * Release an open modal inside `root` before that markup is removed: the scroll lock
+   * cannot survive the removal. Immediate, with no fade and no nds:modal:closed event —
+   * the view is leaving, and re-entering app code mid-unmount is a hazard.
    */
   function destroy(root) {
-    if (!activeModal) return 0;
+    const modal = activeModal;
+    if (!modal) return 0;
     const scope = root || document;
-    if (scope !== document && scope !== activeModal && !scope.contains?.(activeModal)) return 0;
-
-    trapAbortController?.abort();
-    trapAbortController = null;
-    NDS.Backdrop.hide();
-    activeModal.setAttribute('hidden', '');
-    NDS.State.clear(activeModal);
+    if (scope !== document && scope !== modal && !scope.contains?.(modal)) return 0;
     activeModal = null;
-    opener = null;
+    openAbortController?.abort();
+    finish(modal);
     return 1;
   }
 
-  /**
-   * Initialize event listeners
-   */
   function init() {
     if (_initDone) return;
-
-    // Soft dependency — modal init no-ops (with a loud console.error) if NDS.Backdrop
-    // isn't bundled. Modal needs Backdrop's overlay layer to function; failing loudly
-    // surfaces the bundle misconfiguration without crashing the whole page.
-    if (!NDS.Backdrop) {
-      console.error('NDS Modal: requires NDSBackdrop API. Please include nds-backdrop.js first.');
-      return;
-    }
-
-    // Document-level listeners scoped to one AbortController. Init runs once
-    // (_initDone latches, never reset), so there is no prior batch to abort.
+    // Init runs once (_initDone latches), so there is no prior batch to abort.
     initAbortController = new AbortController();
     const { signal } = initAbortController;
 
-    // Trigger buttons
     document.addEventListener('click', (e) => {
       const trigger = e.target.closest('[data-modal-target]');
       if (trigger) {
         e.preventDefault();
-        const targetId = trigger.getAttribute('data-modal-target');
-        open(targetId);
+        open(trigger.getAttribute('data-modal-target'));
       }
     }, { signal });
 
-    // Close buttons
     document.addEventListener('click', (e) => {
       if (e.target.closest('.nds-modal-close, [data-modal-close]')) {
         e.stopPropagation();
@@ -235,30 +186,23 @@
       }
     }, { signal });
 
-    // ESC key handling is now in backdrop, but keep this for additional modal-specific behavior
-    document.addEventListener('keydown', (e) => {
-      if ((e.key === 'Escape' || e.key === 'Esc') && activeModal
-          && !activeModal.hasAttribute('data-modal-static')) {
-        e.preventDefault();
-        close();
-      }
-      // Enter on the box itself (focused when there is no close control) presses the primary action.
-      if (e.key === 'Enter' && activeModal && e.target === activeModal) {
-        const primary = activeModal.querySelector('.nds-card-actions .nds-btn.nds-primary');
-        if (primary) { e.preventDefault(); primary.click(); }
-      }
-    }, { signal });
+    // A dialog closed without close(): a <form method="dialog">, or Chrome's repeat Escape.
+    // close does not bubble, so capture hears it.
+    document.addEventListener('close', (e) => {
+      if (e.target !== activeModal) return;
+      activeModal = null;
+      openAbortController?.abort();
+      finish(e.target);
+      e.target.dispatchEvent(new CustomEvent('nds:modal:closed', { bubbles: true }));
+    }, { capture: true, signal });
 
     _initDone = true;
   }
 
-  /**
-   * Public API
-   */
   NDS.Modal = {
     init,
     open,
-    close: () => close(),  // never forward an argument as swap
+    close: () => close(),
     isOpen: () => activeModal !== null,
     destroy
   };

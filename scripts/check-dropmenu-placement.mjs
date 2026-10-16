@@ -7,8 +7,8 @@
 //            its wrapper: nothing clips it, and closest(), bubbling and a dark
 //            area reach it.
 //   FLIP     flipPosition reserved the sticky nav's height off the TOP side for
-//            a menu stacked ABOVE the nav (a modal is z-index 1101, the nav
-//            1000). The up side measured ~120px smaller than it was, so
+//            a menu stacked ABOVE the nav (a modal is in the top layer, over
+//            the nav). The up side measured ~120px smaller than it was, so
 //            `spaceAbove > spaceBelow` came out false and a tall panel stayed
 //            down and ran off the edge with room to spare above it.
 //   CLAMP    a menu that fits NEITHER side used to overflow deliberately, on
@@ -47,12 +47,9 @@ const ok = (name, pass, detail = '') => {
 const inModal = async (page, { rows = 8, row = 3 } = {}) => page.evaluate(async ([rows, row]) => {
     document.getElementById('probe-modal')?.remove();
     const tpl = document.querySelector('.nds-form-container.nds-date-picker');
-    const modal = document.createElement('div');
+    const modal = document.createElement('dialog');
     modal.id = 'probe-modal';
     modal.className = 'nds-modal nds-card nds-stroke';
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-hidden', 'true');
-    modal.hidden = true;
     modal.innerHTML = '<div class="nds-card-header"></div>'
         + '<div class="nds-card-content"></div>'
         + '<div class="nds-card-actions"></div>';

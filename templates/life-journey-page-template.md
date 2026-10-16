@@ -292,7 +292,7 @@ related:
 </section>
 
 <!-- Completed only: the journey survey. Open it when the user enters a completed journey they have not rated -->
-<div id="journey-survey" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="journey-survey-title" aria-hidden="true" hidden>
+<dialog id="journey-survey" class="nds-modal nds-card nds-stroke" aria-labelledby="journey-survey-title">
     <div class="nds-card-header">
         <span class="nds-card-title" id="journey-survey-title">Tell us what you think of this journey</span>
         <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close" data-i18n-aria-label="modal.close">
@@ -345,7 +345,7 @@ related:
             </button>
         </form>
     </div>
-</div>
+</dialog>
 
 <script>
 // Send the scores, then thank the user.

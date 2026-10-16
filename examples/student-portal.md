@@ -1000,7 +1000,7 @@ hideFeedback: true
 </section>
 
 <!-- Academic standing modal -->
-<div id="standing-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="standing-modal-title" aria-hidden="true" hidden>
+<dialog id="standing-modal" class="nds-modal nds-card nds-stroke" aria-labelledby="standing-modal-title">
     <div class="nds-card-header">
         <div class="nds-card-featured-icon">
             <span class="nds-featured-icon nds-circle" data-status="success">
@@ -1040,10 +1040,10 @@ hideFeedback: true
             <span class="nds-label">Done</span>
         </button>
     </div>
-</div>
+</dialog>
 
 <!-- Study plan modal -->
-<div id="plan-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="plan-modal-title" aria-hidden="true" hidden>
+<dialog id="plan-modal" class="nds-modal nds-card nds-stroke" aria-labelledby="plan-modal-title">
     <div class="nds-card-header">
         <div class="nds-card-featured-icon">
             <span class="nds-featured-icon nds-circle">
@@ -1089,10 +1089,10 @@ hideFeedback: true
             <span class="nds-label">Done</span>
         </button>
     </div>
-</div>
+</dialog>
 
 <!-- Fees modal -->
-<div id="fees-modal" class="nds-modal nds-card nds-stroke nds-lg" role="dialog" aria-modal="true" aria-labelledby="fees-modal-title" aria-hidden="true" hidden>
+<dialog id="fees-modal" class="nds-modal nds-card nds-stroke nds-lg" aria-labelledby="fees-modal-title">
     <div class="nds-card-header">
         <div class="nds-card-featured-icon">
             <span class="nds-featured-icon nds-circle">
@@ -1159,10 +1159,10 @@ hideFeedback: true
             <span class="nds-label">Close</span>
         </button>
     </div>
-</div>
+</dialog>
 
 <!-- Letter request modal -->
-<div id="letter-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="letter-modal-title" aria-hidden="true" hidden>
+<dialog id="letter-modal" class="nds-modal nds-card nds-stroke" aria-labelledby="letter-modal-title">
     <div class="nds-card-header">
         <div class="nds-card-featured-icon">
             <span class="nds-featured-icon nds-circle">
@@ -1223,7 +1223,7 @@ hideFeedback: true
             <span class="nds-label">Cancel</span>
         </button>
     </div>
-</div>
+</dialog>
 
 <!-- Exam support: a FAB that opens a panel of common questions -->
 <button type="button" class="nds-btn nds-fab nds-primary nds-circle nds-icon-only" data-panel-toggle="support-panel" aria-label="Exam support" hidden>

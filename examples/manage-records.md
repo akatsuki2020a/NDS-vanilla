@@ -810,7 +810,7 @@ hideFeedback: true
 </section>
 
 <!-- Create / edit dialog -->
-<div id="record-modal" class="nds-modal nds-card nds-stroke nds-lg" role="dialog" aria-labelledby="record-modal-title" aria-hidden="true" hidden>
+<dialog id="record-modal" class="nds-modal nds-card nds-stroke nds-lg" aria-labelledby="record-modal-title">
     <div class="nds-card-header">
         <span class="nds-featured-icon nds-circle">
             <i class="hgi hgi-stroke hgi-file-edit"></i>
@@ -949,10 +949,10 @@ hideFeedback: true
             </button>
         </div>
     </form>
-</div>
+</dialog>
 
 <!-- Delete confirmation -->
-<div id="delete-modal" class="nds-modal nds-card nds-stroke nds-sm" role="dialog" aria-labelledby="delete-modal-title" aria-hidden="true" hidden>
+<dialog id="delete-modal" class="nds-modal nds-card nds-stroke nds-sm" aria-labelledby="delete-modal-title">
     <div class="nds-card-header">
         <span class="nds-featured-icon nds-circle" data-status="error">
             <i class="hgi hgi-stroke hgi-delete-02"></i>
@@ -975,7 +975,7 @@ hideFeedback: true
             <span class="nds-label">Cancel</span>
         </button>
     </div>
-</div>
+</dialog>
 
 <script>
   function initPage() {

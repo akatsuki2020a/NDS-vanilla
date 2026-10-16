@@ -39,6 +39,7 @@
   // the last-in config, orphaning the underlying owner's dismiss handler.
   let stack = [];
   let isActive = false;
+  let locked = false; // the lock is taken a beat after show(); a hide() before it has none to give back
 
   const top = () => stack[stack.length - 1];
 
@@ -69,7 +70,8 @@
    */
   function handleEscape(e) {
     const cfg = top();
-    if ((e.key === 'Escape' || e.key === 'Esc') && cfg?.onClick) {
+    // defaultPrevented: a Modal above handled it.
+    if ((e.key === 'Escape' || e.key === 'Esc') && !e.defaultPrevented && cfg?.onClick) {
       cfg.onClick();
     }
   }
@@ -130,6 +132,7 @@
       NDS.State.set(backdropElement, 'active');
       if (newConfig.preventScroll) {
         NDS.scrollLock.lock();
+        locked = true;
       }
     }, speed);
 
@@ -164,8 +167,9 @@
     NDS.State.clear(backdropElement);
 
     // Restore scroll immediately
-    if (popped?.preventScroll) {
+    if (locked) {
       NDS.scrollLock.unlock();
+      locked = false;
     }
 
     // Clean up display after component transition

@@ -24,6 +24,11 @@
     opacity: 1;
     backdrop-filter: var(--backdrop-blur, none);
   }
+
+  // A Modal above dims the page with its own layer.
+  &[data-nds-under] {
+    opacity: 0;
+  }
 }
 
 // ==============================================

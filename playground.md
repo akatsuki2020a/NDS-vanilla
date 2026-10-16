@@ -190,7 +190,7 @@ direction: rtl
       <div class="pg-row">
         <div class="pg-box"><b>Old: NDS Modal</b>
           <button type="button" class="nds-btn nds-primary nds-lg" data-modal-target="pg-old-modal"><span class="nds-label">Open Modal</span></button>
-          <div id="pg-old-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-labelledby="pg-old-modal-title" aria-hidden="true" hidden>
+          <dialog id="pg-old-modal" class="nds-modal nds-card nds-stroke" aria-labelledby="pg-old-modal-title">
             <div class="nds-card-header">
               <div class="nds-card-featured-icon"><span class="nds-featured-icon nds-circle"><i class="nds-icon nds-hgi-information-circle" aria-hidden="true"></i></span></div>
               <button type="button" class="nds-close nds-modal-close nds-btn nds-subtle nds-icon-only" aria-label="Close"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
@@ -203,7 +203,7 @@ direction: rtl
               <button type="button" class="nds-btn nds-primary nds-lg" data-modal-close><span class="nds-label">Withdraw</span></button>
               <button type="button" class="nds-btn nds-secondary-outline nds-lg" data-modal-close><span class="nds-label">Cancel</span></button>
             </div>
-          </div>
+          </dialog>
           <p class="pg-out">Try Tab, Esc, a click outside and scrolling the page.</p>
         </div>
         <div class="pg-box"><b>New: &lt;dialog&gt;</b>
@@ -330,7 +330,7 @@ direction: rtl
       dlg.showModal();
       modals.push(dlg);
     };
-    document.querySelectorAll('dialog').forEach(function (dlg) {
+    document.querySelectorAll('dialog:not(.nds-modal)').forEach(function (dlg) {
       dlg.addEventListener('close', function () {
         modals = modals.filter(function (d) { return d !== dlg; });
         dlg.removeAttribute('data-pg-under');
@@ -373,7 +373,7 @@ direction: rtl
       btn.addEventListener('click', function () { showModal(dlg); say('Opened Modal'); });
     });
     // A click on a modal's backdrop lands on the dialog itself, outside its box.
-    document.querySelectorAll('dialog').forEach(function (dlg) {
+    document.querySelectorAll('dialog:not(.nds-modal)').forEach(function (dlg) {
       dlg.addEventListener('click', function (e) {
         var r = dlg.getBoundingClientRect();
         if (e.target === dlg && dlg.matches(':modal') && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) dlg.close();

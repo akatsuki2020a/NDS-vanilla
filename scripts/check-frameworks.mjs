@@ -44,10 +44,10 @@ const VIEW = (p) => `<div class="nds-dropmenu" id="${p}-dm" data-select-name="${
 <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="SA"><span class="nds-label">Saudi Arabia</span></button>
 <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="AE"><span class="nds-label">UAE</span></button>
 </div></div></div>
-<div id="${p}-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-hidden="true" hidden>
+<dialog id="${p}-modal" class="nds-modal nds-card nds-stroke">
 <div class="nds-card-content"><span class="nds-card-title">Title</span></div>
 <div class="nds-card-actions"><button type="button" class="nds-btn nds-primary nds-lg" data-modal-close><span class="nds-label">Close</span></button></div>
-</div>`;
+</dialog>`;
 // The custom-select canon: NDS adds nds-dropmenu to its .nds-form-control.
 const SELECT = '<input type="text" class="nds-input nds-select-input" readonly>'
     + '<input type="hidden" class="nds-select-value">'
@@ -73,7 +73,7 @@ async function open(libs) {
         window.__destroy = (el) => (window.__noDestroy ? 0 : NDS.Init.destroy(el));
         window.__wait = (ms = 350) => new Promise((r) => setTimeout(r, ms));
         window.__strays = () => document.querySelectorAll('.nds-dropmenu-menu:popover-open').length;
-        window.__released = () => !NDS.Modal.isOpen() && !document.body.style.top && !NDS.Backdrop.isActive();
+        window.__released = () => !NDS.Modal.isOpen() && !document.body.style.top && !document.querySelector('.nds-modal[open]');
         window.__noDestroy = noDestroy;
     }, [VIEW('${p}'), SELECT, !!process.env.NO_DESTROY]);
     return { page, errors };
@@ -110,11 +110,11 @@ async function lifecycle(page, name, p, unmount, remount) {
     ok(`${name}: setup, the modal locked the page`, await page.evaluate(() => NDS.Modal.isOpen() && !!document.body.style.top));
     await unmount();
     await page.evaluate(() => window.__wait());
-    ok(`${name}: unmount with the modal open releases backdrop and scroll lock`, await page.evaluate(() => window.__released()));
+    ok(`${name}: unmount with the modal open closes the dialog and releases the scroll lock`, await page.evaluate(() => window.__released()));
 
     await remount();
     await page.evaluate(() => window.__wait(600));
-    // A backdrop left behind covers the trigger: that fails here, not as a crash.
+    // A modal left open makes the page inert: that fails here, not as a crash.
     await trigger.click({ timeout: 3000 }).catch(() => {});
     await page.evaluate(() => window.__wait());
     ok(`${name}: the view works again after a remount`, await menuOpen());
@@ -891,8 +891,8 @@ for (const v of REACT) {
         const PANEL = '<aside id="nds-cookies-panel" class="nds-panel nds-cookies" aria-label="Cookies" hidden>'
             + '<div class="nds-cookies-view" data-cookies-view="notice"><p>Own panel</p>'
             + '<button type="button" class="nds-btn nds-primary" data-cookies-action="accept"><span class="nds-label">Accept</span></button></div></aside>';
-        const MODAL = '<div id="rt-modal" class="nds-modal nds-card nds-stroke" role="dialog" aria-modal="true" aria-hidden="true" hidden>'
-            + '<div class="nds-card-content"><span class="nds-card-title">Title</span></div></div>';
+        const MODAL = '<dialog id="rt-modal" class="nds-modal nds-card nds-stroke">'
+            + '<div class="nds-card-content"><span class="nds-card-title">Title</span></div></dialog>';
         function App() {
             const [s, setS] = React.useState({ before: false, keep: true });
             window.__tplSet = (k, val) => setS((o) => ({ ...o, [k]: val }));

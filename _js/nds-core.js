@@ -1495,30 +1495,28 @@
     // via `top: -<scrollY>px` and stamps `data-nds-scroll-lock`, which
     // _backdrop.scss turns into `position: fixed`. `unlock()` parses the
     // saved offset back out of the inline style, clears both, and restores
-    // scroll. Stateless: the inline style is the source of truth, so
-    // calling `unlock()` when not locked is a safe no-op.
+    // scroll. Counted: each `lock()` needs its own `unlock()`, and the page
+    // unlocks with the last one, so a Modal over a Backdrop owner holds.
+    // `unlock()` with no lock held is a safe no-op.
     //
     // Own attribute, NOT a data-state token: `data-state` keys hundreds of
     // rules, so flipping it on <body> restyled ~half the page (1,578
     // elements on the home page, measured 2026-09-02). A name only one
     // body rule uses restyles <body> alone.
     //
-    // Caller responsibility: do NOT call `lock()` twice without an
-    // intervening `unlock()`. The second call would capture the
-    // already-locked scroll position (0) and lose the original. Existing
-    // callers gate this via overlay isActive / menu open-state guards.
-    //
     // Usage: NDS.scrollLock.lock();
     //        // ... overlay shown ...
     //        NDS.scrollLock.unlock();
+    let _scrollLocks = 0;
     NDS.scrollLock = {
         lock() {
+            if (_scrollLocks++) return;
             const scrollY = window.pageYOffset;
             document.body.style.top = `-${scrollY}px`;
             document.body.setAttribute('data-nds-scroll-lock', '');
         },
         unlock() {
-            if (!document.body.style.top) return;
+            if (!_scrollLocks || --_scrollLocks) return;
             const scrollY = -parseFloat(document.body.style.top); // fractional under zoom
             document.body.style.top = '';
             document.body.removeAttribute('data-nds-scroll-lock');

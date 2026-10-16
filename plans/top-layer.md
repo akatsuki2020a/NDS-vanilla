@@ -4,7 +4,7 @@ Owner decisions (2026-10-16): do it before v2.0.0 · speed is not the reason · 
 
 **Verdict (2026-10-16).** Steps 1–3 before v2: Dropmenu and Tooltip; Modal on `<dialog>`; every Panel on `<dialog>`. Steps 4 and on are judged again, each on its own benefit and cost, once 1–3 have shipped.
 
-**Start here.** Step 2 (step 1 is built, see Step 1 status). The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`.
+**Start here.** Step 3 (steps 1 and 2 are built, see their status sections). The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`.
 
 ## Why
 
@@ -82,6 +82,20 @@ Built, not committed: Dropmenu and Tooltip open with `popover="manual"` through 
 - **Checked, Chrome and WebKit:** `check-dropmenu-placement.mjs` 16/16 (new cases: top layer, nav clip, nested close, dark area, bubbling), a sweep of 18 pages' menus and tooltips, `check-init-destroy.mjs` 36/36, `check-frameworks.mjs` all passed, `check-css.py` and `check-data-state-tails.py` clean, `check-docs.py` on the 9 edited pages, the audit flags a leftover `data-portal`.
 - **Not run yet:** the menu-open timing against the old code, and `doc-check.mjs` on the touched pages (owner's go-ahead).
 - **Owner:** `.claude/skills/nds-iq-eval/scenarios/S15-menu-clipping-in-modal.md` expects `data-portal` as the fix; it needs a rewrite before the next IQ eval run.
+
+## Step 2 status (2026-10-16)
+
+Built, not committed: `.nds-modal` is a `<dialog>` opened with `showModal()`. Modal lost `NDS.trapFocus`, its Backdrop use and `aria-hidden`/`hidden` writes; a div logs an error. Markup moved in the doc canons, examples, life-journey templates, `mainnav.html`, Session Timeout and the check fixtures. Migration row: `div.nds-modal` (scope `&div`); the migration CSS scan skips a class row with a bare element scope, so `.nds-modal` in a site's CSS is not flagged.
+
+- **Fade:** JS keeps `data-state` open/closing and calls `close()` after the fade, so both engines animate out (no `overlay`).
+- **Escape:** a keydown listener on the dialog (not document) closes it, so a menu inside that stops Escape keeps the modal open; `cancel` is prevented as a backstop, and Dropmenu's Escape now also calls `preventDefault()`. A native close (`<form method="dialog">`, Chrome's repeat Escape) syncs through a capture `close` listener.
+- **Click outside:** pointer down and up both outside the box, so a text selection dragged out does not close it.
+- **Scroll lock:** `NDS.scrollLock` is counted now (each `lock()` needs its `unlock()`); Backdrop unlocks only a lock it took.
+- **Until step 3:** a Modal over a modal Panel or the open nav marks `.nds-backdrop` with `data-nds-under` (opacity 0), so the page shows one dim layer; Backdrop skips an Escape a Modal already handled (`defaultPrevented`).
+- **Static checks:** `check-css.py`, `check-data-state-tails.py`, `check-docs.py components/modal.md` clean; `js_processor.rb` built.
+- **Safari focus:** WebKit does not focus a clicked button, so Escape after a click on a menu trigger came from the page or the dialog and closed the modal under an open menu. Dropmenu now also hears Escape on `document` (capture) when focus sits outside every open menu, and closes the newest one. With no focused opener, focus is not handed back after close in Safari, as before.
+- **Browser checks, Chrome and WebKit:** `check-dropmenu-placement.mjs` 16/16, `check-init-destroy.mjs` 36/36, `check-frameworks.mjs` all passed, `doc-check.mjs components/modal.md` no findings, and a one-off modal harness (open, fade, Escape, click outside, drag out, static, a menu inside, swap, over a modal Panel, `<form method="dialog">`) all passed. The playground's prototype script now skips `.nds-modal` dialogs: its click-outside closed the row-4 modal natively.
+- **Step 3 note:** the shared Modal/Panel core is not extracted yet: lift `finish()`, the scroll lock and the outside-click test from `nds-modal.js` when Panel moves.
 
 ## Modal and Panel: one core
 

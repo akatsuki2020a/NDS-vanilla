@@ -356,6 +356,7 @@
                 if (e.key === 'Escape') {
                     if (this.searchInput.value) {
                         e.stopPropagation();
+                        e.preventDefault();
                         this.searchInput.value = '';
                         filter();
                     }
@@ -571,17 +572,28 @@
             // Escape — the menu is inside the wrapper, so one listener hears both.
             const onEscape = (e) => {
                 if (e.key !== 'Escape') return;
+                // preventDefault too: a <dialog> around the menu reads an unhandled Escape as its own close.
                 if (this._cancelDelayedOpen()) {
                     e.stopPropagation();
+                    e.preventDefault();
                     return;
                 }
                 if (this.isOpen) {
                     e.stopPropagation();
+                    e.preventDefault();
                     this.close();
                     this.trigger.focus();
                 }
             };
             this.dropmenu.addEventListener('keydown', onEscape, { signal });
+            // Safari leaves focus on the page or the modal around a clicked trigger: Escape there closes
+            // the newest open menu, before a <dialog> around it reads the key as its own close.
+            document.addEventListener('keydown', (e) => {
+                if (e.key !== 'Escape' || [..._openDropmenus].pop() !== this.dropmenu
+                    || this.dropmenu.contains(e.target) || !e.target.contains?.(this.dropmenu)) return;
+                e.stopImmediatePropagation();
+                onEscape(e);
+            }, { capture: true, signal });
 
             // Item click auto-close.
             this.menu.addEventListener('click', (e) => {

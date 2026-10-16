@@ -61,7 +61,7 @@
     </div>
   </div>`;
 
-    const warningMarkup = () => `<div id="${WARN_ID}" class="nds-modal nds-card nds-stroke nds-sm nds-center" data-status="warning" role="alertdialog" aria-modal="true" aria-labelledby="${WARN_ID}-title" aria-describedby="${WARN_ID}-desc ${WARN_ID}-countdown" aria-hidden="true" hidden>
+    const warningMarkup = () => `<dialog id="${WARN_ID}" class="nds-modal nds-card nds-stroke nds-sm nds-center" data-status="warning" role="alertdialog" aria-labelledby="${WARN_ID}-title" aria-describedby="${WARN_ID}-desc ${WARN_ID}-countdown">
   ${icon('alert-circle')}
   <div class="nds-card-content">
     <div class="nds-card-text">
@@ -74,9 +74,9 @@
     <button type="button" class="nds-btn nds-primary nds-lg" data-modal-close><span class="nds-label">${html('stay')}</span></button>${logoutUrl ? `
     <a class="nds-btn nds-secondary-outline nds-lg" href="${NDS.escapeHtml(logoutUrl)}"><span class="nds-label">${html('sign_out')}</span></a>` : ''}
   </div>
-</div>`;
+</dialog>`;
 
-    const endedMarkup = () => `<div id="${ENDED_ID}" class="nds-modal nds-card nds-stroke nds-sm nds-center" data-status="error" data-modal-static role="alertdialog" aria-modal="true" aria-labelledby="${ENDED_ID}-title" aria-describedby="${ENDED_ID}-desc" aria-hidden="true" hidden>
+    const endedMarkup = () => `<dialog id="${ENDED_ID}" class="nds-modal nds-card nds-stroke nds-sm nds-center" data-status="error" data-modal-static role="alertdialog" aria-labelledby="${ENDED_ID}-title" aria-describedby="${ENDED_ID}-desc">
   ${icon('cancel-circle')}
   <div class="nds-card-content">
     <div class="nds-card-text">
@@ -87,7 +87,7 @@
   <div class="nds-card-actions">
     <a class="nds-btn nds-primary nds-lg" href="${NDS.escapeHtml(signinUrl || location.href)}"><span class="nds-label">${html('sign_in')}</span></a>
   </div>
-</div>`;
+</dialog>`;
 
     // Built when it first opens, then kept for the next time.
     function build(id, markup) {

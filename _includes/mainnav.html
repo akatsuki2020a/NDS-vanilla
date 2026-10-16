@@ -131,14 +131,14 @@
         </div>
     </div>
 </nav>
-{%- comment %} Modal templates rendered outside nav to avoid stacking context issues {%- endcomment -%}
+{%- comment %} Nav modals {%- endcomment -%}
 {%- for item in nav_data.primary_nav %}
     {%- if item.type == 'modal' and item.template %}
     {%- assign modal_id = item.id | default: item.label | slugify | append: "-modal" %}
     {%- assign modal_tpl = item.template %}
-<div class="nds-modal nds-card nds-stroke{%- if item.content_class %} {{ item.content_class }}{%- else %} nds-sm{%- endif %}" id="{{ modal_id }}" role="dialog" aria-labelledby="{{ modal_id }}-title" aria-hidden="true" hidden>
+<dialog class="nds-modal nds-card nds-stroke{%- if item.content_class %} {{ item.content_class }}{%- else %} nds-sm{%- endif %}" id="{{ modal_id }}" aria-labelledby="{{ modal_id }}-title">
     {% include {{ modal_tpl }} item=item %}
-</div>
+</dialog>
     {%- endif %}
 {%- endfor %}
 {%- comment %} Action nav modals {%- endcomment -%}
@@ -146,8 +146,8 @@
     {%- if item.type == 'modal' and item.template %}
     {%- assign modal_id = item.id | default: item.label | slugify | append: "-modal" %}
     {%- assign modal_tpl = item.template %}
-<div class="nds-modal nds-card nds-stroke{%- if item.content_class %} {{ item.content_class }}{%- else %} nds-sm{%- endif %}" id="{{ modal_id }}" role="dialog" aria-labelledby="{{ modal_id }}-title" aria-hidden="true" hidden>
+<dialog class="nds-modal nds-card nds-stroke{%- if item.content_class %} {{ item.content_class }}{%- else %} nds-sm{%- endif %}" id="{{ modal_id }}" aria-labelledby="{{ modal_id }}-title">
     {% include {{ modal_tpl }} item=item %}
-</div>
+</dialog>
     {%- endif %}
 {%- endfor %}

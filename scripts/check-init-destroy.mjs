@@ -218,8 +218,8 @@ report.push(...await records.evaluate(async () => {
     ok('the page-level FAB runtime is released', !document.querySelector('.nds-fab-sentinel')
         && !document.documentElement.hasAttribute('data-fab-tucked'));
 
-    // An open modal is the worst thing to leave behind: the backdrop covers the app and the
-    // page is scroll-locked, and the element that could close it has been removed.
+    // An open modal is the worst thing to leave behind: the page behind it is inert and
+    // scroll-locked, and the element that could close it has been removed.
     const modal = document.querySelector('.nds-modal');
     if (modal) {
         NDS.Modal.open(modal);
@@ -231,11 +231,7 @@ report.push(...await records.evaluate(async () => {
         await new Promise((r) => setTimeout(r, 250));
         ok('destroy released the open modal', !NDS.Modal.isOpen());
         ok('the scroll lock is released', !document.body.style.top, document.body.style.top || 'clear');
-        // The backdrop ELEMENT is a shared singleton that persists by design — what has to
-        // be released is its active state and the display it was given.
-        ok('the backdrop is released', !NDS.Backdrop.isActive()
-            && !document.querySelector('.nds-backdrop')?.style.display,
-            document.querySelector('.nds-backdrop')?.style.display || 'clear');
+        ok('the dialog is closed', !modal.open);
     } else {
         ok('setup: the modal locked the page', false, 'no .nds-modal on this page');
     }
