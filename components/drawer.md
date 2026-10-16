@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 04:46 AM"
+last_edit: "16/10/2026 - 05:02 AM"
 ---
 
 <section id="drawer-overview" class="nds-content-section nds-doc-overview">
@@ -164,7 +164,7 @@ Pick another component when:
         </span>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-xs" data-status="success">
+            <span class="nds-tag" data-status="success">
               <span class="nds-label">Approved</span>
             </span>
             <span class="nds-label nds-truncate">License approved</span>
@@ -180,7 +180,7 @@ Pick another component when:
         </span>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-xs" data-status="warning">
+            <span class="nds-tag" data-status="warning">
               <span class="nds-label">Due</span>
             </span>
             <span class="nds-label nds-truncate">Payment overdue</span>
@@ -196,7 +196,7 @@ Pick another component when:
         </span>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-xs" data-status="info">
+            <span class="nds-tag" data-status="info">
               <span class="nds-label">New</span>
             </span>
             <span class="nds-label nds-truncate">New message</span>
@@ -390,6 +390,7 @@ A [Scroll More](../components/scroll-more) wrapper around the list holds the dra
 - Keep trees to two or three levels. A deeper tree is hard to scan, and often means the section should be split into pages.
 - Keep labels short. A label wraps to a new line when it is too long.
 - In a Notifications row, put `data-status` on the `<li>` and on the tag. The status on the `<li>` colors the icon. The tag does not take it from the `<li>`.
+- Leave the size class off the tag in a Notifications row. The drawer makes it XS, so it leaves the title its room.
 - Use Divided when rows have two lines. Leave it off a list of short links, where the lines only add noise.
 - After you add a drawer to the page, call `NDS.Drawer.reinit()`. After you change the items of a drawer that started, call `NDS.Drawer.destroy(drawer)`, then `NDS.Drawer.create(drawer)`.
 

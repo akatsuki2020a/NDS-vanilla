@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:31 AM"
+last_edit: "16/10/2026 - 05:02 AM"
 ---
 
 <section id="mainnav-overview" class="nds-content-section nds-doc-overview">
@@ -342,7 +342,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
                   </span>
                   <span class="nds-drawer-item">
                     <span class="nds-drawer-item-head">
-                      <span class="nds-tag nds-xs" data-status="success">
+                      <span class="nds-tag" data-status="success">
                         <span class="nds-label">Approved</span>
                       </span>
                       <span class="nds-label nds-truncate">License renewed</span>
@@ -358,7 +358,7 @@ The [Header](../ui-shell/header) shows how the main navigation sits with the top
                   </span>
                   <span class="nds-drawer-item">
                     <span class="nds-drawer-item-head">
-                      <span class="nds-tag nds-xs" data-status="warning">
+                      <span class="nds-tag" data-status="warning">
                         <span class="nds-label">Due soon</span>
                       </span>
                       <span class="nds-label nds-truncate">Appointment tomorrow</span>

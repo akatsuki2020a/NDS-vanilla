@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 04:46 AM"
+last_edit: "16/10/2026 - 05:02 AM"
 ---
 
 <section id="date-tile-overview" class="nds-content-section nds-doc-overview">
@@ -55,7 +55,7 @@ Pick another component when:
         </time>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-xs" data-status="warning">
+            <span class="nds-tag" data-status="warning">
               <span class="nds-label">First</span>
             </span>
             <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
