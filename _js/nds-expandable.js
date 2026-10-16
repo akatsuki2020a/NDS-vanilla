@@ -20,7 +20,7 @@
  *   - --max-height on the content sets the clamp (default 300px). px only: it is parsed
  *     with parseInt. It is cached, so changing it at runtime needs a recheckHeight().
  *   - A container that is not rendered measures 0 and is left clamped until it becomes
- *     visible. Tabs already calls recheckHeights() on panel activation.
+ *     visible; its size watcher re-measures it then (a tab panel shown, a section opened).
  *   - The instance lives on the root as el.ndsExpandable.
  */
 /**

@@ -302,9 +302,6 @@
             NDS.aria.hidden(panel, null);
             panel.removeAttribute('hidden');
             panel.setAttribute('tabindex', '0');
-
-            // Recheck height for expandable components now visible
-            setTimeout(() => NDS.Expandable.recheckHeights(), 10);
         }
 
         deactivateTab(tab, index) {
