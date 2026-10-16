@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "11/10/2026 - 03:19 PM"
+last_edit: "16/10/2026 - 10:25 PM"
 ---
 
 <section id="expandable-overview" class="nds-content-section nds-doc-overview">
@@ -197,7 +197,7 @@ Put `nds-expand-all` on the parent of several expandable boxes. Show More on one
 - Set a max height that shows enough text for the user to decide whether to read more. Below 80px, the first paragraph can be hidden.
 - Use a group for related items that the user compares, such as a comparison grid or a set of policy summaries.
 - After you add expandable boxes to the page, call `NDS.Expandable.reinit()`.
-- After your own script shows a hidden box, call `NDS.Expandable.recheckHeights()`.
+- After your script changes `--max-height`, call `NDS.Expandable.recheckHeights()`. A hidden box measures itself again when it is shown.
 
 </div>
   </div>
@@ -246,7 +246,7 @@ The instance is on the box as `el.ndsExpandable`. It is there once the component
 |---|---|
 | `NDS.Expandable.init()` | Starts every `.nds-expandable` on the page that has no instance. The loader calls it |
 | `NDS.Expandable.reinit()` | The same as `init()`. Call it after you add boxes to the page |
-| `NDS.Expandable.recheckHeights()` | Measures every box again |
+| `NDS.Expandable.recheckHeights()` | Measures every box again. Call it after you change `--max-height` |
 | `NDS.Expandable.create(el)` | Starts one box, or returns its instance |
 | `instance.expandContent()` | Opens the box |
 | `instance.collapseContent()` | Closes the box |

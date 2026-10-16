@@ -3,7 +3,7 @@
  * Methods:
  *   NDS.Expandable.init() / .reinit()   scan + initialize .nds-expandable
  *   NDS.Expandable.recheckHeights()     re-measure every initialized container — call this
- *                                       after revealing one that was display:none
+ *                                       after changing --max-height at runtime
  *   NDS.Expandable.create(container)    instance one container
  *   instance.expandContent() / .collapseContent() / .toggleContent()
  *   instance.recheckHeight()            re-measure this one
