@@ -58,8 +58,7 @@ class JSProcessor
       # synchronously, a lazy stub can't bridge that; forms shows Feedback at
       # submit), every critical component, dropmenu (deferred, but a
       # critical-init dependency of multiselect), and deferred components
-      # deliberately kept in main: mainnav (first-paint critical),
-      # cookies (consent is applied at eval, before analytics), customselect (JS-derived label would flash if async),
+      # deliberately kept in main: cookies (consent is applied at eval, before analytics), customselect (JS-derived label would flash if async),
       # otp (auto-advance/paste is first-interaction-critical on OTP/2FA pages).
       # They stay so they wire on the local idle pass, not after an injected
       # bundle. Reveal is gated on this bundle, so it's kept lean.
