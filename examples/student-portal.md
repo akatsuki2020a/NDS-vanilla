@@ -176,12 +176,12 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
+                            <div class="nds-card-corner">
+                                <button type="button" class="nds-btn nds-subtle nds-sm" data-modal-target="plan-modal">
+                                    <span class="nds-label">Study plan</span>
+                                </button>
+                            </div>
                             <span class="nds-card-title" id="degree-progress-title">Degree progress</span>
-                        </div>
-                        <div class="nds-card-header-action">
-                            <button type="button" class="nds-btn nds-subtle nds-sm" data-modal-target="plan-modal">
-                                <span class="nds-label">Study plan</span>
-                            </button>
                         </div>
                     </div>
                     <div class="nds-card-content">
@@ -248,7 +248,7 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
-                            <div class="nds-card-header-action">
+                            <div class="nds-card-corner">
                                 <a href="#" class="nds-btn nds-subtle nds-sm">
                                     <span class="nds-label">Full timetable</span>
                                     <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
@@ -334,13 +334,13 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
+                            <div class="nds-card-corner">
+                                <a href="#" class="nds-btn nds-subtle nds-sm">
+                                    <span class="nds-label">All requests</span>
+                                    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
+                                </a>
+                            </div>
                             <span class="nds-card-title">My requests</span>
-                        </div>
-                        <div class="nds-card-header-action">
-                            <a href="#" class="nds-btn nds-subtle nds-sm">
-                                <span class="nds-label">All requests</span>
-                                <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
-                            </a>
                         </div>
                     </div>
                     <div class="nds-card-content">
@@ -448,7 +448,7 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
-                            <div class="nds-card-header-action">
+                            <div class="nds-card-corner">
                                 <a href="#" class="nds-btn nds-subtle nds-sm">
                                     <span class="nds-label">Exam timetable</span>
                                     <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
@@ -559,7 +559,7 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
-                            <div class="nds-card-header-action">
+                            <div class="nds-card-corner">
                                 <a href="#" class="nds-btn nds-subtle nds-sm">
                                     <span class="nds-label">Full calendar</span>
                                     <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>

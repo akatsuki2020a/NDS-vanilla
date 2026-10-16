@@ -7,8 +7,8 @@ breadcrumb: [["Components", "/components"]]
 lang: en
 direction: ltr
 since: "1.0.2"
-updated: "1.1.0"
-last_edit: "10/10/2026 - 05:28 PM"
+updated: "1.12.x"
+last_edit: "16/10/2026 - 11:02 PM"
 ---
 
 <section id="metric-overview" class="nds-content-section nds-doc-overview">
@@ -35,18 +35,22 @@ Pick another component when:
       <h2 class="nds-section-title">Markup</h2>
     </div>
     <div class="nds-section-body">
-<script type="text/html" id="metric-positive" data-canon data-variants="metric-variants-table">
-<div class="nds-card nds-stroke" data-status="positive">
+<script type="text/html" id="metric-positive" data-canon data-variants="metric-variants-table" data-demo-width="480px">
+<div class="nds-card nds-stroke nds-full" data-status="positive">
   <div class="nds-card-header">
     <div class="nds-card-featured-icon">
       <span class="nds-featured-icon nds-circle nds-sm">
         <i class="nds-icon nds-hgi-trade-up" aria-hidden="true"></i>
       </span>
     </div>
-    <span class="nds-card-title">24h Views</span>
-    <button type="button" class="nds-btn nds-subtle nds-md nds-ellipsis nds-vertical nds-icon-only">
-      <span class="nds-label">More options</span>
-    </button>
+    <div class="nds-card-text">
+      <div class="nds-card-corner">
+        <button type="button" class="nds-btn nds-subtle nds-md nds-ellipsis nds-vertical nds-icon-only">
+          <span class="nds-label">More options</span>
+        </button>
+      </div>
+      <span class="nds-card-title">24h Views</span>
+    </div>
   </div>
   <div class="nds-card-content">
     <div class="nds-card-metric">
@@ -77,17 +81,21 @@ Pick another component when:
 </div>
 </script>
 <script type="text/html" id="metric-negative" data-canon>
-<div class="nds-card nds-stroke" data-status="negative">
+<div class="nds-card nds-stroke nds-full" data-status="negative">
   <div class="nds-card-header">
     <div class="nds-card-featured-icon">
       <span class="nds-featured-icon nds-circle nds-sm">
         <i class="nds-icon nds-hgi-trade-down" aria-hidden="true"></i>
       </span>
     </div>
-    <span class="nds-card-title">24h Views</span>
-    <button type="button" class="nds-btn nds-subtle nds-md nds-ellipsis nds-vertical nds-icon-only">
-      <span class="nds-label">More options</span>
-    </button>
+    <div class="nds-card-text">
+      <div class="nds-card-corner">
+        <button type="button" class="nds-btn nds-subtle nds-md nds-ellipsis nds-vertical nds-icon-only">
+          <span class="nds-label">More options</span>
+        </button>
+      </div>
+      <span class="nds-card-title">24h Views</span>
+    </div>
   </div>
   <div class="nds-card-content">
     <div class="nds-card-metric">
@@ -132,7 +140,7 @@ Pick another component when:
 |---|---|---|---|---|
 | Structure | Positive (default) | — | — | A trend that is good news. `data-status="positive"` on the card uses the success colors, and the icons are `nds-hgi-trade-up` |
 | Structure | Negative (hint: A trend that is bad news) | canon `#metric-negative` | — | A trend that is bad news. `data-status="negative"` on the card uses the error colors, and the icons are `nds-hgi-trade-down` |
-| Layout | Compact (default) | — | — | The chart sits beside the value and takes at least 40% of the row. It wraps below the value when the card is too narrow. Use it for a row of several metrics |
+| Layout | Compact (default) | — | — | The chart sits beside the value and takes 40% of the row, with the trend under the value. Below 400px of metric width, the chart moves under the value, so a card at its default 360px always stacks: give it `nds-full` in a wider grid cell. Use it for a row of several metrics |
 | Layout | Full (hint: The chart sits below the value, full width) | `.nds-full` | `.nds-card-metric` | The chart always sits below the value, across the full width. Use it for one metric that leads a section |
 | Arrow | Arrow (hint: A plain arrow instead of the trade icon) | `.nds-arrow` | `.nds-card-metric-trend` | Shows a plain arrow in the trend row. Keep the icon's class: `.nds-arrow` changes what the icon shows. The arrow follows the status, not the sign: `positive` points up, `negative` points down |
 | Stroke | Stroke (default) | `.nds-stroke` | `.nds-card` | A 1px border on the card |
@@ -176,7 +184,7 @@ Pick another component when:
             <i class="hgi hgi-stroke hgi-layout-top"></i>
             <span class="nds-label">Dashboard Header</span>
           </span>
-          <p class="nds-item-desc">In a metric card, the title is smaller, the last button in the header moves to the end, and a divider sits above the actions.</p>
+          <p class="nds-item-desc">In a metric card, the title is smaller and a divider sits above the actions. A menu button goes in the header's <code class="nds-inline-code lang-css">.nds-card-corner</code>, as in any card.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">

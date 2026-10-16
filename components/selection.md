@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 11:23 AM"
+last_edit: "16/10/2026 - 08:26 PM"
 ---
 
 <section id="selection-overview" class="nds-content-section nds-doc-overview">
@@ -60,45 +60,45 @@ Pick another component when:
 </div>
 <div id="selection-services" class="nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;">
   <label class="nds-card nds-stroke">
-    <div class="nds-card-checkbox">
-      <div class="nds-form-container nds-check-container">
-        <div class="nds-form-control">
-          <input type="checkbox" name="services" value="passport" class="nds-check" aria-label="Select Passport Renewal">
-        </div>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <div class="nds-form-container nds-check-container">
+            <div class="nds-form-control">
+              <input type="checkbox" name="services" value="passport" class="nds-check" aria-label="Select Passport Renewal">
+            </div>
+          </div>
+        </div>
         <span class="nds-card-title">Passport Renewal</span>
         <p class="nds-card-description">General Directorate of Passports</p>
       </div>
     </div>
   </label>
   <label class="nds-card nds-stroke">
-    <div class="nds-card-checkbox">
-      <div class="nds-form-container nds-check-container">
-        <div class="nds-form-control">
-          <input type="checkbox" name="services" value="licence" class="nds-check" aria-label="Select Driving Licence">
-        </div>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <div class="nds-form-container nds-check-container">
+            <div class="nds-form-control">
+              <input type="checkbox" name="services" value="licence" class="nds-check" aria-label="Select Driving Licence">
+            </div>
+          </div>
+        </div>
         <span class="nds-card-title">Driving Licence</span>
         <p class="nds-card-description">General Department of Traffic</p>
       </div>
     </div>
   </label>
   <label class="nds-card nds-stroke">
-    <div class="nds-card-checkbox">
-      <div class="nds-form-container nds-check-container">
-        <div class="nds-form-control">
-          <input type="checkbox" name="services" value="registration" class="nds-check" aria-label="Select Commercial Registration">
-        </div>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <div class="nds-form-container nds-check-container">
+            <div class="nds-form-control">
+              <input type="checkbox" name="services" value="registration" class="nds-check" aria-label="Select Commercial Registration">
+            </div>
+          </div>
+        </div>
         <span class="nds-card-title">Commercial Registration</span>
         <p class="nds-card-description">Ministry of Commerce</p>
       </div>

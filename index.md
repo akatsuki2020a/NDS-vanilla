@@ -135,16 +135,16 @@ bundle_sizes:
                                         {{ tpl.icon }}
                                     </span>
                                 </div>
-                                {%- if tpl.new %}
-                                <div class="nds-card-status">
-                                    <span class="nds-tag nds-sm" data-status="info">
-                                        <span class="nds-label">New</span>
-                                    </span>
-                                </div>
-                                {%- endif %}
                             </div>
                             <div class="nds-card-content">
                                 <div class="nds-card-text">
+                                    {%- if tpl.new %}
+                                    <div class="nds-card-corner">
+                                        <span class="nds-tag nds-xs" data-status="info">
+                                            <span class="nds-label">New</span>
+                                        </span>
+                                    </div>
+                                    {%- endif %}
                                     <span class="nds-card-title">{{ tpl.title }}</span>
                                     <p class="nds-card-description">{{ tpl.description }}</p>
                                 </div>
@@ -194,16 +194,16 @@ bundle_sizes:
                                         {{ ex.icon }}
                                     </span>
                                 </div>
-                                {%- if ex.new %}
-                                <div class="nds-card-status">
-                                    <span class="nds-tag nds-sm" data-status="info">
-                                        <span class="nds-label">New</span>
-                                    </span>
-                                </div>
-                                {%- endif %}
                             </div>
                             <div class="nds-card-content">
                                 <div class="nds-card-text">
+                                    {%- if ex.new %}
+                                    <div class="nds-card-corner">
+                                        <span class="nds-tag nds-xs" data-status="info">
+                                            <span class="nds-label">New</span>
+                                        </span>
+                                    </div>
+                                    {%- endif %}
                                     <span class="nds-card-title">{{ ex.title }}</span>
                                     <p class="nds-card-description nds-truncate" style="--truncate: 2;">{{ ex.description }}</p>
                                 </div>

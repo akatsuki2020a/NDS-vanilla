@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.1.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 10:08 AM"
+last_edit: "16/10/2026 - 08:23 PM"
 ---
 
 <section id="themes-overview" class="nds-content-section nds-doc-overview">
@@ -248,13 +248,11 @@ A theme menu option can load a stylesheet theme too. `data-theme-css` on the opt
 <script type="text/html" id="theme-dark-area" data-canon data-preview="page" data-preview-light data-preview-height="260" data-preview-style="body{padding:24px}">
 <div class="nds-grid" style="--max-col: 2; --mid-col: 2; --min-col: 1;">
   <div class="nds-card nds-stroke">
-    <div class="nds-card-header">
-      <div class="nds-card-status">
-        <span class="nds-tag nds-sm" data-status="success"><span class="nds-label">Approved</span></span>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <span class="nds-tag nds-xs" data-status="success"><span class="nds-label">Approved</span></span>
+        </div>
         <span class="nds-card-title">Building permit</span>
         <p class="nds-card-description">Request 1184, Riyadh. Valid until 30 June 2027.</p>
       </div>
@@ -264,13 +262,11 @@ A theme menu option can load a stylesheet theme too. `data-theme-css` on the opt
     </div>
   </div>
   <div class="nds-card nds-stroke" data-theme="dark">
-    <div class="nds-card-header">
-      <div class="nds-card-status">
-        <span class="nds-tag nds-sm" data-status="success"><span class="nds-label">Approved</span></span>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <span class="nds-tag nds-xs" data-status="success"><span class="nds-label">Approved</span></span>
+        </div>
         <span class="nds-card-title">Building permit</span>
         <p class="nds-card-description">Request 1184, Riyadh. Valid until 30 June 2027.</p>
       </div>
