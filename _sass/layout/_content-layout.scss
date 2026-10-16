@@ -176,7 +176,7 @@ main {
             @include tablet(max) {
                 --_wrapper-padding: 0;
 
-                .nds-section-body:has(>.nds-card) {
+                .nds-section-body:has(> :is(.nds-card, .nds-grid, .nds-swiper)) {
                     padding-inline: var(--nds-viewport-padding);
                 }
 
