@@ -271,6 +271,7 @@ Set these on the line, or on a parent to reach every line inside it.
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
+- [Student Portal](../examples/student-portal): meta lines on the class, request and exam rows, and above the exam list.
 - [Drawer](../components/drawer) and [Date Tile](../components/date-tile): the row that holds the line, and the date at the start of the row.
 
 </div>

@@ -7,6 +7,16 @@
 #   and the words developers actually use for it. Never conclude NDS lacks a
 #   pattern until every use_when here has been read.
 #   description/icon/category/tags drive the index cards; use_when renders nowhere.
+#   new: true shows a "New" tag on the card.
+
+- title: "Student Portal"
+  description: "A student's home page with grades, today's classes, requests, exams and services."
+  use_when: "A personal home page that a signed-in user opens first: a profile section with a photo and key details, metric tiles with a trend chart, a progress ring, lists of today's items and the user's requests, a dated list of upcoming events, quick-action cards that open modals, swipers of link cards, and a FAB that opens a help panel. Use for a student, employee, patient, citizen or member portal, a my-account page, or any user dashboard. Its lists are Drawer rows: each row is one link with an icon or a Date Tile at the start, a title with a status tag, and a Meta line of icon facts such as time and place. Full chrome with a sub hero, striped sections through content_class: nds-stripe, and no side menu."
+  icon: '<i class="hgi hgi-stroke hgi-mortarboard-01"></i>'
+  category: "Dashboard"
+  tags: ["Drawer", "Date Tile", "Meta", "Metric", "Modal", "FAB"]
+  url: "/examples/student-portal.html"
+  new: true
 
 - title: "Services List"
   description: "Filterable government services catalog with search and category filters."

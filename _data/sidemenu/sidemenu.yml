@@ -85,6 +85,9 @@
     - label: "Console"
       url: "/examples/console-demo"
       href: "/examples/console-demo.html"
+    - label: "Student Portal"
+      url: "/examples/student-portal"
+      href: "/examples/student-portal.html"
 
 - label: "Events"
   has_sub: true

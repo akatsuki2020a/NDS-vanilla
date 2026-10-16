@@ -232,6 +232,7 @@ Set these on the tile, or on a parent to reach every tile inside it. A `data-sta
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
+- [Student Portal](../examples/student-portal): date tiles on the final exams and the academic calendar lists.
 - [Drawer](../components/drawer) and [Meta](../components/meta): the row that holds the tile, and the line of details under the title.
 - [Featured Icons](../components/featured-icons): the icon that a drawer row holds in the same place, with the same statuses.
 
