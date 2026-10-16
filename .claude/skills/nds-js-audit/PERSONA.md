@@ -294,7 +294,7 @@ Every in-scope file opens with a banner comment — the first lines of the file,
 - **Requires** (optional, after Rides) — markup the script needs to work and skips with no warning, one per line: `<host> needs|needs one X per Y|sits in|is|with|points at X via <attr> <selector> — <what breaks>`. `js_processor.rb` bakes it into the audit's `required-part` rule and fails the build on a line it cannot parse. A part that warns when missing, an optional part, a design choice, or a value a JS method can supply instead stays out.
 - **Methods** — the `NDS.<Name>.*` surface, one per line with a short tail description; instance methods are labeled as such.
 - **Events** — full event name plus its `detail {…}` shape.
-- **Hooks** — consumer-facing `data-*` attributes and action roles, hand-enumerated. Excludes init sentinels (`data-nds-*-initialized`) and base-owned attributes — a rider restating a base's hooks (e.g. `data-portal` in a dropmenu-rider's Hooks) is a violation.
+- **Hooks** — consumer-facing `data-*` attributes and action roles, hand-enumerated. Excludes init sentinels (`data-nds-*-initialized`) and base-owned attributes — a rider restating a base's hooks (e.g. `data-anchor` in a dropmenu-rider's Hooks) is a violation.
 - **Gotchas** — one-liners, only what THIS file owns.
 
 No version stamps inside banners. Scaled-down banners (~6–10 lines) are the norm for tiny surfaces. Tooling: `node scripts/check-banners.mjs --generate <file>` prints a skeleton (Methods/Events pre-filled, Hooks grep candidates); `--verify <file>` / `--all` checks presence, section order, and Methods/Events drift. The `SCOPE` array in that script (57 files: 53 components + core, loader, accessibility, theme) is the single source of truth for which files carry a banner.

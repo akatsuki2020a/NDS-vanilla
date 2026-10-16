@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 04:17 PM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="dropmenu-overview" class="nds-content-section nds-doc-overview">
@@ -249,9 +249,6 @@ Every option goes on the `nds-dropmenu` wrapper, except Center items, which goes
 | Anchor | Start (hint: The menu lines up with the trigger's start edge) | `[data-anchor="start"]` | `.nds-dropmenu` | The menu lines up with the trigger's start edge. For a wide trigger |
 | Anchor | End (hint: The menu lines up with the trigger's end edge) | `[data-anchor="end"]` | `.nds-dropmenu` | The menu lines up with the trigger's end edge |
 | Anchor | Cursor (hint: Opens under the pointer, like a context menu) | `[data-anchor-cursor]` | `.nds-dropmenu` | The menu opens under the pointer, like a context menu. A keyboard or script open centers it |
-| Portal | Auto (default) | — | — | The menu moves to `<body>` only when an ancestor would clip it |
-| Portal | Always (hint: The menu moves to the page body when it opens) | `[data-portal]` | `.nds-dropmenu` | The menu always moves to `<body>` when it opens |
-| Portal | Never (hint: The menu stays in its wrapper, even where it is clipped) | `[data-no-portal]` | `.nds-dropmenu` | The menu stays in the wrapper, even where an ancestor clips it. It wins over `data-portal`. Only for CSS or a script that needs the menu inside the wrapper |
 | Search | Search (not: settings) | `[data-search]` | `.nds-dropmenu` | A search box at the top of the menu. For a long list. It filters `nds-dropmenu-item` rows, so not a settings menu |
 | Required | Required | `[data-required]` | `.nds-dropmenu[data-select-name]` | The form does not submit until a value is picked |
 | Center items | Center items (hint: For short labels) | `.nds-center` | `.nds-dropmenu-menu` | Centers each item's label. For short values, such as numbers |
@@ -289,11 +286,6 @@ A settings menu holds switches or checkboxes, so the user changes several things
 
 The menu centers under its trigger by default. On a wide trigger, such as a full-width button, line the menu up with the start or the end edge instead. `data-anchor-cursor` opens the menu where the user clicked, like a context menu.
 
-### Portal
-{: .nds-block-title}
-
-A modal, a scrolling table or a drawer can cut off a menu that opens inside it. The dropmenu checks this each time it opens, with no attribute. When the menu would be cut off, the script moves it to `<body>` and keeps it beside the trigger, above the trigger's layer. Any other menu stays in its wrapper and scrolls with the page. `data-portal` moves the menu every time, and `data-no-portal` never moves it.
-
 ### Delayed Open
 {: .nds-block-title}
 
@@ -328,6 +320,13 @@ A lazy menu keeps its items in a `<template>`, so they are not in the page until
             <span class="nds-label">Menu Position</span>
           </span>
           <p class="nds-item-desc">The menu opens below the trigger, and above it when there is more room there. A menu that fits on neither side shrinks its scroll area, so a search box or a footer stays in view. It never runs past the side of the screen.</p>
+        </div>
+        <div class="nds-definition-item">
+          <span class="nds-item-title">
+            <i class="hgi hgi-stroke hgi-layers-01"></i>
+            <span class="nds-label">No Clipping</span>
+          </span>
+          <p class="nds-item-desc">The open menu shows in the browser's top layer, so a modal, a scrolling table or a drawer never cuts it off. It stays inside its wrapper in the page, so a dark area, a click listener on a parent and <code class="nds-inline-code lang-js">closest()</code> still reach it. Outside a modal, it slides under the sticky main navigation when the page scrolls.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -369,7 +368,7 @@ A lazy menu keeps its items in a `<template>`, so they are not in the page until
 - Put a destructive action last, after a divider, and give it `nds-destructive`.
 - Give an icon-only trigger a label that names what it acts on, such as "Actions for request 20481". The label is hidden on screen.
 - Add `data-no-auto-close` to an item that must keep the menu open, such as a Reset button.
-- Do not fix a clipped menu with `overflow` or `z-index`. The menu moves to `<body>` by itself.
+- Do not fix a clipped menu with `overflow` or `z-index`. The open menu is in the top layer, where nothing clips it.
 - Call `NDS.Dropmenu.destroy()` before you remove a dropmenu from the page, such as a table row you replace.
 
 </div>
@@ -405,11 +404,11 @@ A lazy menu keeps its items in a `<template>`, so they are not in the page until
 | `data-search` | `.nds-dropmenu` | Adds a search box. `data-search="20"` adds it only when the menu has 20 items or more |
 | `data-search-empty` | `.nds-dropmenu` | The text shown when nothing matches. The default is "No results" |
 | `data-anchor`, `data-anchor-cursor` | `.nds-dropmenu` | Where the menu lines up with the trigger. See Anchor in the builder |
-| `data-portal`, `data-no-portal` | `.nds-dropmenu` | Whether the menu moves to `<body>`. See Portal in the builder |
 | `data-delay` | `.nds-dropmenu` | The first open waits this many milliseconds and fires `nds:dropmenu:prepare`. The attribute is removed after it, so later opens are immediate |
 | `data-dropmenu-no-click` | `.nds-dropmenu` | The trigger does not open the menu. A script opens it |
 | `data-dropmenu-no-keys` | `.nds-dropmenu` | Turns off the arrow, Home, End and Tab keys, for a component with its own keyboard. Escape still closes the menu |
 | `data-state` | `.nds-dropmenu`, trigger, menu, `.nds-dropmenu-item` | The script writes `open` on the wrapper, the trigger and the menu, and `selected` on the picked item. An item with `active` gets focus first when the menu opens from the keyboard |
+| `popover` | `.nds-dropmenu-menu` | The script sets `manual` at init, so the open menu shows in the browser's top layer. It removes it on `destroy()` |
 | `data-position-vertical` | `.nds-dropmenu`, `.nds-dropmenu-menu` | The script writes `top` when the menu opens above the trigger, and removes it on close. Do not set it yourself |
 | `data-value` | `.nds-dropmenu-item` | The value the item picks. An item without it picks nothing |
 | `data-trigger-label` | `.nds-dropmenu-item` | A short label for the trigger when the item is picked, such as "+966" for "Saudi Arabia (+966)". The default is the item's `.nds-label` |
@@ -436,7 +435,7 @@ A lazy menu keeps its items in a `<template>`, so they are not in the page until
 ### CSS Custom Properties
 {: .nds-block-title}
 
-Set these on the `.nds-dropmenu` wrapper. They stay with the menu when it moves to `<body>`.
+Set these on the `.nds-dropmenu` wrapper. The menu inherits them.
 
 | Property | Default | Controls |
 |---|---|---|
@@ -455,8 +454,8 @@ Set these on the `.nds-dropmenu` wrapper. They stay with the menu when it moves 
 | `NDS.Dropmenu.init()` | Starts every `.nds-dropmenu` on the page that has not started yet. `reinit()` is the same |
 | `NDS.Dropmenu.create(wrapper)` | Starts one wrapper and returns its instance |
 | `NDS.Dropmenu.destroy(wrapper)` | Removes its listeners. Call it before you remove the wrapper from the page: otherwise its listener on the document keeps the removed wrapper in memory |
-| `NDS.Dropmenu.from(el)` | Returns the wrapper of any element in the dropmenu, also when the menu is in `<body>` |
-| `NDS.Dropmenu.menuOf(wrapper)` | Returns the menu of a wrapper, also when the menu is in `<body>` |
+| `NDS.Dropmenu.from(el)` | Returns the wrapper of any element in the dropmenu |
+| `NDS.Dropmenu.menuOf(wrapper)` | Returns the menu of a wrapper |
 | `wrapper.ndsDropmenu.open()`, `.close()`, `.toggle()` | Opens or closes the menu |
 | `wrapper.ndsDropmenu.destroy()` | The same as `NDS.Dropmenu.destroy(wrapper)` |
 {: .nds-table .nds-responsive}

@@ -556,12 +556,10 @@
             this.isPanelCreated = false;
         }
 
-        // The options live under <body> once a unit's menu portals, so they are
-        // read through the back-reference custom-select stamps.
         _optionsOf(unit) {
             const fc = this.unitEls[unit] && this.unitEls[unit].querySelector('.nds-form-control');
             if (!fc) return [];
-            return (fc._customSelectDropdown || fc).querySelectorAll('.nds-select-option');
+            return fc.querySelectorAll('.nds-select-option');
         }
 
         // Suppress the re-entrant commit path for the length of one write. Saves

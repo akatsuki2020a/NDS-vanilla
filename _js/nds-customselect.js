@@ -1,5 +1,5 @@
 /* NDS.CustomSelect — public surface
- * Rides: nds-dropmenu (open/close, keyboard nav, positioning, portal, outside-click)
+ * Rides: nds-dropmenu (open/close, keyboard nav, positioning, top layer, outside-click)
  * Requires:
  *   .nds-select-option needs [data-value] — a pick writes an empty value
  *   form .nds-form-control:has(> .nds-select-input) needs .nds-select-value — the form never gets the picked value
@@ -102,13 +102,6 @@
         // stamps on the trigger are valid on an <input>.
         selectInput.setAttribute('role', 'combobox');
         dropdown.classList.add('nds-dropmenu-menu', 'nds-select-menu');
-        // Back-reference so onOptionClick can find the owning form-control
-        // after NDS.Dropmenu portals the menu to <body> — a portaled option's
-        // closest('.nds-form-control') walk stops at <body> and returns null.
-        // Forward ref for the same reason in the other direction: setValue's
-        // option lookup while the menu is portaled open.
-        dropdown._customSelectFormControl = formControl;
-        formControl._customSelectDropdown = dropdown;
         dropdown.removeAttribute('hidden');
         var optionsContainer = dropdown.querySelector('.nds-select-options');
         if (optionsContainer) optionsContainer.classList.add('nds-dropmenu-scroll');
@@ -161,12 +154,8 @@
 
     // The full write sequence a user pick runs — shared by the delegated
     // click path and the public setValue/clear. `option` null = clear back to
-    // placeholder. Query options from the dropdown (forward ref / passed
-    // menu), not the form-control — while portaled, the options live under
-    // <body> and formControl.querySelectorAll would return nothing (so the
-    // selected marker would never update, and the next open would still show
-    // the initial selection highlighted).
-    function apply(formControl, option, menu) {
+    // placeholder.
+    function apply(formControl, option) {
         var selectInput = formControl.querySelector('.nds-select-input');
         if (!selectInput) return false;
 
@@ -174,8 +163,7 @@
         var value = option ? (option.dataset.value || '') : '';
         var text = option ? (optionLabel(option) || value) : '';
 
-        var scope = menu || formControl._customSelectDropdown || formControl;
-        scope.querySelectorAll('.nds-select-option').forEach(function (o) {
+        formControl.querySelectorAll('.nds-select-option').forEach(function (o) {
             if (option && o.dataset.value === value) NDS.State.add(o, 'selected');
             else NDS.State.remove(o, 'selected');
         });
@@ -208,14 +196,9 @@
         if (!t || !t.closest) return;
         var option = t.closest('.nds-select-option');
         if (!option) return;
-        // Walk to the enclosing menu first — the option is always its
-        // descendant, portaled or not — then read the back-reference
-        // stamped in build(). Fall back to closest() for the in-place path.
-        var menu = option.closest('.nds-select-dropdown, .nds-dropmenu-menu');
-        var formControl = (menu && menu._customSelectFormControl)
-                        || option.closest('.nds-form-control');
+        var formControl = option.closest('.nds-form-control');
         if (!formControl) return;
-        apply(formControl, option, menu);
+        apply(formControl, option);
     }
 
     function init() {
@@ -251,13 +234,11 @@
         // Programmatic pick: the same write sequence as a user click (display
         // label, hidden value, selected markers, input/change events,
         // nds:customselect:change). Returns false when no option carries the value —
-        // display and value are never desynced. Works before the dropmenu is
-        // built and while it is portaled open.
+        // display and value are never desynced. Works before the dropmenu is built.
         setValue: function (el, value) {
             var formControl = formControlOf(el);
             if (!formControl) return false;
-            var scope = formControl._customSelectDropdown || formControl;
-            var options = scope.querySelectorAll('.nds-select-option');
+            var options = formControl.querySelectorAll('.nds-select-option');
             for (var i = 0; i < options.length; i++) {
                 if (options[i].dataset.value === String(value)) {
                     return apply(formControl, options[i]);

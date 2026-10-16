@@ -11,7 +11,7 @@ lang: en
 direction: ltr
 since: "1.4.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 04:04 PM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="editor-overview" class="nds-content-section nds-doc-overview">
@@ -273,7 +273,6 @@ The image button inserts an image from a URL, with alt text, a width and a heigh
 | `data-editor-upload-max-file-size` | `.nds-editor` | The largest file in bytes. Default `2097152` (2 MB). With `embed`, it also limits a pasted screenshot |
 | `data-editor-upload-allowed-types` | `.nds-editor` | The file extensions the picker takes. Default `jpg,jpeg,png,gif,webp,svg`. List `jpg` and `jpeg` both to take either |
 | `data-editor-upload-allowed-mime-types` | `.nds-editor` | The MIME types the picker takes, such as `image/*`. A second check after the extension |
-| `data-dropmenu-portal` | `.nds-editor` | Moves the link, image and remove popovers to `<body>` when they open, so a parent with `overflow: hidden` does not cut them off |
 | `data-state~="readonly"` | `.nds-editor` | Set by the script at load when the textarea has `readonly`. Add or remove it with `NDS.State` after load. See Read-only and Disabled |
 | `data-state~="disabled"` | `.nds-editor` | Set by the script at load when the textarea has `disabled`. Add or remove it with `NDS.State` after load. See Read-only and Disabled |
 {: .nds-table .nds-responsive}

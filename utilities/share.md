@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="share-overview" class="nds-content-section nds-doc-overview">
@@ -269,9 +269,9 @@ Custom Link is two rows of one choice: write both attributes on `.nds-share`. Ic
         <div class="nds-definition-item">
           <span class="nds-item-title">
             <i class="hgi hgi-stroke hgi-menu-01"></i>
-            <span class="nds-label">Portal-Safe Menu</span>
+            <span class="nds-label">Named Menu</span>
           </span>
-          <p class="nds-item-desc">The script adds <code class="nds-inline-code lang-html">.nds-share-menu</code> to each share menu. The menu keeps its style when Dropmenu moves it to <code class="nds-inline-code lang-html">&lt;body&gt;</code>, and the buttons in it still share the wrapper's link.</p>
+          <p class="nds-item-desc">The script adds <code class="nds-inline-code lang-html">.nds-share-menu</code> to each share menu, a class to style that menu by.</p>
         </div>
       </div>
     </div>
@@ -366,7 +366,7 @@ The full API is in the banner of `_js/nds-share.js`.
 
 - [Hero](../ui-shell/hero): the sub hero's Share Page menu, which uses the Menu structure.
 - [Copy](../utilities/copy): the checkmark, label swap and announcement of Copy Link.
-- [Dropmenu](../components/dropmenu): opens and closes the Menu structure, and moves the menu to `<body>` with `data-portal`.
+- [Dropmenu](../components/dropmenu): opens and closes the Menu structure.
 
 </div>
   </div>

@@ -1,6 +1,5 @@
 /* NDS.Sort — public surface
- * Rides: nds-dropmenu (triggers authored inside a menu are still found while it is portaled
- *        to <body>; soft)
+ * Rides: nds-dropmenu (triggers may sit inside a menu; soft)
  * Methods:
  *   NDS.Sort.init()                     wire every list a [data-sort-target] button names
  *   NDS.Sort.refresh(root)              wire new lists, re-sort the wired ones inside root
@@ -220,16 +219,10 @@
 
         // Shared dispatch for the flexible `selector | NodeList | Array | () => NodeList`
         // shape that both `opts.items` and `opts.triggers` accept.
-        // `deep` reaches into portaled menus — triggers only. Triggers authored
-        // inside a data-portal dropmenu sit at <body> while it is open, so a plain
-        // root walk finds none. Items must NOT reach there: sorting reparents them
-        // into the container, and _originalOrder was snapshotted with menus closed,
-        // so a swept menu node could never be put back.
-        _resolveLike(src, deep) {
+        _resolveLike(src) {
             if (typeof src === 'function') return Array.from(src() || []);
             if (typeof src === 'string') {
-                const found = deep ? NDS.queryAll(this.root, src)
-                                   : Array.from(this.root.querySelectorAll(src));
+                const found = Array.from(this.root.querySelectorAll(src));
                 if (!found.length) this._warnOutOfScope(src);
                 return found;
             }
@@ -262,7 +255,7 @@
         // ── Trigger resolution / wiring ──────────────────────────────────
 
         _resolveTriggers() {
-            return this._resolveLike(this.opts.triggers, true);
+            return this._resolveLike(this.opts.triggers);
         }
 
         _bindTriggers() {
@@ -419,12 +412,10 @@
         // When the triggers live inside a .nds-dropmenu, mirror the active trigger's
         // icon onto the dropmenu's own trigger button so the closed menu reflects the
         // current sort. Icon classes are copied verbatim, so authors can use any icon
-        // set (NDS inline, HGI font, custom) without JS changes. NDS.closest, not
-        // el.closest: a data-portal menu sits at <body> while open, so a plain walk
-        // finds no wrapper and the icon would silently stop tracking the sort.
+        // set (NDS inline, HGI font, custom) without JS changes.
         _syncDropmenuTriggerIcon(triggers) {
             if (!triggers.length) return;
-            const dropmenu = NDS.closest(triggers[0], '.nds-dropmenu');
+            const dropmenu = triggers[0].closest('.nds-dropmenu');
             if (!dropmenu) return;
             const triggerIcon = dropmenu.querySelector('.nds-dropmenu-trigger > i, .nds-dropmenu-trigger .nds-icon, .nds-dropmenu-trigger .hgi');
             if (!triggerIcon) return;
@@ -495,8 +486,7 @@
 
     // ── Markup wiring ────────────────────────────────────────────────────
 
-    // One list per distinct target id; a document query, so triggers in a portaled
-    // menu are found too. ponytail: triggers are bound at create — one added later
+    // One list per distinct target id. ponytail: triggers are bound at create — one added later
     // needs NDS.Init.destroy + refresh; bind by delegation if that becomes common.
     function markupLists() {
         const lists = new Set();

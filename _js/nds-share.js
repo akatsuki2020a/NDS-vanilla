@@ -18,8 +18,7 @@
  *     .nds-share-whatsapp, .nds-share-copy. A class wins over data-share-href.
  *   - X, LinkedIn, WhatsApp and data-share-href open a 600×400 popup window; a mailto: or
  *     tel: pattern opens in the same tab, so no empty window stays behind.
- *   - init() stamps .nds-share-menu on each share dropmenu, so styling survives the menu
- *     portaling to <body>.
+ *   - init() stamps .nds-share-menu on each share dropmenu's menu.
  */
 (function () {
     'use strict';
@@ -58,9 +57,7 @@
         if (!NDS.Copy) return;
         const ok = await NDS.Copy.writeText(url);
         if (!ok || !button) return;
-        // NDS.closest is portal-aware — reaches .nds-share even after the
-        // dropmenu menu portals to <body>.
-        const wrapper = NDS.closest(button, '.nds-share');
+        const wrapper = button.closest('.nds-share');
         NDS.Copy.flash(button, {
             onRestore: () => {
                 if (wrapper && wrapper.ndsDropmenu) wrapper.ndsDropmenu.close();
@@ -69,7 +66,7 @@
     }
 
     function handleClick(button) {
-        const wrapper = NDS.closest(button, '.nds-share');
+        const wrapper = button.closest('.nds-share');
         if (!wrapper) return;
         const url = getShareUrl(wrapper);
         const title = wrapper.getAttribute('data-share-title') || document.title;
@@ -95,16 +92,15 @@
     function init() {
         if (_abortController) _abortController.abort();
         _abortController = new AbortController();
-        // Portal-safe identifier on each share menu (rule: a component-owned
-        // menu names itself so styling/hooks survive the menu portaling to
-        // <body>). Share items are plain buttons — no nested dropmenu to
+        // Identifier on each share menu (rule: a component-owned menu names
+        // itself). Share items are plain buttons — no nested dropmenu to
         // mis-stamp — so a scoped sweep is unambiguous.
         document.querySelectorAll('.nds-share .nds-dropmenu-menu')
             .forEach(m => m.classList.add('nds-share-menu'));
         document.addEventListener('click', (e) => {
             const button = e.target.closest(TARGET_SELECTOR);
             if (!button) return;
-            const wrapper = NDS.closest(button, '.nds-share');
+            const wrapper = button.closest('.nds-share');
             if (!wrapper) return;
             handleClick(button);
         }, { signal: _abortController.signal });

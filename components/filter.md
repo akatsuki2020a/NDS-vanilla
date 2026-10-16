@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:31 AM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="filter-overview" class="nds-content-section nds-doc-overview">
@@ -658,7 +658,6 @@ Sort is not a filter value and is never sent with the form. Decide by what the s
 |---|---|---|
 | `data-filter-target` | every surface, and the submission `<form>` | The `id` of the item container. Every element with the same value is part of one filter |
 | `data-search` | `.nds-filter` | A search box at the top of the menu narrows the options. A number shows it only from that many options. See [Dropmenu](../components/dropmenu) |
-| `data-portal` | `.nds-filter` | Moves the open menu to `<body>`. A menu in a modal, a drawer or a scrolling box moves there without it. See [Dropmenu](../components/dropmenu) |
 | `data-filter` | an element in a surface | A group. The value is the group's name and its URL key |
 | `data-filter="search"` | a text field in a surface, or its wrapper | The search field. In the menu, Apply runs it. A `.nds-search-input` outside the menu needs no attribute |
 | `data-filter-type` | a group | `checkbox`, `radio`, `switch` or `slider`: the script builds the options. Without it, the script uses the inputs you write in the group, or the options of `populateFilter()` |

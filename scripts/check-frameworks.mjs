@@ -4,8 +4,8 @@
 //   MOUNT     mount(view) after mount, destroy(view) before unmount; React StrictMode runs
 //             mount → destroy → mount, so a view must end with ONE live instance.
 //   EVENTS    an NDS event reaches addEventListener through a ref, once per action.
-//   TEARDOWN  unmounting a view with an open portaled menu or an open modal leaves nothing
-//             on the page: no menu in <body>, no backdrop, no scroll lock. The view mounts again.
+//   TEARDOWN  unmounting a view with an open menu or an open modal leaves nothing on the
+//             page: no menu in the top layer, no backdrop, no scroll lock. The view mounts again.
 //   CLASSES   a changing class binding on an element NDS writes to wipes NDS's class; the
 //             doc's advice (put the changing class on a wrapper) keeps it.
 //   SWAPS     htmx and Turbo swaps with destroy() before and mount() after: the new view works
@@ -38,7 +38,7 @@ const ok = (name, pass, detail = '') => {
 };
 
 // One view per framework, from the dropmenu and modal canons; `p` prefixes the ids.
-const VIEW = (p) => `<div class="nds-dropmenu" id="${p}-dm" data-portal data-select-name="${p}-country">
+const VIEW = (p) => `<div class="nds-dropmenu" id="${p}-dm" data-select-name="${p}-country">
 <button type="button" class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger"><span class="nds-label">Choose</span></button>
 <div class="nds-dropmenu-menu" hidden><div class="nds-dropmenu-scroll">
 <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-value="SA"><span class="nds-label">Saudi Arabia</span></button>
@@ -72,7 +72,7 @@ async function open(libs) {
         window.__picks = [];
         window.__destroy = (el) => (window.__noDestroy ? 0 : NDS.Init.destroy(el));
         window.__wait = (ms = 350) => new Promise((r) => setTimeout(r, ms));
-        window.__strays = () => document.body.querySelectorAll(':scope > .nds-dropmenu-menu').length;
+        window.__strays = () => document.querySelectorAll('.nds-dropmenu-menu:popover-open').length;
         window.__released = () => !NDS.Modal.isOpen() && !document.body.style.top && !NDS.Backdrop.isActive();
         window.__noDestroy = noDestroy;
     }, [VIEW('${p}'), SELECT, !!process.env.NO_DESTROY]);
@@ -83,7 +83,7 @@ async function open(libs) {
 async function lifecycle(page, name, p, unmount, remount) {
     const menuOpen = () => page.evaluate((p) => {
         const menu = NDS.Dropmenu.menuOf(document.getElementById(p + '-dm'));
-        return !!menu && !menu.hidden && menu.parentElement === document.body;
+        return !!menu && !menu.hidden && menu.matches(':popover-open');
     }, p);
     const trigger = page.locator(`#${p}-dm .nds-dropmenu-trigger`);
 
@@ -91,7 +91,7 @@ async function lifecycle(page, name, p, unmount, remount) {
     await trigger.scrollIntoViewIfNeeded();
     await trigger.click();
     await page.evaluate(() => window.__wait());
-    ok(`${name}: one click opens the portaled menu (one live instance)`, await menuOpen());
+    ok(`${name}: one click opens the menu in the top layer (one live instance)`, await menuOpen());
 
     await page.evaluate(() => { window.__picks.length = 0; });
     await page.locator('.nds-dropmenu-item[data-value="AE"]').click();
@@ -810,8 +810,8 @@ for (const v of REACT) {
     await page.close();
 }
 
-// React holds the moved node itself, so it is the framework these break. An open portaled
-// menu, and a plain node NDS.portal moved: React inserts a sibling before each, then drops it.
+// React holds the moved node itself, so it is the framework these break. A node NDS.relocate
+// moved and an open menu in the top layer: React inserts a sibling before each, then drops it.
 for (const v of REACT) {
     const R = 'React ' + major(v);
     const { page, errors } = await open(loadReact(v));
@@ -822,7 +822,7 @@ for (const v of REACT) {
             React.useEffect(() => { const el = ref.current; window.NDS?.Init.mount(el); return () => window.__destroy(el); }, []);
             return h('div', { ref },
                 h('div', { id: 'mv-box' }, before ? h('i', { id: 'mv-before' }) : null, keep ? h('span', { id: 'mv-node' }, 'node') : null),
-                h('div', { className: 'nds-dropmenu', id: 'mv-dm', 'data-portal': '' },
+                h('div', { className: 'nds-dropmenu', id: 'mv-dm' },
                     h('button', { type: 'button', className: 'nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger' },
                         h('span', { className: 'nds-label' }, 'Choose')),
                     before ? h('i', { id: 'mv-dm-before' }) : null,
@@ -838,14 +838,14 @@ for (const v of REACT) {
         ReactDOM.createRoot(document.querySelector('.nds-section-body').appendChild(document.createElement('div'))).render(h(App));
     });
     await page.evaluate(() => window.__wait(600));
-    await page.evaluate(() => NDS.portal(document.getElementById('mv-node'), { force: true }));
+    await page.evaluate(() => { const n = document.getElementById('mv-node'); NDS.relocate(n); document.body.appendChild(n); });
     await page.locator('#mv-dm .nds-dropmenu-trigger').click();
     await page.evaluate(() => window.__wait());
     const moved = await page.evaluate(() => ({
         node: document.getElementById('mv-node')?.parentElement === document.body,
-        menu: NDS.Dropmenu.menuOf(document.getElementById('mv-dm'))?.parentElement === document.body
+        menu: !!NDS.Dropmenu.menuOf(document.getElementById('mv-dm'))?.matches(':popover-open')
     }));
-    ok(`${R} moved nodes: setup, both nodes sit in <body>`, moved.node && moved.menu, JSON.stringify(moved));
+    ok(`${R} moved nodes: setup, the node sits in <body>, the menu in the top layer`, moved.node && moved.menu, JSON.stringify(moved));
 
     let before = errors.length;
     await page.evaluate(() => { window.__mvSet('before', true); return window.__wait(); });
@@ -862,7 +862,7 @@ for (const v of REACT) {
     await page.evaluate(() => { window.__mvSet('keep', false); return window.__wait(); });
     const gone = await page.evaluate(() => ({
         node: !document.getElementById('mv-node'),
-        menu: !document.querySelector('body > .nds-dropmenu-menu'),
+        menu: !document.querySelector('.nds-dropmenu-menu:popover-open'),
         markers: [...(document.getElementById('mv-box')?.childNodes || [])].filter((n) => n.nodeType === 8).length
     }));
     ok(`${R} moved nodes: React removing them takes them off the page`, gone.node && gone.menu && gone.markers === 0

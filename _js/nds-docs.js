@@ -562,10 +562,10 @@
     });
 
     // A link in a preview stays on the doc page: the component still gets the click, the browser
-    // does not follow it. NDS.closest also reaches a menu that moved to <body>.
+    // does not follow it.
     document.addEventListener('click', function (e) {
         var a = e.target.closest && e.target.closest('a[href]');
-        if (a && NDS.closest(a, '[data-demo-slot]')) e.preventDefault();
+        if (a && a.closest('[data-demo-slot]')) e.preventDefault();
     });
 
     // A form harness that passes answers as a real page does: an inline success alert under the
@@ -587,14 +587,14 @@
     // A preview field with no URL gets one on its first pick or drop (capture runs before Upload reads it).
     function demoUploadUrl(e) {
         var up = e.target.closest && e.target.closest('.nds-file-upload');
-        if (!up || up.dataset.uploadUrl || !NDS.closest(up, '[data-demo-slot]')) return;
+        if (!up || up.dataset.uploadUrl || !up.closest('[data-demo-slot]')) return;
         up.dataset.uploadUrl = '/demo/upload';
         up.dataset.autoUpload = 'true';
     }
     document.addEventListener('change', demoUploadUrl, true);
     document.addEventListener('drop', demoUploadUrl, true);
     document.addEventListener('nds:upload:beforeUpload', function (e) {
-        if (!NDS.closest(e.target, '[data-demo-slot]')) return;
+        if (!e.target.closest('[data-demo-slot]')) return;
         e.preventDefault();
         var api = NDS.Upload.getInstance(e.target.closest('.nds-file-upload'));
         var file = e.detail.fileData;

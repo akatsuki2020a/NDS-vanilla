@@ -17,7 +17,6 @@
  *   data-editor-upload-*  the image popover's file picker, read at init: url (a server
  *                         endpoint, or "embed" for data: URLs), auto-upload, max-file-size,
  *                         allowed-types, allowed-mime-types — setImageUpload() in markup
- *   data-dropmenu-portal  the popovers portal to <body>
  * Instance:
  *   setImageUpload(config)   File Upload options for the image popover; chainable
  * Gotchas:
@@ -1062,11 +1061,9 @@
                 NDS.State.add(this.root, 'focus');
                 this._valueAtFocus = this.source.value;
             }, { signal });
-            // On document, not the root: a link/image menu portaled to <body> leaves from there.
-            // NDS.closest follows that menu back to its editor.
             document.addEventListener('focusout', (e) => {
-                if (!this._focusWithin || NDS.closest(e.target, '.nds-editor') !== this.root) return;
-                if (NDS.closest(e.relatedTarget, '.nds-editor') === this.root) return; // moving within the editor
+                if (!this._focusWithin || e.target.closest?.('.nds-editor') !== this.root) return;
+                if (e.relatedTarget?.closest('.nds-editor') === this.root) return; // moving within the editor
                 this._focusWithin = false;
                 NDS.State.remove(this.root, 'focus');
                 NDS.State.remove(this.root, 'typing');
@@ -1278,17 +1275,11 @@
             // stub, so create() lands once it arrives. Soft dependencies: the
             // toolbar's dropmenus and tooltips stay inert if NDS.Dropmenu /
             // NDS.Tooltip aren't bundled.
-            // Portal opt-in propagates from the editor root: data-dropmenu-portal
-            // stamps data-portal on each menu before create() reads shouldPortal.
-            const portalMenus = this.root.hasAttribute('data-dropmenu-portal');
             // Soft dependency — NDS.Dropmenu ships in the main bundle, so this
             // normally runs; without it the link/image menus never open and every
             // downstream menuOf read below is unreachable, which is why those are
             // optional-chained too. Toolbar buttons that don't open a menu still work.
-            toolbar.querySelectorAll('.nds-dropmenu').forEach(el => {
-                if (portalMenus) el.setAttribute('data-portal', '');
-                NDS.Dropmenu?.create?.(el);
-            });
+            toolbar.querySelectorAll('.nds-dropmenu').forEach(el => NDS.Dropmenu?.create?.(el));
             // Soft dependency — toolbar buttons keep their title/aria labels and
             // stay fully usable if NDS.Tooltip isn't bundled.
             toolbar.querySelectorAll('.nds-tooltip').forEach(el => NDS.Tooltip?.create?.(el));
@@ -2302,9 +2293,8 @@
             }
         }
 
-        // Popover fields live in the menu, which portal detaches to <body>
-        // while open — reach it via menuOf (nested or portaled), not the
-        // wrapper. Optional-chained: NDS.Dropmenu is a soft dependency.
+        // Popover fields live in the menu. Optional-chained: NDS.Dropmenu is a
+        // soft dependency.
         _menuOf(dropmenu) {
             return (dropmenu && NDS.Dropmenu?.menuOf?.(dropmenu)) || dropmenu;
         }

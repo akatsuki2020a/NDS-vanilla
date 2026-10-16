@@ -4,7 +4,7 @@ Owner decisions (2026-10-16): do it before v2.0.0 · speed is not the reason · 
 
 **Verdict (2026-10-16).** Steps 1–3 before v2: Dropmenu and Tooltip; Modal on `<dialog>`; every Panel on `<dialog>`. Steps 4 and on are judged again, each on its own benefit and cost, once 1–3 have shipped.
 
-**Start here.** Step 1. The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`.
+**Start here.** Step 2 (step 1 is built, see Step 1 status). The demo is the "Popover and dialog: old vs new" section at the end of `playground.md`: five old-vs-new rows (clipping card, dark area, a listener on the box, Modal vs `<dialog>`, a Panel and a Modal over a modal Panel) with the working CSS for the popover reset, `@starting-style` open animations, the `.nds-card` reset on `<dialog>`, the phone bottom sheet and the Panel on `<dialog>`.
 
 ## Why
 
@@ -70,6 +70,18 @@ Today a menu stays in place unless an ancestor clips it (a modal, a table's scro
 **Migration rows.** `data-portal` and `data-no-portal` (in `dropmenu.md` and about eight other pages), Editor's `data-dropmenu-portal`, and the click event's `ndsDropmenuItem` and `ndsDropmenuRedispatch`. The portal-safe menu styling rule in `AGENTS.md` shrinks to the `.nds-{component}-menu` naming.
 
 **Size.** About three to four sessions: Dropmenu and its CSS, Tooltip, the users' lookup cleanup, Date Picker's nested menus, docs and audit and `AGENTS.md`, then every user in both themes in Chrome and WebKit, with `doc-check.mjs` on each page.
+
+## Step 1 status (2026-10-16)
+
+Built, not committed: Dropmenu and Tooltip open with `popover="manual"` through `NDS.topLayer(el, on)`; core lost `NDS.portal`, `unportal`, `needsPortal`, `stackingZ`, `closest`, `queryAll` and `querySelector`; every user went to plain DOM calls; Custom Select lost its two back-references; Migration rows, docs, examples, `AGENTS.md` and the JS audit rules (JSA-19 retired) follow.
+
+- **Sticky nav:** outside a modal (`.nds-modal, dialog:modal`) the menu keeps `respectNav` in its flip math and, while the page scrolls, `_clipUnderNav` clips it with `clip-path` at the nav's bottom edge, so it reads as sliding under the nav.
+- **Nested menus:** `close()` closes the open menus inside it, or the date picker's month menu stayed in the top layer.
+- **Tooltip:** it now inherits from where it is authored, not from `<body>`: the balloon resets `font-weight` and `text-align`.
+- **Until step 2:** a Modal opened from a menu item sits under the closing menu for its fade (about 250 ms): the old Modal is not in the top layer.
+- **Checked, Chrome and WebKit:** `check-dropmenu-placement.mjs` 16/16 (new cases: top layer, nav clip, nested close, dark area, bubbling), a sweep of 18 pages' menus and tooltips, `check-init-destroy.mjs` 36/36, `check-frameworks.mjs` all passed, `check-css.py` and `check-data-state-tails.py` clean, `check-docs.py` on the 9 edited pages, the audit flags a leftover `data-portal`.
+- **Not run yet:** the menu-open timing against the old code, and `doc-check.mjs` on the touched pages (owner's go-ahead).
+- **Owner:** `.claude/skills/nds-iq-eval/scenarios/S15-menu-clipping-in-modal.md` expects `data-portal` as the fix; it needs a rewrite before the next IQ eval run.
 
 ## Modal and Panel: one core
 

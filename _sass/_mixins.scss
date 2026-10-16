@@ -167,6 +167,16 @@ $dark-area: ':is([data-theme~="dark"]:not(:root), [data-theme~="dark"]:not(:root
   border: 0;
 }
 
+// A popup NDS.topLayer shows as a [popover]: undo the browser's popover box (centred,
+// inset 0, its own overflow and colours) so the component's placement and look apply.
+@mixin top-layer {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  overflow: visible;
+  color: inherit;
+}
+
 
 // ==============================================
 // AUTOFILL RESET

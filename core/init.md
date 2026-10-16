@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.7.0"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 01:18 AM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="init-overview" class="nds-content-section nds-doc-overview">
@@ -113,7 +113,7 @@ The loader calls `NDS.Init.initialize()` at load. The components the first scree
 
 `destroy(el)` releases every component instance inside `el`, in page order, and returns how many it released. Each component removes its listeners and its init marker, so `refresh()` or `mount()` can start the same markup again later. `refresh()` releases nothing: without `destroy()`, each removed view leaves its listeners and observers running.
 
-Some parts reach outside `el`. A FAB docks on `<body>`, a dropmenu with `data-portal` moves its open menu there, and an open modal holds a backdrop and a scroll lock. `destroy()` puts each one back or releases it, so nothing stays on the page after the view.
+Some parts reach outside `el`. A FAB docks on `<body>`, an open menu sits in the browser's top layer, and an open modal holds a backdrop and a scroll lock. `destroy()` puts each one back or releases it, so nothing stays on the page after the view.
 
 Only components inside `el` are reached. A filter toolbar can sit beside the grid it drives, so pass the root of the view you remove, not the list inside it.
 

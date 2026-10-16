@@ -141,7 +141,7 @@
         getRows(source, scope) {
             const sel = source.dataset.exportRows;
             const rows = (sel
-                ? NDS.queryAll(source, sel)
+                ? Array.from(source.querySelectorAll(sel))
                 : Array.from(source.children))
                 .filter(row => !isRowFiltered(row));
             if (scope === 'selected') return rows.filter(isSelected);
@@ -156,7 +156,7 @@
             const cols = [];
             const seen = new Set();
             rows.forEach(row => {
-                const fields = NDS.queryAll(row, '[data-export-field]');
+                const fields = row.querySelectorAll('[data-export-field]');
                 fields.forEach(el => {
                     if (el.hasAttribute('data-export-skip')) return;
                     const key = el.dataset.exportField;
@@ -169,7 +169,7 @@
         },
 
         getCell(row, col) {
-            const el = NDS.querySelector(row, '[data-export-field="' + col.key + '"]');
+            const el = row.querySelector('[data-export-field="' + col.key + '"]');
             if (!el || el.hasAttribute('data-export-skip')) return '';
             const override = el.getAttribute('data-export-value');
             if (override !== null) return override;

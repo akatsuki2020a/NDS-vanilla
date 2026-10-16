@@ -440,7 +440,7 @@ hideFeedback: true
                                     {% endif %}
                                 </td>
                                 <td class="nds-actions-column">
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-sm nds-icon-only nds-dropmenu-trigger" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-edit-02"></i>
                                         </button>

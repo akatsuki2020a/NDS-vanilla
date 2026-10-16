@@ -1,5 +1,5 @@
 /* NDS.Filter — public surface
- * Rides: nds-dropmenu (portal, positioning, search, auto-close knobs) · nds-forms (validation)
+ * Rides: nds-dropmenu (top layer, positioning, search, auto-close knobs) · nds-forms (validation)
  *      · nds-pagination · nds-sort · nds-slider · nds-date-picker · nds-accordion
  *        (soft — driven only when present on the filter surface)
  * Methods:
@@ -156,9 +156,8 @@
             // surface set, so the constructor skips re-scanning the document for them.
             this._targetRoots = this.resolveTargetRoots(surfaces);
 
-            // Portal-safe identifier on the filter's own dropmenu menu (rule: a
-            // component-owned menu names itself so styling/hooks survive the menu
-            // portaling to <body>). The .nds-filter anchor IS the dropmenu wrapper
+            // Identifier on the filter's own dropmenu menu (rule: a component-owned
+            // menu names itself). The .nds-filter anchor IS the dropmenu wrapper
             // when filters render in a dropdown; the own-descendant check skips a
             // nested sub-component's menu (e.g. a multiselect used as a control).
             this._targetRoots.forEach(root => {
@@ -308,16 +307,13 @@
          *
          * Searches the small linked subtrees (this._targetRoots) rather than
          * sweeping the whole document, so cost scales with the filter's own UI
-         * regions, not the page. NDS.queryAll rather than root.querySelectorAll:
-         * a filter dropmenu may carry data-portal, which moves its menu to
-         * <body> while open — every control inside it would otherwise drop out
-         * of every post-init re-resolve (refresh, sort triggers, count slot).
+         * regions, not the page.
          */
         queryAll(selector) {
             const set = new Set();
             for (const root of this._targetRoots) {
                 if (root.matches(selector)) set.add(root);
-                NDS.queryAll(root, selector).forEach(el => set.add(el));
+                root.querySelectorAll(selector).forEach(el => set.add(el));
             }
 
             let matches = Array.from(set);
@@ -1122,10 +1118,8 @@
             if (!chipsContainer) return;
 
             // Find auto-fill container (optional): external first, then internal.
-            // Portal-aware: an auto-fill nested inside the menu leaves the
-            // wrapper's subtree while a data-portal dropmenu is open.
             const autoFillContainer = this.autoFillElement
-                || NDS.querySelector(this.filterContainer, '.nds-auto-fill');
+                || this.filterContainer.querySelector('.nds-auto-fill');
 
             chipsContainer.innerHTML = '';
 
@@ -1682,7 +1676,7 @@
                 element._ndsFilterObserver = true;
                 this._offDOMAdds.push(NDS.onDOMAdd('input[type="checkbox"], input[type="radio"], .nds-switch-input', (nodes) => {
                     // Ignore nodes that already have listeners bound — they are
-                    // being moved (portal open/close), not genuinely inserted.
+                    // being moved, not genuinely inserted.
                     const fresh = nodes.filter(n => element.contains(n) && !n._ndsFilterBound);
                     if (fresh.length > 0) {
                         this.setupManualFilter(element, filterName);
@@ -2190,9 +2184,7 @@
         // Sync applied-count tags on filter-accordion headers with the current
         // criteria. Hidden at 0, shows the number of selected values otherwise.
         _updateAccordionCounts() {
-            // Portal-aware: the count tags sit inside the generated fieldsets,
-            // which travel with the menu when the dropmenu carries data-portal.
-            const tags = NDS.queryAll(this.filterContainer, '[data-filter-count-for]');
+            const tags = this.filterContainer.querySelectorAll('[data-filter-count-for]');
             tags.forEach(tag => {
                 const name = tag.getAttribute('data-filter-count-for');
                 const count = (this.criteria.filters[name] || []).length;
@@ -2901,11 +2893,7 @@
         }
 
         populateFilter(filterName, values, inputType = null) {
-            // Find the container element for this filter. Portal-aware: a
-            // data-portal dropmenu moves the whole menu — and every placeholder
-            // in it — to <body> while open, which is exactly when a cascading
-            // filter calls this from an nds:filter:change handler.
-            const container = NDS.querySelector(this.filterContainer, `[data-filter="${filterName}"]`);
+            const container = this.filterContainer.querySelector(`[data-filter="${filterName}"]`);
             if (!container) return;
 
             // Determine input type from data attribute or parameter

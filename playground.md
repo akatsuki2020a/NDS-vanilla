@@ -130,7 +130,7 @@ direction: rtl
       <div class="pg-row">
         <div class="pg-box"><b>Old: NDS Dropmenu</b>
           <div class="pg-dark" data-theme="dark">
-            <div class="nds-dropmenu" id="pg-old-2" data-portal>
+            <div class="nds-dropmenu" id="pg-old-2">
               <button type="button" class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger"><span class="nds-label">Actions</span></button>
               <div class="nds-dropmenu-menu" hidden>
                 <div class="nds-dropmenu-scroll">
@@ -161,7 +161,7 @@ direction: rtl
       <h3>3. A listener on the box around the menu</h3>
       <div class="pg-row">
         <div class="pg-box" data-pg-count><b>Old: NDS Dropmenu</b>
-          <div class="nds-dropmenu" data-portal>
+          <div class="nds-dropmenu">
             <button type="button" class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger"><span class="nds-label">Pick</span></button>
             <div class="nds-dropmenu-menu" hidden>
               <div class="nds-dropmenu-scroll">

@@ -1,5 +1,5 @@
 /* NDS.Multiselect — public surface
- * Rides: nds-dropmenu (portal, positioning, search, auto-close knobs; soft — works without it)
+ * Rides: nds-dropmenu (top layer, positioning, search, auto-close knobs; soft — works without it)
  *      · nds-forms (required + min/max validation, disabled state)
  * Methods:
  *   NDS.Multiselect.init() / .reinit()   scan + initialize .nds-multiselect fields
@@ -83,8 +83,7 @@
                 console.warn('NDS Multiselect: missing required elements', root);
                 return;
             }
-            // Portal-safe identifier so custom styling / consumer hooks survive
-            // the menu portaling to <body> (rule: every owned menu names itself).
+            // Rule: every owned menu names itself.
             this.menu.classList.add('nds-multiselect-menu');
 
             this.name = root.getAttribute('data-multiselect-name') || '';
@@ -285,8 +284,7 @@
             // ── Checkbox change (delegated) ─────────────────────────
             // Each toggle commits immediately; chips + a11y summary refresh
             // live. One listener on the menu element survives populate()
-            // rebuilding the rows and stays attached while the dropmenu
-            // portals the menu to <body>.
+            // rebuilding the rows.
             this.menu.addEventListener('change', (e) => {
                 if (!e.target.matches('input[type="checkbox"]')) return;
                 // Staged in apply mode — the native checkbox state change is

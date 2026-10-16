@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="sort-overview" class="nds-content-section nds-doc-overview">
@@ -255,7 +255,7 @@ The triggers sit in a [Toolbar](../components/toolbar) above the list. The list 
 ### Markup Wiring
 {: .nds-block-title}
 
-The script wires every list that a `data-sort-target` names, after the page first paints. A trigger can sit anywhere on the page, in a portaled dropmenu too. Every child of the list is an item, so the list holds only the items. For a custom value reader, fixed types, URL sync or a change callback, call `create()` instead (see the API). Leave `data-sort-target` off those triggers: a list keeps its first instance, so a second setup is ignored.
+The script wires every list that a `data-sort-target` names, after the page first paints. A trigger can sit anywhere on the page, in a dropmenu too. Every child of the list is an item, so the list holds only the items. For a custom value reader, fixed types, URL sync or a change callback, call `create()` instead (see the API). Leave `data-sort-target` off those triggers: a list keeps its first instance, so a second setup is ignored.
 
 ### Direct Mode
 {: .nds-block-title}
@@ -426,7 +426,7 @@ The `create()` options:
 | Option | Default | Effect |
 |---|---|---|
 | `items` | required | The elements to move. A selector, a NodeList, an array or a function that returns them. A function is called on every sort. |
-| `triggers` | required | The elements that start a sort. Same forms as `items`. Triggers inside a portaled dropmenu are found. |
+| `triggers` | required | The elements that start a sort. Same forms as `items`. Triggers inside a dropmenu menu are found. |
 | `reorderIn` | the parent of the first item | The element the items are appended into. |
 | `mode` | `'direct'` | `'direct'` or `'cycle'`. |
 | `a11y` | `'pressed'` | `'pressed'`, `'sort'` or `'none'`. The Data Attributes table lists what each one writes. |

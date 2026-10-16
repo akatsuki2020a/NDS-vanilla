@@ -276,9 +276,8 @@
 
         // Committed to rebuilding — tear the old ellipsis menu down, as both other
         // rebuild paths do (_rebuildAutoNav, setTotalPages). Runs AFTER the capture
-        // above, which needs the live menu items: destroy() unportals the menu, so
-        // an open one is back in place before replaceChildren discards its shell
-        // instead of being stranded at <body> with its listeners orphaned.
+        // above, which needs the live menu items: destroy() takes an open menu out of
+        // the top layer before replaceChildren discards its shell.
         _destroyEllipsisMenu(nav);
 
         const activeNum = (model.find(e => e.active) || {}).num;
@@ -450,14 +449,11 @@
         return inst;
     }
 
-    // Collect the dropmenu items inside a pagination's ellipsis menus. Queried
-    // portal-aware: the ellipsis menu sets no data-portal, but a pagination
-    // inside a modal or a scrolling wrapper portals on open anyway, which parks
-    // the menu at <body> and out of a plain descendant walk. On a lazy menu this
-    // is the rendered window only — callers needing the true page span use
-    // _lazyRange / the always-visible 1,2,3,N strip buttons.
+    // Collect the dropmenu items inside a pagination's ellipsis menus. On a lazy
+    // menu this is the rendered window only — callers needing the true page span
+    // use _lazyRange / the always-visible 1,2,3,N strip buttons.
     function getPaginationDropmenuItems(pagination) {
-        return NDS.queryAll(pagination, '.nds-dropmenu-menu .nds-dropmenu-item');
+        return Array.from(pagination.querySelectorAll('.nds-dropmenu-menu .nds-dropmenu-item'));
     }
 
     // All clickable page elements (in-list buttons + dropmenu items).
@@ -509,11 +505,9 @@
         NDS.State.set(target, 'active');
         NDS.aria.current(target, 'page');
         if (target.classList.contains('nds-dropmenu-item')) {
-            // NDS.closest, not closest: a portaled menu's row sits under <body>
-            // with no .nds-dropmenu ancestor — core hops back via the owner backref.
             // Without it the trigger never carries the active page, and once the
             // menu closes and drops its rows nothing holds it at all.
-            const ellipsisTrigger = NDS.closest(target, '.nds-dropmenu')?.querySelector('.nds-dropmenu-trigger');
+            const ellipsisTrigger = target.closest('.nds-dropmenu')?.querySelector('.nds-dropmenu-trigger');
             if (ellipsisTrigger) {
                 NDS.State.set(ellipsisTrigger, 'active');
                 const ellipsisLabel = ellipsisTrigger.querySelector('.nds-label');
@@ -895,12 +889,7 @@
     // The lazily-windowed page range stamped on a generated ellipsis menu's
     // scroll container, or null for an eager (author-markup) menu.
     function _lazyRange(host) {
-        // Resolve the menu, then scope into it. A wrapper→menu selector matches
-        // nothing once the menu portals to <body>, and NDS.queryAll can't carry a
-        // spanning selector either — the menu is the search root, not its own
-        // ancestor. Returning null while open let reconcileCollapse's
-        // builder-owned guard fail open and rebuild a live lazy nav.
-        const menu = NDS.querySelector(host, '.nds-pagination-menu');
+        const menu = host.querySelector('.nds-pagination-menu');
         const scroll = menu && menu.querySelector('.nds-dropmenu-scroll');
         return (scroll && scroll._ndsRange) || null;
     }
@@ -1300,8 +1289,7 @@
     // Per-nav click handler for an auto-pagination's <ul>. getItems() returns
     // the current page-item set live (each call); totalPages is derived from it
     // per click so a post-init filter change is reflected in the next/prev
-    // bounds without re-wiring. Portaled dropmenu items reach this via the
-    // wrapper's re-dispatched click (see nds-dropmenu.js).
+    // bounds without re-wiring.
     //
     // Idempotent on the pagination element: Filter (registered before Pagination)
     // calls refresh on interaction; refresh re-wires the nav. The flag stops a
@@ -1311,18 +1299,13 @@
         if (newPagination._ndsAutoClickWired) return;
         newPagination._ndsAutoClickWired = true;
         newPagination.addEventListener('click', (e) => {
-            // The re-dispatch fires on the WRAPPER, so e.target is the wrapper, not
-            // the row — dropmenu hands the row over as ndsDropmenuItem. Resolving
-            // from e.target alone matched nothing and the click died silently.
-            const src = e.ndsDropmenuItem || e.target;
-            // Strip control, or an own-ellipsis row. The ownership test is on the
-            // row's wrapper, not a selector ancestor, so it survives the portal —
-            // same guard as _wireManualNavClicks. The two are mutually exclusive:
+            // Strip control, or an own-ellipsis row — same guard as
+            // _wireManualNavClicks. The two are mutually exclusive:
             // _PAGE_ITEM_SEL excludes .nds-pagination-ellipsis.
-            const strip = src.closest(_PAGE_CTRL_SEL);
-            const row = src.closest('.nds-dropmenu-item');
+            const strip = e.target.closest(_PAGE_CTRL_SEL);
+            const row = e.target.closest('.nds-dropmenu-item');
             const pageElement = strip ||
-                (row && newPagination.contains(NDS.closest(row, '.nds-dropmenu')) ? row : null);
+                (row && newPagination.contains(row.closest('.nds-dropmenu')) ? row : null);
 
             if (pageElement) {
                 if (pageElement.tagName.toLowerCase() === 'a') e.preventDefault();
@@ -1545,16 +1528,10 @@
             // the list element).
             const pagination = _listOf(paginationNav);
 
-            // Portaled ellipsis: the re-dispatch fires on the WRAPPER, so e.target
-            // is the wrapper — dropmenu hands the row over as ndsDropmenuItem.
-            const src = e.ndsDropmenuItem || e.target;
-            const pageElement = src.closest(_PAGE_CTRL_SEL);
-            // Own-ellipsis scoping moves from the selector onto the row's owning
-            // wrapper: a '.nds-pagination-list …' ancestor can't match a portaled
-            // menu, but NDS.closest hops back to the wrapper via the owner backref.
-            const row = src.closest('.nds-dropmenu-item');
-            const dropdownItem = row && pagination.contains(NDS.closest(row, '.nds-dropmenu')) ? row : null;
-            // e.target, not src: prev/next never live in the menu.
+            const pageElement = e.target.closest(_PAGE_CTRL_SEL);
+            // Own ellipsis only: the row's wrapper must sit in this list.
+            const row = e.target.closest('.nds-dropmenu-item');
+            const dropdownItem = row && pagination.contains(row.closest('.nds-dropmenu')) ? row : null;
             const prevElement = e.target.closest('.nds-pagination-prev button, .nds-pagination-prev a');
             const nextElement = e.target.closest('.nds-pagination-next button, .nds-pagination-next a');
 

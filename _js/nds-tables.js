@@ -620,26 +620,11 @@
         return next && next.matches('tr.nds-sub') ? next : null;
     };
 
-    // A toggle may live in a dropmenu item rather than on a chevron of its own —
-    // and an open dropmenu with data-portal has moved its menu to <body>, so the
-    // button has no <tr> ancestor at click time. Dropmenu leaves _ownerDropmenu
-    // on the menu for exactly this walk; in-place menus resolve on the first try.
-    const rowFor = (btn) =>
-        btn.closest('tr')
-        || btn.closest('.nds-dropmenu-menu')?._ownerDropmenu?.closest('tr')
-        || null;
+    // A toggle may live in a dropmenu item rather than on a chevron of its own.
+    const rowFor = (btn) => btn.closest('tr');
 
-    // Toggles belonging to a row. A dropmenu item is a valid toggle, and an open
-    // dropmenu with data-portal has its menu parked on <body> — outside the row —
-    // so reach it back through the wrapper's _ownerMenu backref.
-    function rowToggles(tr) {
-        const found = Array.from(tr.querySelectorAll(SUB_TOGGLE));
-        tr.querySelectorAll('.nds-dropmenu').forEach(dm => {
-            const menu = dm._ownerMenu;
-            if (menu && !tr.contains(menu)) found.push(...menu.querySelectorAll(SUB_TOGGLE));
-        });
-        return found;
-    }
+    // Toggles belonging to a row, a dropmenu item among them.
+    const rowToggles = (tr) => Array.from(tr.querySelectorAll(SUB_TOGGLE));
 
     // Every toggle driving this sub — the row's own control plus any collapse
     // button authored inside the content. Those are the only two places one can
@@ -679,8 +664,8 @@
     // this covers a generated sub and an authored one that left it off.
     function linkSub(tr, sub) {
         if (!sub.id) sub.id = NDS.uniqueId('nds-sub-');
-        // Direct backref so re-pairing after a sort holds even while a dropmenu
-        // toggle is portaled; the aria-controls walk below covers authored subs
+        // Direct backref so re-pairing after a sort holds; the aria-controls walk
+        // below covers authored subs
         // JS has never touched.
         sub._ndsRow = tr;
 

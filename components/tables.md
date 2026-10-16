@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:16 PM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="table-overview" class="nds-content-section nds-doc-overview">
@@ -295,7 +295,7 @@ Pick another component when:
           <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="tbl-rec-sub-118" aria-expanded="false" aria-label="Show details of REQ-2026-118">
             <i class="hgi hgi-stroke hgi-list-view" aria-hidden="true"></i>
           </button>
-          <div class="nds-dropmenu" data-portal>
+          <div class="nds-dropmenu">
             <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Actions for REQ-2026-118">
               <i class="hgi hgi-stroke hgi-more-vertical" aria-hidden="true"></i>
             </button>
@@ -588,7 +588,7 @@ Records holds every part. To leave a part out, delete its markup and everything 
 | Column menu | the `.nds-dropmenu` with `data-columns-target` | `data-columns-lock` on the header cell |
 | Export | the `.nds-dropmenu` with the `data-export` buttons | `data-export-name` on the table, and `data-export-skip` on the header cell |
 | Sub-rows | the `data-sub-toggle` buttons and every `tr.nds-sub` | — |
-| Row menu | the `.nds-dropmenu` with `data-portal` in the actions cell | — |
+| Row menu | the `.nds-dropmenu` in the actions cell | — |
 | Actions column | the `.nds-actions-column` header cell and the cell of every row | Delete it when neither sub-rows nor the row menu stay |
 {: .nds-table .nds-responsive}
 
@@ -674,7 +674,6 @@ Keep Selection only when the page has a bulk action that acts on the selected ro
 - The sub-row background is a sunken surface. Put its content on a surface of its own, never straight on the sub-row: most often a compact table (`nds-table nds-compact`), or a card (`nds-card nds-full`).
 - Put a short detail in a sub-row, not a whole record. Link to a page for the full record.
 - Write a short sub-row detail in the markup: it needs no code. Load it on demand when it is large or the users rarely open it.
-- Give a dropmenu in a cell `data-portal`. The scroll box clips a menu that opens inside it.
 - Page a table of more than about 20 rows.
 
 </div>

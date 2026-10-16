@@ -26,8 +26,8 @@
  *     or give the root data-tooltip-title / data-tooltip-message and let the component
  *     build the missing parts. Markup you wrote always wins.
  *   - Only ONE tooltip is open at a time; opening one closes the other.
- *   - While open the balloon is portaled to <body>, so a closest() walk from inside it
- *     does not reach the tooltip root. It is put back on close.
+ *   - While open the balloon is a [popover] in the top layer: nothing clips it, and it
+ *     stays inside the tooltip root in the DOM.
  *   - The instance lives on the root as el.ndsTooltip.
  *   - A title-sourced balloon does not exist until the first open — query
  *     .nds-tooltip-balloon after nds:tooltip:opened, not at init.
@@ -202,6 +202,7 @@
         adoptBalloon(balloon) {
             this.balloon = balloon;
             balloon.setAttribute('role', 'tooltip');
+            balloon.setAttribute('popover', 'manual');
             balloon.id = this._balloonId;
             if (!this._hoverMode) return;
             const { signal } = this.abortController;
@@ -254,7 +255,7 @@
 
             if (this._hoverMode) {
                 // Mouse: hover owns the balloon. The grace timer lets the pointer
-                // travel from trigger into the (portaled, adjacent) balloon.
+                // travel from trigger into the adjacent balloon.
                 // One timer serves both directions — a pending delayed open and a
                 // pending grace close are mutually exclusive.
                 const hoverOpen = (e) => {
@@ -326,23 +327,15 @@
             if (_openTooltip && _openTooltip !== this) _openTooltip.close();
             _openTooltip = this;
 
-            // Portal first so subsequent measurement happens in <body>'s
-            // containing block, free of any container-type/transform ancestor.
-            NDS.portal(this.balloon);
-            // Lift to the trigger's layer (nav, panel, modal); under it, keep the CSS 998.
-            const z = NDS.stackingZ(this.trigger);
-            this.balloon.style.zIndex = z > 998 ? String(z) : '';
-
             if (!this._rootIsControl) addState(this.root, 'open');
             this.balloon.hidden = false;
+            // Top layer before measuring: nothing around the trigger clips or traps it there.
+            NDS.topLayer(this.balloon, true);
             this.applyPosition();
 
-            // Close on click outside — portal-aware: while open the balloon
-            // lives at <body> level, so events from inside it don't bubble
-            // through `this.root`. Treat clicks inside the balloon as inside.
+            // The balloon is inside the root, so one containment check covers both.
             this._onDocClick = (e) => {
                 if (this.root.contains(e.target)) return;
-                if (this.balloon.contains(e.target)) return;
                 this.close();
             };
             document.addEventListener('click', this._onDocClick);
@@ -371,10 +364,7 @@
             }
             if (this._offScroll) { this._offScroll(); this._offScroll = null; }
 
-            // Restore the balloon to its original location so author markup
-            // queries (e.g. `tooltip.querySelector('.nds-tooltip-balloon')`)
-            // still resolve while closed.
-            NDS.unportal(this.balloon);
+            NDS.topLayer(this.balloon, false);
 
             this.emitEvent('nds:tooltip:closed');
         }
@@ -440,8 +430,8 @@
 
         // Drain open-lifecycle subscriptions before tearing the instance
         // down. close() releases this._onDocClick (document click listener)
-        // and this._offScroll (NDS.onOutsideScroll) and unportals the
-        // balloon. Without the close() drain, destroy-while-open would
+        // and this._offScroll (NDS.onOutsideScroll) and takes the balloon
+        // out of the top layer. Without the close() drain, destroy-while-open would
         // strand the document listener and the pooled scroll subscriber for
         // the page lifetime.
         destroy() {

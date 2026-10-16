@@ -181,6 +181,10 @@
 - { kind: event, name: nds:table:selection, status: renamed, use: nds:selection:change, since: "2.0.0", fix: "Listen for nds:selection:change on the list." }
 - { kind: event, name: nds:table:sort, status: renamed, use: nds:sort:change, since: "2.0.0", fix: "Listen for nds:sort:change; detail.key is the column index and detail.order the order." }
 - { kind: attribute, name: data-sort-dir, status: renamed, use: data-sort-order, since: "2.0.0", fix: "Use data-sort-order." }
+- { kind: attribute, name: data-portal, scope: "&.nds-dropmenu", status: removed, since: "2.0.0", fix: "Remove it: an open menu sits in the browser's top layer, so nothing clips it and it stays inside its wrapper." }
+- { kind: attribute, name: data-no-portal, scope: "&.nds-dropmenu", status: removed, since: "2.0.0", fix: "Remove it: an open menu never leaves its wrapper now, so CSS and DOM walks scoped under the wrapper reach it." }
+- { kind: attribute, name: data-dropmenu-portal, scope: "&.nds-editor", status: removed, since: "2.0.0", fix: "Remove it: the editor's link and image menus sit in the top layer on their own." }
+- { kind: event, name: ndsDropmenuItem, status: removed, since: "2.0.0", fix: "Read e.target.closest('.nds-dropmenu-item'): a menu item's click bubbles through its wrapper as any click does. ndsDropmenuRedispatch is gone too." }
 - { kind: param, name: dir, scope: "&.nds-filter", status: renamed, use: order, since: "2.0.0", fix: "A filter's sort writes ?sort=price&order=desc. Read order on the server; a link with dir=desc opens ascending." }
 - { kind: property, name: --tooltip-background-inverse, scope: .nds-tooltip, status: renamed, use: --tooltip-background-default, since: "1.12.0", fix: "Set --tooltip-background-default under :root[data-theme~=\"dark\"] instead." }
 - { kind: property, name: --tooltip-text-heading-inverse, scope: .nds-tooltip, status: renamed, use: --tooltip-text-heading-default, since: "1.12.0", fix: "Set --tooltip-text-heading-default under :root[data-theme~=\"dark\"] instead." }

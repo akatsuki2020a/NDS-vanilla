@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 03:13 PM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="multiselect-overview" class="nds-content-section nds-doc-overview">
@@ -384,7 +384,6 @@ A button with `data-multiselect-action="reset"` in the menu unchecks every optio
 | `data-state~="disabled"`, `data-state~="readonly"` | `.nds-multiselect` | Set it yourself. See Disabled and Read-only |
 | `data-multiselect-dropmenu` | the `.nds-dropmenu` element | Marks the dropmenu that holds the options. Without it, the script uses `.nds-form-action.nds-prefix.nds-dropmenu` |
 | `data-anchor` | the `.nds-dropmenu` element | Where the menu lines up. The script sets `start` when the element has no `data-anchor`. Write `center` or `end` to change it |
-| `data-portal` | the `.nds-dropmenu` element | The menu moves to `<body>` on every open. See [Dropmenu](../components/dropmenu) for this and the other menu attributes |
 | `data-search` | the `.nds-dropmenu` element | Adds the search box. See Search |
 | `data-multiselect-chips` | `.nds-multiselect-chips` | Marks the element that holds the chips. The script fills it. Without it, the script uses `.nds-multiselect-chips` |
 | `data-no-auto-close` | each `<fieldset>`, and the Reset button | A click on it leaves the menu open |

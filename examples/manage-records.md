@@ -254,7 +254,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-118" aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -340,7 +340,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-controls="detail-REQ-2026-117" aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -430,7 +430,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -480,7 +480,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -530,7 +530,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -580,7 +580,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -630,7 +630,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -680,7 +680,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -730,7 +730,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -780,7 +780,7 @@ hideFeedback: true
                                     <button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-expanded="false" aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">
                                         <i class="hgi hgi-stroke hgi-list-view"></i>
                                     </button>
-                                    <div class="nds-dropmenu" data-portal>
+                                    <div class="nds-dropmenu">
                                         <button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">
                                             <i class="hgi hgi-stroke hgi-more-vertical"></i>
                                         </button>
@@ -837,7 +837,7 @@ hideFeedback: true
                             <span class="nds-label">Requester</span>
                         </label>
                     </div>
-                    <div class="nds-form-control" data-portal>
+                    <div class="nds-form-control">
                         <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
                         <input type="text" id="record-requester" class="nds-input" autocomplete="on" placeholder="Type a name..." required>
                         <div class="nds-form-action">
@@ -854,9 +854,7 @@ hideFeedback: true
                             <span class="nds-label">Service</span>
                         </label>
                     </div>
-                    <!-- data-portal: inside a modal the menu must escape the dialog's
-                         stacking context, or it clips at the card edge -->
-                    <div class="nds-form-control" data-portal>
+                    <div class="nds-form-control">
                         <input type="text" id="record-service" class="nds-input nds-select-input" placeholder="Choose a service..." readonly>
                         <input type="hidden" name="service" id="record-service-value" class="nds-select-value">
                         <div class="nds-select-dropdown" hidden>
@@ -887,7 +885,7 @@ hideFeedback: true
                             <span class="nds-label">Submitted</span>
                         </label>
                     </div>
-                    <div class="nds-form-control" data-portal>
+                    <div class="nds-form-control">
                         <div class="nds-form-action">
                             <button type="button" class="nds-btn nds-subtle nds-md date-picker-toggle nds-icon-only" aria-label="Open calendar" data-i18n-aria-label="date-picker.open_calendar">
                                 <i class="nds-icon nds-hgi-calendar-03" aria-hidden="true"></i>
@@ -914,7 +912,7 @@ hideFeedback: true
                             <span class="nds-label">Status</span>
                         </label>
                     </div>
-                    <div class="nds-form-control" data-portal>
+                    <div class="nds-form-control">
                         <input type="text" id="record-status" class="nds-input nds-select-input" placeholder="Pending" readonly>
                         <input type="hidden" name="status" id="record-status-value" class="nds-select-value">
                         <div class="nds-select-dropdown" hidden>
@@ -1066,7 +1064,7 @@ hideFeedback: true
             '<button class="nds-btn nds-subtle nds-md nds-icon-only" type="button" data-sub-toggle aria-label="Toggle details" data-i18n-aria-label="tables.toggle_details">' +
               '<i class="hgi hgi-stroke hgi-list-view"></i>' +
             '</button>' +
-            '<div class="nds-dropmenu" data-portal>' +
+            '<div class="nds-dropmenu">' +
               '<button class="nds-btn nds-subtle nds-md nds-icon-only nds-dropmenu-trigger" type="button" aria-label="Row actions">' +
                 '<i class="hgi hgi-stroke hgi-more-vertical"></i>' +
               '</button>' +
@@ -1207,14 +1205,10 @@ hideFeedback: true
       askDelete(selectedRows.slice());
     });
 
-    // The row menu carries data-portal, so it moves to <body> when it opens and
-    // closest('tr') finds nothing. NDS.Dropmenu.from() resolves its wrapper —
-    // which is still inside the row.
     document.addEventListener('click', function (event) {
       var action = event.target.closest('[data-record-action]');
       if (!action) return;
-      var owner = NDS.Dropmenu.from(action) || action;
-      var row = owner.closest('tr');
+      var row = action.closest('tr');
       if (!row) return;
       if (action.dataset.recordAction === 'edit') openEditor(row);
       else askDelete([row]);

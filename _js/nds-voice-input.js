@@ -323,7 +323,7 @@
         document.addEventListener('focusout', function(e) { lastBlurred = e.target; });
         // If a button is removed mid-listening, stop its session so the mic
         // doesn't stay open until the 30s timeout. Pooled observer, fires only
-        // on real removals (portal reparents are filtered out by the bus).
+        // on real removals (reparents are filtered out by the bus).
         NDS.onDOMRemove('.nds-voice-input', function(buttons) {
             buttons.forEach(function(btn) {
                 var s = sessions.get(btn);

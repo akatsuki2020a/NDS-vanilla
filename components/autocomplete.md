@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 01:03 PM"
+last_edit: "16/10/2026 - 05:43 AM"
 ---
 
 <section id="autocomplete-overview" class="nds-content-section nds-doc-overview">
@@ -220,7 +220,6 @@ When the autocomplete is in a `.nds-search-box`, a pick also clicks the box's `.
 | `data-empty-icon` | `.nds-form-container` with `data-strict` | The icon classes when nothing matches. The default is `nds-icon nds-hgi-search-01` |
 | `data-strict` | `.nds-form-container` | The form accepts only a picked result. See Strict Mode above |
 | `data-state~="loading"` | `.nds-form-container` | The script sets it when a request starts, and removes it when the latest request ends. The forms script shows a spinner in `.nds-form-action` |
-| `data-portal` | `.nds-form-control` | The menu moves to `<body>` on every open. Without it, the menu moves only when a scroll area would cut it off |
 | `autocomplete="on"` | the `<input>` | Marks the input. The script sets it to `off` when the field starts, so the browser shows no list of its own, and `destroy()` sets it back |
 | `data-state~="active"` | a result in the menu | The script sets it on the result that the arrow keys reach, and removes it when they move on |
 {: .nds-table .nds-responsive}

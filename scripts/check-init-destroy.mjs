@@ -11,7 +11,7 @@
 //
 // Drives a real page — components/filter.html — and destroys a CLONE of its own demo
 // markup, so the harness cannot drift from canon. Then manage-records for the relocated
-// nodes (FAB, portaled menu) and an open modal, then a breadth sweep over every doc and
+// node (FAB), an open menu in the top layer and an open modal, then a breadth sweep over every doc and
 // example page with a coverage line for the registry components no page exercised.
 //
 //   node scripts/check-init-destroy.mjs [baseUrl]
@@ -169,29 +169,27 @@ report.push(...await records.evaluate(async () => {
     ok('setup: a FAB is docked away from its origin', !!fab && !!fabOrigin && fab.parentElement !== fabOrigin,
         fab?.parentElement?.className || 'no docked FAB on this page');
 
-    // The FAB case again, in a second shape: `data-portal` moves the open MENU to <body>,
-    // so it leaves the view that authored it and no scan of that view can find it. Scoped
-    // to one cell — destroy(document.body) below would hold both halves and prove nothing.
-    // A menu left behind is a click-eating overlay in <body> that nothing owns.
-    const dm = document.querySelector('td .nds-dropmenu[data-portal]');
+    // An open menu sits in the top layer: destroying its view must take it out, or it is a
+    // click-eating overlay nothing owns. Scoped to one cell, so the page-wide destroy below
+    // still has work to do.
+    const dm = document.querySelector('td .nds-dropmenu');
     const dmHost = dm?.closest('td');
     if (dm) {
         dm.querySelector('.nds-dropmenu-trigger').click();
         await new Promise((r) => setTimeout(r, 350));
         const menu = NDS.Dropmenu.menuOf(dm);
-        ok('setup: an open menu portaled out of its container',
-            !!menu && menu.parentElement === document.body && !dmHost.contains(menu),
-            menu?.parentElement?.tagName || 'no menu resolved');
+        ok('setup: an open menu in the top layer, inside its cell',
+            !!menu && menu.matches(':popover-open') && dmHost.contains(menu),
+            menu ? 'popover-open ' + menu.matches(':popover-open') : 'no menu resolved');
 
         NDS.Init.destroy(dmHost);
         await new Promise((r) => setTimeout(r, 350));
-        ok('the portaled menu went back inside its container', dmHost.contains(menu),
-            menu.parentElement?.className || menu.parentElement?.tagName);
+        ok('the menu left the top layer', !menu.matches(':popover-open'));
         ok('the menu is hidden again, as it shipped',
-            menu.hasAttribute('hidden') && !menu.hasAttribute('data-portal'),
+            menu.hasAttribute('hidden') && !menu.hasAttribute('popover'),
             menu.outerHTML.slice(0, 60));
-        ok('no menu is stranded in <body>', !document.body.querySelector(':scope > .nds-dropmenu-menu'),
-            `${document.body.querySelectorAll(':scope > .nds-dropmenu-menu').length} left`);
+        ok('no menu is left in the top layer', !document.querySelector('.nds-dropmenu-menu:popover-open'),
+            `${document.querySelectorAll('.nds-dropmenu-menu:popover-open').length} left`);
 
         // Two-way, and it re-arms the instance for the page-wide destroy below.
         NDS.Init.refresh(dmHost);
@@ -199,7 +197,7 @@ report.push(...await records.evaluate(async () => {
         ok('the dropmenu re-initializes after destroy', !!dm.ndsDropmenu,
             dm.hasAttribute('data-nds-dropmenu-initialized') ? 'stamped' : 'not stamped');
     } else {
-        ok('setup: an open menu portaled out of its container', false, 'no [data-portal] dropmenu in a table cell');
+        ok('setup: an open menu in the top layer, inside its cell', false, 'no dropmenu in a table cell');
     }
 
     const count = NDS.Init.destroy(document.body);

@@ -20,12 +20,10 @@
  *     NDS.debounce(fn, ms) (.cancel() drops a pending call) · NDS.rafThrottle(fn) · NDS.onIdle(fn, timeout)
  *     NDS.afterPaint(fn) · NDS.onTransitionEnd(el, fn, opts) → cancel()
  *     NDS.transitionSpeed()            the token-sourced duration in ms
- *   DOM, portal-aware
- *     NDS.portal(el) / .unportal(el) / .needsPortal(el)
+ *   DOM
  *     NDS.relocate(el) / .restore(el) / .homeOf(el)   move a node the app owns; its old spot answers for it
- *     NDS.closest(el, sel) · NDS.queryAll(root, sel) · NDS.querySelector(root, sel)
+ *     NDS.topLayer(el, on)             show or hide a [popover] in the top layer, in place
  *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
- *     NDS.stackingZ(el)                highest z-index on el's ancestors: the layer a portaled popup matches
  *     NDS.stickyHeaderBottom() · NDS.scrollBelowNav(el, opts) · NDS.scrollLock.lock/unlock
  *     NDS.gridLastRow.update(container) · NDS.trapFocus(getEl) · NDS.focusableSel
  *   data + text
@@ -63,8 +61,6 @@
  *   - There is no init(). Core is a utility layer, loaded first and consumed by everyone.
  *   - Every observer helper is POOLED — one observer per page, shared. Each call returns
  *     an off() function; not calling it leaks a subscriber for the page's lifetime.
- *   - Use NDS.closest / queryAll / querySelector instead of the DOM ones whenever a
- *     dropmenu menu may be portaled to <body>: the plain walks stop at <body>.
  *   - NDS.request is a fetch wrapper and nothing more — no XHR, no upload progress, no
  *     retry, no cache layer and no interceptors.
  *   - data-state is a LIST. Never write it with setAttribute; go through NDS.State so
@@ -853,12 +849,12 @@
                     for (let j = 0; j < m.removedNodes.length; j++)
                         if (m.removedNodes[j].nodeType === 1) removed.push(m.removedNodes[j]);
                 }
-                // A reparent (e.g. NDS.portal → document.body.appendChild) emits
+                // A reparent (e.g. NDS.relocate, then appendChild elsewhere) emits
                 // both a remove and an add for the same node in one batch. Treat
                 // that as a move, not a lifecycle change — drop those nodes from
                 // both lists so subscribers (and any descendants matching their
                 // selectors) keep their instances, listeners, and internal state
-                // across portals and similar reparents.
+                // across relocations and similar reparents.
                 let realAdded = added, realRemoved = removed;
                 if (added.length && removed.length) {
                     const addedSet = new Set(added), removedSet = new Set(removed);
@@ -1547,116 +1543,8 @@
         return () => document.removeEventListener('scroll', handler, { capture: true });
     };
 
-    // ── Portal-Aware DOM Lookup ────────────────────────────────────────
-    // When a `.nds-dropmenu-menu` is portaled to <body>, its descendants
-    // are no longer reachable through the original wrapper's DOM tree.
-    // These helpers bridge that gap using the `_ownerDropmenu` backref
-    // dropmenu sets on every menu.
-    //
-    //   NDS.closest(el, sel)       — like el.closest, but if `el` lives
-    //                                inside a portaled menu it falls back
-    //                                to the menu's owner wrapper and
-    //                                continues from there.
-    //   NDS.queryAll(root, sel)    — like root.querySelectorAll, but also
-    //                                searches inside any portaled menu
-    //                                whose owner wrapper is a descendant
-    //                                of `root`.
-    //   NDS.querySelector(root, sel) — first match using queryAll order.
-
-    NDS.closest = (el, selector) => {
-        if (!el) return null;
-        const direct = el.closest(selector);
-        if (direct) return direct;
-        const menu = el.closest('.nds-dropmenu-menu');
-        if (menu && menu._ownerDropmenu) {
-            return menu._ownerDropmenu.closest(selector);
-        }
-        return null;
-    };
-
-    // Active NDS.portal count — incremented in portal, decremented in unportal.
-    // queryAll/querySelector use this to skip the body > .nds-dropmenu-menu sweep
-    // when nothing is portaled (the common case on most pages).
-    let _portaledCount = 0;
-
-    // Portaled `.nds-dropmenu-menu` elements whose owner wrapper descends from
-    // `root`. Shared discovery scaffold for queryAll / querySelector — both gate
-    // the call behind their own `_portaledCount === 0` fast path, so this runs
-    // only when something is portaled.
-    const _portaledMenusIn = (root) => {
-        const out = [];
-        if (!document.body) return out;
-        const portaled = document.body.querySelectorAll(':scope > .nds-dropmenu-menu');
-        for (let i = 0; i < portaled.length; i++) {
-            const owner = portaled[i]._ownerDropmenu;
-            if (owner && root.contains(owner)) out.push(portaled[i]);
-        }
-        return out;
-    };
-
-    NDS.queryAll = (root, selector) => {
-        if (!root) return [];
-        if (_portaledCount === 0) return Array.from(root.querySelectorAll(selector));
-        const set = new Set();
-        root.querySelectorAll(selector).forEach(el => set.add(el));
-        _portaledMenusIn(root).forEach(menu => {
-            if (menu.matches(selector)) set.add(menu);
-            menu.querySelectorAll(selector).forEach(el => set.add(el));
-        });
-        return Array.from(set);
-    };
-
-    NDS.querySelector = (root, selector) => {
-        if (!root) return null;
-        const direct = root.querySelector(selector);
-        if (direct) return direct;
-        if (_portaledCount === 0) return null;
-        const menus = _portaledMenusIn(root);
-        for (let i = 0; i < menus.length; i++) {
-            const menu = menus[i];
-            if (menu.matches(selector)) return menu;
-            const found = menu.querySelector(selector);
-            if (found) return found;
-        }
-        return null;
-    };
-
-    // ── Portal / Containing-Block Detection ────────────────────────────
-    // A `position: fixed` element resolves `top`/`left` against the nearest
-    // ancestor that establishes a containing block — and is trapped inside
-    // the nearest stacking-context ancestor. The CSS spec lists many
-    // properties that establish either; the most common offenders we hit
-    // in this codebase are `container-type: inline-size` (on
-    // `.nds-section-wrapper`) and `isolation: isolate` (on
-    // `.nds-hero-section.nds-sub`). Returns true if any ancestor would
-    // trap the element.
-    NDS.needsPortal = (el) => {
-        let n = el.parentElement;
-        while (n && n !== document.documentElement) {
-            const cs = getComputedStyle(n);
-            const wc = cs.willChange || '';
-            const cn = cs.contain || '';
-            const ct = cs.containerType || '';
-            if (cs.transform !== 'none' ||
-                cs.perspective !== 'none' ||
-                cs.filter !== 'none' ||
-                (cs.backdropFilter && cs.backdropFilter !== 'none') ||
-                (cs.webkitBackdropFilter && cs.webkitBackdropFilter !== 'none') ||
-                cs.clipPath !== 'none' ||
-                cs.contentVisibility === 'auto' ||
-                cs.isolation === 'isolate' ||
-                /\b(transform|filter|perspective)\b/.test(wc) ||
-                /\b(paint|layout|strict|content)\b/.test(cn) ||
-                /\b(inline-size|size)\b/.test(ct)) {
-                return true;
-            }
-            n = n.parentElement;
-        }
-        return false;
-    };
-
     // ── Relocate / Restore ───────────────────────────────────────────
-    // A node NDS moves out of markup the app owns (a portaled menu, a docked FAB, a pinned
+    // A node NDS moves out of markup the app owns (a docked FAB, a pinned
     // nav item) leaves a comment marker in its place. While it is away, the old parent's
     // insertBefore / appendChild / removeChild take the marker for the node, so a framework
     // that still holds it (React inserts before it, or removes it) works on its old spot
@@ -1675,7 +1563,7 @@
         parent.removeChild = function (node) {
             if (_standIn(this, node) === node) return _node.removeChild.call(this, node);
             // Back home first, through its owner's own exit, then out as the app asked.
-            if (node._ndsPortal) NDS.unportal(node); else NDS.restore(node);
+            NDS.restore(node);
             return _node.removeChild.call(this, node);
         };
     }
@@ -1713,64 +1601,15 @@
     // The element a relocated node was moved out of, or null.
     NDS.homeOf = (el) => _home.get(el)?.parent || null;
 
-    // Move `el` to <body> when an ancestor would trap it; no-op otherwise.
-    // NDS.relocate keeps its old spot so unportal can restore it. `opts.snapshotVars` lets callers preserve custom
-    // properties that consumers set on the wrapper (e.g.
-    // `--dropmenu-min-width: 250px` on `.nds-filter`) — those values are
-    // read from the inherited cascade BEFORE the move and re-applied as
-    // inline styles after, so the visual remains identical.
-    // `opts.force` bypasses the needsPortal heuristic — use when the caller
-    // wants to escape a stacking-context ancestor (z-indexed card, modal,
-    // sticky bar), not just a containing-block trap.
-    // Usage: NDS.portal(menu, { snapshotVars: ['--menu-padding'], force: true });
-    //        NDS.unportal(menu); // later
-    NDS.portal = (el, opts = {}) => {
-        if (el._ndsPortal) return; // already portaled
-        if (!opts.force && !NDS.needsPortal(el)) return;
-        _portaledCount++;
-        const snap = {};
-        const vars = opts.snapshotVars;
-        if (vars && vars.length) {
-            const cs = getComputedStyle(el);
-            for (let i = 0; i < vars.length; i++) {
-                const val = cs.getPropertyValue(vars[i]).trim();
-                if (val) snap[vars[i]] = val;
-            }
-        }
-        const setProps = [];
-        el._ndsPortal = { setProps };
-        NDS.relocate(el);
-        document.body.appendChild(el);
-        for (const k in snap) {
-            el.style.setProperty(k, snap[k]);
-            setProps.push(k);
-        }
-        // Force a style/layout flush — Safari sometimes skips style recalc
-        // when an element is reparented while display:none/hidden.
-        void el.offsetHeight;
-    };
-
-    NDS.unportal = (el) => {
-        const state = el._ndsPortal;
-        if (!state) return;
-        _portaledCount--;
-        delete el._ndsPortal;   // first: restore() below may run inside the guard's removeChild
-        NDS.restore(el);
-        for (let i = 0; i < state.setProps.length; i++) {
-            el.style.removeProperty(state.setProps[i]);
-        }
-    };
-
-    // Highest z-index on el's ancestor chain: the layer a popup portaled to <body>
-    // must match, or a trigger in the nav, a panel or a modal paints over it.
-    // Usage: const z = NDS.stackingZ(trigger);
-    NDS.stackingZ = (el) => {
-        let z = 0;
-        for (let n = el; n && n !== document.body; n = n.parentElement) {
-            const v = parseInt(getComputedStyle(n).zIndex, 10);
-            if (v > z) z = v;
-        }
-        return z;
+    // Put a [popover] element in the browser's top layer (on) or take it out (off). It
+    // escapes every clip and stacking context without leaving its place in the DOM, so
+    // closest(), bubbling and inherited styles still work. No popover support (Safari < 17,
+    // Firefox < 125): it stays where it is, as a fixed element that an ancestor may clip.
+    // Usage: NDS.topLayer(menu, true); … NDS.topLayer(menu, false);
+    NDS.topLayer = (el, on) => {
+        if (!el.showPopover || on === el.matches(':popover-open')) return;
+        if (!on) el.hidePopover();
+        else if (el.isConnected) el.showPopover();
     };
 
     // ── Place `position: fixed` element at viewport coords ─────────────
