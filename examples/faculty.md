@@ -1,5 +1,4 @@
 ---
-exclude_showcase: true
 layout: page
 title: "Dr. Mohammed Ahmed Al-Salem"
 lang: en
@@ -7,12 +6,12 @@ direction: ltr
 breadcrumb: ["Faculty Members"]
 hero_title: "Dr. Mohammed Ahmed Al-Salem"
 hero_description: "Associate Professor - College of Computer Science"
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
-layout_class: nds-cardView
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
+layout_class: nds-card-view
 sidemenu_mode: top
 ---
 
-<section id="facultyInfo" class="nds-content-section nds-user">
+<section id="faculty-info" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-image faculty-avatar nds-avatar nds-3xl nds-image nds-image-border">
             <img src="{{ 'docs-assets/img/avatar3.webp' | relative_url }}" width="112" height="112"
@@ -27,7 +26,7 @@ sidemenu_mode: top
 
         <div class="nds-section-body">
             <div class="nds-block">
-                <dl class="nds-definition-list nds-tableView-lg nds-divided" style="--max-col:4;--mid-col:2;--min-col:2;">
+                <dl class="nds-definition-list nds-table-view-lg nds-divided" style="--max-col:4;--mid-col:2;--min-col:2;">
                     <div class="nds-definition-item">
                         <dt>
                             <i class="hgi hgi-stroke hgi-school"></i>
@@ -62,7 +61,7 @@ sidemenu_mode: top
     </div>
 </section>
 
-<section id="facultyTabs" class="nds-content-section nds-ghost">
+<section id="faculty-tabs" class="nds-content-section nds-ghost">
     <div class="nds-section-body">
         <div class="nds-tabs nds-divided nds-lg">
             <div class="nds-tab-list-container nds-scroll-more">
@@ -92,7 +91,7 @@ sidemenu_mode: top
                         <span class="nds-label">Contact</span>
                     </button>
                 </nav>
-                <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                 </button>
             </div>
             <div class="nds-tab-content">
@@ -155,7 +154,7 @@ sidemenu_mode: top
                     aria-labelledby="tab-education" aria-hidden="true" tabindex="-1" hidden>
                     <div class="nds-block">
                         <h3 class="nds-block-title">Academic Qualifications</h3>
-                        <dl class="nds-definition-list nds-tableView">
+                        <dl class="nds-definition-list nds-table-view">
                         <div class="nds-definition-item">
                             <dt><span class="nds-label">Ph.D.</span></dt>
                             <dd>Computer Science (Artificial Intelligence) - Stanford University, USA (2010)</dd>
@@ -176,7 +175,7 @@ sidemenu_mode: top
                     aria-labelledby="tab-contact" aria-hidden="true" tabindex="-1" hidden>
                     <div class="nds-block">
                         <h3 class="nds-block-title">Contact Information</h3>
-                        <dl class="nds-definition-list nds-tableView">
+                        <dl class="nds-definition-list nds-table-view">
                             <div class="nds-definition-item">
                                 <dt><span class="nds-label">Email</span></dt>
                                 <dd>m.alsalem@university.edu.sa</dd>

@@ -14,12 +14,18 @@
  *   data-editor-toolbar   which commands the generated toolbar carries: space-separated
  *                         tokens, "|" starts a new group, "source" renders at the end,
  *                         "none" opts out. Leave it off for the full default set
+ *   data-editor-upload-*  the image popover's file picker, read at init: url (a server
+ *                         endpoint, or "embed" for data: URLs), auto-upload, max-file-size,
+ *                         allowed-types, allowed-mime-types — setImageUpload() in markup
+ * Instance:
+ *   setImageUpload(config)   File Upload options for the image popover; chainable
  * Gotchas:
  *   - BETA: the API and the markup contract may still change.
  *   - Author a STANDARD NDS textarea field and put .nds-editor on its container. Nothing
  *     editor-specific is authored — the editing surface and the toolbar are generated.
  *   - The adopted textarea is still the form carrier and holds the sanitized HTML. Read
- *     and write THAT, not the contenteditable.
+ *     and write THAT, not the contenteditable, with NDS.setValue(textarea, html)
+ *     refills the surface. A form reset refills it too.
  *   - readonly and disabled are derived from the textarea's native attributes.
  *   - Pasted markup is reduced to the formatting vocabulary, but NDS component markup
  *     (nds-* regions) survives with a filtered class and attribute set.
@@ -43,7 +49,7 @@
  * The toolbar is GENERATED too: data-editor-toolbar on the root picks the
  * commands (space-separated data-cmd tokens, "|" starts a new button group,
  * "source" renders at the bar's end, "none" opts out; absent = the full
- * default set). ARIA labels resolve ar/en via NDS.lang. Pre-init the
+ * default set). Labels come from the editor section of the assets/i18n/{lang}.json pack. Pre-init the
  * skeleton in _editor.scss holds the field until the stamp lands.
  *
  * Status: BETA — ships with v1.4.0. Under heavy testing and real-project
@@ -84,7 +90,17 @@
     // logical start/end are also accepted so already-saved content and
     // bidi-aware pastes round-trip unchanged.
     const ALIGN_VALUES = new Set(['left', 'right', 'center', 'justify', 'start', 'end']);
+    // Table columns align per the table canon: data-align on the <th>.
+    const COLUMN_ALIGN = new Set(['center', 'start', 'end']);
     const CMD_BLOCK_MAP = { h1: 'H1', h2: 'H2', h3: 'H3', h4: 'H4' };
+    // Structural/formatting commands never touch an atom's content — it's a
+    // label (+ icon), never a heading, a list, or formatted text. Native
+    // execCommand doesn't understand the atom boundary any better here than
+    // it does for Enter (_guardRegionEnter) or a document-end split
+    // (_placeCaretAtEnd) — block at the source instead of cleaning up after.
+    // Alignment/direction are exempt: they write to the CONTAINING block via
+    // direct DOM properties, never into the atom itself.
+    const ATOM_LOCKED_CMDS = new Set(['bold', 'italic', 'underline', 'strike', 'clear', 'ul', 'ol', 'h1', 'h2', 'h3', 'h4']);
     // One trust decision for every URL the editor keeps: scheme-less URLs
     // (relative — path/to/img.jpg, page.html, #anchor — doc-example canon)
     // pass; an explicit scheme must be allowlisted, so javascript:,
@@ -134,6 +150,17 @@
         return false;
     }
 
+    // Atoms are one line: a BUTTON, or an nds-classed SPAN/A/I (tag, chip,
+    // featured icon, a converted button/avatar link…) — never a structural
+    // shell (card, alert, table), which has block PARTS. Shared by the
+    // sanitizer (atoms may carry only their label/icon, never block
+    // structure) and the editor's _linkableAtom (Enter/Link key on the same
+    // boundary) — one definition, not two that can drift apart.
+    const isAtomTag = (el) => el.tagName === 'BUTTON' || (INLINE_REGION_TAGS.has(el.tagName) && hasNdsClass(el));
+    // No BR either — atoms never take a line break (see _guardRegionEnter);
+    // a stray one smuggled in via paste/source unwraps like anything else.
+    const ATOM_TAGS = new Set(['SPAN', 'I', 'IMG']);
+
     // The editor's own link stamps aren't component identity — an anchor
     // carrying any OTHER nds class is a component wearing link duty (a
     // converted button/tag/chip/avatar…), which canon styling must not touch.
@@ -143,8 +170,7 @@
         return false;
     }
 
-    // Local fork — also escapes quotes for attribute contexts (openTag); NDS.escapeHtml doesn't. Do not swap.
-    const escapeHtml = (s) => s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const escapeHtml = NDS.escapeHtml;
 
     // ---------- Interpret (normal markup → NDS vocabulary) ----------
     // Runs first inside sanitizeHtml: translate foreign dialects into the
@@ -429,7 +455,8 @@
             // closest() honors it on containers, not just anchors.
             if (/^aria-/i.test(n) || n === 'role' || n === 'data-status' || n === 'data-state' || n === 'data-no-external'
                 || (tag === 'IMG' && (n === 'alt' || ((n === 'width' || n === 'height') && /^\d+$/.test(attr.value))))
-                || ((tag === 'TD' || tag === 'TH') && (n === 'colspan' || n === 'rowspan' || n === 'scope'))) {
+                || ((tag === 'TD' || tag === 'TH') && (n === 'colspan' || n === 'rowspan' || n === 'scope'))
+                || (tag === 'TH' && n === 'data-align' && COLUMN_ALIGN.has(attr.value))) {
                 kept.push([n, attr.value]);
             }
             el.removeAttribute(n);
@@ -480,7 +507,8 @@
             if (!el.isConnected) continue; // removed inside an earlier region
             if (lastRegion && lastRegion.contains(el)) continue; // top-most roots only
             if (!NDS_TAGS.has(el.tagName) || !hasNdsClass(el)) continue;
-            if (sanitizeRegion(el, converted.has(el) ? CONVERTED_TAGS : NDS_TAGS)) { trusted.add(el); lastRegion = el; }
+            const allowed = converted.has(el) ? CONVERTED_TAGS : isAtomTag(el) ? ATOM_TAGS : NDS_TAGS;
+            if (sanitizeRegion(el, allowed)) { trusted.add(el); lastRegion = el; }
         }
 
         // Pass B — generic whitelist outside trusted subtrees.
@@ -555,6 +583,36 @@
         return false;
     }
 
+    // formatNode's indentation: whitespace-only text carrying a newline.
+    const isIndentNode = (n) => n.nodeType === Node.TEXT_NODE && n.textContent.includes('\n') && !n.textContent.trim();
+    // Child index counted without indentation nodes, and its inverse.
+    function realIndexOf(parent, idx) {
+        let k = 0;
+        for (let i = 0; i < idx && i < parent.childNodes.length; i++) if (!isIndentNode(parent.childNodes[i])) k++;
+        return k;
+    }
+    function realChildAt(parent, k) {
+        for (const c of parent.childNodes) {
+            if (isIndentNode(c)) continue;
+            if (k-- === 0) return c;
+        }
+        return null;
+    }
+
+    // A cell's column header: the last thead row carries the column's
+    // data-align. Positional, like nds-tables.js — a colspan shifts it.
+    function columnHead(cell) {
+        const rows = cell.closest('table')?.tHead?.rows;
+        return rows?.length ? rows[rows.length - 1].cells[cell.cellIndex] || null : null;
+    }
+    // A header's logical data-align as the toolbar's physical value.
+    function physicalAlign(th) {
+        const a = th.getAttribute('data-align');
+        if (a === 'center') return 'center';
+        if (a !== 'start' && a !== 'end') return '';
+        return (a === 'start') !== (getComputedStyle(th).direction === 'rtl') ? 'left' : 'right';
+    }
+
     const VOID_TAGS = new Set(['BR', 'HR', 'IMG', 'WBR']);
     // Elements typing can continue in — anything else as a trailing node
     // traps the caret (component regions, tables, block wrappers).
@@ -608,66 +666,92 @@
 
     const TOOLBAR_DEFAULT = 'undo redo | bold italic underline strike clear | link image | h2 h3 h4 | align-left align-center align-right align-justify | dir-ltr dir-rtl | ul ol | remove | source';
     const TOOLBAR_CMDS = {
-        undo:      { icon: 'arrow-turn-backward',                     en: 'Undo',             ar: 'تراجع' },
-        redo:      { icon: 'arrow-turn-forward',                      en: 'Redo',             ar: 'إعادة' },
-        bold:      { icon: 'text-bold',                 toggle: true, en: 'Bold',             ar: 'غامق' },
-        italic:    { icon: 'text-italic',               toggle: true, en: 'Italic',           ar: 'مائل' },
-        underline: { icon: 'text-underline',            toggle: true, en: 'Underline',        ar: 'تسطير' },
-        strike:    { icon: 'text-strikethrough',        toggle: true, en: 'Strikethrough',    ar: 'يتوسطه خط' },
-        clear:     { icon: 'text-clear',                              en: 'Clear formatting', ar: 'مسح التنسيق' },
-        link:      { icon: 'link-01',                   toggle: true, en: 'Insert link',      ar: 'إدراج رابط' },
-        image:     { icon: 'image-add-01',              toggle: true, en: 'Insert image',     ar: 'إدراج صورة' },
+        undo:      { icon: 'arrow-turn-backward' },
+        redo:      { icon: 'arrow-turn-forward' },
+        bold:      { icon: 'text-bold',                 toggle: true },
+        italic:    { icon: 'text-italic',               toggle: true },
+        underline: { icon: 'text-underline',            toggle: true },
+        strike:    { icon: 'text-strikethrough',        toggle: true },
+        clear:     { icon: 'text-clear' },
+        link:      { icon: 'link-01',                   toggle: true },
+        image:     { icon: 'image-add-01',              toggle: true },
         // h1 is deliberately OUT of the default set (the page owns its h1) —
         // available via data-editor-toolbar for full-page authoring fields.
-        h1:        { icon: 'heading-01',                toggle: true, en: 'Heading 1',        ar: 'عنوان 1' },
-        h2:        { icon: 'heading-02',                toggle: true, en: 'Heading 2',        ar: 'عنوان 2' },
-        h3:        { icon: 'heading-03',                toggle: true, en: 'Heading 3',        ar: 'عنوان 3' },
-        h4:        { icon: 'heading-04',                toggle: true, en: 'Heading 4',        ar: 'عنوان 4' },
-        ul:        { icon: 'left-to-right-list-bullet', toggle: true, en: 'Bulleted list',    ar: 'قائمة نقطية' },
-        ol:        { icon: 'left-to-right-list-number', toggle: true, en: 'Numbered list',    ar: 'قائمة رقمية' },
+        h1:        { icon: 'heading-01',                toggle: true },
+        h2:        { icon: 'heading-02',                toggle: true },
+        h3:        { icon: 'heading-03',                toggle: true },
+        h4:        { icon: 'heading-04',                toggle: true },
+        ul:        { icon: 'left-to-right-list-bullet', toggle: true },
+        ol:        { icon: 'left-to-right-list-number', toggle: true },
         // Alignment is PHYSICAL (left/right) — absolute icons, never flip;
         // orthogonal to the dir command. Re-clicking the active one clears it
         // back to natural (direction-following).
-        'align-left':    { icon: 'text-align-left',                                    toggle: true, en: 'Align left',   ar: 'محاذاة لليسار' },
-        'align-center':  { icon: 'text-align-center',                                  toggle: true, en: 'Align center', ar: 'توسيط' },
-        'align-right':   { icon: 'text-align-right',                                   toggle: true, en: 'Align right',  ar: 'محاذاة لليمين' },
-        'align-justify': { icon: 'text-align-justify-center',                          toggle: true, en: 'Justify',      ar: 'ضبط' },
+        'align-left':    { icon: 'text-align-left',                                    toggle: true },
+        'align-center':  { icon: 'text-align-center',                                  toggle: true },
+        'align-right':   { icon: 'text-align-right',                                   toggle: true },
+        'align-justify': { icon: 'text-align-justify-center',                          toggle: true },
         // Direction is ABSOLUTE (ltr/rtl) — icons never flip; each writes the
         // native `dir` on the caret's block(s), toggling off clears it back
         // to the editor's inherited direction.
         // Direction buttons use the inline pilcrow glyphs (mask-based, not in
         // the HGI font): pilcrow-right = LTR, pilcrow-left = RTL.
-        'dir-ltr':       { icon: 'pilcrow-right', inlineIcon: true,                    toggle: true, en: 'Left to right', ar: 'من اليسار إلى اليمين' },
-        'dir-rtl':       { icon: 'pilcrow-left', inlineIcon: true,                     toggle: true, en: 'Right to left', ar: 'من اليمين إلى اليسار' },
+        'dir-ltr':       { icon: 'pilcrow-right', inlineIcon: true,                    toggle: true },
+        'dir-rtl':       { icon: 'pilcrow-left', inlineIcon: true,                     toggle: true },
         // Caret-gated: enabled only while the caret sits inside a pasted
         // component — the explicit removal path the shell guards point to.
-        remove:    { icon: 'delete-02',                               en: 'Remove component', ar: 'إزالة المكون' },
+        remove:    { icon: 'delete-02' },
     };
-    const TOOLBAR_STRINGS = {
-        source:   { en: 'View HTML source', ar: 'عرض مصدر HTML' },
-        url:      { en: 'URL',    ar: 'الرابط' },
-        text:     { en: 'Text',   ar: 'النص' },
-        external: { en: 'Open in new tab', ar: 'فتح في تبويب جديد' },
-        colored:  { en: 'Colored link', ar: 'رابط ملون' },
-        noBadge:  { en: 'Hide external badge', ar: 'إخفاء شارة الرابط الخارجي' },
-        fromLink: { en: 'From link', ar: 'من رابط' },
-        or:       { en: 'OR', ar: 'أو' },
-        attrs:    { en: 'Attributes', ar: 'الخصائص' },
-        invalidImageUrl: { en: 'Enter a valid image URL', ar: 'أدخل رابط صورة صالحًا' },
-        invalidUrl:      { en: 'Enter a valid URL', ar: 'أدخل رابطًا صالحًا' },
-        pasteBlocked:    { en: 'Pasting images is not available — use the image dialog', ar: 'لصق الصور غير متاح — استخدم نافذة إدراج الصورة' },
-        pasteClipsShell: { en: 'Selection crosses a component — adjust it before pasting', ar: 'التحديد يتجاوز حدود مكون — عدّل التحديد قبل اللصق' },
-        alt:      { en: 'Alt text', ar: 'النص البديل' },
-        width:    { en: 'Width (px)', ar: 'العرض (بكسل)' },
-        height:   { en: 'Height (px)', ar: 'الارتفاع (بكسل)' },
-        upload:   { en: 'Upload image', ar: 'رفع صورة' },
-        cancel:   { en: 'Cancel', ar: 'إلغاء' },
-        insert:   { en: 'Insert', ar: 'إدراج' },
-        unlink:   { en: 'Unlink', ar: 'إزالة الرابط' },
-        removePrompt:  { en: 'Remove the component:', ar: 'إزالة المكون:' },
-    };
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('editor', {
+        undo: 'Undo',
+        redo: 'Redo',
+        clear: 'Clear formatting',
+        remove: 'Remove component',
+        bold: 'Bold',
+        italic: 'Italic',
+        underline: 'Underline',
+        strike: 'Strikethrough',
+        link: 'Insert link',
+        image: 'Insert image',
+        h1: 'Heading 1',
+        h2: 'Heading 2',
+        h3: 'Heading 3',
+        h4: 'Heading 4',
+        ul: 'Bulleted list',
+        ol: 'Numbered list',
+        'align-left': 'Align left',
+        'align-center': 'Align center',
+        'align-right': 'Align right',
+        'align-justify': 'Justify',
+        'dir-ltr': 'Left to right',
+        'dir-rtl': 'Right to left',
+        source: 'View HTML source',
+        url: 'URL',
+        text: 'Text',
+        external: 'Open in new tab',
+        colored: 'Colored link',
+        no_badge: 'Hide external badge',
+        from_link: 'From link',
+        or: 'OR',
+        attrs: 'Attributes',
+        invalid_image_url: 'Enter a valid image URL',
+        invalid_url: 'Enter a valid URL',
+        upload_pending: 'Wait for the upload to finish',
+        upload_failed: 'The file was not uploaded. Choose another file or enter a link',
+        paste_blocked: 'Pasting images is not available — use the image dialog',
+        paste_clips_shell: 'Selection crosses a component — adjust it before pasting',
+        alt: 'Alt text',
+        width: 'Width (px)',
+        height: 'Height (px)',
+        upload: 'Upload image',
+        cancel: 'Cancel',
+        insert: 'Insert',
+        unlink: 'Unlink',
+        remove_prompt: 'Remove the component:',
+    });
+    // Escaped: the pack is site-editable, and these land in innerHTML.
+    const html = (k) => NDS.escapeHtml(strings.text(k));
 
-    const uiLabel = (s) => (NDS.lang === 'ar' ? s.ar : s.en);
 
     let uid = 0; // minted label ids for adopted fields whose textarea has no id
 
@@ -675,7 +759,7 @@
     // own content is the trigger; nds-tooltip.js generates the balloon).
     function cmdButtonHtml(cmd, extraClass = '') {
         const c = TOOLBAR_CMDS[cmd];
-        const label = uiLabel(c);
+        const label = html(cmd);
         const icon = c.icon;
         // inlineIcon: paint from the mask-based UI-icon sheet (.nds-icon) rather
         // than the HGI font — for glyphs not (yet) in the font, e.g. pilcrow.
@@ -692,55 +776,53 @@
     }
 
     function linkDropmenuHtml(idBase) {
-        const S = TOOLBAR_STRINGS;
         return `<div class="nds-dropmenu" data-editor-link-dropmenu>${cmdButtonHtml('link', ' nds-dropmenu-trigger')}`
             + '<div class="nds-dropmenu-menu nds-editor-link-menu" hidden><div class="nds-dropmenu-scroll">'
             + '<div class="nds-dropmenu-group nds-form-group">'
-            + textFieldHtml(`${idBase}-link-text`, uiLabel(S.text), 'text', 'data-editor-link-text')
-            + textFieldHtml(`${idBase}-link-url`, uiLabel(S.url), 'url', 'data-editor-link-url', 'https://')
-            + `<div class="nds-form-container nds-check-container"><div class="nds-form-header"><label for="${idBase}-link-external"><span class="nds-label">${uiLabel(S.external)}</span></label></div>`
+            + textFieldHtml(`${idBase}-link-text`, html('text'), 'text', 'data-editor-link-text')
+            + textFieldHtml(`${idBase}-link-url`, html('url'), 'url', 'data-editor-link-url', 'https://')
+            + `<div class="nds-form-container nds-check-container"><div class="nds-form-header"><label for="${idBase}-link-external"><span class="nds-label">${html('external')}</span></label></div>`
             + `<div class="nds-form-control"><input type="checkbox" id="${idBase}-link-external" class="nds-check" data-editor-link-external /></div></div>`
-            + `<div class="nds-form-container nds-check-container"><div class="nds-form-header"><label for="${idBase}-link-noexternal"><span class="nds-label">${uiLabel(S.noBadge)}</span></label></div>`
+            + `<div class="nds-form-container nds-check-container"><div class="nds-form-header"><label for="${idBase}-link-noexternal"><span class="nds-label">${html('no_badge')}</span></label></div>`
             + `<div class="nds-form-control"><input type="checkbox" id="${idBase}-link-noexternal" class="nds-check" data-editor-link-noexternal /></div></div>`
-            + `<div class="nds-form-container nds-check-container"><div class="nds-form-header"><label for="${idBase}-link-colored"><span class="nds-label">${uiLabel(S.colored)}</span></label></div>`
+            + `<div class="nds-form-container nds-check-container"><div class="nds-form-header"><label for="${idBase}-link-colored"><span class="nds-label">${html('colored')}</span></label></div>`
             + `<div class="nds-form-control"><input type="checkbox" id="${idBase}-link-colored" class="nds-check" data-editor-link-colored /></div></div>`
             + '</div></div>'
             + '<div class="nds-dropmenu-footer"><hr class="nds-divider"><div class="nds-dropmenu-action">'
-            + `<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-editor-link-cancel><span class="nds-label">${uiLabel(S.cancel)}</span></button>`
-            + `<button type="button" class="nds-btn nds-destructive nds-secondary-outline nds-dropmenu-item" data-editor-link-unlink hidden><span class="nds-label">${uiLabel(S.unlink)}</span></button>`
-            + `<button type="button" class="nds-btn nds-primary nds-dropmenu-item" data-editor-link-confirm data-dropmenu-primary data-no-auto-close><span class="nds-label">${uiLabel(S.insert)}</span></button>`
+            + `<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-editor-link-cancel><span class="nds-label">${html('cancel')}</span></button>`
+            + `<button type="button" class="nds-btn nds-destructive nds-secondary-outline nds-dropmenu-item" data-editor-link-unlink hidden><span class="nds-label">${html('unlink')}</span></button>`
+            + `<button type="button" class="nds-btn nds-primary nds-dropmenu-item" data-editor-link-confirm data-dropmenu-primary data-no-auto-close><span class="nds-label">${html('insert')}</span></button>`
             + '</div></div></div></div>';
     }
 
     // Image popover: direct URL or a local file — the chosen file lands in
     // the URL field as a data:image URL, so Insert is the one commit path.
     function imageDropmenuHtml(idBase) {
-        const S = TOOLBAR_STRINGS;
         return `<div class="nds-dropmenu" data-editor-image-dropmenu>${cmdButtonHtml('image', ' nds-dropmenu-trigger')}`
             + '<div class="nds-dropmenu-menu nds-editor-image-menu" hidden><div class="nds-dropmenu-scroll">'
             + '<div class="nds-dropmenu-group nds-form-group nds-editor-image-form">'
-            + textFieldHtml(`${idBase}-image-url`, uiLabel(S.fromLink), 'url', 'data-editor-image-url', 'https://')
-            + `<div class="nds-divider" data-editor-image-or>${uiLabel(S.or)}</div>`
+            + textFieldHtml(`${idBase}-image-url`, html('from_link'), 'url', 'data-editor-image-url', 'https://')
+            + `<div class="nds-divider" data-editor-image-or>${html('or')}</div>`
             // Canonical single-file nds-upload (no dropzone) — NDS.Upload owns
             // picking, extension enforcement, and the file chip; the editor
             // only listens for nds:upload:selected.
             + '<div class="nds-form-container nds-file-upload" data-state="single" data-allowed-types="jpg,jpeg,png,gif,webp,svg" data-max-file-size="2097152" data-editor-image-upload>'
             + '<div class="nds-form-control nds-center">'
             + `<input type="file" id="${idBase}-image-file" class="nds-file-input" data-editor-image-file />`
-            + `<div class="nds-form-action"><button type="button" class="nds-btn nds-neutral nds-md nds-browse-btn"><i class="hgi hgi-stroke hgi-folder-01"></i><span class="nds-label">${uiLabel(S.upload)}</span></button></div>`
+            + `<div class="nds-form-action"><button type="button" class="nds-btn nds-neutral nds-md nds-browse-btn"><i class="hgi hgi-stroke hgi-folder-01"></i><span class="nds-label">${html('upload')}</span></button></div>`
             + '</div>'
             + '<div class="nds-file-list"></div>'
             + '</div>'
-            + `<div class="nds-divider">${uiLabel(S.attrs)}</div>`
-            + textFieldHtml(`${idBase}-image-alt`, uiLabel(S.alt), 'text', 'data-editor-image-alt', '', ' nds-md')
+            + `<div class="nds-divider">${html('attrs')}</div>`
+            + textFieldHtml(`${idBase}-image-alt`, html('alt'), 'text', 'data-editor-image-alt', '', ' nds-md')
             + '<div class="nds-form-group nds-row">'
-            + textFieldHtml(`${idBase}-image-width`, uiLabel(S.width), 'text', 'inputmode="numeric" data-editor-image-width', 'auto', ' nds-md')
-            + textFieldHtml(`${idBase}-image-height`, uiLabel(S.height), 'text', 'inputmode="numeric" data-editor-image-height', 'auto', ' nds-md')
+            + textFieldHtml(`${idBase}-image-width`, html('width'), 'text', 'inputmode="numeric" data-editor-image-width', 'auto', ' nds-md')
+            + textFieldHtml(`${idBase}-image-height`, html('height'), 'text', 'inputmode="numeric" data-editor-image-height', 'auto', ' nds-md')
             + '</div>'
             + '</div></div>'
             + '<div class="nds-dropmenu-footer"><hr class="nds-divider"><div class="nds-dropmenu-action">'
-            + `<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-editor-image-cancel><span class="nds-label">${uiLabel(S.cancel)}</span></button>`
-            + `<button type="button" class="nds-btn nds-primary nds-dropmenu-item" data-editor-image-confirm data-dropmenu-primary data-no-auto-close><span class="nds-label">${uiLabel(S.insert)}</span></button>`
+            + `<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-editor-image-cancel><span class="nds-label">${html('cancel')}</span></button>`
+            + `<button type="button" class="nds-btn nds-primary nds-dropmenu-item" data-editor-image-confirm data-dropmenu-primary data-no-auto-close><span class="nds-label">${html('insert')}</span></button>`
             + '</div></div></div></div>';
     }
 
@@ -757,14 +839,13 @@
     // whose rows are filled per caret position (one destructive row per
     // removable level: nested components, then the shell).
     function removeDropmenuHtml() {
-        const S = TOOLBAR_STRINGS;
         return `<div class="nds-dropmenu" data-editor-remove-dropmenu>${cmdButtonHtml('remove', ' nds-dropmenu-trigger nds-destructive')}`
             + '<div class="nds-dropmenu-menu nds-editor-remove-menu" hidden><div class="nds-dropmenu-scroll">'
-            + `<div class="nds-dropmenu-group"><span class="nds-label">${uiLabel(S.removePrompt)}</span></div>`
+            + `<div class="nds-dropmenu-group"><span class="nds-label">${html('remove_prompt')}</span></div>`
             + '<div data-editor-remove-levels></div>'
             + '</div>'
             + '<div class="nds-dropmenu-footer"><hr class="nds-divider"><div class="nds-dropmenu-action">'
-            + `<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-editor-remove-cancel><span class="nds-label">${uiLabel(S.cancel)}</span></button>`
+            + `<button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-editor-remove-cancel><span class="nds-label">${html('cancel')}</span></button>`
             + '</div></div></div></div>';
     }
 
@@ -775,7 +856,7 @@
             const flush = () => { if (cluster) { start += `<div class="nds-btn-group">${cluster}</div>`; cluster = ''; } };
             for (const cmd of group.trim().split(/\s+/).filter(Boolean)) {
                 if (cmd === 'source') {
-                    const label = uiLabel(TOOLBAR_STRINGS.source);
+                    const label = html('source');
                     end = `<button type="button" class="nds-btn nds-secondary-outline nds-md nds-icon-only nds-tooltip" data-source-toggle aria-pressed="false" aria-label="${label}" data-tooltip-message="${label}" data-tooltip-hover="500"><i class="hgi hgi-stroke hgi-source-code" aria-hidden="true"></i></button>`;
                 } else if (cmd === 'link') {
                     flush(); // the dropmenu wrapper sits outside any button group
@@ -795,7 +876,7 @@
             flush();
         }
         if (!start && !end) return '';
-        return `<div class="nds-toolbar">${start ? `<div class="nds-bar-start">${start}</div>` : ''}${end ? `<div class="nds-bar-end">${end}</div>` : ''}</div>`;
+        return `<div class="nds-toolbar">${start ? `<div class="nds-toolbar-start">${start}</div>` : ''}${end ? `<div class="nds-toolbar-end">${end}</div>` : ''}</div>`;
     }
 
     // ---------- Editor ----------
@@ -840,14 +921,16 @@
             // ponytail: <p> as new-block separator — native Enter gives clean <p> per paragraph.
             try { document.execCommand('defaultParagraphSeparator', false, 'p'); } catch { /* older UAs */ }
 
-            // Hydrate from the adopted textarea's value (server-filled or empty).
-            this.editable.innerHTML = sanitizeHtml(this.source.value) || '<p><br></p>';
-            this._normalizeLooseBlocks();
-            this._refreshLinks();
-            this._syncSource();
-            // Seed the history base — the initial value stays reachable even
-            // when hydration didn't change the value (sync early-returned).
-            if (this._histIdx < 0) this._pushHistory(false);
+            this._hydrate();
+            // A script write (NDS.setValue) and a form reset refill the surface.
+            // The editor's own leave-change carries the value it wrote, so it skips the refill (and keeps undo).
+            const reload = () => {
+                if (this.source.value === this._synced) return;
+                this._hydrate(); this._updateToolbarState();
+            };
+            this.source.addEventListener('change', reload, { signal });
+            // The browser restores the textarea's default value only after the reset event.
+            this.source.form?.addEventListener('reset', () => setTimeout(reload), { signal });
 
             this._bindToolbar(signal);
             this._bindEditable(signal);
@@ -858,6 +941,7 @@
             this._bindLinkMenu(signal);
             this._bindImageMenu(signal);
             this._bindRemoveMenu(signal);
+            this._readUploadAttrs();
 
             // Server-shipped data-state="disabled|readonly" applies at init;
             // later toggles arrive through the NDS.State hooks above.
@@ -868,6 +952,21 @@
             this._syncImageUploadVisibility();
 
             this.root.dispatchEvent(new CustomEvent('nds:editor:ready', { detail: { instance: this }, bubbles: true }));
+        }
+
+        // Fill the surface from the adopted textarea (server-filled or empty) and
+        // start the history there.
+        _hydrate() {
+            this._history = [];
+            this._histIdx = -1;
+            this.editable.innerHTML = sanitizeHtml(this.source.value) || '<p><br></p>';
+            this._normalizeLooseBlocks();
+            this._refreshLinks();
+            this._syncColumnAlign();
+            this._syncSource();
+            // Seed the history base — the value stays reachable even when
+            // hydration didn't change it (sync early-returned).
+            if (this._histIdx < 0) this._pushHistory(false);
         }
 
         // preventDefault on mousedown keeps the editable's selection when a
@@ -926,7 +1025,7 @@
                 if (!target) {
                     let atom = null;
                     for (let el = e.target; el && el !== this.editable; el = el.parentElement) {
-                        if (el.tagName === 'BUTTON' || (INLINE_REGION_TAGS.has(el.tagName) && hasNdsClass(el))) atom = el;
+                        if (isAtomTag(el)) atom = el;
                     }
                     if (atom && !atom.textContent.trim()) target = atom;
                 }
@@ -950,7 +1049,7 @@
 
         // Mirror NDS.Forms interactive states on the container — forms only
         // delegates to input/textarea/select, so the contenteditable is
-        // skipped. Tracked with focusin/focusout on the ROOT: the source
+        // skipped. Tracked for the whole editor (focusin on the root, focusout below): the source
         // textarea and the link popover's URL input are separate focus
         // targets inside the editor, so an editable-only focus/blur pair
         // drops the field's focus state (and fires a premature change
@@ -962,8 +1061,9 @@
                 NDS.State.add(this.root, 'focus');
                 this._valueAtFocus = this.source.value;
             }, { signal });
-            this.root.addEventListener('focusout', (e) => {
-                if (this.root.contains(e.relatedTarget)) return; // moving within the editor
+            document.addEventListener('focusout', (e) => {
+                if (!this._focusWithin || e.target.closest?.('.nds-editor') !== this.root) return;
+                if (e.relatedTarget?.closest('.nds-editor') === this.root) return; // moving within the editor
                 this._focusWithin = false;
                 NDS.State.remove(this.root, 'focus');
                 NDS.State.remove(this.root, 'typing');
@@ -1175,17 +1275,11 @@
             // stub, so create() lands once it arrives. Soft dependencies: the
             // toolbar's dropmenus and tooltips stay inert if NDS.Dropmenu /
             // NDS.Tooltip aren't bundled.
-            // Portal opt-in propagates from the editor root: data-dropmenu-portal
-            // stamps data-portal on each menu before create() reads shouldPortal.
-            const portalMenus = this.root.hasAttribute('data-dropmenu-portal');
             // Soft dependency — NDS.Dropmenu ships in the main bundle, so this
             // normally runs; without it the link/image menus never open and every
             // downstream menuOf read below is unreachable, which is why those are
             // optional-chained too. Toolbar buttons that don't open a menu still work.
-            toolbar.querySelectorAll('.nds-dropmenu').forEach(el => {
-                if (portalMenus) el.setAttribute('data-portal', '');
-                NDS.Dropmenu?.create?.(el);
-            });
+            toolbar.querySelectorAll('.nds-dropmenu').forEach(el => NDS.Dropmenu?.create?.(el));
             // Soft dependency — toolbar buttons keep their title/aria labels and
             // stay fully usable if NDS.Tooltip isn't bundled.
             toolbar.querySelectorAll('.nds-tooltip').forEach(el => NDS.Tooltip?.create?.(el));
@@ -1205,6 +1299,11 @@
         }
 
         _applyCommand(cmd) {
+            // Atoms are one line, label/icon only — a heading, a list or
+            // inline formatting never lands inside one. Checked here, the one
+            // choke point both the toolbar click and the Ctrl+B/I/U keyboard
+            // shortcuts route through.
+            if (ATOM_LOCKED_CMDS.has(cmd) && this._linkableAtom()) return;
             // ponytail: execCommand for writes — deprecated but universally
             // supported, with browser-handled RTL/bidi. Replace per-command only if a UA misbehaves.
             switch (cmd) {
@@ -1266,6 +1365,7 @@
                 this.editable.innerHTML = sanitizeHtml(this.source.value) || '<p><br></p>';
                 this._normalizeLooseBlocks();
                 this._refreshLinks();
+                this._syncColumnAlign();
                 this.root.classList.remove('is-source');
                 this.source.setAttribute('tabindex', '-1');
                 btn?.setAttribute('aria-pressed', 'false');
@@ -1428,7 +1528,7 @@
             // why.
             const sel = window.getSelection();
             if (sel.rangeCount && this._selectionClipsShell(sel.getRangeAt(0))) {
-                this._notice(uiLabel(TOOLBAR_STRINGS.pasteClipsShell));
+                this._notice(strings.text('paste_clips_shell'));
                 return;
             }
             const html = e.clipboardData.getData('text/html');
@@ -1455,13 +1555,13 @@
                 const files = Array.from(e.clipboardData.files).filter(f => f.type.startsWith('image/'));
                 if (!files.length) return;
                 if (!this._imageEmbedAllowed()) {
-                    this._notice(uiLabel(TOOLBAR_STRINGS.pasteBlocked));
+                    this._notice(strings.text('paste_blocked'));
                     return;
                 }
                 // Same size/type/MIME gates as the popover upload — full
                 // parity via NDS.Upload's live validateFile(), so pasted files
                 // honor allowedTypes/allowedMimeTypes too, not just size.
-                const host = this.root.querySelector('[data-editor-image-upload]');
+                const host = this._imageUploadHost();
                 let firstError = '';
                 const valid = files.filter(f => {
                     const errors = host?.ndsUpload?.validateFile?.(f) || [];
@@ -1507,12 +1607,14 @@
                 sel.removeAllRanges();
                 sel.addRange(r);
                 this._refreshLinks();
+                this._syncColumnAlign();
                 this._syncSource();
                 this._updateToolbarState();
                 return;
             }
             if (!this._insertPasted(insert)) return;
             this._refreshLinks();
+            this._syncColumnAlign();
             this._syncSource();
             this._updateToolbarState();
         }
@@ -1598,9 +1700,15 @@
 
         _saveSelection() {
             const sel = window.getSelection();
-            this._savedRange = (sel.rangeCount && this.editable.contains(sel.anchorNode))
-                ? sel.getRangeAt(0).cloneRange()
-                : null;
+            if (sel.rangeCount && this.editable.contains(sel.anchorNode)) {
+                this._savedRange = sel.getRangeAt(0).cloneRange();
+                return;
+            }
+            // No caret in the text yet: a popover inserts at the end, never nowhere.
+            const end = document.createRange();
+            end.selectNodeContents(this.editable.lastElementChild || this.editable);
+            end.collapse(false);
+            this._savedRange = end;
         }
 
         _restoreSelection() {
@@ -1643,12 +1751,11 @@
         // converts the atom whole to <a … href> — an anchor nested inside an
         // atom is meaningless. Unlink converts back.
         _linkableAtom() {
-            const isAtom = (n) => n.tagName === 'BUTTON' || (INLINE_REGION_TAGS.has(n.tagName) && hasNdsClass(n));
             const picked = this._selectedNode();
-            if (picked && isAtom(picked)) return picked;
+            if (picked && isAtomTag(picked)) return picked;
             let atom = null;
             this._selAncestor(n => {
-                if (isAtom(n)) atom = n;
+                if (isAtomTag(n)) atom = n;
                 return false; // keep climbing — outermost match wins
             });
             return atom;
@@ -1692,7 +1799,7 @@
             // ancestor, so the document's length stops driving the cost.
             // The editable is the ceiling: a drag can escape the editing host,
             // and rooting above it would let outside text answer as an
-            // endpoint (the old root filtered those out by construction).
+            // endpoint.
             const cac = range.commonAncestorContainer;
             const inner = (cac.nodeType === Node.ELEMENT_NODE ? cac : cac.parentElement) || this.editable;
             const scope = this.editable.contains(inner) ? inner : this.editable;
@@ -1806,21 +1913,23 @@
 
         _resolvePath(path) {
             let n = this.editable;
-            for (const i of path) n = n.childNodes[i] || n;
+            for (const i of path) n = realChildAt(n, i) || n;
             return n;
         }
 
-        // Caret as a child-index path — value snapshots restore via a
-        // deterministic re-parse, so paths resolve across restores.
+        // Caret as a child-index path. Indices skip the pretty-printer's
+        // indentation nodes: the restore re-parses the formatted value, which
+        // has them, while the live DOM that recorded the path does not.
         _caretSnapshot() {
             const sel = window.getSelection();
             if (!sel.rangeCount || !this.editable.contains(sel.anchorNode)) return null;
             const { startContainer, startOffset } = sel.getRangeAt(0);
             const path = [];
             for (let n = startContainer; n && n !== this.editable; n = n.parentNode) {
-                path.unshift(Array.prototype.indexOf.call(n.parentNode.childNodes, n));
+                path.unshift(realIndexOf(n.parentNode, Array.prototype.indexOf.call(n.parentNode.childNodes, n)));
             }
-            return { path, offset: startOffset };
+            const offset = startContainer.nodeType === Node.TEXT_NODE ? startOffset : realIndexOf(startContainer, startOffset);
+            return { path, offset };
         }
 
         // Value-snapshot history entry. Typing coalesces (sub-800ms bursts
@@ -1854,14 +1963,19 @@
             this.editable.innerHTML = snap.v ? sanitizeHtml(snap.v) : '<p><br></p>';
             this._normalizeLooseBlocks();
             this._refreshLinks();
+            this._syncColumnAlign();
             this._syncSource();
             this._histSuspend = false;
             const sel = window.getSelection();
             const r = document.createRange();
             try {
                 const node = this._resolvePath(snap.caret?.path || []);
-                const max = node.nodeType === Node.TEXT_NODE ? node.textContent.length : node.childNodes.length;
-                r.setStart(node, Math.min(snap.caret?.offset || 0, max));
+                const off = snap.caret?.offset || 0;
+                if (node.nodeType === Node.TEXT_NODE) r.setStart(node, Math.min(off, node.textContent.length));
+                else {
+                    const child = realChildAt(node, off);
+                    r.setStart(node, child ? Array.prototype.indexOf.call(node.childNodes, child) : node.childNodes.length);
+                }
             } catch {
                 r.selectNodeContents(this.editable);
                 r.collapse(false);
@@ -1906,10 +2020,8 @@
             this._saveSelection();
             const node = this._componentCaretNode();
             this._removeChain = node ? this._removeLevels(node) : [];
-            // Fields live in the menu, which portal detaches to <body> while
-            // open — query it via menuOf (nested or portaled), not the wrapper.
             const dropmenu = this.root.querySelector('[data-editor-remove-dropmenu]');
-            const menu = NDS.Dropmenu?.menuOf?.(dropmenu) || dropmenu;
+            const menu = this._menuOf(dropmenu);
             const list = menu?.querySelector('[data-editor-remove-levels]');
             if (!list) return;
             const chain = this._removeChain;
@@ -1968,11 +2080,16 @@
                 e.preventDefault();
                 return true;
             }
-            // A caret inside an INLINE atom (chip, tag, featured icon,
-            // button) never takes a line break — even a <br> breaks its
-            // one-line shape. Enter ESCAPES to after the atom instead; a
-            // second Enter then behaves normally from outside it.
-            const atom = range.collapsed ? this._linkableAtom() : null;
+            // A caret — or a same-atom selection (e.g. double-click word-select
+            // of a button's label) — inside an INLINE atom (chip, tag,
+            // featured icon, button) never takes a line break — even a <br>
+            // breaks its one-line shape, and insertLineBreak over a selection
+            // whose bounds coincide with the atom's own (nothing else inside)
+            // corrupts it instead of replacing the text. Enter ESCAPES to
+            // after the atom instead. Not collapse-gated: a non-collapsed
+            // selection already cleared _selectionClipsShell above, so if it
+            // resolves to an atom here, the whole selection sits inside it.
+            const atom = this._linkableAtom();
             if (atom) {
                 e.preventDefault();
                 const r = document.createRange();
@@ -1981,6 +2098,39 @@
                 sel.removeAllRanges();
                 sel.addRange(r);
                 return true;
+            }
+            // A SECOND Enter, right where the escape above left the caret (or
+            // any Enter in a block that merely CONTAINS an atom elsewhere),
+            // still isn't safe to hand to native splitting: Chrome's own
+            // paragraph-split doesn't handle a block boundary that touches an
+            // interactive element correctly — it can nest a stray <p> INSIDE
+            // the original instead of after it, corrupting the atom's parent
+            // the same way an unguarded Enter used to corrupt the atom
+            // itself. Split the block ourselves via Range.extractContents
+            // (which already handles partial text-node boundaries) whenever
+            // an atom sits anywhere in the block, regardless of exact caret
+            // proximity to it.
+            if (range.collapsed) {
+                const block = this._getBlockContext();
+                if (block && [...block.querySelectorAll('button, [class*="nds-"]')].some(isAtomTag)) {
+                    e.preventDefault();
+                    const newBlock = document.createElement(block.tagName);
+                    const tail = document.createRange();
+                    tail.setStart(range.startContainer, range.startOffset);
+                    tail.setEndAfter(block.lastChild);
+                    newBlock.appendChild(tail.extractContents());
+                    if (!newBlock.hasChildNodes()) newBlock.innerHTML = '<br>';
+                    if (!block.hasChildNodes()) block.innerHTML = '<br>';
+                    block.parentNode.insertBefore(newBlock, block.nextSibling);
+                    const r = document.createRange();
+                    r.selectNodeContents(newBlock);
+                    r.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                    this._syncSource();
+                    this._updateToolbarState();
+                    return true;
+                }
             }
             if (!this._regionRootOf(range.startContainer)) return false;
             e.preventDefault();
@@ -2071,17 +2221,60 @@
 
         // Physical text-align (left/right/center/justify) inline on every block
         // the selection touches. Re-clicking the active value clears it back to
-        // natural (direction-following) — mirrors the dir toggle, and replaces
-        // the old logical "start" reset button. Native justify* commands are
+        // natural (direction-following) — mirrors the dir toggle. Native justify* commands are
         // avoided (they write physical left/right unpredictably); this is a
         // direct DOM write.
         _applyAlignment(value) {
-            const blocks = this._blocksInSelection();
+            const cells = [...this.editable.querySelectorAll('td, th')].filter(c => this._rangeTouches(c));
+            if (cells.length) this._alignColumns(cells, value);
+            const blocks = this._blocksInSelection().filter(b => !b.closest('td, th'));
             const clear = blocks.length && blocks.every(b => b.style.textAlign === value);
             for (const b of blocks) {
                 if (clear) b.style.removeProperty('text-align');
                 else b.style.textAlign = value;
                 if (!b.getAttribute('style')) b.removeAttribute('style');
+            }
+        }
+
+        _rangeTouches(el) {
+            const sel = window.getSelection();
+            return !!sel.rangeCount && sel.getRangeAt(0).intersectsNode(el);
+        }
+
+        // A cell aligns its whole column the table way (tables.md): data-align
+        // on the header — inline style would not survive sanitize in a region.
+        // The toolbar is physical, the canon logical; the header's direction
+        // maps one to the other. ponytail: justify has no column form — no-op.
+        _alignColumns(cells, value) {
+            if (value === 'justify') return;
+            const heads = [...new Set(cells.map(c => columnHead(c)).filter(Boolean))];
+            if (!heads.length) return;
+            const logical = (th) => value === 'center' ? 'center'
+                : (value === 'left') !== (getComputedStyle(th).direction === 'rtl') ? 'start' : 'end';
+            const clear = heads.every(th => th.getAttribute('data-align') === logical(th));
+            for (const th of heads) {
+                if (clear) th.removeAttribute('data-align');
+                else th.setAttribute('data-align', logical(th));
+            }
+            this._syncColumnAlign();
+        }
+
+        // Live preview of body-cell alignment. On the published page
+        // nds-tables.js does this from the same data-align; here the inline
+        // style is editing-only — sanitize strips it from the value.
+        _syncColumnAlign() {
+            for (const table of this.editable.querySelectorAll('table')) {
+                for (const body of table.tBodies) {
+                    for (const tr of body.rows) {
+                        for (const td of tr.cells) {
+                            // Same lookup the toolbar reads, so the painted and pressed alignment agree.
+                            const a = columnHead(td)?.getAttribute('data-align');
+                            if (COLUMN_ALIGN.has(a)) td.style.textAlign = a;
+                            else td.style.removeProperty('text-align');
+                            if (!td.getAttribute('style')) td.removeAttribute('style');
+                        }
+                    }
+                }
             }
         }
 
@@ -2100,30 +2293,48 @@
             }
         }
 
+        // Popover fields live in the menu. Optional-chained: NDS.Dropmenu is a
+        // soft dependency.
+        _menuOf(dropmenu) {
+            return (dropmenu && NDS.Dropmenu?.menuOf?.(dropmenu)) || dropmenu;
+        }
+
+        _imageUploadHost() {
+            return (this._menuOf(this.root.querySelector('[data-editor-image-dropmenu]')) || this.root)
+                .querySelector('[data-editor-image-upload]');
+        }
+
         // ---------- Link popover ----------
+
+        // What the link applies to. One derivation for prep (what the popover
+        // shows) and confirm (what it applies) — they must never disagree.
+        _linkTarget() {
+            const existing = this._getAncestorTag('A');
+            const atom = existing ? null : this._linkableAtom();
+            const img = existing || atom ? null : this._selectedImage();
+            const target = existing || atom;
+            return {
+                existing, atom, img, target,
+                asComponent: !!atom || !!(existing && isComponentAnchor(existing)),
+                // Opaque targets — an image, an icon-only atom — have nothing
+                // to rename, so the text field doesn't apply.
+                asOpaque: !!img || !!(target && !target.querySelector('.nds-label') && !target.textContent.trim())
+            };
+        }
 
         _prepLinkMenu() {
             this._saveSelection();
             const dropmenu = this.root.querySelector('[data-editor-link-dropmenu]');
             if (!dropmenu) return;
-            // Fields live in the menu, which portal detaches to <body> while
-            // open — query it via menuOf (nested or portaled), not the wrapper.
-            const menu = NDS.Dropmenu?.menuOf?.(dropmenu) || dropmenu;
+            const menu = this._menuOf(dropmenu);
             const textInput = menu.querySelector('[data-editor-link-text]');
             const urlInput = menu.querySelector('[data-editor-link-url]');
             const externalInput = menu.querySelector('[data-editor-link-external]');
             const unlinkBtn = menu.querySelector('[data-editor-link-unlink]');
-            const existing = this._getAncestorTag('A');
-            const atom = existing ? null : this._linkableAtom();
-            const img = existing || atom ? null : this._selectedImage();
-            const asComponent = !!atom || !!(existing && isComponentAnchor(existing));
+            const { existing, target, asComponent, asOpaque } = this._linkTarget();
             const sel = window.getSelection();
             const selected = (sel.rangeCount && !sel.isCollapsed && this.editable.contains(sel.anchorNode))
                 ? sel.toString().replace(/\s+/g, ' ').trim() : '';
-            const target = existing || atom;
-            // Opaque targets — an image, an icon-only atom — have nothing to
-            // rename, so the text field doesn't apply.
-            const asOpaque = !!img || !!(target && !target.querySelector('.nds-label') && !target.textContent.trim());
             // Text shows the existing link's label, else the selection —
             // editable either way (typing it replaces the linked text). A
             // component reads its .nds-label (raw textContent carries the
@@ -2161,31 +2372,34 @@
 
         _confirmLink() {
             const dropmenu = this.root.querySelector('[data-editor-link-dropmenu]');
-            // Fields live in the menu, which portal detaches to <body> while
-            // open — query it via menuOf (nested or portaled), not the wrapper.
-            // Optional-chained per the soft dependency on NDS.Dropmenu declared
-            // where the toolbar menus are created.
-            const menu = NDS.Dropmenu?.menuOf?.(dropmenu) || dropmenu;
+            const menu = this._menuOf(dropmenu);
             const url = cleanUrl((menu?.querySelector('[data-editor-link-url]')?.value || '').trim());
             const text = (menu?.querySelector('[data-editor-link-text]')?.value || '').trim();
             const external = !!menu?.querySelector('[data-editor-link-external]')?.checked;
             const noExternal = !!menu?.querySelector('[data-editor-link-noexternal]')?.checked;
             const colored = !!menu?.querySelector('[data-editor-link-colored]')?.checked;
             if (!url || url === 'https://' || !safeUrl(url)) {
-                this._fieldError(menu?.querySelector('[data-editor-link-url]'), uiLabel(TOOLBAR_STRINGS.invalidUrl));
+                this._fieldError(menu?.querySelector('[data-editor-link-url]'), strings.text('invalid_url'));
                 return;
             }
             dropmenu?.ndsDropmenu?.close?.();
 
             this.editable.focus();
-            this._restoreSelection();
+            // A stray re-entrant call (a fast double-click on Insert, or
+            // Enter-in-field racing a click — data-no-auto-close keeps the
+            // button live through an error) lands here after the first call
+            // already consumed the saved selection: _restoreSelection()
+            // returns null on that second call, and without this bail the
+            // atom/existing-anchor lookups below go stale, falling through to
+            // insertHTML and duplicating the link at whatever the DOM's
+            // leftover caret happens to be. A saved selection to restore IS
+            // the request — checked here, not via the dropmenu's isOpen,
+            // since a delayed auto-close from an EARLIER, unrelated
+            // dropmenu-item click (see nds-dropmenu.js's 100ms setTimeout)
+            // can flip isOpen on this reused popover between two genuine uses.
+            if (!this._restoreSelection()) return;
             const sel = window.getSelection();
-            const existing = this._getAncestorTag('A');
-            const atom = existing ? null : this._linkableAtom();
-            const img = existing || atom ? null : this._selectedImage();
-            const asComponent = !!atom || !!(existing && isComponentAnchor(existing));
-            const target = existing || atom;
-            const asOpaque = !!img || !!(target && !target.querySelector('.nds-label') && !target.textContent.trim());
+            const { existing, atom, img, asComponent, asOpaque } = this._linkTarget();
             // Canon stamp: nds-link + nds-primary per the colored checkbox —
             // but never on a component (its classes ARE its identity) or an
             // image wrapper (text styling has nothing to color). target/rel
@@ -2271,7 +2485,8 @@
         _unlink() {
             this.root.querySelector('[data-editor-link-dropmenu]')?.ndsDropmenu?.close?.();
             this.editable.focus();
-            this._restoreSelection();
+            // Re-entrant guard — see _confirmLink.
+            if (!this._restoreSelection()) return;
             const existing = this._getAncestorTag('A');
             // A component anchor reverts whole — execCommand('unlink') would
             // unwrap it and strand its children. nds-btn goes back to
@@ -2318,12 +2533,7 @@
         _imageEmbedAllowed() { return this._imageUploadUrl() === 'embed'; }
 
         _imageUploadUrl() {
-            // Consulted during _confirmImage (menu open) — the upload host is
-            // inside the menu, which portal detaches to <body>, so reach it via
-            // menuOf rather than this.root's subtree. Optional-chained per the soft
-            // dependency on NDS.Dropmenu declared where the toolbar menus are created.
-            const menu = NDS.Dropmenu?.menuOf?.(this.root.querySelector('[data-editor-image-dropmenu]'));
-            const host = (menu || this.root).querySelector('[data-editor-image-upload]');
+            const host = this._imageUploadHost(); // read while the menu is open
             return host?.ndsUpload?.getConfig?.().uploadUrl || host?.dataset.uploadUrl || '';
         }
 
@@ -2333,9 +2543,7 @@
         // before the menu opens).
         _syncImageUploadVisibility() {
             const dropmenu = this.root.querySelector('[data-editor-image-dropmenu]');
-            // Fields live in the menu, which portal detaches to <body> while
-            // open — query it via menuOf (nested or portaled), not the wrapper.
-            const menu = NDS.Dropmenu?.menuOf?.(dropmenu) || dropmenu;
+            const menu = this._menuOf(dropmenu);
             const host = menu?.querySelector('[data-editor-image-upload]');
             if (!host) return;
             const show = !!this._imageUploadUrl();
@@ -2352,7 +2560,7 @@
         // URLs instead of POSTing. autoUpload is forced off in that mode so
         // NDS.Upload never sends an XHR to "/embed".
         setImageUpload(config = {}) {
-            const host = this.root.querySelector('[data-editor-image-upload]');
+            const host = this._imageUploadHost();
             if (host) {
                 for (const [k, v] of Object.entries(config)) {
                     if (v == null || v === false) delete host.dataset[k];
@@ -2367,12 +2575,23 @@
             return this;
         }
 
+        // Markup twin of setImageUpload: data-editor-upload-{option} on the root,
+        // the option in kebab case; `url` is uploadUrl.
+        _readUploadAttrs() {
+            const config = {};
+            for (const { name, value } of this.root.attributes) {
+                const m = /^data-editor-upload-(.+)$/.exec(name);
+                if (m) config[m[1] === 'url' ? 'uploadUrl' : m[1].replace(/-(\w)/g, (_, c) => c.toUpperCase())] = value;
+            }
+            if (Object.keys(config).length) this.setImageUpload(config);
+        }
+
         // Transient author-facing notice through the field's native forms
         // feedback (the editor root IS a form container). Soft dependency —
         // the notice is silently dropped if NDS.Forms isn't bundled.
         _notice(message) {
             if (!NDS.Forms?.setStatus) return;
-            NDS.Forms.setStatus({ element: this.root, status: 'warning', message });
+            NDS.Forms.setStatus({ element: this.root, status: 'neutral', message });
             this._clearNotice ||= NDS.debounce(() => NDS.Forms.clearStatus(this.root), 5000);
             this._clearNotice();
         }
@@ -2410,11 +2629,12 @@
             this._saveSelection();
             const dropmenu = this.root.querySelector('[data-editor-image-dropmenu]');
             if (!dropmenu) return;
-            // Fields live in the menu, which portal detaches to <body> while
-            // open — query it via menuOf (nested or portaled), not the wrapper.
-            const menu = NDS.Dropmenu?.menuOf?.(dropmenu) || dropmenu;
+            const menu = this._menuOf(dropmenu);
             const urlInput = menu.querySelector('[data-editor-image-url]');
             const altInput = menu.querySelector('[data-editor-image-alt]');
+            // Fresh staging per open, BEFORE the prefill: clearing fires nds:upload:removed,
+            // which resets a data: URL. A committed/abandoned chip never lingers.
+            menu.querySelector('[data-editor-image-upload]')?.ndsUpload?.clearAllFiles?.();
             // A clicked (selected) image edits in place — url/alt prefill.
             const existing = this._selectedImage();
             if (urlInput) urlInput.value = existing?.getAttribute('src') || 'https://';
@@ -2423,10 +2643,6 @@
             const hInput = menu.querySelector('[data-editor-image-height]');
             if (wInput) wInput.value = existing?.getAttribute('width') || '';
             if (hInput) hInput.value = existing?.getAttribute('height') || '';
-            // Fresh staging per open — a committed/abandoned chip never
-            // lingers, stale field errors clear, and the upload affordance
-            // reflects the CURRENT config.
-            menu.querySelector('[data-editor-image-upload]')?.ndsUpload?.clearAllFiles?.();
             // Soft dependency — a stale field error just lingers if NDS.Forms isn't bundled.
             if (urlInput) NDS.Forms?.clearStatus?.(urlInput.closest('.nds-form-container'));
             menu.querySelector('[data-dropmenu-primary]')?.removeAttribute('disabled');
@@ -2438,11 +2654,7 @@
 
         _confirmImage() {
             const dropmenu = this.root.querySelector('[data-editor-image-dropmenu]');
-            // Fields live in the menu, which portal detaches to <body> while
-            // open — query it via menuOf (nested or portaled), not the wrapper.
-            // Optional-chained per the soft dependency on NDS.Dropmenu declared
-            // where the toolbar menus are created.
-            const menu = NDS.Dropmenu?.menuOf?.(dropmenu) || dropmenu;
+            const menu = this._menuOf(dropmenu);
             const url = cleanUrl((menu?.querySelector('[data-editor-image-url]')?.value || '').trim());
             const alt = (menu?.querySelector('[data-editor-image-alt]')?.value || '').trim();
             // Dims are the numeric width/height ATTRIBUTES (aspect + CLS);
@@ -2453,14 +2665,19 @@
             // srcs are embed-mode only.
             if (!url || url === 'https://' || !safeSrc(url)
                 || (url.startsWith('data:') && !this._imageEmbedAllowed())) {
-                this._fieldError(menu?.querySelector('[data-editor-image-url]'), uiLabel(TOOLBAR_STRINGS.invalidImageUrl));
+                // A picked file that gave no URL is the problem, not the link field.
+                const file = this._imageUploadHost()?.ndsUpload?.getAllFiles?.()[0];
+                const msg = !file || file.status === 'complete' ? 'invalid_image_url'
+                    : file.status === 'error' ? 'upload_failed' : 'upload_pending';
+                this._fieldError(menu?.querySelector('[data-editor-image-url]'), strings.text(msg));
                 return;
             }
             dropmenu?.ndsDropmenu?.close?.();
             // Committed — the staging chip's job is done.
             menu?.querySelector('[data-editor-image-upload]')?.ndsUpload?.clearAllFiles?.();
             this.editable.focus();
-            this._restoreSelection();
+            // Re-entrant guard — see _confirmLink.
+            if (!this._restoreSelection()) return;
             const existing = this._selectedImage();
             if (existing) {
                 existing.setAttribute('src', url);
@@ -2506,11 +2723,20 @@
                 sel.addRange(r);
                 return;
             }
-            r.selectNodeContents(this.editable);
+            // Build the fresh line structurally instead of collapsing to the
+            // document end and calling execCommand('insertParagraph') — when
+            // the trailing content is an inline atom (button, tag…), native
+            // splitting there corrupts it the same way Enter would (guarded
+            // for Enter by _guardRegionEnter; this click path has no caret to
+            // guard, so it never even reaches the atom check).
+            const p = document.createElement('p');
+            p.innerHTML = '<br>';
+            this.editable.appendChild(p);
+            r.selectNodeContents(p);
             r.collapse(false);
             sel.removeAllRanges();
             sel.addRange(r);
-            document.execCommand('insertParagraph');
+            this._syncSource();
         }
 
         // ---------- Toolbar state ----------
@@ -2547,6 +2773,9 @@
             else {
                 const node = this._componentCaretNode();
                 next = node ? (this._removeLevels(node)[0] || null) : null;
+                // A bare content image rings like a component — the selection
+                // wash alone can vanish against the image.
+                if (!next && picked?.tagName === 'IMG') next = picked;
             }
             if (next === this._selectedMark) return;
             this._selectedMark?.removeAttribute('data-editor-selected');
@@ -2559,6 +2788,17 @@
             const block = this._getBlockContext();
             const blockTag = block ? block.tagName : null;
             const inList = (block && block.tagName === 'LI') ? block.closest('ul,ol')?.tagName : null;
+            const cell = this._selAncestor(n => n.tagName === 'TD' || n.tagName === 'TH');
+            const cellHead = cell && columnHead(cell);
+            // Heading/list/formatting buttons grey out inside an atom — same
+            // reason _applyCommand refuses them there. A separate pass since
+            // it covers 'clear' too, which (like undo/redo) carries no
+            // aria-pressed and skips the loop below.
+            // Must not re-enable a disabled/readonly surface's buttons.
+            const locked = !!this._linkableAtom() || this.editable.getAttribute('contenteditable') !== 'true';
+            for (const btn of this.buttons) {
+                if (ATOM_LOCKED_CMDS.has(btn.dataset.cmd)) btn.disabled = locked;
+            }
 
             for (const btn of this.buttons) {
                 // Only toggle commands carry aria-pressed in markup; action
@@ -2575,7 +2815,10 @@
                 else if (CMD_BLOCK_MAP[cmd]) pressed = blockTag === CMD_BLOCK_MAP[cmd];
                 else if (cmd === 'ul')        pressed = inList === 'UL';
                 else if (cmd === 'ol')        pressed = inList === 'OL';
-                else if (cmd.startsWith('align-')) pressed = block?.style.textAlign === cmd.slice(6);
+                else if (cmd.startsWith('align-')) {
+                    pressed = cell ? !!cellHead && physicalAlign(cellHead) === cmd.slice(6)
+                        : block?.style.textAlign === cmd.slice(6);
+                }
                 else if (cmd.startsWith('dir-')) pressed = block?.getAttribute('dir') === cmd.slice(4);
                 btn.setAttribute('aria-pressed', pressed ? 'true' : 'false');
             }
@@ -2632,10 +2875,9 @@
                     // The trailing caret-escape paragraph is an editing
                     // affordance, not content — it stays out of the value.
                     .replace(/\n?<p><br><\/p>$/, '');
+            this._synced = next;
             if (this.source.value === next) return;
-            this.source.value = next;
-            // Programmatic .value writes don't fire 'input' — dispatch so NDS.Forms delegation sees the change.
-            this.source.dispatchEvent(new Event('input', { bubbles: true }));
+            NDS.setValue(this.source, next, { change: false });
             this._pushHistory(coalesce);
         }
     }
@@ -2644,7 +2886,7 @@
 
     function initializeEditors() {
         document.querySelectorAll('.nds-editor').forEach(el => {
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
             if (el.hasAttribute('data-nds-editor-initialized')) return;
             new NDSEditor(el);
         });

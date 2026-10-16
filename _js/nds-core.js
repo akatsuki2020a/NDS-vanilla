@@ -4,12 +4,13 @@
  *   state + status
  *     NDS.State.add / .remove / .set / .has / .get / .clear / .apply (el, ...tokens)
  *                                     the data-state token list
+ *     NDS.State.parse(el)              the tokens as a Set
  *     NDS.State.onAdd / .onRemove (token, scope, fn)   react to a token; returns off()
  *     NDS.Status.set / .get / .clear (el, status)      the data-status value
  *     NDS.aria.expanded / .hidden / .pressed / .selected / .disabled / .label / .current
  *              / .sort (el, value)     write an ARIA attribute (null removes it)
  *   page facts (live getters, not snapshots)
- *     NDS.lang · NDS.langKey · NDS.isArabic · NDS.isRTL · NDS.prefersReducedMotion
+ *     NDS.lang · NDS.isArabic · NDS.isRTL · NDS.prefersReducedMotion
  *     NDS.breakpoints                  the media-query strings the components share
  *   pooled observers — each returns an off() function, and you must call it
  *     NDS.onResize(fn) · NDS.onIntersect(el, fn, opts) · NDS.onElementResize(el, fn)
@@ -19,21 +20,36 @@
  *     NDS.debounce(fn, ms) (.cancel() drops a pending call) · NDS.rafThrottle(fn) · NDS.onIdle(fn, timeout)
  *     NDS.afterPaint(fn) · NDS.onTransitionEnd(el, fn, opts) → cancel()
  *     NDS.transitionSpeed()            the token-sourced duration in ms
- *   DOM, portal-aware
- *     NDS.portal(el) / .unportal(el) / .needsPortal(el)
- *     NDS.closest(el, sel) · NDS.queryAll(root, sel) · NDS.querySelector(root, sel)
- *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.placeFixed(el, t, l)
+ *   DOM
+ *     NDS.relocate(el) / .restore(el) / .homeOf(el)   move a node the app owns; its old spot answers for it
+ *     NDS.topLayer(el, on)             show or hide a [popover] in the top layer, in place
+ *     NDS.resolveEl(idOrElOrSel) · NDS.fromTemplate(id) · NDS.flipPosition(trigger, menu) · NDS.place(el, t, l)
  *     NDS.stickyHeaderBottom() · NDS.scrollBelowNav(el, opts) · NDS.scrollLock.lock/unlock
- *     NDS.gridLastRow(container) · NDS.trapFocus(getEl) · NDS.focusableSel
+ *     NDS.gridLastRow.update(container) · NDS.trapFocus(getEl) · NDS.focusableSel
  *   data + text
- *     NDS.request(url, opts) → Promise<{data, response}>   the shared fetch wrapper
- *     NDS.cache.get / .set (key, value, minutes)           localStorage with expiry
+ *     NDS.request(url, opts) → Promise<{isJson, data}>     the shared fetch wrapper
+ *     NDS.cache.get / .clear (key) · .set (key, value, minutes)   localStorage with expiry
  *     NDS.formatNumber(n, opts) · NDS.escapeHtml(s) · NDS.safeUrl(url) · NDS.uniqueId(prefix)
+ *     NDS.date.parse(text, opts) · .format(date, opts) · .convert(text, from, to) · .today() · .site
+ *     NDS.date.formatFor(el)           the nearest data-date-format (<html> is the site's)
+ *     NDS.date.calendarFor(el, fb)     the nearest data-calendar: hijri | gregory (else fb, gregory)
+ *     NDS.date.monthNames(calendar, lang) · .weekdayNames(lang)   names in a language, Sunday first
+ *                                      calendar days, Gregorian or Hijri (Umm al-Qura);
+ *                                      <html data-timezone / data-date-format>
  *     NDS.announce(text)               say something in the shared live region
- *     NDS.i18n.load(component, scopes) fetch + apply a component's string table (en
- *                                      fallback; stamps data-i18n / data-i18n-attr in scope)
- *     NDS.triggerEvents(el)            dispatch input + change so forms and consumers sync
- *     NDS.badge(el, count) · NDS.buildChip(value, opts) · NDS.isRowSelected(row)
+ *     NDS.i18n.load(component, lang)   a promise of a section's words
+ *     NDS.i18n.strings(component, defaults) → { text, set, load, ready, has, defaults }   a component's strings;
+ *                                      set() marks a fixed word for core, re-writes one with {vars}
+ *     data-i18n="section.key" · data-i18n-{aria-label|aria-description|title|alt|placeholder|label}
+ *                                      a marker: core writes the word in the page language, unless
+ *                                      a script or the author changed it since
+ *     NDS.i18n.translate(root?)         translate the markers in root now (mount/refresh call it)
+ *     NDS.i18n.settled → Promise        the pack landed, failed, or 3 s passed; then <html data-nds-i18n>
+ *     NDS.i18n.pack() → Promise         the page language's pack
+ *     NDS.i18n.format(value, vars)     fill {name}; a plural value picks by vars.n
+ *     NDS.i18n.safeMerge(target, src)  copy own keys, skipping __proto__ / constructor / prototype
+ *     NDS.setValue(el, value, { change }) write value (checked: a click), fire input + change
+ *     NDS.badge(el, count) · NDS.buildChip(value, opts)
  * Events:
  *   nds:template:ready    on the stamped root, bubbles — detail.id is the summoned id.
  *                         Fires after NDS.Init.refresh wires the arrivals, so page JS
@@ -45,8 +61,6 @@
  *   - There is no init(). Core is a utility layer, loaded first and consumed by everyone.
  *   - Every observer helper is POOLED — one observer per page, shared. Each call returns
  *     an off() function; not calling it leaks a subscriber for the page's lifetime.
- *   - Use NDS.closest / queryAll / querySelector instead of the DOM ones whenever a
- *     dropmenu menu may be portaled to <body>: the plain walks stop at <body>.
  *   - NDS.request is a fetch wrapper and nothing more — no XHR, no upload progress, no
  *     retry, no cache layer and no interceptors.
  *   - data-state is a LIST. Never write it with setAttribute; go through NDS.State so
@@ -65,27 +79,23 @@
     //   /assets/js/nds-main.min.js                   → /assets/
     //   /NDS-vanilla/assets/js/nds-main.min.js?ver=… → /NDS-vanilla/assets/
     //   https://cdn.example.com/v1/assets/js/…       → https://cdn.example.com/v1/assets/
-    // document.currentScript is valid synchronously while this IIFE runs
-    // (script parsing time). Falls back to page-relative if the bundle was
-    // loaded inline or via a path we can't pattern-match.
+    // The script is found as the loader finds it: its own tag, else the page's nds-main
+    // tag (a module has no currentScript). The assets folder is the one above it, when
+    // it sits in js/ or is named nds-main; any other src (a site's own bundle) falls
+    // back to page-relative.
     //
     // Override layers, in priority order:
     //   1. window.NDS_I18N_PATH       → only the i18n directory (component-specific)
-    //   2. window.NDS_ASSETS_BASE     → entire assets directory (e.g. CDN)
+    //   2. window.NDS_ASSETS_PATH     → entire assets directory (e.g. CDN)
     //   3. auto-derived from script src
     //   4. 'assets/' (page-relative fallback)
     // Set the override BEFORE this bundle loads.
-    //
-    // Use match() (not replace()) so a script src that doesn't fit the
-    // `/.../js/{name}.js` shape falls through to the empty-string fallback,
-    // letting _fetchOne use 'assets/i18n/' page-relative. replace() would
-    // return the original src unchanged and produce a malformed URL like
-    // `https://host/bundle.jsi18n/...` on the first fetch.
-    const _scriptSrc = (document.currentScript && document.currentScript.src) || '';
-    const _scriptBaseMatch = _scriptSrc.match(/^(.*\/)js\/[^/]+\.js(?:\?.*)?$/);
-    const ASSETS_BASE = window.NDS_ASSETS_BASE
-                     || (_scriptBaseMatch && _scriptBaseMatch[1])
-                     || '';
+    const _scriptSrc = (document.currentScript
+        || [...document.scripts].find(s => /nds-main(\.min)?\.js/.test(s.src)) || {}).src || '';
+    const _isOwnPath = /\/js\/[^/?#]+\.js(?:[?#]|$)|nds-main(\.min)?\.js/.test(_scriptSrc);
+    const ASSETS_VER = (_scriptSrc.match(/\?ver=[^&#]*/) || [''])[0];
+    const ASSETS_BASE = window.NDS_ASSETS_PATH
+                     || (_isOwnPath ? new URL('../', _scriptSrc).href : '');
 
     // ── Breakpoints (matches _mixins.scss) ─────────────────────────
     // Usage: NDS.breakpoints.desktop → '(width >= 960px)'
@@ -108,11 +118,6 @@
     // Usage: NDS.lang    → 'ar' | 'en' | ...
     //        NDS.isArabic → true/false
     //        NDS.isRTL   → true/false
-    //        NDS.langKey → 'ar' | 'en'   (bilingual selector — falls back to
-    //                                     'en' for any non-Arabic locale; use
-    //                                     for component `labels[NDS.langKey]`
-    //                                     lookups where the component carries
-    //                                     only `{ ar, en }` translations)
     // Live getters so runtime language/direction toggles (e.g. language switcher) stay correct.
     Object.defineProperty(NDS, 'lang', {
         get() { return (document.documentElement.lang || 'en').split('-')[0].toLowerCase(); }
@@ -122,9 +127,6 @@
     });
     Object.defineProperty(NDS, 'isRTL', {
         get() { return document.documentElement.dir === 'rtl'; }
-    });
-    Object.defineProperty(NDS, 'langKey', {
-        get() { return NDS.isArabic ? 'ar' : 'en'; }
     });
 
     // ── Reduced-motion preference (live getter) ──────────────────────
@@ -146,83 +148,150 @@
     });
 
     // ── i18n ─────────────────────────────────────────────────────────
-    // Component-scoped runtime localization. Each consumer:
-    //   1. Bakes English defaults into its HTML alongside data-i18n keys.
-    //   2. Calls NDS.i18n.load('{component}', scope) at init.
-    //   3. Optionally awaits the returned data for component-specific work
-    //      (iterating arrays, removing locale-excluded controls, etc.).
+    // One pack per language NDS ships besides English, assets/i18n/{lang}.json, keyed by component
+    // and built from _i18n/ (scripts/check-i18n.mjs --build). English is built in: the JS defaults
+    // and the markup. A missing pack, section or key shows the English.
     //
-    // Override hooks (read once per load):
-    //   window.NDS_I18N      = { '{component}': {...}, ... }   inline strings
-    //   window.NDS_I18N_PATH = '/custom/'                       base path
+    // Override hooks:
+    //   window.NDS_I18N      = { '{component}': {...}, ... }   inline strings, read on every lookup
+    //   window.NDS_I18N_PATH = '/custom/'                       base path, read once per file
+    //
+    // Markers (plans/i18n-markers.md): data-i18n="section.key" writes an element's text, and
+    // data-i18n-{attribute}="section.key" that attribute. Core translates them all once the pack
+    // settles, then each one added or changed later. The six names are the attribute allowlist.
+    const I18N_MARKS = {
+        'data-i18n': 'text',
+        'data-i18n-aria-label': 'aria-label',
+        'data-i18n-aria-description': 'aria-description',
+        'data-i18n-title': 'title',
+        'data-i18n-alt': 'alt',
+        'data-i18n-placeholder': 'placeholder',
+        'data-i18n-label': 'label',
+    };
+    const I18N_MARK_SEL = Object.keys(I18N_MARKS).map(a => `[${a}]`).join(',');
     NDS.i18n = {
-        // Load translations for a component and apply them to its scope(s).
-        // Always fetches — JSON is the single source of truth for both EN
-        // and other locales. Falls back to en.json when the active locale's
-        // file is missing or fails (so consumers can ship a partial set of
-        // translations without breaking the live-region / lazy-built UI).
-        async load(component, scopes) {
-            // Inline override wins — consumer set strings before bundle loaded.
-            const inline = window.NDS_I18N && window.NDS_I18N[component];
-            if (inline) { this.apply(scopes, inline); return inline; }
+        _files: Object.create(null),   // 'ar' → the pack, once landed (null when none)
+        _loads: Object.create(null),   // same keys → Promise<data>
 
-            // Reject anything that isn't a BCP-47 base tag (2–3 letters) before
-            // it reaches the fetch URL — guards against <html lang="../foo">
-            // path-traversal into a sibling _data file.
-            const lang = /^[a-z]{2,3}$/.test(NDS.lang) ? NDS.lang : 'en';
-            const data = await this._fetchOne(component, lang)
-                      || (lang !== 'en' && await this._fetchOne(component, 'en'));
-            if (data) this.apply(scopes, data);
-            return data || null;
+        // A promise of a section's words, in the page's language or lang. A marked word needs no
+        // wait: core writes it, and the CSS holds it as a bar until then.
+        load(component, lang) {
+            if (this._fromFiles(component, lang) !== undefined) return Promise.resolve(this._section(component, lang));
+            return this._get(component, lang).then(() => this._section(component, lang));
         },
 
-        async _fetchOne(component, lang) {
+        // The page's language, or the one a component passes ('ar-SA' → 'ar'). Anything
+        // that isn't a BCP-47 base tag (2–3 letters) is 'en' — guards the fetch URL
+        // against <html lang="../foo"> traversal.
+        _lang(lang) {
+            const l = String(lang || NDS.lang).split('-')[0].toLowerCase();
+            return /^[a-z]{2,3}$/.test(l) ? l : 'en';
+        },
+
+        // A section's words in a language: undefined until known, then the pack's section, or
+        // null when it has none. English is built in (the JS defaults and the markup), so an
+        // English page loads no file. Ignores the override: an override is no sign the file landed.
+        _fromFiles(component, lang) {
+            lang = this._lang(lang);
+            if (lang === 'en') return null;
+            const pack = this._files[lang];
+            if (pack === undefined) return undefined;
+            return pack && component in pack ? pack[component] : null;
+        },
+
+        // The files' text with the inline override laid over it key by key. Until they
+        // land, the override stands alone.
+        _section(component, lang) {
+            const inline = window.NDS_I18N && window.NDS_I18N[component];
+            const data = this._fromFiles(component, lang);
+            if (!inline) return data;
+            return data ? Object.assign({}, data, inline) : inline;
+        },
+
+        _get(component, lang) { return this.pack(lang); },
+
+        // A language's pack (the page's by default), landed; English has none. settled is the
+        // capped promise the loader waits on.
+        pack(lang) {
+            lang = this._lang(lang);
+            return lang === 'en' ? Promise.resolve(null) : this._file(lang);
+        },
+
+        // One fetch per pack per page. A missing pack is null, so English shows.
+        _file(path) {
+            return this._loads[path] || (this._loads[path] = this._fetchOne(path)
+                .then(data => (this._files[path] = data || null)));
+        },
+
+        // A component's strings: English defaults until its file lands.
+        //   s.text(key, vars, lang)     the word in the page's language, or in lang (fetched on first use)
+        //   s.set(el, attr, key, vars)  write an attribute ('text' = textContent) now. A fixed word
+        //                               also gets its marker, so core owns it; one with {vars} is
+        //                               written again when the file lands, unless it changed since
+        //   s.load(lang)                a promise of the section's words
+        //   s.ready(lang)               true once the text for that language is known
+        //   s.has(key)                  the component defines this key (for keys from outside)
+        strings(component, defaults) {
+            const I = this, queue = [];
+            // The section's English: text() and its markers fall back to it when no file has the key.
+            I._seeds[component] = Object.assign(I._seeds[component] || {}, defaults);
+            const has = (o, k) => !!o && Object.prototype.hasOwnProperty.call(o, k);
+            const landed = () => I._fromFiles(component) !== undefined;
+            const read = (el, attr) => (attr === 'text' ? el.textContent : el.getAttribute(attr));
+            const write = (el, attr, v) => (attr === 'text' ? (el.textContent = v) : el.setAttribute(attr, v));
+            const t = (key, vars, lang) => {
+                if (lang && I._fromFiles(component, lang) === undefined) I._get(component, lang);
+                const d = I._section(component, lang);
+                // Own keys only: a key from outside (a cached value, a browser error name) never reaches Object.prototype.
+                // The English every strings() call for this section declared, not only this one's.
+                const seed = I._seeds[component];
+                return I.format(has(d, key) ? d[key] : has(seed, key) ? seed[key] : key, vars, lang);
+            };
+            return {
+                text: t,
+                defaults,
+                load: lang => I.load(component, lang),
+                ready: lang => I._fromFiles(component, lang) !== undefined,
+                has: key => has(defaults, key),
+                set(el, attr, key, vars) {
+                    const v = t(key, vars);
+                    write(el, attr, v);
+                    // A fixed word becomes a marker, so core owns it from here, as markup would.
+                    const mark = attr === 'text' ? 'data-i18n' : 'data-i18n-' + attr;
+                    if (!vars && mark in I18N_MARKS) { el.setAttribute(mark, component + '.' + key); return; }
+                    if (landed()) return;
+                    if (!queue.length) I.load(component).then(() => queue.splice(0).forEach(([e, a, was, k, vs]) => {
+                        if (read(e, a) === was) write(e, a, t(k, vs));
+                    }));
+                    queue.push([el, attr, v, key, vars]);
+                },
+            };
+        },
+
+        // Fill {name} from vars. A plural value is an object of Intl.PluralRules
+        // categories ({ one, two, few, many, other }), picked by vars.n.
+        format(value, vars, lang) {
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                lang = this._lang(lang);
+                const rules = this._plural[lang] || (this._plural[lang] = new Intl.PluralRules(lang));
+                value = value[rules.select(vars && vars.n)] || value.other;
+            }
+            if (typeof value !== 'string' || !vars) return value;
+            return value.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+        },
+        _plural: Object.create(null),
+
+        // ?ver= rides along so a release never serves a stale file.
+        async _fetchOne(path) {
             const base = window.NDS_I18N_PATH || (ASSETS_BASE ? ASSETS_BASE + 'i18n/' : 'assets/i18n/');
             try {
-                // json:true — a static host serving .json as text/plain must not
-                // silently hand back a string. cache:'default' rides through to fetch
-                // and is what dedupes repeat loads as i18n fans out across components.
-                const { data } = await NDS.request(base + component + '/' + lang + '.json',
-                                                   { cache: 'default', json: true });
+                const { data } = await NDS.request(base + path + '.json' + ASSETS_VER, { cache: 'default', json: true });
                 return data;
             } catch (err) {
-                console.warn('[NDS.i18n] ' + component + '/' + lang + ' failed', err);
+                // A 404 is a language NDS does not ship: English shows, and a site adds its words with NDS_I18N.
+                if (err.status !== 404) console.warn('[NDS.i18n] ' + path + ' failed', err);
                 return null;
             }
-        },
-
-        // Walk scope(s) and swap text/attributes per data on every match.
-        //   data-i18n="key"            → textContent = data[key]
-        //   data-i18n-attr="a:k1,b:k2" → setAttribute(a, data[k1]) etc.
-        // Missing keys are skipped (HTML defaults stay). Attribute names are
-        // allowlisted to a11y/text attrs so JSON-driven values can never reach
-        // event handlers (onclick), URLs (href/src), or styles. Lookup is
-        // portal-aware (NDS.queryAll) so future components with portaled
-        // dropmenus inside their i18n scope still get translated.
-        apply(scopes, data) {
-            if (!data) return;
-            this._roots(scopes).forEach(root => {
-                // One walk for both attrs; classify per element. An element can
-                // carry data-i18n AND data-i18n-attr — both branches still run.
-                NDS.queryAll(root, '[data-i18n], [data-i18n-attr]').forEach(el => {
-                    const textKey = el.dataset.i18n;
-                    if (textKey) {
-                        const v = data[textKey];
-                        if (typeof v === 'string') el.textContent = v;
-                    }
-                    const attrSpec = el.dataset.i18nAttr;
-                    if (!attrSpec) return;
-                    attrSpec.split(',').forEach(pair => {
-                        const [attr, key] = pair.split(':').map(s => s.trim());
-                        if (!this._SAFE_ATTR.test(attr)) {
-                            console.warn('[NDS.i18n] refused to set unsafe attr:', attr);
-                            return;
-                        }
-                        const v = data[key];
-                        if (typeof v === 'string') el.setAttribute(attr, v);
-                    });
-                });
-            });
         },
 
         // Copy own enumerable keys from src onto target, skipping prototype
@@ -237,15 +306,95 @@
             return target;
         },
 
-        // Allowlist for data-i18n-attr — text/a11y attributes only.
-        _SAFE_ATTR: /^(aria-[a-z-]+|title|alt|placeholder|label)$/,
+        _seeds: Object.create(null),   // section → the JS defaults its strings() call registered
+        _written: new WeakMap(),       // element → { target: { wrote: core's last write, was: the markup word it replaced } }
+        _warned: new Set(),
+        _warnOnce(msg) { if (!this._warned.has(msg)) { this._warned.add(msg); console.warn('[NDS.i18n] ' + msg); } },
 
-        _roots(scopes) {
-            if (!scopes) return [document.documentElement];
-            const arr = Array.isArray(scopes) ? scopes : [scopes];
-            return arr
-                .map(s => typeof s === 'string' ? document.querySelector(s) : s)
-                .filter(Boolean);
+        // The word a marker names, through text()'s chain: the override, the pack, the script's
+        // English. Also that English (the JS default): the guard's baseline. word null: leave the markup.
+        _word(ref) {
+            const m = /^([a-z][a-z0-9-]*)\.([A-Za-z0-9_]+)$/.exec(ref);
+            if (!m) {
+                this._warnOnce(`marker "${ref}" is not section.key: a 1.x marker; write the section too, such as accessibility.${ref}`);
+                return { word: null };
+            }
+            const [, section, key] = m;
+            const own = (o) => !!o && Object.prototype.hasOwnProperty.call(o, key);
+            const d = this._section(section), seed = this._seeds[section];
+            const v = own(d) ? d[key] : own(seed) ? seed[key] : undefined;
+            const english = own(seed) ? seed[key] : undefined;
+            if (typeof v === 'string' && !/\{\w+\}/.test(v)) return { word: v, english };
+            // A missing word is no error: the pack may not be in yet, or the section's script not
+            // loaded, and the markup's English shows. check-i18n catches a misspelled section.
+            if (v !== undefined) this._warnOnce(`${ref} has {vars} or plural forms: write it with set(), not a marker`);
+            return { word: null };
+        },
+
+        // One element's markers. The guard: core skips a word someone changed. Untouched by core,
+        // that is a word that no longer reads its English (when core knows the English); touched,
+        // a word that reads neither what core wrote nor the markup word it replaced. It never adds an absent attribute.
+        // force: the marker itself changed, so its new word always lands.
+        _mark(el, force) {
+            for (const name in I18N_MARKS) {
+                const ref = el.getAttribute(name);
+                if (ref === null) continue;
+                if (!ref.trim()) {
+                    this._warnOnce(`${name} with no value: a 1.x marker; name its word, ${name}="section.key"`);
+                    continue;
+                }
+                const { word: v, english } = this._word(ref.trim());
+                if (v === null) continue;
+                const target = I18N_MARKS[name];
+                const isText = target === 'text';
+                if (isText && el.firstElementChild) {
+                    this._warnOnce(`${ref}: data-i18n goes on an element that holds only the word`);
+                    continue;
+                }
+                if (!isText && !el.hasAttribute(target)) continue;
+                const seen = this._written.get(el) || {};
+                const prev = seen[target];
+                const cur = isText ? el.textContent : el.getAttribute(target);
+                // prev.was: the markup word core replaced. A morph (Livewire, Turbo, htmx) puts it back, and it is still NDS's.
+                if (!force && (prev ? cur !== prev.wrote && cur !== prev.was : typeof english === 'string' && cur.trim() !== english)) continue;
+                if (cur.trim() !== v) {
+                    if (!isText) el.setAttribute(target, v);
+                    else {
+                        // Write the lone text node: a framework's node and comment anchors survive, and no childList record fires.
+                        const texts = [...el.childNodes].filter(n => n.nodeType === 3);
+                        if (texts.length === 1) texts[0].nodeValue = v; else el.textContent = v;
+                    }
+                }
+                seen[target] = { wrote: isText ? el.textContent : v, was: prev && !force ? prev.was : cur };
+                this._written.set(el, seen);
+            }
+        },
+
+        // Translate every marker in root (the document by default): root itself, its
+        // descendants, and the content of each <template>, so a later clone lands translated.
+        translate(root = document) {
+            const walk = (r) => {
+                if (r.nodeType === 1 && r.matches(I18N_MARK_SEL)) this._mark(r);
+                r.querySelectorAll(I18N_MARK_SEL).forEach(el => this._mark(el));
+                r.querySelectorAll('template').forEach(t => walk(t.content));
+            };
+            walk(root);
+        },
+
+        // The loader calls this from initialize(), so data-nds-auto-init="false" holds it too.
+        // Once the pack settles: one walk, the data-nds-i18n stamp that releases the CSS hold,
+        // then the markers added or changed later. A pack that lands after the 3 s cap walks
+        // again; the guard keeps it to the words still in English.
+        start() {
+            if (this._started) return;
+            this._started = true;
+            this.settled.then(() => {
+                this.translate();
+                document.documentElement.setAttribute('data-nds-i18n', '');
+                NDS.onDOMAdd(I18N_MARK_SEL, els => els.forEach(el => this._mark(el)));
+                NDS.onAttrChange(I18N_MARK_SEL, Object.keys(I18N_MARKS), els => els.forEach(el => this._mark(el, true)));
+                this.pack().then(() => this.translate());
+            });
         },
     };
 
@@ -333,6 +482,11 @@
         return text;
     };
 
+    // Start the pack now: nearly every page needs it, and most components init after it lands.
+    // settled: the pack landed or failed, or 3 s passed. The loader and the marker pass wait on it.
+    // ponytail: past 3 s a slow pack starts the late components and the markers in English.
+    NDS.i18n.settled = Promise.race([NDS.i18n.pack(), new Promise(r => setTimeout(r, 3000))]);
+
     // ── Debounce ─────────────────────────────────────────────────────
     // Usage: const fn = NDS.debounce(handler, 150)
     NDS.debounce = (fn, ms) => {
@@ -368,16 +522,171 @@
     // THE separator rule for every number NDS renders — .nds-number-format
     // (nds-numbers.js), the pagination records slots, and the selection
     // count all route here so they can never drift.
-    NDS.formatNumber = (n, opts) => n.toLocaleString(undefined, opts);
+    // Page lang, Latin digits: one look whatever the browser's language. A bad lang falls back to en.
+    NDS.formatNumber = (n, opts) => {
+        try { return n.toLocaleString(`${document.documentElement.lang || 'en'}-u-nu-latn`, opts); }
+        catch { return n.toLocaleString('en', opts); }
+    };
 
-    // ── Selection rule ───────────────────────────────────────────────
-    // Canonical "is this row/card selected": data-state~=selected (the
-    // convention nds-tables.js stamps on rows) OR a checked input.nds-check
-    // inside (cards, definition lists, JS-less checkbox containers).
-    // Shared by nds-export.js (selected-scope export) and nds-selection.js
-    // (selection count widget) — keep the two readers in lockstep here.
-    NDS.isRowSelected = (row) =>
-        NDS.State.has(row, 'selected') || !!row.querySelector('input.nds-check:checked');
+    // ── Dates ────────────────────────────────────────────────────────
+    // THE date rule: Date Picker, the topbar date and Export parse and print here.
+    // A date is a calendar day: a Date at local midnight, never shifted by a timezone.
+    // The site's timezone (<html data-timezone>) enters only through today().
+    // ponytail: built for Saudi Arabia's two calendars, gregory and hijri; any other calendar when a site asks.
+    NDS.date = (() => {
+        const TOKENS = /YYYY|YY|MMMM|MM|M|DD|D/g;
+        const fmts = new Map();
+        const regs = new Map();
+        const warned = new Set();
+        const warnOnce = (msg) => { if (!warned.has(msg)) { warned.add(msg); console.warn('[NDS.date] ' + msg); } };
+        // An Intl.DateTimeFormat costs ICU init; format() on a built one is cheap.
+        const dtf = (locale, opts) => {
+            const key = locale + JSON.stringify(opts);
+            let f = fmts.get(key);
+            if (!f) fmts.set(key, f = new Intl.DateTimeFormat(locale, opts));
+            return f;
+        };
+        const calOf = (c) => (c === 'hijri' ? 'islamic-umalqura' : c || 'gregory');
+        const partsOf = (f, t) => {
+            const p = {};
+            for (const { type, value } of f.formatToParts(t)) p[type] = +value;
+            return { y: p.year, m: p.month, d: p.day };
+        };
+        const local = (t) => { const g = new Date(t); return new Date(g.getUTCFullYear(), g.getUTCMonth(), g.getUTCDate()); };
+        const ymdIn = (cal) => {
+            const f = dtf('en', { calendar: cal, numberingSystem: 'latn', timeZone: 'UTC', year: 'numeric', month: 'numeric', day: 'numeric' });
+            // An unknown calendar silently resolves to gregory: say so.
+            if (f.resolvedOptions().calendar !== cal) warnOnce(`calendar "${cal}" is not supported here`);
+            return f;
+        };
+
+        // Local day → {y, m, d} in cal. Read at UTC noon, so no offset moves the day.
+        function toCal(date, cal) {
+            if (cal === 'gregory') return { y: date.getFullYear(), m: date.getMonth() + 1, d: date.getDate() };
+            return partsOf(ymdIn(cal), Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), 12));
+        }
+
+        // {y, m, d} in cal → local day, or null when that day does not exist.
+        // Non-gregory: estimate by the mean month, read the guess back in cal, step by the miss.
+        function fromCal(y, m, d, cal) {
+            if (cal === 'gregory') {
+                const t = new Date(y, m - 1, d);
+                return t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === d ? t : null;
+            }
+            if (!(m >= 1 && m <= 12 && d >= 1 && d <= 31)) return null;
+            const f = ymdIn(cal);
+            let t = Date.UTC(2000, 0, 1, 12);
+            for (let i = 0; i < 8; i++) {
+                const p = partsOf(f, t);
+                const miss = Math.round(((y - p.y) * 12 + m - p.m) * 29.53) + d - p.d;
+                if (!miss) return p.y === y && p.m === m && p.d === d ? local(t) : null;
+                t += miss * 864e5;
+            }
+            return null; // a day past the month's end never lands
+        }
+
+        function zone() {
+            const tz = document.documentElement.dataset.timezone;
+            if (!tz) return undefined;
+            try { dtf('en', { timeZone: tz }); return tz; }
+            catch { warnOnce(`data-timezone "${tz}" is not a timezone; using the visitor's`); return undefined; }
+        }
+
+        // The nearest data-date-format wins, like a dark area; <html> holds the site's.
+        // Hijri names come from the pack: Android's ICU renders Umm al-Qura month
+        // symbols from the Gregorian set (month 1 → "January").
+        const names = NDS.i18n.strings('date', {
+            hijri_months: ['Muharram', 'Safar', 'Rabi al-Awwal', 'Rabi al-Thani', 'Jumada al-Ula', 'Jumada al-Akhirah', 'Rajab', 'Shaban', 'Ramadan', 'Shawwal', 'Dhu al-Qadah', 'Dhu al-Hijjah'],
+        });
+        const intlNames = (lang, opts, at) => {
+            const f = new Intl.DateTimeFormat(NDS.i18n._lang(lang), { timeZone: 'UTC', ...opts });
+            return Array.from({ length: opts.month ? 12 : 7 }, (_, i) => f.format(at(i)));
+        };
+        const monthNames = (calendar, lang) => (calendar === 'hijri'
+            ? names.text('hijri_months', null, lang)
+            : intlNames(lang, { month: 'long' }, i => Date.UTC(2000, i, 15)));
+        // Sunday first: 2 Jan 2000 was a Sunday.
+        const weekdayNames = (lang) => intlNames(lang, { weekday: 'short' }, i => Date.UTC(2000, 0, 2 + i));
+
+        const formatFor = (el) => el?.closest?.('[data-date-format]:not([data-date-format=""])')?.dataset.dateFormat || 'DD/MM/YYYY';
+        const calendarFor = (el, fallback = 'gregory') => el?.closest?.('[data-calendar]:not([data-calendar=""])')?.dataset.calendar || fallback;
+        const siteFormat = () => formatFor(document.documentElement);
+
+        const api = {
+            // Live: a script that sets the attributes after load still applies.
+            get site() { return { timeZone: zone(), format: siteFormat() }; },
+
+            formatFor,
+            calendarFor,
+            monthNames,
+            weekdayNames,
+
+            // Today in the site's timezone (the visitor's when unset), as a local day.
+            today() {
+                const tz = zone();
+                if (!tz) { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate()); }
+                const p = partsOf(dtf('en', { timeZone: tz, numberingSystem: 'latn', year: 'numeric', month: 'numeric', day: 'numeric' }), new Date());
+                return new Date(p.y, p.m - 1, p.d);
+            },
+
+            // The caller names the format: 03/04/2026 is ambiguous, so nothing is guessed.
+            parse(text, opts = {}) {
+                const format = opts.format || siteFormat();
+                let re = regs.get(format);
+                if (!re) {
+                    const order = [];
+                    const src = format.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(TOKENS, (t) => {
+                        order.push(t);
+                        // A month name is print-only: the format never matches.
+                        if (t === 'MMMM') return '(?!)';
+                        return t === 'YYYY' ? '(\\d{4})' : t.length === 2 ? '(\\d{2})' : '(\\d{1,2})';
+                    });
+                    regs.set(format, re = { rx: new RegExp('^' + src + '$'), order });
+                }
+                // Arabic digits (both Unicode forms) → ASCII (low nibble), bidi marks Intl writes in Arabic out.
+                const s = String(text ?? '').replace(/[\u200e\u200f\u061c]/g, '')
+                    .replace(/[٠-٩۰-۹]/g, (c) => c.charCodeAt(0) & 15).trim();
+                const match = s.match(re.rx);
+                if (!match) return null;
+                let y = null, m = 1, d = 1;
+                re.order.forEach((t, i) => {
+                    const v = +match[i + 1];
+                    if (t[0] === 'Y') y = t === 'YY' ? 2000 + v : v; // ponytail: YY reads 20xx; add a year window if 19xx/21xx dates need it
+                    else if (t[0] === 'M') m = v;
+                    else d = v;
+                });
+                return y === null ? null : fromCal(y, m, d, calOf(opts.calendar));
+            },
+
+            // { format } fills the tokens (ASCII digits, or `numerals`). Without it, Intl options
+            // print the day in the page language; neither → the site format.
+            format(date, opts = {}) {
+                if (!(date instanceof Date) || isNaN(date)) return '';
+                const { format, calendar, locale, numerals, ...intl } = opts;
+                const cal = calOf(calendar);
+                if (format || !Object.keys(intl).length) {
+                    const { y, m, d } = toCal(date, cal);
+                    const out = (format || siteFormat()).replace(TOKENS, (t) =>
+                        t === 'YYYY' ? String(y) : t === 'YY' ? String(y).slice(-2)
+                        : t === 'MMMM' ? monthNames(calendar === 'hijri' ? 'hijri' : 'gregory', locale)[m - 1]
+                        : String(t[0] === 'M' ? m : d).padStart(t.length, '0'));
+                    if (!numerals || numerals === 'latn') return out;
+                    // The numbering system's zero, then offset: its digits are contiguous.
+                    const zero = (0).toLocaleString('en-u-nu-' + numerals).charCodeAt(0);
+                    return out.replace(/\d/g, (c) => String.fromCharCode(zero + +c));
+                }
+                const o = { ...intl, calendar: cal, numberingSystem: numerals || 'latn' };
+                try { return dtf(locale || document.documentElement.lang || 'en', o).format(date); }
+                catch { return dtf('en', o).format(date); }
+            },
+
+            convert(text, from, to) {
+                const date = api.parse(text, from);
+                return date && api.format(date, to);
+            }
+        };
+        return api;
+    })();
 
     // ── Run-When-Idle ────────────────────────────────────────────────
     // Defers work to a browser-idle slot via requestIdleCallback, with a
@@ -397,18 +706,24 @@
         }
     };
 
+    // ── Subscriber lists (the pooled buses below) ────────────────────
+    const subscribe = (list, sub) => {
+        list.push(sub);
+        return () => { const i = list.indexOf(sub); if (i !== -1) list.splice(i, 1); };
+    };
+    // A callback that calls its own off() shifts the list: step back, or the next subscriber is skipped.
+    const each = (list, call) => {
+        for (let i = 0; i < list.length; i++) { const sub = list[i]; call(sub); if (list[i] !== sub) i--; }
+    };
+
     // ── Window Resize Bus ────────────────────────────────────────────
     // Single listener, 150ms debounce, fan-out to subscribers
     // Usage: const off = NDS.onResize(handler)
     NDS.onResize = (() => {
         const subs = [];
-        const fire = NDS.debounce(() => { for (let i = 0; i < subs.length; i++) subs[i](); }, 150);
+        const fire = NDS.debounce(() => each(subs, fn => fn()), 150);
         window.addEventListener('resize', fire, { passive: true });
-
-        return fn => {
-            subs.push(fn);
-            return () => { const i = subs.indexOf(fn); if (i !== -1) subs.splice(i, 1); };
-        };
+        return fn => subscribe(subs, fn);
     })();
 
     // ── Element Resize Observer ──────────────────────────────────────
@@ -440,7 +755,7 @@
             if (!fns) { fns = new Set(); map.set(el, fns); ro.observe(el); }
             fns.add(fn);
             return () => {
-                fns.delete(fn);
+                if (!fns.delete(fn)) return; // a repeat off() must not unobserve a newer subscriber
                 if (!fns.size) { map.delete(el); ro.unobserve(el); }
             };
         };
@@ -460,16 +775,19 @@
                 const map = new Map();
                 const io = new IntersectionObserver(entries => {
                     for (let i = 0; i < entries.length; i++) {
-                        const cb = map.get(entries[i].target);
-                        if (cb) cb(entries[i]);
+                        const fns = map.get(entries[i].target);
+                        if (fns) fns.forEach(fn => fn(entries[i]));
                     }
                 }, { threshold: opts.threshold || 0, rootMargin: opts.rootMargin || '0px' });
                 group = { io, map };
                 pool.set(key, group);
             }
-            group.map.set(el, fn);
-            group.io.observe(el);
+            // A Set per element, as in onElementResize: two subscribers on one element both fire.
+            let fns = group.map.get(el);
+            if (!fns) { fns = new Set(); group.map.set(el, fns); group.io.observe(el); }
+            fns.add(fn);
             return () => {
+                if (!fns.delete(fn) || fns.size) return; // a repeat off() must not drop a newer subscriber
                 group.map.delete(el);
                 group.io.unobserve(el);
                 if (!group.map.size) { group.io.disconnect(); pool.delete(key); }
@@ -478,7 +796,7 @@
     })();
 
     // ── DOM Mutation Bus ─────────────────────────────────────────────
-    // Single MutationObserver on body, selector-based dispatch.
+    // Single MutationObserver on <html>, selector-based dispatch.
     // Each subscriber returns an unsubscribe handle so per-instance callers
     // (component constructors / init() methods called per re-init) can
     // release their subscription without the pool's array growing
@@ -498,27 +816,28 @@
         let started = false;
 
         function dispatch(nodes, subs) {
-            for (let s = 0; s < subs.length; s++) {
-                const hits = [];
+            each(subs, sub => {
+                // A Set: a parent and its child added in one batch both reach the child.
+                const hits = new Set();
                 for (let i = 0; i < nodes.length; i++) {
-                    if (nodes[i].matches(subs[s].sel)) hits.push(nodes[i]);
-                    const ch = nodes[i].querySelectorAll(subs[s].sel);
-                    for (let c = 0; c < ch.length; c++) hits.push(ch[c]);
+                    if (nodes[i].matches(sub.sel)) hits.add(nodes[i]);
+                    const ch = nodes[i].querySelectorAll(sub.sel);
+                    for (let c = 0; c < ch.length; c++) hits.add(ch[c]);
                 }
-                if (hits.length) subs[s].fn(hits);
-            }
+                if (hits.size) sub.fn([...hits]);
+            });
         }
 
         function dispatchParents(parents, subs) {
-            for (let s = 0; s < subs.length; s++) {
+            each(subs, sub => {
                 const hits = [];
-                parents.forEach(p => { if (p.matches(subs[s].sel)) hits.push(p); });
-                if (hits.length) subs[s].fn(hits);
-            }
+                parents.forEach(p => { if (p.matches(sub.sel)) hits.push(p); });
+                if (hits.length) sub.fn(hits);
+            });
         }
 
         function start() {
-            if (started || !document.body) return;
+            if (started) return;
             started = true;
             new MutationObserver(mutations => {
                 const added = [], removed = [], parents = new Set();
@@ -530,12 +849,12 @@
                     for (let j = 0; j < m.removedNodes.length; j++)
                         if (m.removedNodes[j].nodeType === 1) removed.push(m.removedNodes[j]);
                 }
-                // A reparent (e.g. NDS.portal → document.body.appendChild) emits
+                // A reparent (e.g. NDS.relocate, then appendChild elsewhere) emits
                 // both a remove and an add for the same node in one batch. Treat
                 // that as a move, not a lifecycle change — drop those nodes from
                 // both lists so subscribers (and any descendants matching their
                 // selectors) keep their instances, listeners, and internal state
-                // across portals and similar reparents.
+                // across relocations and similar reparents.
                 let realAdded = added, realRemoved = removed;
                 if (added.length && removed.length) {
                     const addedSet = new Set(added), removedSet = new Set(removed);
@@ -547,30 +866,16 @@
                 if (realRemoved.length) dispatch(realRemoved, removeSubs);
                 if (realAdded.length) dispatch(realAdded, addSubs);
                 if (parents.size && childrenSubs.length) dispatchParents(parents, childrenSubs);
-            }).observe(document.body, { childList: true, subtree: true });
+            }).observe(document.documentElement, { childList: true, subtree: true });   // <html>: a whole-body swap (Turbo Drive) stays in view
         }
 
         return { addSubs, removeSubs, childrenSubs, start };
     })();
 
-    NDS.onDOMAdd = (sel, fn) => {
-        const sub = { sel, fn };
-        domBus.addSubs.push(sub);
-        domBus.start();
-        return () => { const i = domBus.addSubs.indexOf(sub); if (i !== -1) domBus.addSubs.splice(i, 1); };
-    };
-    NDS.onDOMRemove = (sel, fn) => {
-        const sub = { sel, fn };
-        domBus.removeSubs.push(sub);
-        domBus.start();
-        return () => { const i = domBus.removeSubs.indexOf(sub); if (i !== -1) domBus.removeSubs.splice(i, 1); };
-    };
-    NDS.onChildrenChange = (sel, fn) => {
-        const sub = { sel, fn };
-        domBus.childrenSubs.push(sub);
-        domBus.start();
-        return () => { const i = domBus.childrenSubs.indexOf(sub); if (i !== -1) domBus.childrenSubs.splice(i, 1); };
-    };
+    const onDOM = (list) => (sel, fn) => { domBus.start(); return subscribe(list, { sel, fn }); };
+    NDS.onDOMAdd = onDOM(domBus.addSubs);
+    NDS.onDOMRemove = onDOM(domBus.removeSubs);
+    NDS.onChildrenChange = onDOM(domBus.childrenSubs);
 
     // ── Attribute Change Observer ────────────────────────────────────
     // Single MutationObserver on <html> for attribute changes, selector-based dispatch.
@@ -584,8 +889,6 @@
     const attrNames = new Set();
     let attrMo;
     NDS.onAttrChange = (sel, attrs, fn) => {
-        const sub = { sel, attrs: new Set(attrs), fn };
-        attrSubs.push(sub);
         if (!attrMo) {
             attrMo = new MutationObserver(mutations => {
                 const changed = new Map();
@@ -594,17 +897,17 @@
                     if (!changed.has(el)) changed.set(el, new Set());
                     changed.get(el).add(mutations[i].attributeName);
                 }
-                for (let s = 0; s < attrSubs.length; s++) {
+                each(attrSubs, sub => {
                     const hits = [];
                     changed.forEach((attrs, el) => {
                         // Attribute check before matches(): this observer sees every
                         // attribute write on the page, and matches() is the expensive half.
                         let watched = false;
-                        for (const a of attrs) { if (attrSubs[s].attrs.has(a)) { watched = true; break; } }
-                        if (watched && el.matches(attrSubs[s].sel)) hits.push(el);
+                        for (const a of attrs) { if (sub.attrs.has(a)) { watched = true; break; } }
+                        if (watched && el.matches(sub.sel)) hits.push(el);
                     });
-                    if (hits.length) attrSubs[s].fn(hits);
-                }
+                    if (hits.length) sub.fn(hits);
+                });
             });
         }
         // attributeFilter = the union of every subscriber's names, re-observed as it
@@ -615,7 +918,7 @@
         if (attrNames.size !== before) {
             attrMo.observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: [...attrNames] });
         }
-        return () => { const i = attrSubs.indexOf(sub); if (i !== -1) attrSubs.splice(i, 1); };
+        return subscribe(attrSubs, { sel, attrs: new Set(attrs), fn });
     };
 
     // ── State Management (data-state) ─────────────────────────────────
@@ -630,15 +933,13 @@
     //        NDS.State.onAdd(state, scope, fn)    → register hook: fn(el) fires when state added on el matching scope; returns off()
     //        NDS.State.onRemove(state, scope, fn) → register hook: fn(el) fires when state removed; returns off()
     NDS.State = (() => {
-        const _onAdd = {};    // { 'disabled': [{ scope, fn }, ...] }
-        const _onRemove = {};
+        // Null prototype: a token named like an Object.prototype key ('constructor') has no hooks.
+        const _onAdd = Object.create(null);    // { 'disabled': [{ scope, fn }, ...] }
+        const _onRemove = Object.create(null);
 
         function _fire(hooks, token, el) {
             const fns = hooks[token];
-            if (!fns) return;
-            for (let i = 0; i < fns.length; i++) {
-                if (el.matches(fns[i].scope)) fns[i].fn(el, token);
-            }
+            if (fns) each(fns, sub => { if (el.matches(sub.scope)) sub.fn(el, token); });
         }
 
         const parse = el => new Set((el.getAttribute('data-state') || '').split(/\s+/).filter(Boolean));
@@ -676,13 +977,27 @@
 
         const get = el => el ? (el.getAttribute('data-state') || '') : '';
 
-        const set = (el, ...states) => {
-            if (!el) return;
-            states.length ? el.setAttribute('data-state', states.join(' '))
-                          : el.removeAttribute('data-state');
+        // set and clear replace the list, so the hooks hear each token that left or arrived.
+        const _swap = (el, before) => {
+            const after = parse(el);
+            before.forEach(t => { if (!after.has(t)) _fire(_onRemove, t, el); });
+            after.forEach(t => { if (!before.has(t)) _fire(_onAdd, t, el); });
         };
 
-        const clear = el => { if (el) el.removeAttribute('data-state'); };
+        const set = (el, ...states) => {
+            if (!el) return;
+            const before = parse(el);
+            states.length ? el.setAttribute('data-state', states.join(' '))
+                          : el.removeAttribute('data-state');
+            _swap(el, before);
+        };
+
+        const clear = el => {
+            if (!el) return;
+            const before = parse(el);
+            el.removeAttribute('data-state');
+            _swap(el, before);
+        };
 
         const apply = (el, ...states) => {
             if (!el) return;
@@ -692,19 +1007,8 @@
             }
         };
 
-        const onAdd = (state, scope, fn) => {
-            const sub = { scope, fn };
-            const list = (_onAdd[state] || (_onAdd[state] = []));
-            list.push(sub);
-            return () => { const i = list.indexOf(sub); if (i !== -1) list.splice(i, 1); };
-        };
-
-        const onRemove = (state, scope, fn) => {
-            const sub = { scope, fn };
-            const list = (_onRemove[state] || (_onRemove[state] = []));
-            list.push(sub);
-            return () => { const i = list.indexOf(sub); if (i !== -1) list.splice(i, 1); };
-        };
+        const onAdd = (state, scope, fn) => subscribe(_onAdd[state] ||= [], { scope, fn });
+        const onRemove = (state, scope, fn) => subscribe(_onRemove[state] ||= [], { scope, fn });
 
         return { parse, add, remove, has, get, set, clear, apply, onAdd, onRemove };
     })();
@@ -723,9 +1027,10 @@
     const MIRRORS = { loading: 'nds-loading', hidden: 'nds-hidden', 'has-more': 'nds-has-more', 'always-open': 'nds-always-open', dropbox: 'nds-dropbox' };
     const _mirrored = new WeakMap();
     const mirrorTokens = (el) => {
+        const cur = NDS.State.parse(el);
+        let mine = _mirrored.get(el);
         for (const token in MIRRORS) {
-            const cls = MIRRORS[token], on = NDS.State.has(el, token);
-            let mine = _mirrored.get(el);
+            const cls = MIRRORS[token], on = cur.has(token);
             if (on && !el.classList.contains(cls)) {
                 el.classList.add(cls);
                 if (!mine) _mirrored.set(el, mine = new Set());
@@ -737,6 +1042,8 @@
     const MIRROR_SEL = Object.keys(MIRRORS).map(t => `[data-state~="${t}"]`).join(',');
     const scanTokens = () => document.querySelectorAll(MIRROR_SEL).forEach(mirrorTokens);
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scanTokens, { once: true }); else scanTokens();
+    // Markup added later with the token already written fires no attribute change.
+    NDS.onDOMAdd(MIRROR_SEL, (els) => els.forEach(mirrorTokens));
 
     // ── Status Management (data-status) ─────────────────────────────
     // Single-value management for data-status attribute
@@ -860,20 +1167,11 @@
     };
 
     // ── HTML Escape ──────────────────────────────────────────────────
-    // Escape a string for safe insertion into an HTML context (innerHTML, template literals).
-    // Uses the browser's textContent serializer so every edge case the parser cares about
-    // (quotes, angle brackets, entities, mixed charsets) is handled by the engine itself —
-    // no regex-based escape can match that coverage.
-    // Usage: el.innerHTML = `<span>${NDS.escapeHtml(userValue)}</span>`
-    // Shared scratch node — one allocation for the page lifetime instead of
-    // one per escape call. Reading innerHTML between writes is fine because
-    // the node is never inserted into the document.
-    const _escapeNode = document.createElement('div');
-    NDS.escapeHtml = (str) => {
-        if (str == null) return '';
-        _escapeNode.textContent = String(str);
-        return _escapeNode.innerHTML;
-    };
+    // Escape a string for text and QUOTED attribute values. Not for unquoted
+    // attributes, URLs (NDS.safeUrl), or style/script contents.
+    // Usage: el.innerHTML = `<span title="${NDS.escapeHtml(v)}">${NDS.escapeHtml(v)}</span>`
+    const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+    NDS.escapeHtml = (str) => str == null ? '' : String(str).replace(/[&<>"']/g, (c) => ESC[c]);
 
     // ── Unique ID ─────────────────────────────────────────────────────
     // Short collision-resistant ID for DOM-scoped needs (input names,
@@ -907,7 +1205,7 @@
     // Resolve an id that may still sit inside a <template>. A modal or panel
     // may ship template-wrapped so its nodes stay out of the DOM until first
     // open; on a live miss this scans the page's templates, moves the owning
-    // template's content into its place, inits the arrivals via
+    // template's content in right after it, inits the arrivals via
     // NDS.Init.refresh (loader inits are idempotent), fires a bubbling
     // nds:template:ready {id} on the element — page JS binds there, since
     // nothing it looked up at load existed — and returns the element.
@@ -920,7 +1218,8 @@
         const tpls = document.querySelectorAll('template');
         for (let i = 0; i < tpls.length; i++) {
             if (!tpls[i].content.getElementById(id)) continue;
-            tpls[i].replaceWith(tpls[i].content);
+            // After it, not in its place: the emptied <template> stays where a framework put it.
+            tpls[i].after(tpls[i].content);
             el = document.getElementById(id);
             if (el) {
                 NDS.Init?.refresh?.(el);
@@ -931,15 +1230,26 @@
         return null;
     };
 
-    // ── Programmatic Input Events ────────────────────────────────────
-    // Dispatch a bubbling input + change pair after a programmatic value
-    // write, so delegated form handlers (validation, counters, custom
-    // selects) observe it exactly as if the user had typed. Null el no-ops.
-    // Usage: input.value = text; NDS.triggerEvents(input);
-    NDS.triggerEvents = (el) => {
+    // ── Programmatic Value Write ─────────────────────────────────────
+    // Write a field's value (checked on a checkbox or radio) and fire a
+    // bubbling input + change pair, so forms and framework bindings see it
+    // as typing. { change: false } fires input only, as each keystroke does.
+    // Through the prototype setter: React's setter on the node would record
+    // the value, and its onChange would then skip the event. Null el no-ops.
+    // Usage: NDS.setValue(input, text);
+    NDS.setValue = (el, value, { change = true } = {}) => {
         if (!el) return;
+        const key = el.type === 'checkbox' || el.type === 'radio' ? 'checked' : 'value';
+        // React reads a box from its click: flip it with one, as a user does. A radio can't click off;
+        // a disabled box or a cancelled click falls through to the plain write.
+        if (key === 'checked' && el.checked !== !!value && (value || el.type === 'checkbox')) {
+            el.click();
+            if (el.checked === !!value) return;
+        }
+        const native = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), key);
+        if (native?.set) native.set.call(el, value); else el[key] = value;
         el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+        if (change) el.dispatchEvent(new Event('change', { bubbles: true }));
     };
 
     // ── Safe URL (scheme allowlist) ──────────────────────────────────
@@ -1062,9 +1372,10 @@
     // Shift+Tab traversal will land on. Excludes [tabindex="-1"] (unreachable
     // by Tab) and disabled form controls. Exposed so component code can
     // reuse the same coverage when querying focusables.
-    NDS.focusableSel =
-        'a[href], button:not([disabled]), textarea:not([disabled]), ' +
-        'input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    NDS.focusableSel = [
+        'a[href]', 'button:not([disabled])', 'textarea:not([disabled])',
+        'input:not([disabled]):not([type="hidden"])', 'select:not([disabled])', '[tabindex]'
+    ].map(s => s + ':not([tabindex="-1"])').join(', ');
 
     // Build a keydown handler that traps Tab/Shift+Tab inside `containerFn()`'s
     // returned element. Pass either a function (re-evaluated on every Tab —
@@ -1081,11 +1392,18 @@
         if (e.key !== 'Tab') return;
         const c = typeof containerFn === 'function' ? containerFn() : containerFn;
         if (!c) return;
+        // An unrendered match as `last` never takes focus, so Tab would leave instead of wrapping.
+        // Only the ends decide the wrap: walk in from each, not over every match.
         const f = c.querySelectorAll(NDS.focusableSel);
-        if (!f.length) return;
-        const first = f[0];
-        const last = f[f.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        const shown = (el) => el.checkVisibility?.({ visibilityProperty: true }) ?? el.getClientRects().length > 0;
+        let i = 0, j = f.length - 1;
+        while (i <= j && !shown(f[i])) i++;
+        while (j > i && !shown(f[j])) j--;
+        if (i > j) return;
+        const first = f[i];
+        const last = f[j];
+        // From the container itself (focused when it has no control to start on), Shift+Tab would leave.
+        if (e.shiftKey && (document.activeElement === first || document.activeElement === c)) { e.preventDefault(); last.focus(); }
         else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
     };
 
@@ -1108,7 +1426,7 @@
         const defaultRegion = () => {
             if (!shared || !shared.isConnected) {
                 shared = document.createElement('div');
-                shared.className = 'sr-only';
+                shared.className = 'nds-sr-only';
                 shared.setAttribute('aria-live', 'polite');
                 shared.setAttribute('aria-atomic', 'true');
                 document.body.appendChild(shared);
@@ -1136,7 +1454,7 @@
     // Cache safety: callers are responsible for treating cached values as
     // potentially-untrusted (any same-origin script can write to
     // localStorage). Store primitive values, not pre-rendered HTML; render
-    // imperatively at the consumer. See `_js/nds-cityWeather.js` for the
+    // imperatively at the consumer. See `_js/nds-city-weather.js` for the
     // canonical pattern.
     //
     // Usage:
@@ -1177,31 +1495,29 @@
     // via `top: -<scrollY>px` and stamps `data-nds-scroll-lock`, which
     // _backdrop.scss turns into `position: fixed`. `unlock()` parses the
     // saved offset back out of the inline style, clears both, and restores
-    // scroll. Stateless: the inline style is the source of truth, so
-    // calling `unlock()` when not locked is a safe no-op.
+    // scroll. Counted: each `lock()` needs its own `unlock()`, and the page
+    // unlocks with the last one, so a Modal over a Backdrop owner holds.
+    // `unlock()` with no lock held is a safe no-op.
     //
     // Own attribute, NOT a data-state token: `data-state` keys hundreds of
     // rules, so flipping it on <body> restyled ~half the page (1,578
     // elements on the home page, measured 2026-09-02). A name only one
     // body rule uses restyles <body> alone.
     //
-    // Caller responsibility: do NOT call `lock()` twice without an
-    // intervening `unlock()`. The second call would capture the
-    // already-locked scroll position (0) and lose the original. Existing
-    // callers gate this via overlay isActive / menu open-state guards.
-    //
     // Usage: NDS.scrollLock.lock();
     //        // ... overlay shown ...
     //        NDS.scrollLock.unlock();
+    let _scrollLocks = 0;
     NDS.scrollLock = {
         lock() {
+            if (_scrollLocks++) return;
             const scrollY = window.pageYOffset;
             document.body.style.top = `-${scrollY}px`;
             document.body.setAttribute('data-nds-scroll-lock', '');
         },
         unlock() {
-            if (!document.body.style.top) return;
-            const scrollY = parseInt(document.body.style.top, 10) * -1;
+            if (!_scrollLocks || --_scrollLocks) return;
+            const scrollY = -parseFloat(document.body.style.top); // fractional under zoom
             document.body.style.top = '';
             document.body.removeAttribute('data-nds-scroll-lock');
             window.scrollTo(0, scrollY);
@@ -1225,198 +1541,88 @@
         return () => document.removeEventListener('scroll', handler, { capture: true });
     };
 
-    // ── Portal-Aware DOM Lookup ────────────────────────────────────────
-    // When a `.nds-dropmenu-menu` is portaled to <body>, its descendants
-    // are no longer reachable through the original wrapper's DOM tree.
-    // These helpers bridge that gap using the `_ownerDropmenu` backref
-    // dropmenu sets on every menu.
-    //
-    //   NDS.closest(el, sel)       — like el.closest, but if `el` lives
-    //                                inside a portaled menu it falls back
-    //                                to the menu's owner wrapper and
-    //                                continues from there.
-    //   NDS.queryAll(root, sel)    — like root.querySelectorAll, but also
-    //                                searches inside any portaled menu
-    //                                whose owner wrapper is a descendant
-    //                                of `root`.
-    //   NDS.querySelector(root, sel) — first match using queryAll order.
-
-    NDS.closest = (el, selector) => {
-        if (!el) return null;
-        const direct = el.closest(selector);
-        if (direct) return direct;
-        const menu = el.closest('.nds-dropmenu-menu');
-        if (menu && menu._ownerDropmenu) {
-            return menu._ownerDropmenu.closest(selector);
-        }
-        return null;
-    };
-
-    // Active NDS.portal count — incremented in portal, decremented in unportal.
-    // queryAll/querySelector use this to skip the body > .nds-dropmenu-menu sweep
-    // when nothing is portaled (the common case on most pages).
-    let _portaledCount = 0;
-
-    // Portaled `.nds-dropmenu-menu` elements whose owner wrapper descends from
-    // `root`. Shared discovery scaffold for queryAll / querySelector — both gate
-    // the call behind their own `_portaledCount === 0` fast path, so this runs
-    // only when something is portaled.
-    const _portaledMenusIn = (root) => {
-        const out = [];
-        if (!document.body) return out;
-        const portaled = document.body.querySelectorAll(':scope > .nds-dropmenu-menu');
-        for (let i = 0; i < portaled.length; i++) {
-            const owner = portaled[i]._ownerDropmenu;
-            if (owner && root.contains(owner)) out.push(portaled[i]);
-        }
-        return out;
-    };
-
-    NDS.queryAll = (root, selector) => {
-        if (!root) return [];
-        if (_portaledCount === 0) return Array.from(root.querySelectorAll(selector));
-        const set = new Set();
-        root.querySelectorAll(selector).forEach(el => set.add(el));
-        _portaledMenusIn(root).forEach(menu => {
-            if (menu.matches(selector)) set.add(menu);
-            menu.querySelectorAll(selector).forEach(el => set.add(el));
-        });
-        return Array.from(set);
-    };
-
-    NDS.querySelector = (root, selector) => {
-        if (!root) return null;
-        const direct = root.querySelector(selector);
-        if (direct) return direct;
-        if (_portaledCount === 0) return null;
-        const menus = _portaledMenusIn(root);
-        for (let i = 0; i < menus.length; i++) {
-            const menu = menus[i];
-            if (menu.matches(selector)) return menu;
-            const found = menu.querySelector(selector);
-            if (found) return found;
-        }
-        return null;
-    };
-
-    // ── Portal / Containing-Block Detection ────────────────────────────
-    // A `position: fixed` element resolves `top`/`left` against the nearest
-    // ancestor that establishes a containing block — and is trapped inside
-    // the nearest stacking-context ancestor. The CSS spec lists many
-    // properties that establish either; the most common offenders we hit
-    // in this codebase are `container-type: inline-size` (on
-    // `.nds-section-wrapper`) and `isolation: isolate` (on
-    // `.nds-hero-section.nds-sub`). Returns true if any ancestor would
-    // trap the element.
-    NDS.needsPortal = (el) => {
-        let n = el.parentElement;
-        while (n && n !== document.documentElement) {
-            const cs = getComputedStyle(n);
-            const wc = cs.willChange || '';
-            const cn = cs.contain || '';
-            const ct = cs.containerType || '';
-            if (cs.transform !== 'none' ||
-                cs.perspective !== 'none' ||
-                cs.filter !== 'none' ||
-                (cs.backdropFilter && cs.backdropFilter !== 'none') ||
-                (cs.webkitBackdropFilter && cs.webkitBackdropFilter !== 'none') ||
-                cs.clipPath !== 'none' ||
-                cs.contentVisibility === 'auto' ||
-                cs.isolation === 'isolate' ||
-                /\b(transform|filter|perspective)\b/.test(wc) ||
-                /\b(paint|layout|strict|content)\b/.test(cn) ||
-                /\b(inline-size|size)\b/.test(ct)) {
-                return true;
-            }
-            n = n.parentElement;
-        }
-        return false;
-    };
-
-    // Move `el` to <body> when an ancestor would trap it; no-op otherwise.
-    // Records the original parent + next-sibling on the element so unportal
-    // can restore them. `opts.snapshotVars` lets callers preserve custom
-    // properties that consumers set on the wrapper (e.g.
-    // `--dropmenu-min-width: 250px` on `.nds-filter`) — those values are
-    // read from the inherited cascade BEFORE the move and re-applied as
-    // inline styles after, so the visual remains identical.
-    // `opts.force` bypasses the needsPortal heuristic — use when the caller
-    // wants to escape a stacking-context ancestor (z-indexed card, modal,
-    // sticky bar), not just a containing-block trap.
-    // Usage: NDS.portal(menu, { snapshotVars: ['--menu-padding'], force: true });
-    //        NDS.unportal(menu); // later
-    NDS.portal = (el, opts = {}) => {
-        if (el._ndsPortal) return; // already portaled
-        if (!opts.force && !NDS.needsPortal(el)) return;
-        _portaledCount++;
-        const snap = {};
-        const vars = opts.snapshotVars;
-        if (vars && vars.length) {
-            const cs = getComputedStyle(el);
-            for (let i = 0; i < vars.length; i++) {
-                const val = cs.getPropertyValue(vars[i]).trim();
-                if (val) snap[vars[i]] = val;
-            }
-        }
-        const setProps = [];
-        el._ndsPortal = {
-            parent: el.parentNode,
-            nextSibling: el.nextSibling,
-            setProps,
+    // ── Relocate / Restore ───────────────────────────────────────────
+    // A node NDS moves out of markup the app owns (a docked FAB, a pinned
+    // nav item) leaves a comment marker in its place. While it is away, the old parent's
+    // insertBefore / appendChild / removeChild take the marker for the node, so a framework
+    // that still holds it (React inserts before it, or removes it) works on its old spot
+    // instead of throwing "not a child of this node".
+    // Usage: NDS.relocate(menu); document.body.appendChild(menu); … NDS.restore(menu);
+    // ponytail: only those three methods answer for the node; replaceChild or a textContent
+    // write on the old parent still sees the move.
+    const _home = new WeakMap();   // moved node → { mark, parent }
+    const _node = Node.prototype;
+    const _standIn = (parent, n) => { const h = n && _home.get(n); return h && h.mark.parentNode === parent ? h.mark : n; };
+    function _guard(parent) {
+        parent._ndsMoved = (parent._ndsMoved || 0) + 1;
+        if (parent._ndsMoved > 1) return;
+        parent.insertBefore = function (node, ref) { return _node.insertBefore.call(this, _standIn(this, node), _standIn(this, ref)); };
+        parent.appendChild = function (node) { return _node.appendChild.call(this, _standIn(this, node)); };
+        parent.removeChild = function (node) {
+            if (_standIn(this, node) === node) return _node.removeChild.call(this, node);
+            // Back home first, through its owner's own exit, then out as the app asked.
+            NDS.restore(node);
+            return _node.removeChild.call(this, node);
         };
-        document.body.appendChild(el);
-        for (const k in snap) {
-            el.style.setProperty(k, snap[k]);
-            setProps.push(k);
-        }
-        // Force a style/layout flush — Safari sometimes skips style recalc
-        // when an element is reparented while display:none/hidden.
-        void el.offsetHeight;
+    }
+    function _unguard(parent) {
+        if (--parent._ndsMoved > 0) return;
+        delete parent._ndsMoved;
+        delete parent.insertBefore;
+        delete parent.appendChild;
+        delete parent.removeChild;
+    }
+
+    NDS.relocate = (el) => {
+        const parent = el?.parentNode;
+        if (!parent || _home.has(el)) return;
+        const mark = document.createComment(' moved by NDS ');   // no nds- prefix: the audit reads those as class names
+        _node.insertBefore.call(parent, mark, el);
+        _home.set(el, { mark, parent });
+        _guard(parent);
     };
 
-    NDS.unportal = (el) => {
-        const state = el._ndsPortal;
-        if (!state) return;
-        _portaledCount--;
-        if (state.nextSibling && state.nextSibling.parentNode === state.parent) {
-            state.parent.insertBefore(el, state.nextSibling);
-        } else {
-            state.parent.appendChild(el);
-        }
-        for (let i = 0; i < state.setProps.length; i++) {
-            el.style.removeProperty(state.setProps[i]);
-        }
-        delete el._ndsPortal;
+    // Put a relocated node back at its marker. True when it went home; when the marker is
+    // gone it goes to the end of its old parent while that parent is on the page, else off it.
+    NDS.restore = (el) => {
+        const h = _home.get(el);
+        if (!h) return false;
+        _home.delete(el);
+        const parent = h.mark.parentNode;
+        if (parent) _node.replaceChild.call(parent, el, h.mark);
+        else if (h.parent.isConnected) _node.appendChild.call(h.parent, el);
+        else el.remove();
+        _unguard(h.parent);
+        return !!el.parentNode;
     };
 
-    // ── Place `position: fixed` element at viewport coords ─────────────
-    // Writes `top`/`left` then measures and corrects. The CSS spec says
-    // top/left on a `position: fixed` element resolve against the
-    // viewport — but only when no ancestor establishes a containing block.
-    // When one does (transform, filter, container-type, etc.), the values
-    // resolve against that ancestor instead, leaving the element offset.
-    // The set of triggering properties varies per engine (Safari notably
-    // honors `container-type: inline-size` strictly), so a static heuristic
-    // misfires. Reading the actual rect after the write reveals any
-    // discrepancy; subtracting it lands the element at the intended
-    // viewport coords across engines.
+    // The element a relocated node was moved out of, or null.
+    NDS.homeOf = (el) => _home.get(el)?.parent || null;
+
+    // Put a [popover] element in the browser's top layer (on) or take it out (off). It
+    // escapes every clip and stacking context without leaving its place in the DOM, so
+    // closest(), bubbling and inherited styles still work. No popover support (Safari < 17,
+    // Firefox < 125): it stays where it is, as a fixed element that an ancestor may clip.
+    // Usage: NDS.topLayer(menu, true); … NDS.topLayer(menu, false);
+    NDS.topLayer = (el, on) => {
+        if (!el.showPopover || on === el.matches(':popover-open')) return;
+        if (!on) el.hidePopover();
+        else if (el.isConnected) el.showPopover();
+    };
+
+    // ── Place a positioned element at viewport coords ─────────────────
+    // Writes `top`/`left` then measures and corrects, so the element lands at
+    // the viewport coords whatever its containing block: the page for an
+    // absolute popover in the top layer (the correction adds the scroll), the
+    // wrapper where popover is missing, the viewport for a fixed element.
     // The transform back-out handles in-flight slide animations on the
     // element itself (e.g. dropmenu's opening translateY).
-    // Usage: NDS.placeFixed(menu, top, leftPx);
-    NDS.placeFixed = (el, top, left) => {
+    // Usage: NDS.place(menu, top, leftPx);
+    NDS.place = (el, top, left) => {
         el.style.top = top + 'px';
         el.style.left = left + 'px';
         const r = el.getBoundingClientRect();
-        const tm = getComputedStyle(el).transform;
-        let tx = 0, ty = 0;
-        if (tm && tm !== 'none') {
-            const m = tm.match(/matrix\(([^)]+)\)/);
-            if (m) {
-                const parts = m[1].split(',');
-                tx = parseFloat(parts[4]) || 0;
-                ty = parseFloat(parts[5]) || 0;
-            }
-        }
+        const { m41: tx, m42: ty } = new DOMMatrixReadOnly(getComputedStyle(el).transform);
         const dx = (r.left - tx) - left;
         const dy = (r.top  - ty) - top;
         if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
@@ -1424,6 +1630,14 @@
             el.style.left = (left - dx) + 'px';
         }
     };
+
+    // Cached lookup for `.nds-main-nav` — flipPosition fires on every popup
+    // open, so avoiding the repeated qS adds up. `undefined` = never looked up,
+    // null = looked up and absent, element = cached. SPA consumers that swap
+    // the nav DOM on route changes leave a detached element in the cache;
+    // isConnected re-lookups in that case (null stays sticky to avoid
+    // re-querying on every popup when no nav is present).
+    let _navEl;
 
     // ── Viewport Flip-Position Measurement ─────────────────────────────
     // Measures available space around a trigger so popup-like components
@@ -1442,14 +1656,6 @@
     // Usage: const p = NDS.flipPosition(trigger, menu);
     //        const flipUp = p.spaceBelow < p.menuRect.height && p.spaceAbove > p.spaceBelow;
     //        const top = flipUp ? p.triggerRect.top - p.menuRect.height - 4 : p.triggerRect.bottom + 4;
-    // Cached lookup for `.nds-main-nav` — flipPosition fires on every popup
-    // open, so avoiding the repeated qS adds up. `undefined` = never looked up,
-    // null = looked up and absent, element = cached. SPA consumers that swap
-    // the nav DOM on route changes leave a detached element in the cache;
-    // isConnected re-lookups in that case (null stays sticky to avoid
-    // re-querying on every popup when no nav is present).
-    let _navEl;
-
     NDS.flipPosition = (trigger, menuEl, opts = {}) => {
         const { respectNav = true, navGap = 16 } = opts;
         const triggerRect = trigger.getBoundingClientRect();
@@ -1516,21 +1722,50 @@
 
         // Each grid marks itself from the ResizeObserver, which delivers after
         // layout: the offsetTop reads never force one, the first delivery is the
-        // initial scan, and a grid that reflows (items paged out, viewport
-        // resized) re-marks on its own. A scheduled first scan (idle, DCL, after
+        // initial scan, and a grid that reflows (viewport resized, items added
+        // or removed) re-marks on its own. A scheduled first scan (idle, DCL, after
         // the reveal paint) always raced the time-sliced inits and forced a
         // full-page layout (~1–2s on a table page at 6.6×).
+        // The FIRST ITEM is observed, not the grid: the mark shrinks the grid (and
+        // the last row's items) inside its own callback, the "ResizeObserver loop"
+        // error. Rows depend only on column width and order, which the first item's
+        // width tracks, and its content box never moves with the mark.
+        // ponytail: fixed-width tracks (a consumer --_tracks) change columns without resizing it; observe the grid too if one needs it.
         // A grid that leaves the DOM releases its observer entry, else an SPA
         // that remounts grids retains every discarded one. Subscribed on the
         // first watch so a page without grids never starts the DOM bus for it.
         const offs = new WeakMap();
         let releasing = false;
+        function unwatch(grid) { offs.get(grid)?.(); offs.delete(grid); }
         function watch(grid) {
             if (offs.has(grid)) return;
-            offs.set(grid, NDS.onElementResize(grid, () => mark(grid)));
+            const first = grid.firstElementChild;
+            offs.set(grid, first ? NDS.onElementResize(first, () => (held(grid) ? undefined : mark(grid))) : () => {});
             if (releasing) return;
             releasing = true;
-            NDS.onDOMRemove(SEL, (grids) => grids.forEach((g) => { offs.get(g)?.(); offs.delete(g); }));
+            NDS.onDOMRemove(SEL, (grids) => grids.forEach(unwatch));
+            // A re-observed first item delivers again, so the grid re-marks in the observer without forcing layout.
+            NDS.onChildrenChange(SEL, (grids) => grids.forEach((g) => { if (offs.has(g)) { unwatch(g); watch(g); } }));
+        }
+
+        // Before the reveal, off-screen sections are content-visibility:auto, and Chrome
+        // tracks their size with its own observer: a mark that resizes one raises the
+        // "ResizeObserver loop" error. Those grids mark once data-nds-loaded drops cv, still off-screen.
+        const root = document.documentElement;
+        const waiting = new Set();
+        function held(grid) {
+            if (root.hasAttribute('data-nds-loaded')) return false;
+            const sec = grid.closest('.nds-content-section');
+            if (!sec || sec.getBoundingClientRect().top < innerHeight || getComputedStyle(sec).contentVisibility !== 'auto') return false;
+            if (!waiting.size) {
+                const off = NDS.onAttrChange('html', ['data-nds-loaded'], () => {
+                    off();
+                    waiting.forEach((g) => { if (g.isConnected) { unwatch(g); watch(g); } });
+                    waiting.clear();
+                });
+            }
+            waiting.add(grid);
+            return true;
         }
 
         function gridsIn(container) {
@@ -1572,7 +1807,7 @@
         history.scrollRestoration = 'auto';
         let pending = 0;
         window.addEventListener('pagehide', () => {
-            try { sessionStorage.setItem(KEY, window.scrollY || pending); } catch {}
+            try { sessionStorage.setItem(KEY, pending || window.scrollY); } catch {}
         });
         const navType = (performance.getEntriesByType('navigation')[0] || {}).type;
         if (navType === 'reload' || navType === 'back_forward') {
@@ -1587,10 +1822,9 @@
                 };
                 if (root.hasAttribute('data-nds-loaded')) restore();
                 else {
-                    const mo = new MutationObserver(() => {
-                        if (root.hasAttribute('data-nds-loaded')) { mo.disconnect(); restore(); }
+                    const off = NDS.onAttrChange('html', ['data-nds-loaded'], () => {
+                        if (root.hasAttribute('data-nds-loaded')) { off(); restore(); }
                     });
-                    mo.observe(root, { attributes: true, attributeFilter: ['data-nds-loaded'] });
                 }
                 window.addEventListener('load', restore);                   // fallback
             }

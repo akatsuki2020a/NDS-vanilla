@@ -10,6 +10,7 @@
  * Hooks:
  *   data-value           the percentage, 0–100
  *   data-num · data-max  the "out of" display (circle only) — both are needed
+ *   .nds-progress-steps  shows the same pair as "2 / 4", the stepper's ring style
  * Gotchas:
  *   - The attributes ARE the API. setValue() and setOutOf() only write them; an observer
  *     repaints. Writing the attribute yourself works just as well.
@@ -17,6 +18,8 @@
  *   - The value is applied when the indicator scrolls into view, so the fill animates where
  *     it is seen. Reduced motion applies it immediately.
  *   - Markup: .nds-progress-circle or .nds-progress-bar.
+ *   - Writes role="progressbar" (if absent) and aria-valuemin/max/now at once; the name is
+ *     the markup's (aria-labelledby on the label or text).
  */
 /**
  * NDS Progress Component
@@ -44,10 +47,26 @@
     'use strict';
 
     const SEL = '.nds-progress-circle, .nds-progress-bar';
-    const ATTRS = ['data-value', 'data-num', 'data-max'];
+    const ATTRS = ['data-value', 'data-num', 'data-max', 'data-status'];
+
+    // The value a screen reader hears; set at once, the fill waits for scroll.
+    function syncAria(el) {
+        const num = parseFloat(el.dataset.num);
+        const max = parseFloat(el.dataset.max);
+        const outOf = !isNaN(num) && !isNaN(max) && max > 0;
+        const top = outOf ? max : 100;
+        const now = el.dataset.status === 'success' ? top
+            : Math.max(0, outOf ? Math.min(num, max) : Math.min(parseFloat(el.dataset.value), 100));
+        if (isNaN(now)) return;
+        if (!el.hasAttribute('role')) el.setAttribute('role', 'progressbar');
+        el.setAttribute('aria-valuemin', 0);
+        el.setAttribute('aria-valuemax', top);
+        el.setAttribute('aria-valuenow', now);
+    }
 
     function syncFromData(el) {
-        if (el.closest('code, .code-example')) return;
+        if (el.closest('code')) return;
+        syncAria(el);
         const num = parseFloat(el.dataset.num);
         const max = parseFloat(el.dataset.max);
         const value = parseFloat(el.dataset.value);
@@ -62,6 +81,8 @@
             const ofEl = el.querySelector('.nds-progress-out-of .nds-progress-of');
             if (numberEl) numberEl.textContent = num;
             if (ofEl) ofEl.textContent = '/' + max;
+            const stepsEl = el.querySelector('.nds-progress-steps');
+            if (stepsEl) stepsEl.textContent = `${num} / ${max}`;
         }
         // Percentage mode: data-value
         else if (!isNaN(value)) {
@@ -69,11 +90,16 @@
         }
     }
 
-    // Public API
-    function setValue(el, value) { el.dataset.value = value; }
-    function setOutOf(el, num, max) { el.dataset.num = num; el.dataset.max = max; }
-
     let _offAttrChange;
+    // A page with no indicator at load never runs init(), so the public writers wire this too.
+    function _watch() {
+        if (_offAttrChange) return;
+        _offAttrChange = NDS.onAttrChange(SEL, ATTRS, els => els.forEach(syncFromData));
+    }
+
+    // Public API
+    function setValue(el, value) { _watch(); el.dataset.value = value; }
+    function setOutOf(el, num, max) { _watch(); el.dataset.num = num; el.dataset.max = max; }
 
     function init() {
         const reduced = NDS.prefersReducedMotion;
@@ -81,25 +107,27 @@
 
         document.querySelectorAll(SEL).forEach(el => {
             if (el.dataset.value == null && el.dataset.num == null) return;
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
 
             // Reduced motion (or no observer support): show the value at once.
             if (reduced || !canObserve) { syncFromData(el); return; }
+            syncAria(el);
 
             // Otherwise leave it empty and let the fill sweep when the indicator
             // scrolls into view — setting the value triggers the CSS transition.
-            if (el._ndsProgressOff) el._ndsProgressOff();
-            el._ndsProgressOff = NDS.onIntersect(el, entry => {
+            // The pending reveal sits on an nds* backref so NDS.Init.destroy(view) can release it.
+            el.ndsProgress?.destroy();
+            const off = NDS.onIntersect(el, entry => {
                 if (!entry.isIntersecting) return;
-                el._ndsProgressOff();
-                delete el._ndsProgressOff;
+                reveal.destroy();
                 syncFromData(el);
             }, { threshold: 0.5 });
+            const reveal = { destroy() { off(); if (el.ndsProgress === reveal) delete el.ndsProgress; } };
+            el.ndsProgress = reveal;
         });
 
-        if (_offAttrChange) _offAttrChange();
-        _offAttrChange = NDS.onAttrChange(SEL, ATTRS, els => els.forEach(syncFromData));
+        _watch();
     }
 
-    NDS.Progress = { init, initCircle: syncFromData, setValue, setOutOf };
+    NDS.Progress = { init, initCircle: el => { _watch(); syncFromData(el); }, setValue, setOutOf };
 })();

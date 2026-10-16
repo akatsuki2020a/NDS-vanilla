@@ -1,29 +1,29 @@
 /* NDS.Drawer — public surface
  * Rides: (none — base component)
+ * Requires:
+ *   .nds-drawer-list li:has(> ul) needs :scope > .nds-btn — the item never opens
  * Methods:
  *   NDS.Drawer.init() / .reinit()   scan + initialize .nds-drawer
  *   NDS.Drawer.create(drawer)       initialize one drawer
- *   NDS.Drawer.initDrawer(drawer)   the same function under its older name
  *   NDS.Drawer.destroy(drawer)      detach its listeners and clear the init stamp
  *   NDS.Drawer.toggle(button)       open or close the submenu that BUTTON owns
  * Events (bubble from the .nds-drawer):
  *   nds:drawer:shown    detail {item, drawer} — after the expand transition
  *   nds:drawer:hidden   detail {item, drawer} — after the collapse transition
  * Hooks:
- *   data-open-on          which items start open. A breakpoint name from NDS.breakpoints,
- *                         or `always` / `never`. On the drawer it is the default; on an
- *                         <li> it overrides that default
- *   data-always-open-on   at this breakpoint every submenu is open and the toggles stop
- *                         responding (the drawer also gains data-state="always-open")
+ *   data-state="always-open"   on the drawer: submenus open and close on their own
+ *   data-state="open"          on an <li> and its <ul> (+ aria-expanded="true" on the
+ *                              button): the submenu starts open, painted by CSS
  * Gotchas:
- *   - Opening a submenu closes its siblings — one open branch per level.
+ *   - Opening a submenu closes its siblings — one open branch per level — unless always-open.
  *   - toggle() takes the BUTTON, not the <li>.
- *   - An <li> marked data-state="active" opens every ancestor branch at init.
+ *   - An <li> marked data-state="active" opens every ancestor branch at init; moving the
+ *     mark later (a client-side route) marks its button and opens its branch too.
  */
 /**
  * NDS Drawer Component
- * Handles expand/collapse of nested menus with responsive state control
- * Uses data-state for state management and data-open-on for breakpoint control
+ * Handles expand/collapse of nested menus
+ * Uses data-state for state management
  */
 
 (function () {
@@ -39,56 +39,9 @@
             closing: 'closing',
             closed: '',
             active: 'active'
-        },
-        breakpoints: NDS.breakpoints
+        }
     };
 
-
-    // ==============================================
-    // RESPONSIVE STATE HELPERS
-    // ==============================================
-
-    function checkBreakpoint(breakpoint) {
-        if (breakpoint === 'always') return true;
-        if (breakpoint === 'never') return false;
-
-        const mediaQuery = CONFIG.breakpoints[breakpoint];
-        return mediaQuery ? window.matchMedia(mediaQuery).matches : false;
-    }
-
-    function getOpenOnValue(item, drawer) {
-        // Item-level override takes priority
-        if (item.hasAttribute('data-open-on')) {
-            return item.getAttribute('data-open-on');
-        }
-
-        // Drawer-level default
-        if (drawer.hasAttribute('data-open-on')) {
-            return drawer.getAttribute('data-open-on');
-        }
-
-        // Fallback: check if item has 'open' class (backward compatibility)
-        if (item.classList.contains('open')) {
-            return 'always';
-        }
-
-        return 'never';
-    }
-
-    function shouldItemBeOpen(item, drawer) {
-        const openOn = getOpenOnValue(item, drawer);
-        return checkBreakpoint(openOn);
-    }
-
-    function getAlwaysOpenOnValue(drawer) {
-        return drawer.getAttribute('data-always-open-on') || null;
-    }
-
-    function shouldBeAlwaysOpen(drawer) {
-        const alwaysOpenOn = getAlwaysOpenOnValue(drawer);
-        if (!alwaysOpenOn) return false;
-        return checkBreakpoint(alwaysOpenOn);
-    }
 
     // ==============================================
     // STATE MANAGEMENT
@@ -106,9 +59,15 @@
             removeState(element, ...TRANSITION_STATES);
             addState(element, state);
         } else {
-            // Empty state = clear transition + active states, keep others
-            removeState(element, ...TRANSITION_STATES, 'active');
+            // Empty state = clear transition states only: an <li>'s `active` is the author's current-page mark
+            removeState(element, ...TRANSITION_STATES);
         }
+    }
+
+    // A closed toggle keeps its highlight while its <li> is the current page.
+    function clearButton(listItem, button) {
+        if (hasState(listItem, CONFIG.states.active)) setState(button, CONFIG.states.active);
+        else NDS.State.clear(button);
     }
 
     function isOpen(listItem) {
@@ -131,7 +90,7 @@
         } else {
             // Accordion: close siblings
             const parentList = listItem.parentElement;
-            if (parentList) {
+            if (parentList && !hasState(button.closest(CONFIG.selectors.drawer), 'always-open')) {
                 parentList.querySelectorAll(':scope > li').forEach(sibling => {
                     if (sibling === listItem) return;
                     if (!isOpen(sibling)) return;
@@ -166,7 +125,7 @@
         submenu.style.height = '0px';
         setState(listItem, CONFIG.states.closed);
         NDS.aria.expanded(button, false);
-        NDS.State.clear(button);
+        clearButton(listItem, button);
 
         NDS.onTransitionEnd(submenu, () => {
             setState(submenu, CONFIG.states.closed);
@@ -184,12 +143,10 @@
     }
 
     // ==============================================
-    // RESPONSIVE STATE INITIALIZATION
+    // INITIAL STATE
     // ==============================================
 
-    function initResponsiveState(drawer) {
-        const isAlwaysOpen = shouldBeAlwaysOpen(drawer);
-
+    function initOpenState(drawer) {
         drawer.querySelectorAll('.nds-drawer-list li').forEach(item => {
             const submenu = item.querySelector(':scope > ul');
             if (!submenu) return;
@@ -197,10 +154,8 @@
             const button = item.querySelector(':scope > .nds-btn');
             if (!button) return;
 
-            // Check if should be open (either always-open or conditional)
-            const shouldBeOpen = isAlwaysOpen || shouldItemBeOpen(item, drawer);
-
-            if (shouldBeOpen) {
+            // Opened in the markup
+            if (hasState(item, CONFIG.states.open)) {
                 setState(item, CONFIG.states.open);
                 setState(submenu, CONFIG.states.open);
                 NDS.aria.expanded(button, true);
@@ -209,16 +164,9 @@
                 setState(item, CONFIG.states.closed);
                 setState(submenu, CONFIG.states.closed);
                 NDS.aria.expanded(button, false);
-                NDS.State.clear(button);
+                clearButton(item, button);
             }
         });
-
-        // Set always-open state on drawer for CSS targeting
-        if (isAlwaysOpen) {
-            addState(drawer, 'always-open');
-        } else {
-            removeState(drawer, 'always-open');
-        }
     }
 
     function initToggles(drawer) {
@@ -236,11 +184,6 @@
             button.classList.add('nds-menu-btn');
 
             button.addEventListener('click', (e) => {
-                // Don't toggle if drawer is in always-open mode
-                if (hasState(drawer, 'always-open')) {
-                    return;
-                }
-
                 if (button.tagName === 'BUTTON' || button.getAttribute('href') === '#') {
                     e.preventDefault();
                     toggleSubmenu(button);
@@ -253,93 +196,81 @@
     // ACTIVE STATE MANAGEMENT
     // ==============================================
 
-    function initActiveStates(drawer) {
-        drawer.querySelectorAll('li[data-state~="active"]').forEach(activeItem => {
-            // Set active state on the item's own button for visual indicator
-            const activeBtn = activeItem.querySelector(':scope > .nds-btn');
-            if (activeBtn) setState(activeBtn, CONFIG.states.active);
+    // Marks the item's button and opens its closed ancestors: painted at once at init,
+    // through toggleSubmenu() later, so a moved mark animates and closes sibling branches.
+    function activateItem(drawer, activeItem, animate) {
+        const activeBtn = activeItem.querySelector(':scope > .nds-btn');
+        if (activeBtn) setState(activeBtn, CONFIG.states.active);
 
-            let parent = activeItem.closest('ul')?.closest('li');
-
-            while (parent && drawer.contains(parent)) {
-                if (!isOpen(parent)) {
-                    const btn = parent.querySelector(':scope > .nds-btn');
-                    const submenu = parent.querySelector(':scope > ul');
-
-                    setState(parent, CONFIG.states.open);
-                    if (btn) {
-                        NDS.aria.expanded(btn, true);
-                        setState(btn, CONFIG.states.active);
-                    }
-                    if (submenu) setState(submenu, CONFIG.states.open);
-                }
-                parent = parent.closest('ul')?.closest('li');
+        const closed = [];
+        let parent = activeItem.closest('ul')?.closest('li');
+        while (parent && drawer.contains(parent)) {
+            if (!isOpen(parent)) closed.unshift(parent);
+            parent = parent.closest('ul')?.closest('li');
+        }
+        closed.forEach(item => {
+            const btn = item.querySelector(':scope > .nds-btn');
+            const submenu = item.querySelector(':scope > ul');
+            if (animate) { if (btn && submenu) toggleSubmenu(btn); return; }
+            setState(item, CONFIG.states.open);
+            if (btn) {
+                NDS.aria.expanded(btn, true);
+                setState(btn, CONFIG.states.active);
             }
+            if (submenu) setState(submenu, CONFIG.states.open);
         });
     }
 
-    // ==============================================
-    // RESIZE HANDLER FOR RESPONSIVE STATE
-    // ==============================================
+    function initActiveStates(drawer) {
+        drawer.querySelectorAll('li[data-state~="active"]').forEach(item => activateItem(drawer, item, false));
+    }
 
-    function handleResize(drawer) {
-        const currentWidth = window.innerWidth;
-        const previousWidth = drawer._previousWidth;
-        drawer._previousWidth = currentWidth;
-
-        // Skip height-only changes (mobile address bar show/hide) — width is
-        // unchanged. A first resize has no baseline (previousWidth undefined),
-        // so it never equals currentWidth and correctly re-evaluates.
-        if (currentWidth === previousWidth) return;
-
-        initResponsiveState(drawer);
+    // A page that routes on the client moves the <li>'s active mark after init; the
+    // button and the branch follow. Idempotent, so the drawer's own open/close writes pass.
+    let watchingActive = false;
+    function watchActive() {
+        if (watchingActive) return;
+        watchingActive = true;
+        NDS.onAttrChange('.nds-drawer[data-nds-drawer-initialized] li', ['data-state'], items => items.forEach(item => {
+            const btn = item.querySelector(':scope > .nds-btn');
+            if (!btn) return;
+            if (hasState(item, CONFIG.states.active)) {
+                if (!hasState(btn, CONFIG.states.active)) activateItem(item.closest(CONFIG.selectors.drawer), item, true);
+            } else if (!isOpen(item) && hasState(btn, CONFIG.states.active)) {
+                clearButton(item, btn);
+            }
+        }));
     }
 
     // ==============================================
     // INITIALIZATION
     // ==============================================
 
-    function initDrawer(drawer) {
+    function createDrawer(drawer) {
         if (drawer.hasAttribute('data-nds-drawer-initialized')) return;
 
-        initResponsiveState(drawer);
+        initOpenState(drawer);
         initToggles(drawer);
         initActiveStates(drawer);
-
-        // Cold init: no window.innerWidth read here — it would force a
-        // synchronous reflow of every setState write above. handleResize
-        // establishes the width baseline lazily on its first call instead.
-
-        // Add resize listener for responsive state updates
-        if (drawer.hasAttribute('data-open-on') || drawer.hasAttribute('data-always-open-on') || drawer.querySelector('[data-open-on]')) {
-            drawer._offResize = NDS.onResize(() => handleResize(drawer));
-        }
+        watchActive();
 
         drawer.setAttribute('data-nds-drawer-initialized', 'true');
     }
 
     function initAllDrawers() {
         document.querySelectorAll(CONFIG.selectors.drawer).forEach(drawer => {
-            if (drawer.closest('code, .code-example')) return;
-            initDrawer(drawer);
+            if (drawer.closest('code')) return;
+            createDrawer(drawer);
         });
     }
 
     function destroyDrawer(drawer) {
-        // Release pooled resize subscription stored in initDrawer.
-        if (drawer._offResize) {
-            drawer._offResize();
-            delete drawer._offResize;
-        }
-
         // Abort all submenu-toggle listeners attached in initToggles
         if (drawer._togglesAC) {
             drawer._togglesAC.abort();
             delete drawer._togglesAC;
         }
 
-        // Clean up stored width
-        delete drawer._previousWidth;
         drawer.removeAttribute('data-nds-drawer-initialized');
     }
 
@@ -350,8 +281,7 @@
     NDS.Drawer = {
         init: initAllDrawers,
         reinit: initAllDrawers,
-        create: initDrawer,
-        initDrawer,
+        create: createDrawer,
         destroy: destroyDrawer,
         toggle: toggleSubmenu
     };

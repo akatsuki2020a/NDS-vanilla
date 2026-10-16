@@ -1,54 +1,20 @@
 /* ========================================
-   COOKIE POPUP COMPONENT
-   Composes on .nds-card for background, padding, typography, and layout.
-   Only popup-specific overlay behavior lives here.
+   COOKIE CONSENT
+   Rides Panel (the bottom sheet), Scroll More, Switch and Flex. Only the views live here.
    ======================================== */
 
 @use '../mixins' as *;
 
-.nds-cookie-popup.nds-card {
-    --card-width: 100%;
-    --_card-padding-base: var(--spacing-3xl);
-    --_card-gap-base: var(--spacing-lg);
-    --_card-radius-base: var(--radius-lg) var(--radius-lg) 0 0;
-
-    position: fixed;
-    bottom: 0;
-    inset-inline: 0;
-    box-shadow: var(--shadow-md-top);
-    z-index: 1000;
-    animation: slideUp var(--nds-transition);
-
-    @include reduced-motion {
-        animation: none;
-    }
-
-    &.nds-compact {
-        @include tablet('min') {
-            --_card-radius-base: var(--radius-lg);
-            --card-width: calc(100% - var(--spacing-4xl));
-            --card-width-max: 480px;
-            margin-inline: auto;
-            bottom: var(--spacing-3xl);
-        }
-    }
-
-    .nds-card-actions {
-        flex-direction: column;
-    }
-}
-
-.nds-cookie-popup-links {
+// A view stands in for the panel's own column, so its body still scrolls.
+.nds-cookies-view {
+    flex: 1 1 auto;
+    min-height: 0;
     display: flex;
-    gap: var(--spacing-lg);
+    flex-direction: column;
+    gap: inherit;
 
-    a {
-        color: var(--text-primary);
-        text-decoration: none;
-
-        &:hover {
-            color: var(--text-default);
-            text-decoration: underline;
-        }
+    // Panel's own rule reaches only its direct child.
+    > .nds-scroll-more {
+        flex: 1 1 auto;
     }
 }

@@ -2,8 +2,8 @@
    FOLD  ·  above-the-fold FCP gates + chrome reservations
    The minimum that must paint before crit lands: page canvas, topbar/nav
    heights, hero swiper first-slide collapse, page-level hide gate, pre-init
-   main overflow guard, and icon/HGI gate initials (their reveals live with
-   the respective sheets). Heavier structural skeleton (content-layout grid,
+   main overflow guard, skip-link hide, and the icon gate initial (its reveal lives with
+   the icon sheet). Heavier structural skeleton (content-layout grid,
    hero CTA/swiper flex, critical-component safeguard) lives in _skeleton.scss
    — crit-only, no inline weight.
 
@@ -114,17 +114,15 @@ html[data-theme~=dark] :where(.nds-main-nav .nds-brand.nds-oncolor :is(img, svg)
    applies, components own their own overflow. */
 html:not([data-nds-loaded]) main { overflow-x: clip; }
 
+/* ── Skip link ── hidden until focused; here so it never flashes before main CSS.
+   Its focus look lives in _utilities.scss. */
+.nds-skip-link:not(:focus) { @include label-hidden; }
+
 /* ── Icon gate (initial) ──
    Masked-icon pseudos write opacity:var(--nds-icons-opacity); ships 0 here.
    The reveal (→ 1) is the :root block of _sass/_icons.scss itself, so it
    lands in the same style pass as the icon tokens. */
 :root { --nds-icons-opacity: 0; }
-
-/* ── HGI font gate (initial) ──
-   Content icons render fallback glyphs until the icon font lands; hidden
-   here. The reveal (data-nds-fonts-loaded~="hgi-stroke-rounded" → 1) lives
-   in _sass/_hgiRoundedStroke.scss; the @font-face itself is in _fonts.scss. */
-i.hgi-stroke { opacity: 0; }
 
 @if $inline {
     /* ════ Inline-only (no critical-file counterpart) ════
@@ -151,7 +149,7 @@ i.hgi-stroke { opacity: 0; }
         content: "";
         position: absolute;
         inset: 0;
-        background: color-mix(in srgb, var(--img-overlay-color, #{$c-hero-overlay}) calc(var(--overlay, .7) * 100%), transparent);
+        background: color-mix(in srgb, var(--background-image-overlay, #{$c-hero-overlay}) calc(var(--overlay, .7) * 100%), transparent);
         pointer-events: none;
     }
 

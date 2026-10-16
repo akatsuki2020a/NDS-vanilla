@@ -33,6 +33,13 @@
 (function () {
     'use strict';
 
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('chart', {
+        chart: 'Chart',
+        bar: 'Bar chart',
+        line: 'Line chart',
+    });
+
     const SVG_NS = 'http://www.w3.org/2000/svg';
     let uid = 0;
 
@@ -147,6 +154,8 @@
             this._activeHover = null;
             this.abortController = new AbortController();
             this._setupDelegation();
+            // Holds the drawing's height until the first render, so a chart mounted into a live view does not collapse for two frames.
+            if (!el.firstElementChild) { this._heldMin = el.style.minHeight; el.style.minHeight = this.opts.height + 'px'; }
             // The first render is triggered by the ResizeObserver's initial
             // delivery (_setupResize): it reads clientWidth post-layout and
             // schedules render() off a rAF, so construction never forces a
@@ -182,10 +191,12 @@
         }
 
         destroy() {
+            this._destroyed = true;
             this.abortController.abort();
             if (this.renderAbortController) { this.renderAbortController.abort(); this.renderAbortController = null; }
             if (this._offResize) { this._offResize(); this._offResize = null; }
             this.el.innerHTML = '';
+            if (this._heldMin != null) this.el.style.minHeight = this._heldMin;
             // Drop the init sentinel with the instance: leaving it on makes teardown
             // one-way — the init sweep skips a stamped element, so a view that unmounts
             // and mounts again gets an emptied chart no instance will ever claim.
@@ -253,7 +264,7 @@
             }));
         }
 
-        _layout(wrap, height, extraPadBottom = 0) {
+        _layout(wrap, height, extraPadBottom = 0, startReach = 0) {
             const isRTL = this._isRTL;
             const w = wrap.clientWidth || this.el.clientWidth || 600;
             const h = height || 350;
@@ -262,17 +273,21 @@
             const axisPad = hasY ? 55 : 20;
             const padTop = pad.top ?? 20;
             const padBottom = (pad.bottom ?? 40) + extraPadBottom;
-            const padLeft = pad.left ?? (isRTL ? 20 : axisPad);
-            const padRight = pad.right ?? (isRTL ? axisPad : 20);
+            const baseLeft = pad.left ?? (isRTL ? 20 : axisPad);
+            const baseRight = pad.right ?? (isRTL ? axisPad : 20);
+            // A tilted first label leans out past the y-axis side: widen that side to hold it.
+            const extraStart = Math.max(0, startReach - (isRTL ? baseRight : baseLeft));
+            const padLeft = baseLeft + (isRTL ? 0 : extraStart);
+            const padRight = baseRight + (isRTL ? extraStart : 0);
             return {
-                w, h, padTop, padBottom, padLeft, padRight, isRTL,
+                w, h, padTop, padBottom, padLeft, padRight, isRTL, extraStart,
                 plotW: w - padLeft - padRight,
                 plotH: h - padTop - padBottom,
             };
         }
 
         // Decide whether x-axis labels should be decimated and/or rotated.
-        // Returns { step, rotate, extraPad }. Char width is estimated, not measured —
+        // Returns { step, rotate, extraPad, startReach }. Char width is estimated, not measured —
         // an explicit labelRotate/labelDecimate overrides the auto decision.
         _xaxisStrategy(catLabels, plotW) {
             const xaxis = this.opts.xaxis || {};
@@ -310,7 +325,13 @@
                 ? Math.max(0, Math.ceil(maxLabelW * Math.sin(rotate * Math.PI / 180)) - 14)
                 : 0;
 
-            return { step, rotate, extraPad };
+            // How far the tilted first label reaches sideways past the plot's edge; one font size spare,
+            // since the width is a guess. A bar's label sits half a slot in from the edge.
+            const rad = rotate * Math.PI / 180;
+            const inset = this.opts.type === 'bar' ? plotW / Math.max(1, catLabels.length) / 2 : 0;
+            const startReach = rotate ? Math.ceil(String(catLabels[0] ?? '').length * charW * Math.cos(rad) + fontSize - inset) : 0;
+
+            return { step, rotate, extraPad, startReach };
         }
 
         _valToY(val, scale, L) {
@@ -339,7 +360,7 @@
             // Two-step layout: provisional plotW → x-axis strategy → final layout with extraPad
             const provisional = this._layout(wrap, height);
             const xStrategy = this._xaxisStrategy(catLabels, provisional.plotW);
-            const L = this._layout(wrap, height, xStrategy.extraPad);
+            const L = this._layout(wrap, height, xStrategy.extraPad, xStrategy.startReach);
 
             const scale = computeScale(seriesArr, catCount);
             const svg = this._createSvg(L, ariaLabel);
@@ -364,7 +385,7 @@
         _renderYAxis(svg, scale, L) {
             scale.steps.forEach(v => {
                 const txt = svgEl('text', {
-                    x: L.isRTL ? L.w - 8 : L.padLeft - 8,
+                    x: L.isRTL ? L.w - 8 - L.extraStart : L.padLeft - 8,
                     y: this._valToY(v, scale, L) + 4,
                     class: 'nds-chart-axis-label',
                     'text-anchor': L.isRTL ? 'start' : 'end',
@@ -374,10 +395,13 @@
             });
         }
 
-        _renderXLabels(svg, catLabels, xPositions, L, xStrategy) {
+        // edges: the first and last points sit on the plot's edges (a line chart), so their flat labels
+        // run inward from the point instead of centring over it and spilling past the SVG.
+        _renderXLabels(svg, catLabels, xPositions, L, xStrategy, edges = false) {
             const { step = 1, rotate = 0 } = xStrategy || {};
             const baseY = L.padTop + L.plotH;
             const y = rotate ? baseY + 14 : baseY + 30;
+            const last = catLabels.length - 1;
 
             catLabels.forEach((label, i) => {
                 if (step > 1 && i % step !== 0) return;
@@ -386,7 +410,7 @@
                 const attrs = { x, y, class: 'nds-chart-axis-label' };
 
                 if (rotate === 0) {
-                    attrs['text-anchor'] = 'middle';
+                    attrs['text-anchor'] = (edges && last > 0 && (i === 0 ? 'start' : i === last && 'end')) || 'middle';
                 } else {
                     attrs['text-anchor'] = 'end';
                     attrs.transform = `rotate(${L.isRTL ? rotate : -rotate} ${x} ${y})`;
@@ -401,6 +425,8 @@
         // ── Render orchestrator ──────────────────────────────────
 
         render() {
+            // A deferred or throttled frame can land after destroy(); it must not draw into the emptied element.
+            if (this._destroyed) return;
             if (!this.el.clientWidth) {
                 this._deferCount = (this._deferCount || 0) + 1;
                 if (this._deferCount < 10) {
@@ -416,6 +442,7 @@
             if (this.renderAbortController) this.renderAbortController.abort();
             this.renderAbortController = new AbortController();
             this.el.innerHTML = '';
+            if (this._heldMin != null) { this.el.style.minHeight = this._heldMin; this._heldMin = null; }
             this.el.classList.add('nds-chart');
             this.el.setAttribute('data-chart-type', this.opts.type);
 
@@ -488,7 +515,7 @@
                 viewBox: `0 0 ${size} ${size}`,
                 class: 'nds-chart-svg',
                 role: 'img',
-                'aria-label': 'Chart',
+                'aria-label': strings.text('chart'),
                 style: `max-height:${size}px`,
             });
 
@@ -570,7 +597,7 @@
             const { bar, dataLabels } = this.opts;
             const stacked = bar?.stacked || false;
 
-            const ctx = this._axisChart(wrap, 'Bar chart', (seriesArr, catCount) => {
+            const ctx = this._axisChart(wrap, strings.text('bar'), (seriesArr, catCount) => {
                 let maxVal = 0;
                 if (stacked) {
                     for (let c = 0; c < catCount; c++) {
@@ -674,7 +701,7 @@
             const lineW = line?.width || 2;
             const showArea = line?.area || false;
 
-            const ctx = this._axisChart(wrap, 'Line chart', (seriesArr) => {
+            const ctx = this._axisChart(wrap, strings.text('line'), (seriesArr) => {
                 let maxVal = 0, minVal = 0;
                 seriesArr.forEach(s => s.data.forEach(v => {
                     if (v > maxVal) maxVal = v;
@@ -892,8 +919,7 @@
                         if (this.opts.tooltip?.show !== false && this._tooltip) {
                             // Build tip as DOM so caller-supplied colors[] flow through
                             // marker.style.backgroundColor (a CSSOM setter) instead of an
-                            // HTML attribute interpolation. escapeHtml cannot safely close
-                            // attribute-context quote-breakouts.
+                            // HTML style-attribute interpolation.
                             this._tooltip.replaceChildren();
                             const title = document.createElement('strong');
                             title.textContent = catLabels[nearest] ?? '';
@@ -952,7 +978,7 @@
             }
 
             if (this.opts.xaxis?.show) {
-                this._renderXLabels(svg, catLabels, xPositions, L, xStrategy);
+                this._renderXLabels(svg, catLabels, xPositions, L, xStrategy, true);
             }
 
             wrap.appendChild(svg);

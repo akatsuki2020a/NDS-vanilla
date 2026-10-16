@@ -1,8 +1,8 @@
 /**
  * NDS Tooltip Component
  * Floating balloon with a title + body (and optional leading icon),
- * anchored to a trigger via a visible arrow. Viewport-aware fixed
- * positioning with flip-up and horizontal clamping.
+ * anchored to a trigger via a visible arrow. Viewport-aware placement
+ * with flip-up and horizontal clamping.
  */
 
 @use '../mixins' as *;
@@ -71,19 +71,24 @@
 
   // On the help wrapper itself, inherited by its icon; an outline icon has no disc
   // and never reads the fill, so the old outline exclusion is implicit.
-  &-trigger [data-status="help"] {
+  &-trigger .nds-feedback:is([data-status="help"], :not([data-status])) {
     --feedback-icon-color: var(--_tooltip-help-color);
   }
 
 }
 
+// A status-less chip in a tooltip draws the help "?". In the var() default, so a
+// data-status on the chip still wins.
+:is(.nds-tooltip-trigger, .nds-tooltip-balloon) .nds-feedback .nds-feedback-icon {
+  --_feedback-icon-stroke: var(--feedback-icon-stroke, var(--nds-icon-help-circle));
+  --_feedback-icon-symbol: var(--feedback-icon-symbol, var(--nds-icon-help));
+}
+
 // ==============================================
 // 3. BALLOON
 // ==============================================
-// Lives at body level when portaled (escapes container-type/transform
-// stacking contexts), so its variables and state-driven rules must apply
-// via the balloon's own attributes — we can't rely on `.nds-tooltip` as
-// an ancestor selector.
+// A [popover] in the top layer while open (NDS.topLayer), still a DOM child of
+// its .nds-tooltip.
 
 .nds-tooltip-balloon {
   --_tooltip-bg: var(--tooltip-background-default);
@@ -99,10 +104,13 @@
   display: flex;
   gap: var(--_tooltip-gap);
   align-items: flex-start;
-  position: fixed;
-  z-index: 1000;
+  @include top-layer;
+  z-index: 998; // only without popover support: under the mainnav and an open panel
   width: max-content;
   max-width: var(--_tooltip-max-width);
+  // Built inside its trigger, so a nowrap host (.nds-tag) would otherwise leak in.
+  white-space: normal;
+  overflow-wrap: anywhere; // a long unbroken string (file name, URL) wraps instead of spilling out
   padding: var(--_tooltip-padding);
   background-color: var(--_tooltip-bg);
   color: var(--_tooltip-body);
@@ -112,6 +120,9 @@
 
   font-size: var(--typo-text-xs-FS);
   line-height: var(--typo-text-xs-LH);
+  // It inherits from where it is authored now, not from <body>: a bold or centred host stays out.
+  font-weight: var(--font-weight-regular);
+  text-align: start;
 
   // CSS-only arrow: rotated square inheriting background + border so only
   // the two edges facing away from the balloon body are visible.
@@ -140,8 +151,7 @@
   }
 
   // Flipped above trigger → arrow points down from balloon bottom.
-  // The attribute is mirrored onto the balloon by JS so this works whether
-  // the balloon is in source position or portaled to <body>.
+  // JS mirrors the attribute onto the balloon.
   &[data-position-vertical="top"]::before {
     top: auto;
     bottom: calc(var(--_tooltip-arrow-size) / -2 - 1px);

@@ -1,5 +1,5 @@
 /* NDS.Multiselect — public surface
- * Rides: nds-dropmenu (portal, positioning, search, auto-close knobs; soft — works without it)
+ * Rides: nds-dropmenu (top layer, positioning, search, auto-close knobs; soft — works without it)
  *      · nds-forms (required + min/max validation, disabled state)
  * Methods:
  *   NDS.Multiselect.init() / .reinit()   scan + initialize .nds-multiselect fields
@@ -44,11 +44,14 @@
 (function () {
     'use strict';
 
-    const STRINGS = {
-        en: { none: 'No selection', added: 'Added',     removed: 'Removed',   cleared: 'Selection cleared', applied: 'Applied' },
-        ar: { none: 'لا تحديد',     added: 'تمت إضافة', removed: 'تمت إزالة', cleared: 'تم مسح التحديد',    applied: 'تم تطبيق' }
-    };
-    const S = () => STRINGS[NDS.langKey];
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('multiselect', {
+        none: '{label}: No selection',
+        added: 'Added {value}',
+        removed: 'Removed {value}',
+        cleared: 'Selection cleared',
+        applied: 'Applied {value}',
+    });
 
     // Chips are buttons outside .nds-form-action, so the forms disabled hook
     // doesn't reach them — without this they stay tab-focusable (and removable)
@@ -80,8 +83,7 @@
                 console.warn('NDS Multiselect: missing required elements', root);
                 return;
             }
-            // Portal-safe identifier so custom styling / consumer hooks survive
-            // the menu portaling to <body> (rule: every owned menu names itself).
+            // Rule: every owned menu names itself.
             this.menu.classList.add('nds-multiselect-menu');
 
             this.name = root.getAttribute('data-multiselect-name') || '';
@@ -89,6 +91,8 @@
             this.abortController = new AbortController();
             this.valid = true;
             this.init();
+            // Forms applies an authored disabled through the field's input, and a multiselect's inputs sit in its menu.
+            NDS.State.apply(root, 'disabled');
         }
 
         init() {
@@ -102,8 +106,10 @@
             // during the critical pass), so this normally runs; the guard just keeps
             // the unbuilt-but-functional fallback if it's ever absent.
             if (NDS.Dropmenu && !this.dropmenu.ndsDropmenu) NDS.Dropmenu.create(this.dropmenu);
+            // An icon-only trigger names itself in aria-label: read it, and give it back on destroy().
+            this.triggerAriaOriginal = this.trigger?.getAttribute('aria-label') || '';
             this.triggerLabelOriginal = (
-                this.trigger?.querySelector('.nds-label')?.textContent || ''
+                this.trigger?.querySelector('.nds-label')?.textContent || this.triggerAriaOriginal
             ).trim();
             // Declarative population — JSON attributes win over any
             // hand-written rows in the menu.
@@ -122,6 +128,12 @@
             this.applied = this.getSelected();
             this.bindEvents();
             this.renderChips();
+            // A narrow field wraps the trigger onto its own top row, a shape only
+            // layout can see; CSS rounds the trigger's corners for it.
+            this._offStacked = NDS.onElementResize(this.formControl, () => {
+                const stacked = this.dropmenu.offsetHeight < this.formControl.clientHeight - 1;
+                return () => this.formControl.toggleAttribute('data-multiselect-stacked', stacked);
+            });
             this.root.setAttribute('data-nds-multiselect-initialized', 'true');
             // Registered here (not the sweep) so create()-made instances get the
             // expando too — init() only runs on successful construction.
@@ -272,8 +284,7 @@
             // ── Checkbox change (delegated) ─────────────────────────
             // Each toggle commits immediately; chips + a11y summary refresh
             // live. One listener on the menu element survives populate()
-            // rebuilding the rows and stays attached while the dropmenu
-            // portals the menu to <body>.
+            // rebuilding the rows.
             this.menu.addEventListener('change', (e) => {
                 if (!e.target.matches('input[type="checkbox"]')) return;
                 // Staged in apply mode — the native checkbox state change is
@@ -315,6 +326,7 @@
             if (this.resetBtn) {
                 this.resetBtn.addEventListener('click', (e) => {
                     e.preventDefault();
+                    if (this.isReadonly()) return;
                     this.reset();
                 }, { signal });
             }
@@ -340,13 +352,24 @@
 
         destroy() {
             this.abortController?.abort();
-            NDS.aria.label(this.trigger, '');
+            this._offStacked?.();
+            this.formControl.removeAttribute('data-multiselect-stacked');
+            // Chips hold their own remove listeners; create() rebuilds them.
+            this.chipsEl.replaceChildren();
+            NDS.State.remove(this.root, 'filled');
+            NDS.aria.label(this.trigger, this.triggerAriaOriginal);
             this.root.removeAttribute('data-nds-multiselect-initialized');
             delete this.root.ndsMultiselect;
         }
 
         isOpen() {
             return NDS.State.has(this.dropmenu, 'open');
+        }
+
+        // Readonly blocks the user only: chips and Reset are keyboard-reachable
+        // past the readonly CSS, while removeValue()/reset() stay callable from code.
+        isReadonly() {
+            return NDS.State.has(this.root, 'readonly');
         }
 
         getSelected() {
@@ -360,7 +383,7 @@
             this.applied = this.getSelected();
             this.renderChips();
             const labels = this.applied.map(v => this.labelFor(v));
-            NDS.announce(labels.length ? S().applied + ' ' + labels.join(', ') : S().cleared);
+            NDS.announce(labels.length ? strings.text('applied', { value: labels.join(', ') }) : strings.text('cleared'));
             this.emitChange();
         }
 
@@ -378,7 +401,7 @@
             this.applied = [];
             this.renderChips();
             if (before.length) {
-                NDS.announce(S().cleared);
+                NDS.announce(strings.text('cleared'));
                 this.emitChange();
             }
         }
@@ -397,13 +420,12 @@
                 const remaining = this.chipsEl.children;
                 (remaining[Math.min(removedIdx, remaining.length - 1)] || this.trigger)?.focus();
             }
-            NDS.announce(S().removed + ' ' + this.labelFor(value));
+            NDS.announce(strings.text('removed', { value: this.labelFor(value) }));
             this.emitChange();
         }
 
         announceToggle(cb) {
-            const s = S();
-            NDS.announce((cb.checked ? s.added : s.removed) + ' ' + this.labelFor(cb.value));
+            NDS.announce(strings.text(cb.checked ? 'added' : 'removed', { value: this.labelFor(cb.value) }));
         }
 
         labelFor(value) {
@@ -423,8 +445,8 @@
 
             if (this.trigger && this.triggerLabelOriginal) {
                 const labels = selected.map(v => this.labelFor(v));
-                const summary = labels.length ? labels.join(', ') : S().none;
-                NDS.aria.label(this.trigger, this.triggerLabelOriginal + ': ' + summary);
+                if (labels.length) NDS.aria.label(this.trigger, this.triggerLabelOriginal + ': ' + labels.join(', '));
+                else strings.set(this.trigger, 'aria-label', 'none', { label: this.triggerLabelOriginal });
             }
         }
 
@@ -437,6 +459,7 @@
                 disabled: NDS.State.has(this.root, 'disabled'),
                 onRemove: (e) => {
                     e.stopPropagation();
+                    if (this.isReadonly()) return;
                     this.removeValue(value);
                 },
             });
@@ -457,7 +480,7 @@
 
     function initializeMultiselects() {
         document.querySelectorAll('.nds-multiselect').forEach(el => {
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
             if (el.hasAttribute('data-nds-multiselect-initialized')) return;
             new NDSMultiselect(el);
         });
@@ -466,7 +489,11 @@
     NDS.Multiselect = {
         init: initializeMultiselects,
         reinit: initializeMultiselects,
-        create: (element) => element.ndsMultiselect || new NDSMultiselect(element),
+        create: (element) => {
+            if (element.ndsMultiselect) return element.ndsMultiselect;
+            const inst = new NDSMultiselect(element);
+            return inst.valid ? inst : null;
+        },
         destroy: (element) => element.ndsMultiselect?.destroy()
     };
 })();

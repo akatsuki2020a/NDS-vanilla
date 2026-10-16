@@ -2,7 +2,8 @@
  * Rides: (none — base component)
  * Methods:
  *   NDS.Empty.init()                fill every empty .nds-empty now, then keep watching
- *   NDS.Empty.refresh(container)    re-evaluate one container by hand
+ *   NDS.Empty.refresh(container)    re-evaluate one container by hand; also resyncs a table
+ *                                   placeholder's colspan to the current column count
  * Events:
  *   (none)
  * Hooks:
@@ -34,16 +35,16 @@
 (() => {
   'use strict';
 
-  const STRINGS = {
-    ar: 'لا يوجد محتوى',
-    en: 'No content to show',
-  };
+  // English defaults; the assets/i18n/{lang}.json pack overrides them.
+  const strings = NDS.i18n.strings('empty', {
+    message: 'No content to show',
+  });
   const PLACEHOLDER_ATTR = 'data-nds-empty-placeholder';
   const DEFAULT_ICON_CLASS = 'nds-icon nds-hgi-desert';
 
   function getMessage(container) {
     const custom = container.getAttribute('data-empty-message');
-    return custom && custom.trim() ? custom : STRINGS[NDS.langKey];
+    return custom && custom.trim() ? custom : strings.text('message');
   }
 
   function getIconClass(container) {
@@ -129,6 +130,13 @@
   }
 
   function inject(container) {
+    place(container);
+    if ((container.getAttribute('data-empty-message') || '').trim()) return;
+    // The default text is a marker: core writes it in the page language, as a bar until it lands.
+    strings.set(findPlaceholder(container).querySelector('.nds-empty-message'), 'text', 'message');
+  }
+
+  function place(container) {
     const message = getMessage(container);
     const iconClass = getIconClass(container);
     const tag = container.tagName;
@@ -164,7 +172,12 @@
       if (existing) existing.remove();
       return;
     }
-    if (existing) return;
+    if (existing) {
+      // A table's column count can change after the row went in.
+      const td = existing.querySelector('td');
+      if (td) td.colSpan = colspanFor(container.closest('table') || container);
+      return;
+    }
     inject(container);
   }
 

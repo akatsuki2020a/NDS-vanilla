@@ -118,7 +118,7 @@
     margin-inline-end: var(--spacing-md);
   }
 
-  // Neutralize links inside alerts; the content-section rule otherwise promotes a bare .nds-link to primary.
+  // Links inside an alert are neutral; the link default is primary.
   a {
     font-size: var(--typo-text-md-FS);
     line-height: var(--typo-text-md-LH);
@@ -140,6 +140,11 @@
     @include mobile{
       inset-block-start: calc(8px + 8px);
     }
+  }
+
+  // The close button is out of flow, so a long title would run under it.
+  &:not(.nds-inline) .nds-alert-content:has(~ .nds-alert-close) {
+    padding-inline-end: var(--spacing-4xl);
   }
 
   // Both .nds-color and .nds-inline are always colored via the alpha tint
@@ -303,7 +308,7 @@
   position: fixed;
   z-index: 9999;
   // Content-edge offset shared by every anchored side
-  --_toast-edge: max(var(--nds-viewport-padding), calc((100vw - var(--nds-content-MaxWidth)) / 2));
+  --_toast-edge: max(var(--nds-viewport-padding), calc((100vw - var(--nds-content-max-width)) / 2));
   inset-inline-end: var(--_toast-edge);
   display: flex;
   flex-direction: column;

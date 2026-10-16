@@ -1,5 +1,4 @@
 ---
-exclude_showcase: true
 layout: page
 title: Bachelor of Science in Artificial Intelligence
 hero_title: Bachelor of Science in Artificial Intelligence
@@ -7,12 +6,12 @@ hero_description: Preparing future leaders in AI, machine learning, and data sci
 breadcrumb: ["College of Computer Science","Artificial Intelligence"]
 lang: en
 direction: ltr
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
-layout_class: nds-cardView
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
+layout_class: nds-card-view
 ---
 
 <!--Section 1: About the Program - Expandable Content -->
-<section id="aboutProgram" class="nds-content-section">
+<section id="about-program" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">About the Program</h2>
@@ -29,7 +28,7 @@ layout_class: nds-cardView
 </section>
 
 <!--Section 2: Program Description -->
-<section id="programDescription" class="nds-content-section">
+<section id="program-description" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Program Details</h2>
@@ -92,7 +91,7 @@ layout_class: nds-cardView
                                 <span class="nds-label">Program Specification</span>
                             </dt>
                             <dd>
-                                <a class="nds-btn nds-secondary-outline nds-md" href="#" target="_blank"
+                                <a class="nds-btn nds-secondary-outline nds-md nds-icon-only" href="#" target="_blank"
                                     aria-label="Download program specification"><i class="hgi hgi-stroke hgi-pdf-01"></i>
                                 </a>
                             </dd>
@@ -102,7 +101,7 @@ layout_class: nds-cardView
 
                 <div class="nds-block nds-cq">
                     <div class="program-overview-cards nds-grid" style="--max-col: 2;--mid-col: 4;--min-col: 2;--min-width: 100px;--gap: 12px;height: auto;">
-                        <div class="nds-card nds-stroke nds-statistic">
+                        <div class="nds-card nds-stroke nds-center">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon nds-circle nds-lg">
@@ -112,13 +111,13 @@ layout_class: nds-cardView
                             </div>
                             <div class="nds-card-content">
                                 <div class="nds-card-text">
-                                    <span class="nds-card-number nds-counter-value nds-number-format nds-md"
-                                        data-target="132">0</span>
+                                    <span class="nds-card-number nds-md"
+                                        data-counter="132">0</span>
                                     <p class="nds-card-description">Credit Hours</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-card nds-stroke nds-statistic">
+                        <div class="nds-card nds-stroke nds-center">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon nds-circle nds-lg">
@@ -128,13 +127,13 @@ layout_class: nds-cardView
                             </div>
                             <div class="nds-card-content">
                                 <div class="nds-card-text">
-                                    <span class="nds-card-number nds-counter-value nds-number-format nds-md"
-                                        data-target="4">0</span>
+                                    <span class="nds-card-number nds-md"
+                                        data-counter="4">0</span>
                                     <p class="nds-card-description">Years</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-card nds-stroke nds-statistic">
+                        <div class="nds-card nds-stroke nds-center">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon nds-circle nds-lg">
@@ -144,13 +143,13 @@ layout_class: nds-cardView
                             </div>
                             <div class="nds-card-content">
                                 <div class="nds-card-text">
-                                    <span class="nds-card-number nds-counter-value nds-number-format nds-md"
-                                        data-target="8">0</span>
+                                    <span class="nds-card-number nds-md"
+                                        data-counter="8">0</span>
                                     <p class="nds-card-description">Semesters</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-card nds-stroke nds-statistic">
+                        <div class="nds-card nds-stroke nds-center">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon nds-circle nds-lg">
@@ -160,8 +159,8 @@ layout_class: nds-cardView
                             </div>
                             <div class="nds-card-content">
                                 <div class="nds-card-text">
-                                    <span class="nds-card-number nds-counter-value nds-number-format nds-md"
-                                        data-target="16">0</span>
+                                    <span class="nds-card-number nds-md"
+                                        data-counter="16">0</span>
                                     <p class="nds-card-description">Weeks per Semester</p>
                                 </div>
                             </div>
@@ -174,10 +173,10 @@ layout_class: nds-cardView
 </section>
 
 <!--Section 3: Tabs (Objectives, Requirements, Curriculum, Course Descriptions) -->
-<section id="programDetails" class="nds-content-section nds-ghost">
+<section id="program-details" class="nds-content-section nds-ghost">
     <div class="nds-section-wrapper">
         <div class="nds-section-body">
-            <div class="nds-tabs nds-divided nds-lg" id="programTabs">
+            <div class="nds-tabs nds-divided nds-lg" id="program-tabs">
                 <div class="nds-tab-list-container nds-scroll-more">
                     <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Program details navigation">
                         <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
@@ -201,7 +200,7 @@ layout_class: nds-cardView
                             <span class="nds-label">Course Descriptions</span>
                         </button>
                     </nav>
-                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                    <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more" data-i18n-aria-label="scroll-more.show_more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                     </button>
                 </div>
                 <div class="nds-tab-content">
@@ -339,7 +338,7 @@ layout_class: nds-cardView
                                         <td>2nd</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -351,7 +350,7 @@ layout_class: nds-cardView
                                         <td>2nd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -363,7 +362,7 @@ layout_class: nds-cardView
                                         <td>2nd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -375,7 +374,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -387,7 +386,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -399,7 +398,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -411,7 +410,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -423,7 +422,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -435,7 +434,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -447,7 +446,7 @@ layout_class: nds-cardView
                                         <td>4th</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -459,7 +458,7 @@ layout_class: nds-cardView
                                         <td>4th</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -471,7 +470,7 @@ layout_class: nds-cardView
                                         <td>4th</td>
                                         <td>Semester 1</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -483,7 +482,7 @@ layout_class: nds-cardView
                                         <td>3rd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>
@@ -495,7 +494,7 @@ layout_class: nds-cardView
                                         <td>2nd</td>
                                         <td>Semester 2</td>
                                         <td>
-                                            <a class="nds-btn nds-secondary-outline" href="#" target="_blank"
+                                            <a class="nds-btn nds-secondary-outline nds-icon-only" href="#" target="_blank"
                                                 aria-label="Download course specification">
                                                 <i class="hgi hgi-stroke hgi-pdf-01"></i>
                                             </a>

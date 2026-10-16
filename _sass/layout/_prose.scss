@@ -29,9 +29,17 @@
     }
 
     // Two-thirds of the 24px body line box: the break reads as a break without
-    // splitting the flow into separate blocks.
+    // splitting the flow into separate blocks. End side only: in flow it gives
+    // the same gap, and inside a flex or grid component (no margin collapse) it
+    // never pushes the element away from the one above it.
     :where(p, ul, ol, blockquote, figure, table, pre, .nds-code, .nds-alert) {
-        margin-block: var(--spacing-xl);
+        margin-block-end: var(--spacing-xl);
+    }
+
+    // Editors wrap quote, list-item and cell text in <p>: its gap would pad
+    // the box below the text.
+    :where(blockquote, li, td, th) > :where(:last-child) {
+        margin-block-end: 0;
     }
 
     // A bare image straight from an editor. Direct children only: <figure>
@@ -41,7 +49,7 @@
         margin-block: var(--spacing-xl);
     }
 
-    :where(ul, ol) > li {
+    :where(ul, ol) > :where(li) {
         padding-block: var(--_list-item-pad);
 
         &:first-child { padding-block-start: 0; }
@@ -54,7 +62,7 @@
     :where(li) > :where(ul, ol) {
         margin-block: var(--_list-item-pad) 0;
 
-        > li { padding-block: var(--_sub-item-pad); }
+        > :where(li) { padding-block: var(--_sub-item-pad); }
     }
 
     // Markers cycle by depth the way native <ul> does: 1. → a. → i.
@@ -72,6 +80,8 @@
     // out at the 1200px viewport the typo clamps top out at.
     :where(h2) { margin-top: clamp(var(--spacing-6xl), 5.33vw, var(--spacing-7xl)); }
     :where(h3) { margin-top: clamp(var(--spacing-4xl), 3.33vw, var(--spacing-5xl)); }
+    // The reset's 12–15px sits under the 16px sibling gap; 1.5x reads as a break.
+    :where(h4, h5, h6) { margin-top: var(--spacing-3xl); }
 
     > :where(*:first-child) {
         margin-block-start: 0;
@@ -80,20 +90,40 @@
     > :where(*:last-child) {
         margin-block-end: 0;
     }
+
+    // The first and last SHOWN child (the global hide list; data-state hidden mirrors to .nds-hidden).
+    // Own rules: a browser without `of S` (pre-2023) drops them and keeps the two above.
+    > :where(:nth-child(1 of :not(.nds-hidden, [hidden], [data-filtered]))) {
+        margin-block-start: 0;
+    }
+
+    > :where(:nth-last-child(1 of :not(.nds-hidden, [hidden], [data-filtered]))) {
+        margin-block-end: 0;
+    }
 }
 
 .nds-prose {
+    // A long word breaks instead of widening the page. Not `anywhere`: that lets
+    // a table column shrink below its words next to nowrap code ("Componen t").
+    overflow-wrap: break-word;
+
     @include prose-flow;
 
+    // A long URL from a CMS is a link: `anywhere` lets a table cell holding one shrink.
+    :where(a) {
+        overflow-wrap: anywhere;
+    }
+
     // Flowing-citation tier; the featured pull-quote card is .nds-quote
-    // (components/_quote.scss) — same border token family by design
-    :where(blockquote) {
+    // (components/_quote.scss) — same border token family by design.
+    // A Quote inside prose is built from the same tags, so its parts are skipped.
+    :where(blockquote:not(.nds-quote-body)) {
         padding-inline-start: var(--spacing-xl);
         border-inline-start: 3px solid var(--border-neutral-primary);
         color: var(--text-secondary-paragraph);
     }
 
-    :where(figcaption) {
+    :where(figcaption:not(.nds-quote-author)) {
         font-size: var(--typo-text-sm-FS);
         line-height: var(--typo-text-sm-LH);
         color: var(--text-secondary-paragraph);

@@ -1,8 +1,7 @@
 ---
-exclude_showcase: true
 layout: page
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
-layout_class: nds-wSideInfo
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
+layout_class: nds-has-sideinfo
 title: Form Template
 hero_style: "nds-flat nds-aside"
 hero_title: Apply for a Service
@@ -16,15 +15,15 @@ sidemenu_mode: false
 <!-- --ft-scroll-offset: the gap NDS.scrollBelowNav leaves past the nav when it
      scrolls a new step into view. 0 lands the section flush, where the mobile
      stepper strip pins. Without it the helper falls back to 120px. -->
-<section id="formTemplate" class="nds-content-section nds-sideinfo-section" style="--ft-scroll-offset: 0px;">
+<section id="form-template" class="nds-content-section nds-sideinfo-section" style="--ft-scroll-offset: 0px;">
     <div class="nds-section-body">
 
         <div class="nds-info-content">
-            <p class="nds-required-notice"><span class="nds-label">*Required information</span></p>
+            <p class="nds-note nds-block" data-status="error"><span class="nds-label">*Required information</span></p>
 
             <!-- data-ajax: Forms owns the submit listener and stops the POST itself
                  after validation. Send the request from nds:formValid. -->
-            <form id="form-template" class="nds-form" data-ajax>
+            <form id="ft-form" class="nds-form" data-ajax>
 
                 <!-- ============================================================
                      STEP 1 — Identity Verification
@@ -37,11 +36,11 @@ sidemenu_mode: false
                                 <label for="ft-national-id"><span class="nds-label">National ID</span></label>
                             </div>
                             <div class="nds-form-control">
-                                <input type="text" id="ft-national-id" name="nationalId" class="nds-input"
-                                    placeholder="10-digit ID number" inputmode="numeric" pattern="[0-9]{10}"
+                                <input type="text" id="ft-national-id" name="nationalId" class="nds-input nds-national-id"
+                                    placeholder="10-digit ID number" inputmode="numeric" maxlength="10"
                                     autocomplete="off" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -60,13 +59,13 @@ sidemenu_mode: false
                             </div>
                             <div class="nds-form-control">
                                 <div class="nds-form-action">
-                                    <button type="button" class="nds-btn nds-subtle date-picker-toggle" aria-label="Calendar toggle">
+                                    <button type="button" class="nds-btn nds-subtle date-picker-toggle nds-icon-only" aria-label="Open calendar" data-i18n-aria-label="date-picker.open_calendar">
                                         <i class="nds-icon nds-hgi-calendar-03" aria-hidden="true"></i>
                                     </button>
                                 </div>
                                 <input type="text" id="ft-dob" name="dob" class="nds-input nds-date-input"
                                     placeholder="DD/MM/YYYY" autocomplete="bday"
-                                    data-year-before="100" data-year-after="0" required>
+                                    data-year-before="100" data-year-after="0" data-max-date="today" required>
                             </div>
                         </div>
 
@@ -82,7 +81,7 @@ sidemenu_mode: false
                                     placeholder="5XX XXX XXX" autocomplete="tel-national"
                                     inputmode="numeric" maxlength="9" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -138,7 +137,7 @@ sidemenu_mode: false
                                 <input type="text" id="ft-first-name" name="firstName" class="nds-input"
                                     placeholder="As written on your ID" autocomplete="given-name" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -153,7 +152,7 @@ sidemenu_mode: false
                                 <input type="text" id="ft-father-name" name="fatherName" class="nds-input"
                                     placeholder="As written on your ID" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -168,7 +167,7 @@ sidemenu_mode: false
                                 <input type="text" id="ft-grandfather-name" name="grandfatherName" class="nds-input"
                                     placeholder="Optional">
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -183,7 +182,7 @@ sidemenu_mode: false
                                 <input type="text" id="ft-family-name" name="familyName" class="nds-input"
                                     placeholder="As written on your ID" autocomplete="family-name" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -199,7 +198,7 @@ sidemenu_mode: false
                                 <input type="email" id="ft-email" name="email" class="nds-input"
                                     placeholder="name@example.com" autocomplete="email" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -217,7 +216,7 @@ sidemenu_mode: false
                                 <input type="text" id="ft-city" name="city" autocomplete="on"
                                     placeholder="Type to search Saudi cities" required>
                                 <div class="nds-form-action">
-                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input" hidden>
                                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                                     </button>
                                 </div>
@@ -249,7 +248,7 @@ sidemenu_mode: false
 
                     <div class="nds-form-actions">
                         <button type="button" class="nds-btn nds-secondary-outline"
-                            data-stepper-control="previous" data-stepper-target="formStepper">
+                            data-stepper-control="previous" data-stepper-target="form-stepper">
                             <span class="nds-label">Back</span>
                         </button>
                         <button type="button" class="nds-btn nds-primary" data-ft-continue>
@@ -305,7 +304,7 @@ sidemenu_mode: false
 
                     <div class="nds-form-actions">
                         <button type="button" class="nds-btn nds-secondary-outline"
-                            data-stepper-control="previous" data-stepper-target="formStepper">
+                            data-stepper-control="previous" data-stepper-target="form-stepper">
                             <span class="nds-label">Back</span>
                         </button>
                         <!-- No data-stepper-control: it would preventDefault the click
@@ -346,7 +345,7 @@ sidemenu_mode: false
                             </a>
                             <button type="button" class="nds-btn nds-primary"
                                 data-stepper-control="goto" data-stepper-value="1"
-                                data-stepper-target="formStepper">
+                                data-stepper-target="form-stepper">
                                 <span class="nds-label">Submit another</span>
                             </button>
                         </div>
@@ -357,10 +356,10 @@ sidemenu_mode: false
         </div>
 
         <aside class="nds-sideinfo nds-sticky nds-sticky-md nds-top" aria-label="Application progress" style="--nds-sideinfo-top-offset: var(--spacing-6xl);">
-            <!-- Vertical fallback (tablet + desktop) with a radial override on
-                 mobile so the 4-step flow stays compact on small screens. -->
-            <div class="nds-stepper nds-radial nds-vertical-lg nds-card nds-stroke nds-shadow"
-                id="formStepper"
+            <!-- Vertical on desktops, radial on phones and tablets, so the 4-step
+                 flow stays compact on small screens. -->
+            <div class="nds-stepper nds-vertical nds-radial-sm nds-radial-md nds-card nds-stroke nds-shadow"
+                id="form-stepper"
                 data-current="1" data-total="4">
                 <!-- Radial-only progress ring; hidden on non-radial variants by base CSS. -->
                 <div class="nds-progress-circle">
@@ -457,16 +456,16 @@ sidemenu_mode: false
             return new Promise(resolve => setTimeout(resolve, 1200));
         }
 
-        const requiredNotice = document.querySelector('#formTemplate .nds-required-notice');
-        const formSection = document.getElementById('formTemplate');
+        const requiredNotice = document.querySelector('#form-template .nds-note');
+        const formSection = document.getElementById('form-template');
 
-        function showPanel(step) {
+        function showPanel(step, last) {
             panels.forEach(p => {
                 p.hidden = parseInt(p.dataset.formStep) !== step;
             });
             // The success panel has no required fields, so hide the notice there.
-            if (requiredNotice) requiredNotice.hidden = step === 4;
-            const panel = document.querySelector('#formTemplate [data-form-step]:not([hidden])');
+            if (requiredNotice) requiredNotice.hidden = step === last;
+            const panel = document.querySelector('#form-template [data-form-step]:not([hidden])');
             // Scroll to the form section top, not the panel. The section sits above
             // all the dynamic content (notice, panels, mobile stepper strip), so its
             // position never drifts and the scroll lands the same on every step.
@@ -520,19 +519,21 @@ sidemenu_mode: false
         // number). One more next() on the last step marks every step completed —
         // the component owns that rule, including the radial exception.
         document.addEventListener('nds:stepper:change', (e) => {
-            if (e.target.id !== 'formStepper') return;
+            if (e.target.id !== 'form-stepper') return;
             const step = e.detail.currentStep;
-            const panelStep = Math.min(step, 4);
+            // The last step is the success panel and the one before it the review,
+            // so adding a step needs only its panel and its stepper item.
+            const last = e.detail.totalSteps;
+            const panelStep = Math.min(step, last);
 
-            showPanel(panelStep);
-            if (panelStep === 3) populateReview();
-            if (panelStep === 4) {
+            showPanel(panelStep, last);
+            if (panelStep === last - 1) populateReview();
+            if (panelStep === last) {
                 const ref = document.getElementById('ft-reference');
                 if (ref) ref.textContent = generateReference();
                 // Deferred so the second change event does not fire mid-handler.
-                // It is a no-op once the last step is already completed, so this
-                // settles after one extra pass.
-                if (step === 4) queueMicrotask(() => { NDS.Stepper.next('formStepper'); });
+                // That event reports one past the last step, so it does not loop.
+                if (step === last) queueMicrotask(() => { NDS.Stepper.next('form-stepper'); });
             }
         });
 
@@ -541,20 +542,20 @@ sidemenu_mode: false
         // fields in a hidden panel, so this checks the step on screen.
         formSection.querySelectorAll('[data-ft-continue]').forEach(btn => {
             btn.addEventListener('click', () => {
-                if (NDS.Forms.validateForm(btn).valid) NDS.Stepper.next('formStepper');
+                if (NDS.Forms.validateForm(btn).valid) NDS.Stepper.next('form-stepper');
             });
         });
 
         // data-ajax: Forms validates on submit, stops the POST and fires nds:formValid.
         // Advance from the request's OUTCOME, never the click — a failure must not
         // report success. Forms skips fields in a hidden panel, so this validates step 3.
-        document.getElementById('form-template')
+        document.getElementById('ft-form')
             .addEventListener('nds:formValid', function () {
                 var btn = document.getElementById('ft-submit');
                 NDS.State.add(btn, 'loading');
                 // Replace submitApplication() with your own request.
                 submitApplication()
-                    .then(() => NDS.Stepper.next('formStepper'))
+                    .then(() => NDS.Stepper.next('form-stepper'))
                     .catch(() => NDS.Alert.create({
                         variant: 'error', title: 'Could not submit the application',
                         description: 'Check your connection and try again.',

@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "doctor_id": 1,
+    "clinic_id": 1,
+    "at": "2026-10-14T10:30",
+    "status": "booked",
+    "reason": "Blood pressure follow-up"
+  },
+  {
+    "id": 2,
+    "doctor_id": 18,
+    "clinic_id": 14,
+    "at": "2026-10-19T16:00",
+    "status": "booked",
+    "reason": "Heart check-up before travel"
+  },
+  {
+    "id": 3,
+    "doctor_id": 1,
+    "clinic_id": 1,
+    "at": "2026-06-02T09:00",
+    "status": "completed",
+    "reason": "Annual check-up"
+  },
+  {
+    "id": 4,
+    "doctor_id": 10,
+    "clinic_id": 8,
+    "at": "2026-07-15T11:30",
+    "status": "completed",
+    "reason": "Skin rash on the arms"
+  },
+  {
+    "id": 5,
+    "doctor_id": 14,
+    "clinic_id": 11,
+    "at": "2026-09-03T14:00",
+    "status": "completed",
+    "reason": "Dental cleaning"
+  },
+  {
+    "id": 6,
+    "doctor_id": 22,
+    "clinic_id": 16,
+    "at": "2026-08-12T10:00",
+    "status": "cancelled",
+    "reason": "Shoulder pain"
+  }
+]

@@ -1,36 +1,24 @@
 /* NDS.Share — public surface
  * Rides: nds-copy (the copy-link action; soft — the other buttons work without it)
  *      · nds-dropmenu (when the buttons sit in a menu; soft — an inline row works too)
+ * Requires:
+ *   .nds-share needs .nds-share-x, .nds-share-linkedin, .nds-share-whatsapp, .nds-share-copy, [data-share-href] — no button shares
  * Methods:
  *   NDS.Share.init()   delegate clicks on .nds-share — safe to call again
  * Events:
  *   (none)
  * Hooks:
  *   data-share-url     on the .nds-share wrapper; defaults to the page URL. A URL whose
- *                      scheme is not http(s) is rejected and the page URL is used
+ *                      scheme is not http(s), mailto or tel is rejected and the page URL is used
  *   data-share-title   on the wrapper; defaults to document.title
+ *   data-share-href    on any other button in the wrapper: a link pattern for a target the
+ *                      classes don't cover; {url} and {title} are filled in, encoded
  * Gotchas:
- *   - Buttons are identified by CLASS, not by an attribute: .nds-share-x,
- *     .nds-share-linkedin, .nds-share-whatsapp, .nds-share-copy.
- *   - X, LinkedIn and WhatsApp open a 600×400 popup window.
- *   - init() stamps .nds-share-menu on each share dropmenu, so styling survives the menu
- *     portaling to <body>.
- */
-/**
- * NDS Share — standalone share-page utility
- *
- * Binds to any `.nds-share` wrapper containing share buttons with one of
- * `.nds-share-x`, `.nds-share-linkedin`, `.nds-share-whatsapp`,
- * `.nds-share-copy`. Works with either a `.nds-dropmenu` trigger or an
- * `.nds-inline` row of buttons — the module only wires click handlers.
- *
- * Per-instance overrides on the `.nds-share` wrapper:
- *   - data-share-url="https://…"   defaults to window.location.href
- *   - data-share-title="…"         defaults to document.title
- *
- * Public API:
- *   NDS.Share.init()   Delegate click on '.nds-share'. Called by the loader.
- *                      Repeat-safe via AbortController.
+ *   - The built-in targets are identified by CLASS: .nds-share-x, .nds-share-linkedin,
+ *     .nds-share-whatsapp, .nds-share-copy. A class wins over data-share-href.
+ *   - X, LinkedIn, WhatsApp and data-share-href open a 600×400 popup window; a mailto: or
+ *     tel: pattern opens in the same tab, so no empty window stays behind.
+ *   - init() stamps .nds-share-menu on each share dropmenu's menu.
  */
 (function () {
     'use strict';
@@ -69,9 +57,7 @@
         if (!NDS.Copy) return;
         const ok = await NDS.Copy.writeText(url);
         if (!ok || !button) return;
-        // NDS.closest is portal-aware — reaches .nds-share even after the
-        // dropmenu menu portals to <body>.
-        const wrapper = NDS.closest(button, '.nds-share');
+        const wrapper = button.closest('.nds-share');
         NDS.Copy.flash(button, {
             onRestore: () => {
                 if (wrapper && wrapper.ndsDropmenu) wrapper.ndsDropmenu.close();
@@ -80,7 +66,7 @@
     }
 
     function handleClick(button) {
-        const wrapper = NDS.closest(button, '.nds-share');
+        const wrapper = button.closest('.nds-share');
         if (!wrapper) return;
         const url = getShareUrl(wrapper);
         const title = wrapper.getAttribute('data-share-title') || document.title;
@@ -89,24 +75,32 @@
         else if (button.classList.contains('nds-share-linkedin')) shareOnLinkedIn(url);
         else if (button.classList.contains('nds-share-whatsapp')) shareOnWhatsApp(url, title);
         else if (button.classList.contains('nds-share-copy')) copyLink(url, button);
+        else shareOnHref(button.getAttribute('data-share-href'), url, title);
     }
 
-    const TARGET_SELECTOR = '.nds-share-x, .nds-share-linkedin, .nds-share-whatsapp, .nds-share-copy';
+    function shareOnHref(template, url, title) {
+        const href = NDS.safeUrl(template && template.replace(/\{(url|title)\}/g, (_, key) => encodeURIComponent(key === 'url' ? url : title)));
+        if (!href) return;
+        // A mail or phone link opens its app; in a popup it would leave an empty window
+        if (/^(mailto|tel):/.test(href)) window.location.href = href;
+        else openPopup(href);
+    }
+
+    const TARGET_SELECTOR = '.nds-share-x, .nds-share-linkedin, .nds-share-whatsapp, .nds-share-copy, [data-share-href]';
 
     let _abortController = null;
     function init() {
         if (_abortController) _abortController.abort();
         _abortController = new AbortController();
-        // Portal-safe identifier on each share menu (rule: a component-owned
-        // menu names itself so styling/hooks survive the menu portaling to
-        // <body>). Share items are plain buttons — no nested dropmenu to
+        // Identifier on each share menu (rule: a component-owned menu names
+        // itself). Share items are plain buttons — no nested dropmenu to
         // mis-stamp — so a scoped sweep is unambiguous.
         document.querySelectorAll('.nds-share .nds-dropmenu-menu')
             .forEach(m => m.classList.add('nds-share-menu'));
         document.addEventListener('click', (e) => {
             const button = e.target.closest(TARGET_SELECTOR);
             if (!button) return;
-            const wrapper = NDS.closest(button, '.nds-share');
+            const wrapper = button.closest('.nds-share');
             if (!wrapper) return;
             handleClick(button);
         }, { signal: _abortController.signal });

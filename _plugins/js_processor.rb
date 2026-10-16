@@ -39,34 +39,31 @@ class JSProcessor
     @output_dir = 'assets/js'
     # Per-file output dir overrides (keyed by source basename). docs-assets/ holds
     # everything only the documentation site loads, so a consumer copying assets/
-    # into their project never hosts it — the showcase demo layer and the event
-    # brands (each in its own self-contained folder).
+    # into their project never hosts it — here, the docs builder.
     #
     # Only self-booting files may be overridden. nds-loader.js derives the asset
     # dir from nds-main.min.js's own src and fetches every injected bundle as a
     # SIBLING, so anything in @bundles must stay in @output_dir or it 404s at
-    # runtime. Safe here: showcase and the event packs are plain <script> tags
-    # (showcase from the layouts, event packs injected by nds-theme.js from the
-    # full path in _data/themes.yml), none of them loader-managed.
+    # runtime. Safe here: nds-docs is a plain <script> tag from the layouts,
+    # not loader-managed.
     @output_overrides = {
-      'nds-showcase.js' => 'docs-assets/js',
-      'nds-theme-foundation-day.js' => 'docs-assets/events/foundation_day',
-      'nds-theme-hajj.js' => 'docs-assets/events/Hajj',
-      'nds-theme-national-day-96.js' => 'docs-assets/events/national_day_96',
+      'nds-docs.js' => 'docs-assets/js',
     }
+    # Event packs (_js/events/) are NOT built here: scripts/mkevent.py owns a pack end to end
+    # (minify, inline its CSS, zip). Building them here too blanked the inlined CSS on every run.
+    @skip_dirs = [File.join(@source_dir, 'events')]
     @bundles = {
       # Critical bundle — loaded via <script defer>. Carries core, the loader,
       # shared utils (backdrop/feedback — mainnav reads NDS.Backdrop.isActive()
       # synchronously, a lazy stub can't bridge that; forms shows Feedback at
       # submit), every critical component, dropmenu (deferred, but a
       # critical-init dependency of multiselect), and deferred components
-      # deliberately kept in main: mainnav + fontLoading (first-paint critical),
-      # cookies (pending refactor — eval-time consent enforcement must run
-      # before analytics), customselect (JS-derived label would flash if async),
+      # deliberately kept in main: mainnav (first-paint critical),
+      # cookies (consent is applied at eval, before analytics), customselect (JS-derived label would flash if async),
       # otp (auto-advance/paste is first-interaction-critical on OTP/2FA pages).
       # They stay so they wire on the local idle pass, not after an injected
       # bundle. Reveal is gated on this bundle, so it's kept lean.
-      'nds-main.min.js' => ['nds-core.js', 'nds-theme.js', 'nds-mainnav.js', 'nds-fontLoading.js', 'nds-sidemenu.js', 'nds-drawer.js', 'nds-scroll-more.js', 'nds-cookies.js', 'nds-forms.js', 'nds-otp.js', 'nds-dropmenu.js', 'nds-customselect.js', 'nds-multiselect.js', 'nds-taginput.js', 'nds-backdrop.js', 'nds-feedback.js', 'nds-sideinfo.js', 'nds-toc.js', 'nds-empty.js', 'nds-cooldown-button.js', 'nds-link.js', 'nds-loader.js'],
+      'nds-main.min.js' => ['nds-core.js', 'nds-theme.js', 'nds-mainnav.js', 'nds-sidemenu.js', 'nds-drawer.js', 'nds-scroll-more.js', 'nds-cookies.js', 'nds-forms.js', 'nds-otp.js', 'nds-dropmenu.js', 'nds-customselect.js', 'nds-multiselect.js', 'nds-taginput.js', 'nds-backdrop.js', 'nds-feedback.js', 'nds-sideinfo.js', 'nds-toc.js', 'nds-empty.js', 'nds-cooldown-button.js', 'nds-link.js', 'nds-loader.js'],
       # Delegated — deferred components verified safe to load late. Injected by
       # nds-loader.js AFTER the critical pass (never a render-blocking defer tag), so
       # its download never gates the reveal. Components migrate in here over time
@@ -74,16 +71,18 @@ class JSProcessor
       # drop `critical: true` from its loader registry entry (location is owned here, not the
       # registry — the build generates the namespace→bundle map from these lists).
       # nds-sort.js leads the list: it's the shared sort engine for filter/tables.
-      'nds-delegated.min.js' => ['nds-sort.js', 'nds-filter.js', 'nds-pagination.js', 'nds-swiper.js', 'nds-stepper.js', 'nds-breadcrumb.js', 'nds-accordion.js', 'nds-tabs.js', 'nds-expandable.js', 'nds-copy.js', 'nds-share.js', 'nds-modal.js', 'nds-alert.js', 'nds-cityWeather.js', 'nds-timeDate.js', 'nds-digitalStamp.js', 'nds-progress.js', 'nds-voice-input.js', 'nds-numbers.js', 'nds-user-feedback.js', 'nds-rating.js', 'nds-slider.js', 'nds-tables.js', 'nds-selection.js', 'nds-panels.js', 'nds-fab.js', 'nds-password.js', 'nds-tooltip.js'],
-      # Extras — heavy, page-specific, zero-inbound leaf components. Injected by
-      # nds-loader.js only when the page contains one of them (selector-gated), so
-      # plain pages never download/parse them. May later be split into smaller
-      # per-component bundles (add a bundle here; the loader picks it up from the
-      # generated manifest).
-      # nds-code.js is documentation-only — no consumer site renders code blocks,
-      # so it has no business in the reveal-gating bundle. Delegate-safe: _code.scss
-      # reserves the line-number gutter and colours inline code with no JS.
-      'nds-extras.min.js' => ['nds-date-picker.js', 'nds-chart.js', 'nds-autocomplete.js', 'nds-ipv.js', 'nds-export.js', 'nds-upload.js', 'nds-editor.js', 'nds-code.js'],
+      'nds-delegated.min.js' => ['nds-sort.js', 'nds-filter.js', 'nds-pagination.js', 'nds-swiper.js', 'nds-stepper.js', 'nds-breadcrumb.js', 'nds-accordion.js', 'nds-tabs.js', 'nds-expandable.js', 'nds-copy.js', 'nds-share.js', 'nds-modal.js', 'nds-alert.js', 'nds-city-weather.js', 'nds-time-date.js', 'nds-digital-stamp.js', 'nds-progress.js', 'nds-voice-input.js', 'nds-numbers.js', 'nds-user-feedback.js', 'nds-rating.js', 'nds-slider.js', 'nds-tables.js', 'nds-selection.js', 'nds-panels.js', 'nds-fab.js', 'nds-password.js', 'nds-tooltip.js', 'nds-countdown.js', 'nds-session-timeout.js'],
+      # Extras — heavy, page-specific leaf components. Injected by nds-loader.js
+      # only when the page contains one of them (selector-gated).
+      'nds-extras.min.js' => ['nds-date-picker.js', 'nds-time-picker.js', 'nds-autocomplete.js', 'nds-ipv.js', 'nds-export.js', 'nds-upload.js'],
+      # Big leaves with NO inbound calls get their own chunk, so a page with one date
+      # picker doesn't download them. A file another component calls synchronously
+      # must share that caller's bundle — the lazy stub can't answer a sync read.
+      # Editor's NDS.Upload use is optional-chained and late, so Upload stays in extras.
+      # nds-code.js is documentation-only — no consumer site renders code blocks.
+      'nds-editor.min.js' => ['nds-editor.js'],
+      'nds-chart.min.js' => ['nds-chart.js'],
+      'nds-code.min.js' => ['nds-code.js'],
       # Audit — debug diagnostics, its own bundle so production pages ship zero
       # bytes of it. NEVER auto-injected (no component registry entry): the
       # loader pulls it via the NDS.Audit lazy stub when enableLogging schedules
@@ -95,7 +94,10 @@ class JSProcessor
       # loader arms the FAB and the lazy stub pulls this on the first press.
       # No <script> tag: dropping this file is the opt-out, and loadBundle
       # resolves on error.
-      'nds-accessibility.min.js' => ['nds-accessibility.js']
+      'nds-accessibility.min.js' => ['nds-accessibility.js'],
+      # Cookie consent UI — lazy the same way: fetched for a visitor with no stored
+      # choice, or on the first [data-cookies-toggle] press. The consent store stays in main.
+      'nds-cookie-consent.min.js' => ['nds-cookie-consent.js']
     }
     # Sheets a bundle owns. nds-loader.js requests these in parallel with the
     # bundle's JS, so a lazily-loaded component's styles are not a second round
@@ -219,7 +221,87 @@ class JSProcessor
   def bundle_deps(bundle_name, source_files)
     deps = source_files.map { |sf| File.join(@source_dir, sf) }
     deps += injected_bundles.values.flatten.map { |sf| File.join(@source_dir, sf) } if bundle_name == 'nds-main.min.js'
+    deps += [MIGRATIONS] + anatomy_sources if bundle_name == 'nds-audit.min.js'
     (deps + global_deps).uniq
+  end
+
+  # _data/migrations.yml as the audit's rows: [kind, name, scope, status, use, since, fix, inert],
+  # 0 for an empty field. A fix that only says "Use <use>." is rebuilt at runtime. Events and
+  # URL params stay out: a page cannot see a listener or what its server reads.
+  MIGRATIONS = '_data/migrations.yml'
+  def migrations_js
+    rows = YAML.load_file(MIGRATIONS).reject { |r| %w[event param].include?(r['kind']) }.map do |r|
+      fix = r['fix'] == "Use #{r['use']}." ? 0 : r['fix']
+      [r['kind'], r['name'], r['scope'] || 0, r['status'], r['use'] || 0, r['since'].to_s, fix || 0, r['inert'] ? 1 : 0]
+    end
+    JSON.generate(rows)
+  end
+
+  # The audit's anatomy: every nds- name the docs, includes, data and scripts use (known), and each
+  # part that sits inside its component root in every canon (parts: part → root). A part inside
+  # a -menu is left out: the menu may portal to <body>.
+  ANATOMY_DOCS = '{components,ui-shell,layout,utilities,core}/*.md'
+  ANATOMY_NAME = /(?<![\w-])nds-[a-z0-9]+(?:-[a-z0-9]+)*/
+  VOID_TAGS = %w[area base br col embed hr img input link meta source track wbr].freeze
+  def anatomy_sources
+    Dir.glob(ANATOMY_DOCS) + Dir.glob('{templates,examples}/*.md') + Dir.glob('{_includes,_layouts}/**/*.html') +
+      Dir.glob('_js/**/*.js') + Dir.glob('_data/**/*.yml') + Dir.glob('_plugins/*.rb')
+  end
+  def anatomy_js
+    known = anatomy_sources.flat_map { |f| File.read(f, encoding: 'utf-8').scan(ANATOMY_NAME) }.uniq.sort
+    ancestors = Hash.new { |h, k| h[k] = [] }
+    Dir.glob(ANATOMY_DOCS).each do |f|
+      File.read(f, encoding: 'utf-8').scan(/<script\b([^>]*\bdata-canon\b[^>]*)>(.*?)<\/script>/m) do |attrs, body|
+        next if attrs =~ /data-lang="(js|css)"|data-generated|data-escaped/
+        stack = []
+        body.gsub(/<!--.*?-->/m, '').scan(/<(\/)?([a-zA-Z][\w-]*)([^>]*?)(\/)?>/) do |close, tag, rest, self_close|
+          tag = tag.downcase
+          if close
+            i = stack.rindex { |e| e[0] == tag }
+            stack = stack[0...i] if i
+            next
+          end
+          classes = (rest[/\bclass\s*=\s*"([^"]*)"/, 1] || '').split.grep(/\Ands-/)
+          above = stack.flat_map(&:last)
+          classes.each { |c| ancestors[c] << above }
+          stack << [tag, classes] unless VOID_TAGS.include?(tag) || self_close
+        end
+      end
+    end
+    parts = {}
+    ancestors.each do |c, sets|
+      segs = c.split('-')
+      root = (segs.length - 1).downto(2).map { |k| segs[0...k].join('-') }.find { |r| ancestors.key?(r) }
+      next unless root
+      next if sets.any? { |a| a.any? { |x| x.end_with?('-menu') } }
+      parts[c] = root if sets.all? { |a| a.include?(root) }
+    end
+    JSON.generate({ known: known, parts: parts, requires: requires_rows })
+  end
+
+  # Each banner's Requires lines: "<host> needs|needs one X per|sits in|is|with|points at X via" … " — why".
+  # Rows: [component, host, verb, arg, extra, why]. A line that does not parse fails the build.
+  REQUIRES_LINE = /\A(.+?) (needs one|points at|sits in|needs|is|with) (.+?) — (.+)\z/
+  def requires_rows
+    Dir.glob('_js/**/*.js').sort.flat_map do |f|
+      head = File.read(f, encoding: 'utf-8')[/\A\/\*.*?\*\//m] || ''
+      name = head[/\A\/\*\s*NDS\.(\S+)/, 1]
+      block = head[/^ \* Requires:\s*\n(.*?)(?=^ \* (?:Methods|Events|Hooks|Gotchas))/m, 1]
+      next [] unless name && block
+      block.lines.map(&:strip).map { |l| l.sub(/\A\*\s*/, '') }.reject(&:empty?).map do |l|
+        m = l.match(REQUIRES_LINE) or raise "#{f}: Requires line does not parse: #{l}"
+        host, verb, arg, why = m.captures
+        extra = 0
+        if verb == 'needs one'
+          arg, extra = arg.split(' per ', 2)
+          raise "#{f}: 'needs one' takes 'X per Y': #{l}" unless extra
+        elsif verb == 'points at'
+          arg, extra = arg.split(' via ', 2)
+          raise "#{f}: 'points at' takes 'X via attribute': #{l}" unless extra
+        end
+        [name, host, verb, arg, extra, why]
+      end
+    end
   end
 
   # A bundle is stale when its output is missing or older than any dependency.
@@ -230,10 +312,10 @@ class JSProcessor
     m.nil? || m > File.mtime(out)
   end
 
-  # Basename -> real path. Sources may sit in a subfolder (_js/events/), so a
-  # name is resolved against a recursive scan, never assumed to be _js/<name>.
+  # Basename -> real path. Sources may sit in a subfolder, so a name is resolved
+  # against a recursive scan, never assumed to be _js/<name>.
   def source_path(basename)
-    @source_index ||= Dir.glob(File.join(@source_dir, '**', '*.js'))
+    @source_index ||= source_files_on_disk
                          .each_with_object({}) { |p, h| h[File.basename(p)] ||= p }
     @source_index[basename]
   end
@@ -252,6 +334,12 @@ class JSProcessor
   # Compress JavaScript with Terser. When site.debug is on the bundle is left
   # unminified so DevTools profiles and stack traces map to real per-statement
   # lines and every function keeps its name — accurate attribution over size.
+  # Every source this processor builds: _js/ recursively, minus @skip_dirs.
+  def source_files_on_disk
+    Dir.glob(File.join(@source_dir, '**', '*.js'))
+       .reject { |p| @skip_dirs.any? { |d| p.start_with?(d + '/') } }
+  end
+
   def compress_with_terser(js_content)
     return js_content if @config['debug']
 
@@ -290,8 +378,7 @@ class JSProcessor
     # Ensure output directory exists
     FileUtils.mkdir_p(@output_dir)
 
-    # Get all JS files from source directory (recursive — event packs live in _js/events/)
-    js_files = Dir.glob(File.join(@source_dir, '**', '*.js'))
+    js_files = source_files_on_disk
 
     # Fail fast if location (build) contradicts classification (registry).
     assert_no_critical_in_injected!
@@ -344,6 +431,13 @@ class JSProcessor
         next unless file_path
         
         original_content = File.read(file_path)
+        if source_file == 'nds-audit.js'
+          # A lost marker would ship an audit that silently finds no old names.
+          raise 'nds-audit.js: /*@migrations*/[] marker missing' unless original_content.include?('/*@migrations*/[]')
+          original_content = original_content.sub('/*@migrations*/[]') { migrations_js }
+          raise 'nds-audit.js: /*@anatomy*/{} marker missing' unless original_content.include?('/*@anatomy*/{}')
+          original_content = original_content.sub('/*@anatomy*/{}') { anatomy_js }
+        end
         processed_files << file_path
         bundle_size += original_content.length
         
@@ -414,7 +508,7 @@ class JSProcessor
         compressed_content = compress_with_terser(original_content)
 
         # Header comment (no timestamp — keeps git diffs stable on rebuild).
-        # Docs-only outputs (@output_overrides — showcase + event themes) skip the
+        # Docs-only outputs (@output_overrides — the docs builder + event themes) skip the
         # version line: they never ship to a consumer, and the stamp dirties the
         # file on every version bump.
         project_title = @config['title'] || 'National Design System'
@@ -509,4 +603,6 @@ if __FILE__ == $0
   else
     processor.process_files
   end
+  # The word packs ship beside the bundles: their English lives in _js/, their banner carries the version.
+  system('node', 'scripts/check-i18n.mjs', '--build') unless ARGV[0] == 'watch'
 end

@@ -20,7 +20,8 @@
  *     focus, and a CLICK pins the pause: it then stays until closed.
  *   - title and description are escaped. An action's href is scheme-checked, and an
  *     unsafe one downgrades the action to a plain button.
- *   - An action is {label, variant, size, onClick, dismiss, href, target, copy, copyTarget}.
+ *   - An action is {label, variant, size, class, onClick, dismiss, href, target, copy, copyTarget};
+ *     class replaces the variant/size classes.
  *     Set dismiss:true to close the alert after onClick.
  */
 /**
@@ -44,6 +45,11 @@
 
 (function() {
     'use strict';
+
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('alert', {
+        close: 'Close',
+    });
 
     const NDSAlert = {
         /**
@@ -125,7 +131,7 @@
                 ` : '';
 
                 html += `
-                    <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close${progressClass}" aria-label="Close">
+                    <button class="nds-btn nds-subtle nds-icon-only nds-md nds-alert-close${progressClass}">
                         <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                         ${progressSVG}
                     </button>
@@ -133,6 +139,8 @@
             }
 
             alert.innerHTML = html;
+            const closeBtn = alert.querySelector('.nds-alert-close');
+            if (closeBtn) strings.set(closeBtn, 'aria-label', 'close');
 
             // Knob via CSSOM, never a style attribute — a strict style-src blocks the attribute form.
             if (display === 'toast' && duration > 0) {
@@ -351,7 +359,7 @@
         // Initialize existing alerts
         init() {
             document.querySelectorAll('.nds-alert').forEach(alert => {
-                if (alert.hasAttribute('data-nds-alert-initialized') || alert.closest('code, .code-example')) return;
+                if (alert.hasAttribute('data-nds-alert-initialized') || alert.closest('code')) return;
 
                 const closeBtn = alert.querySelector('.nds-alert-close');
                 if (closeBtn) {

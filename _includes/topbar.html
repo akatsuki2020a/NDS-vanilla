@@ -1,27 +1,27 @@
-<div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities">
-    <button class="nds-btn nds-menu-btn nds-digitalStamp-tab" role="button" aria-expanded="false" aria-controls="nds-digitalStamp">
+<div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities" data-i18n-aria-label="topbar.top_bar_utilities">
+    <button class="nds-btn nds-menu-btn nds-digital-stamp-tab" role="button" aria-expanded="false" aria-controls="nds-digital-stamp">
         <img class="nds-flag" src="{{ 'assets/icon/SAflag.min.svg' | relative_url }}" width="20" height="14"
-            loading="lazy" alt="Logo of Saudi Arabia Flag">
-        <span class="nds-digitalStamp-lg-text nds-truncate" id="big-screen-text">{{ site.digital_stamp[page.lang].tab_text_lg }}</span>
-        <span class="nds-digitalStamp-sm-text nds-truncate" id="small-screen-text">{{ site.digital_stamp[page.lang].tab_text_sm }}</span>
-        <span id="nds-digitalStamp-verify-text" class="nds-link nds-primary">{{ site.digital_stamp[page.lang].tab_verify_text }}</span>
+            loading="lazy" alt="Saudi Arabia flag" data-i18n-alt="digital-stamp.flag">
+        <span class="nds-digital-stamp-lg-text nds-truncate" data-i18n="digital-stamp.tab">A government website registered with the Digital Government Authority.</span>
+        <span class="nds-digital-stamp-sm-text nds-truncate" data-i18n="digital-stamp.tab_short">Government website registered with DGA</span>
+        <span id="nds-digital-stamp-verify-text" class="nds-link nds-primary" data-i18n="digital-stamp.verify">How you know?</span>
     </button>
     <div class="nds-topbar-info">
         <span id="nds-date" class="nds-text-icon" data-calendar="hijri" data-hidden="sm md"></span>
-        <span id="nds-realTimeClock" class="nds-text-icon" data-hidden="sm"></span>
-        <!--
-        <span id="nds-cityName" class="nds-text-icon" data-hidden="sm md" data-city="{{ site.city_name_ar | default: 'الرياض' }}"
+        <span id="nds-real-time-clock" class="nds-text-icon" data-hidden="sm"></span>
+        {%- comment %}
+        <span id="nds-city-name" class="nds-text-icon" data-hidden="sm md" data-city="{{ site.city_name_ar | default: 'الرياض' }}"
             data-city-en="{{ site.city_name | default: 'Riyadh' }}"></span>
-        <span id="nds-weatherInfo" class="nds-text-icon" data-hidden="sm" data-latitude="{{ site.city_latitude | default: '24.7136' }}"
+        <span id="nds-weather-info" class="nds-text-icon" data-hidden="sm" data-latitude="{{ site.city_latitude | default: '24.7136' }}"
             data-longitude="{{ site.city_longitude | default: '46.6753' }}"></span>
-        -->
+        {% endcomment %}
         {% if site.brand_switcher %}
-        <!-- Theme switcher (demo). data-portal: the menu must escape the topbar's
-             overflow-y:clip. Predefined themes toggle a data-theme token (seeds in
-             _sass/themes/_register.scss); stylesheet themes carry data-theme-css/js.
-             Applied by _js/nds-theme.js. -->
-        <div class="nds-dropmenu nds-theme-switcher" data-portal>
-            <button class="nds-btn nds-subtle nds-icon-only nds-dropmenu-trigger nds-tooltip" data-tooltip-hover="500" title="Choose a theme" aria-label="Choose a theme">
+        {%- comment %} Theme switcher (demo). Predefined themes toggle a data-theme token (seeds in
+             _sass/themes/_register.scss); a stylesheet theme carries data-theme-js, the
+             pack that holds its CSS too.
+             Applied by _js/nds-theme.js. {% endcomment %}
+        <div class="nds-dropmenu nds-theme-switcher">
+            <button class="nds-btn nds-subtle nds-icon-only nds-dropmenu-trigger nds-tooltip" data-tooltip-hover="500" title="Choose a theme" data-i18n-title="topbar.choose_theme" aria-label="Choose a theme" data-i18n-aria-label="topbar.choose_theme">
                 <i class="nds-icon nds-icon-theme" aria-hidden="true"></i>
             </button>
             <div class="nds-dropmenu-menu nds-theme-menu" hidden>
@@ -32,7 +32,7 @@
                     {% for group in site.data.themes %}
                     {% if group.label %}<div class="nds-divider nds-lg">{{ group.label }}</div>{% endif %}
                     {% for b in group.list %}
-                    <button class="nds-btn nds-subtle nds-dropmenu-item" data-theme-value="{{ b.value }}"{% if b.stylesheet %} data-theme-css="{{ b.css | relative_url }}?ver={{ site.asset_ver }}"{% if b.js %} data-theme-js="{{ b.js | relative_url }}?ver={{ site.asset_ver }}"{% endif %}{% endif %}>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item" data-theme-value="{{ b.value }}"{% if b.stylesheet and b.js %} data-theme-js="{{ b.js | relative_url }}?ver={{ site.asset_ver }}"{% endif %}>
                         <span class="nds-label">{{ b.label }}</span>
                     </button>
                     {% endfor %}
@@ -42,51 +42,39 @@
         </div>
         {% endif %}
         {% if site.theme_switcher %}
-        <button class="nds-btn nds-subtle nds-icon-only nds-theme-toggle-wrap nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" aria-label="Toggle dark mode">
+        <button class="nds-btn nds-subtle nds-icon-only nds-theme-toggle-wrap nds-tooltip" data-tooltip-hover="500" data-theme-toggle title="Toggle dark mode" data-i18n-title="topbar.toggle_dark_mode" aria-label="Toggle dark mode" data-i18n-aria-label="topbar.toggle_dark_mode">
             <i class="nds-icon nds-hgi-moon-02" aria-hidden="true"></i>
         </button>
         {% endif %}
     </div>
 </div>
-<div id="nds-digitalStamp" role="region" aria-label="Digital government stamp" hidden>
+<div id="nds-digital-stamp" role="region" aria-label="Digital government stamp" data-i18n-aria-label="digital-stamp.label" hidden>
     <div class="nds-content-wrapper">
-        <div class="nds-digitalStamp-notices">
-            <!-- gov Links Notice -->
-            <div class="nds-digitalStamp-card">
-                <div class="nds-digitalStamp-icon">
+        <div class="nds-digital-stamp-notices">
+            <div class="nds-digital-stamp-card">
+                <div class="nds-digital-stamp-icon">
                     <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
                 </div>
-                <div class="nds-digitalStamp-content">
-                    <div class="nds-digitalStamp-heading" id="domain-title">
-                        {{ site.digital_stamp[page.lang].domain_title }}
-                    </div>
-                    <div class="nds-digitalStamp-description" id="domain-desc">
-                        {{ site.digital_stamp[page.lang].domain_desc }}
-                    </div>
+                <div class="nds-digital-stamp-content">
+                    <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.gov_title">Official Saudi Government websites URL ends with</span> <span class="nds-digital-stamp-highlight" data-i18n="digital-stamp.gov_mark">.gov.sa</span></div>
+                    <div class="nds-digital-stamp-description" data-i18n="digital-stamp.gov_desc">Website belongs to an official government organization in the Kingdom of Saudi Arabia always ends with .gov.sa .</div>
                 </div>
             </div>
-            <!-- HTTPS Security Notice -->
-            <div class="nds-digitalStamp-card">
-                <div class="nds-digitalStamp-icon">
+            <div class="nds-digital-stamp-card">
+                <div class="nds-digital-stamp-icon">
                     <i class="nds-icon nds-hgi-square-lock-01" aria-hidden="true"></i>
                 </div>
-                <div class="nds-digitalStamp-content">
-                    <div class="nds-digitalStamp-heading" id="https-title">
-                        {{ site.digital_stamp[page.lang].https_title }}
-                    </div>
-                    <div class="nds-digitalStamp-description" id="https-desc">
-                        {{ site.digital_stamp[page.lang].https_desc }}
-                    </div>
+                <div class="nds-digital-stamp-content">
+                    <div class="nds-digital-stamp-heading"><span data-i18n="digital-stamp.https_title">Official Reliable websites use</span> <span class="nds-digital-stamp-highlight">HTTPS</span></div>
+                    <div class="nds-digital-stamp-description" data-i18n="digital-stamp.https_desc">Ensure the website is using the HTTPS protocol.</div>
                 </div>
             </div>
         </div>
-        <div class="nds-digitalStamp-register">
-            <img src="{{ 'assets/img/dga-logo-icon.svg' | relative_url }}" width="21" height="31" alt="هيئة الحكومة الرقمية" loading="lazy">
+        <div class="nds-digital-stamp-register">
+            <img src="{{ 'assets/img/dga-logo-icon.svg' | relative_url }}" width="21" height="31" alt="Digital Government Authority" data-i18n-alt="digital-stamp.dga" loading="lazy">
             <div>
-                <span id="register-text">
-                    {{ site.digital_stamp[page.lang].register_text }}
-                </span>
-                <a class="nds-digitalStamp-registration nds-primary nds-underline"
+                <span class="nds-digital-stamp-register-text" data-i18n="digital-stamp.register">Registered on Digital Government Authority:</span>
+                <a class="nds-digital-stamp-registration nds-primary nds-underline"
                     href="{{ page.dga_registration_url | default: site.dga_registration_url }}"
                     target="_blank">{{ page.dga_registration_number | default: site.dga_registration_number }}</a>
             </div>

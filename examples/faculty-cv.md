@@ -1,5 +1,4 @@
 ---
-exclude_showcase: true
 layout: page
 title: "Dr. Noura Al-Otaibi"
 lang: en
@@ -13,18 +12,18 @@ hero_style: nds-flat
 hero_actions:
   - share
 hero_float_actions: []
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
-layout_class: nds-wSideInfo
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
+layout_class: nds-has-sideinfo
 sidemenu_mode: false
 ---
 
-<section id="facultyProfile" class="nds-content-section nds-sideinfo-section">
+<section id="faculty-profile" class="nds-content-section nds-sideinfo-section">
     <div class="nds-section-body">
-        <aside class="nds-sideinfo nds-md nds-sticky nds-top" aria-label="On this page">
-            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 5"
-                data-toc-source="#facultyProfile .nds-info-content" data-toc-levels="h2">
+        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page" data-i18n-aria-label="toc.on_this_page">
+            <nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents" style="--toc-skeleton-rows: 5"
+                data-toc-source="#faculty-profile .nds-info-content" data-toc-levels="h2">
                 <div class="nds-toc-head">
-                    <span class="nds-label">On this page</span>
+                    <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
                     <h2 class="nds-toc-title nds-truncate">Dr. Noura Al-Otaibi</h2>
                 </div>
                 <div class="nds-drawer nds-lined">
@@ -34,7 +33,7 @@ sidemenu_mode: false
         </aside>
         <div class="nds-info-content">
             <!-- Academic information. The portrait and the name live in the hero. -->
-            <div class="nds-section-wrapper" id="facultyInfo">
+            <div class="nds-section-wrapper" id="faculty-info">
                 <div class="nds-section-head">
                     <h2 class="nds-section-title">Academic Information</h2>
                     <p class="nds-section-description">College, department, and field of specialization</p>
@@ -102,7 +101,7 @@ sidemenu_mode: false
             </div>
 
             <!-- Biography + research interests -->
-            <div class="nds-section-wrapper" id="facultyBio">
+            <div class="nds-section-wrapper" id="faculty-bio">
                 <div class="nds-section-head">
                     <h2 class="nds-section-title">Biography</h2>
                     <p class="nds-section-description">Teaching, research, and consulting work in short</p>
@@ -130,7 +129,7 @@ sidemenu_mode: false
             </div>
 
             <!-- Career timeline - vertical stepper, newest role on top -->
-            <div class="nds-section-wrapper" id="facultyExperience">
+            <div class="nds-section-wrapper" id="faculty-experience">
                 <div class="nds-section-head">
                     <h2 class="nds-section-title">Professional Experience</h2>
                     <p class="nds-section-description">Academic and advisory roles, most recent first</p>
@@ -223,7 +222,7 @@ sidemenu_mode: false
             </div>
 
             <!-- Academic qualifications -->
-            <div class="nds-section-wrapper" id="facultyQualifications">
+            <div class="nds-section-wrapper" id="faculty-qualifications">
                 <div class="nds-section-head">
                     <h2 class="nds-section-title">Academic Qualifications</h2>
                     <p class="nds-section-description">Degrees and executive programs</p>
@@ -231,7 +230,7 @@ sidemenu_mode: false
                 <div class="nds-section-body">
                     <!-- --gap is set here, not inherited, so an ancestor can never retune this list -->
                     <div class="nds-flex nds-col" style="--gap: var(--spacing-xl);">
-                        <div class="nds-card nds-stroke nds-rowView" style="--card-width: 100%;">
+                        <div class="nds-card nds-stroke nds-horizontal" style="--card-width: 100%;">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon">
@@ -251,7 +250,7 @@ sidemenu_mode: false
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-card nds-stroke nds-rowView" style="--card-width: 100%;">
+                        <div class="nds-card nds-stroke nds-horizontal" style="--card-width: 100%;">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon">
@@ -271,7 +270,7 @@ sidemenu_mode: false
                                 </div>
                             </div>
                         </div>
-                        <div class="nds-card nds-stroke nds-rowView" style="--card-width: 100%;">
+                        <div class="nds-card nds-stroke nds-horizontal" style="--card-width: 100%;">
                             <div class="nds-card-header">
                                 <div class="nds-card-featured-icon">
                                     <span class="nds-featured-icon">
@@ -296,7 +295,7 @@ sidemenu_mode: false
             </div>
 
             <!-- Publications - auto pagination slices the list into pages of 5 -->
-            <div class="nds-section-wrapper" id="facultyPublications">
+            <div class="nds-section-wrapper" id="faculty-publications">
                 <div class="nds-section-head">
                     <h2 class="nds-section-title">Publications</h2>
                     <p class="nds-section-description">Journal articles and conference papers</p>
@@ -308,7 +307,7 @@ sidemenu_mode: false
                 </div>
                 <div class="nds-section-body">
                     <!-- --gap is set here, not inherited, so an ancestor can never retune this list -->
-                    <div id="facultyPublicationList" class="nds-paged-content nds-flex nds-col"
+                    <div id="faculty-publication-list" class="nds-paged-content nds-flex nds-col"
                         style="--per-page: 5; --gap: var(--spacing-xl);">
                         <div class="nds-page-item nds-card nds-stroke" style="--card-width: 100%;">
                             <div class="nds-card-content">
@@ -511,7 +510,7 @@ sidemenu_mode: false
                             </div>
                         </div>
                     </div>
-                    <nav class="nds-pagination" data-auto-pagination="facultyPublicationList" aria-label="Publications pagination"></nav>
+                    <nav class="nds-pagination" data-auto-pagination="faculty-publication-list" aria-label="Publications pagination"></nav>
                 </div>
             </div>
         </div>

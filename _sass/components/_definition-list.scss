@@ -25,7 +25,7 @@
         display: grid;
         grid-template-columns: subgrid;
         row-gap: var(--_dl-gap);
-        column-gap: var(--col-gap, var(--gap, var(--spacing-xl)));
+        column-gap: var(--_dl-col-gap, var(--spacing-xl));
     }
 
     // Reset stacked icon indent in tableView mode
@@ -42,7 +42,7 @@
     .nds-definition-item {
         flex-direction: row;
         flex-wrap: wrap;
-        column-gap: var(--col-gap, var(--gap, var(--spacing-sm)));
+        column-gap: var(--_dl-col-gap, var(--spacing-sm));
     }
 
     // Reset stacked icon indent in rowView mode
@@ -102,40 +102,43 @@
     --_dl-title-FS: var(--dl-title-FS, var(--typo-text-lg-FS));
     --_dl-desc-FS: var(--dl-desc-FS, var(--typo-text-md-FS));
     --_dl-gap: var(--row-gap, var(--gap, var(--spacing-lg)));
+    // Items read it, and --col-gap does not inherit. Unset stays invalid, so each layout keeps its own default.
+    --_dl-col-gap: var(--col-gap, var(--gap));
     display: flex;
     flex-direction: column;
     row-gap: var(--_dl-gap);
 
     &.nds-md {
         --dl-icon-size: 18px;
-        --dl-title-FS: var(--typo-text-clamp-md-FS);
+        // Fixed, not fluid: a clamp shrank the title below its value on phones.
+        --dl-title-FS: var(--typo-text-md-FS);
         --row-gap: var(--spacing-md);
     }
 
     &.nds-sm {
         --dl-icon-size: 18px;
-        --dl-title-FS: var(--typo-text-clamp-sm-FS);
+        --dl-title-FS: var(--typo-text-sm-FS);
         --dl-desc-FS: var(--typo-text-sm-FS);
         --row-gap: var(--spacing-sm);
     }
 
     // Always-on tableView
-    &.nds-tableView:not([class*="nds-tableView-"]) {
+    &.nds-table-view:not([class*="nds-table-view-"]) {
         @include dl-tableView;
     }
 
     // Responsive variants
-    &.nds-tableView-sm {
+    &.nds-table-view-sm {
         @include mobile { @include dl-tableView; }
     }
-    &.nds-tableView-md {
+    &.nds-table-view-md {
         @include tablet { @include dl-tableView; }
     }
-    &.nds-tableView-lg {
+    &.nds-table-view-lg {
         @include desktop('min') { @include dl-tableView; }
     }
 
-    &.nds-rowView {
+    &.nds-horizontal {
         @include dl-rowView;
     }
 }
@@ -197,6 +200,23 @@
 .nds-definition-list :is(dd, .nds-item-desc) {
     color: var(--text-secondary-paragraph);
     font-size: var(--_dl-desc-FS);
+    margin: 0; // a <p> inside .nds-prose would take the paragraph gap
+}
+
+// The value leads: the title takes the value's look and the value the title's.
+.nds-definition-list.nds-highlight-value {
+    :is(dt, .nds-item-title) {
+        font-size: var(--_dl-desc-FS);
+        color: var(--text-secondary-paragraph);
+
+        .nds-label { font-weight: var(--font-weight-regular); }
+    }
+
+    :is(dd, .nds-item-desc) {
+        font-size: var(--_dl-title-FS);
+        color: var(--text-primary-paragraph);
+        font-weight: var(--font-weight-semibold);
+    }
 }
 
 // Icon indent: always on by default, reset when tableView activates
@@ -214,16 +234,16 @@
     @include dl-divided-stacked;
 
     // TableView divided overrides
-    &.nds-tableView:not([class*="nds-tableView-"]) {
+    &.nds-table-view:not([class*="nds-table-view-"]) {
         @include dl-divided-tableView;
     }
-    &.nds-tableView-sm {
+    &.nds-table-view-sm {
         @include mobile { @include dl-divided-tableView; }
     }
-    &.nds-tableView-md {
+    &.nds-table-view-md {
         @include tablet { @include dl-divided-tableView; }
     }
-    &.nds-tableView-lg {
+    &.nds-table-view-lg {
         @include desktop('min') { @include dl-divided-tableView; }
     }
 }
@@ -236,8 +256,8 @@
 // PROCESSING SKELETON
 // ==============================================
 // A loading definition list bars its terms and descriptions (fit-content
-// width, per the legacy skeleton) — icons hide; spinner + dim suppressed
-// in _loading.scss. No JS owns this component, so its pre-init default
+// width, per the legacy skeleton) — icons hide; spinner + dim off
+// at the end of this file. No JS owns this component, so its pre-init default
 // keys on the page stamp (html:not([data-nds-loaded])) — the
 // no-JS-component pattern, covering regions visible before the reveal.
 :is(.nds-definition-list.nds-loading,
@@ -252,4 +272,9 @@
     :is(.nds-icon, i) {
         visibility: hidden;
     }
+}
+
+// Loading shows the skeleton above, not the spinner.
+.nds-definition-list.nds-loading {
+    @include loading-skeleton-host;
 }

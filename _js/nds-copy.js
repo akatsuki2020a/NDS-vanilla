@@ -1,10 +1,12 @@
 /* NDS.Copy — public surface
  * Rides: (none — base component)
+ * Requires:
+ *   .nds-copy:not([data-copy]):not([data-copy-target]) sits in .nds-code — with no text source it copies nothing
  * Methods:
  *   NDS.Copy.init()                     delegate clicks on .nds-copy
  *   NDS.Copy.bind(selector, opts)       delegate on your own selector; one listener per
  *                                       selector, so calling it again replaces the old one.
- *                                       opts {duration}
+ *                                       opts {duration, onRestore}
  *   NDS.Copy.writeText(text)            → Promise<boolean>. Clipboard write only
  *   NDS.Copy.flash(button, opts)        the success state on its own.
  *                                       opts {duration, onRestore}
@@ -13,63 +15,25 @@
  * Events:
  *   (none)
  * Hooks (on the button):
- *   data-copy          the literal text to copy
- *   data-copy-target   a selector — copies that element's textContent instead
- *   data-label         label swap during the flash (needs a .nds-label inside)
- *   data-message       what is announced; falls back to data-label, then "Copied"
+ *   data-copy           the literal text to copy
+ *   data-copy-target    a selector — copies that element's textContent instead
+ *   data-copy-label     label swap during the flash (needs a .nds-label inside); empty = "Copied" in the page language
+ *   data-copy-announce  what is announced; falls back to data-copy-label, then "Copied" / "تم النسخ"
  * Gotchas:
  *   - Text resolution stops at the first hit: data-copy, then data-copy-target, then the
  *     <code> inside a surrounding .nds-code block.
  *   - Outside a secure context it falls back to a hidden textarea and execCommand, so a
  *     plain-HTTP dev address still copies.
  *   - flash() holds data-status="success" and aria-disabled for 2 seconds by default, then
- *     restores the icon and label and calls onRestore.
- */
-/**
- * NDS Copy — shared clipboard utility with copy-button success state
- *
- * One code path for every "copy this text to the clipboard" button in the
- * project. Used by:
- *   - .nds-code blocks (delegated by nds-code.js)
- *   - the share dropmenu (driven by nds-share.js, which composes
- *     writeText + flash so the URL stays dynamic)
- *   - inline content like the Contact example's phone / email / emergency
- *     numbers (auto-bound via .nds-copy)
- *
- * Public API:
- *   NDS.Copy.writeText(text) → Promise<boolean>
- *     Tries navigator.clipboard, falls back to a temporary textarea +
- *     execCommand('copy') for non-secure contexts (e.g. dev over network IP).
- *
- *   NDS.Copy.flash(button, { duration, onRestore })
- *     Sets data-status="success", swaps the icon to a checkmark, swaps the
- *     .nds-label to data-label, announces data-message via the shared
- *     aria-live region, then restores everything after `duration`
- *     (default 2000 ms) and fires `onRestore`.
- *
- *   NDS.Copy.copyFrom(button, options)
- *     Reads the text the button wants to copy (see resolver below), writes
- *     it, and flashes on success. `options` is forwarded to flash().
- *
- *   NDS.Copy.bind(selector = '.nds-copy', { duration })
- *     Delegates click on `selector` to copyFrom. Safe to call repeatedly —
- *     each call replaces the previous listener for that selector.
- *
- *   NDS.Copy.init()
- *     Auto-binds '.nds-copy' for the page. Called by the NDS loader.
- *
- * Button text resolution (first match wins):
- *   1. `data-copy="literal text"`            — copy the literal string
- *   2. `data-copy-target="#id-or-selector"`  — copy target element's textContent
- *   3. Button inside a `.nds-code` block     — copy the nested <code> textContent
- *
- * Button success-state attributes (read by flash()):
- *   - `data-label="Link Copied!"`            — visible label swap (uses .nds-label)
- *   - `data-message="Page link copied…"`     — aria-live announcement (falls back
- *                                              to data-label, then "Copied")
+ *     restores the icon and label and calls onRestore. A call during a flash is ignored.
  */
 (function () {
     'use strict';
+
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('copy', {
+        copied: 'Copied',
+    });
     window.NDS = window.NDS || {};
 
     const DEFAULT_FLASH_MS = 2000;
@@ -105,12 +69,14 @@
     }
 
     function flash(button, options) {
-        if (!button) return;
+        // A second flash would snapshot the checkmark as the original icon (Enter skips pointer-events: none)
+        if (!button || NDS.Status.get(button) === 'success') return;
         const opts = options || {};
         const duration = opts.duration || DEFAULT_FLASH_MS;
 
-        const labelText = button.getAttribute('data-label');
-        const messageText = button.getAttribute('data-message') || labelText || 'Copied';
+        // A bare data-copy-label swaps in the pack's word, so the label follows the page language.
+        const labelText = button.hasAttribute('data-copy-label') ? button.getAttribute('data-copy-label') || strings.text('copied') : null;
+        const messageText = button.getAttribute('data-copy-announce') || labelText || strings.text('copied');
 
         // Icon swap: snapshot the className and replace with the mask
         // checkmark for the flash window. Wholesale replace is needed because

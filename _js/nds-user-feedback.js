@@ -1,13 +1,23 @@
 /* NDS.UserFeedback — public surface
  * Rides: nds-feedback (renders the success / error message) · nds-cookies (remembers a
  *        submission per page) · nds-forms (validateForm when the widget sits in a form)
+ * Requires:
+ *   .nds-user-feedback needs .nds-user-feedback-answer-btn .nds-btn[data-answer] — the details step never opens
+ *   .nds-user-feedback needs .nds-user-feedback-submit-btn — nothing is sent
  * Methods:
  *   NDS.UserFeedback.init() / .reinit()   scan + initialize .nds-user-feedback
  *   NDS.UserFeedback.create(el)           initialize one widget (idempotent)
  *   NDS.UserFeedback.destroy(el)          release one widget's listeners + init marker
+ *   NDS.UserFeedback.showStatus(el, status)  end a send a submit listener took over:
+ *                                         'success' (default) or 'error'
  * Events:
- *   (none)
+ *   nds:userfeedback:submit   on the root, bubbles, cancelable — detail { form, data }
+ *                             (data is the form's FormData). Fires after validation.
+ *                             Cancel it to send the data yourself, then call showStatus().
  * Hooks:
+ *   action · method (the form's)                Submit posts the FormData there with
+ *                                               NDS.request and shows success or error.
+ *                                               No action: success at once, nothing sent
  *   data-success-message · data-error-message   override the built-in localized text
  *   data-no-persist                             skip the cookie: never restore, never save
  *   data-answer                                 on each answer button, its value; the
@@ -18,6 +28,8 @@
  *   - The cookie is essential/functional (`nds-feedback_<page path>`, 365 days) and needs
  *     no consent.
  *   - Submit validates the surrounding form first and stops when it fails.
+ *   - An error keeps the form open with the message, so the visitor can send again.
+ *     Only success is saved in the cookie.
  */
 /**
  * NDS User Feedback Component
@@ -46,7 +58,7 @@
  * - Storing only minimal, non-personal data (page path + "submitted" status)
  *
  * Cookie Format: nds-feedback_{encoded_page_path} = "submitted"
- * Example: nds-feedback_components_buttons = "submitted"
+ * Example: nds-feedback_components_buttons-html = "submitted"
  *
  * Data Attributes:
  * - data-success-message: Custom success message (overrides language defaults)
@@ -56,6 +68,12 @@
 
 NDS.UserFeedback = (() => {
     'use strict';
+
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('user-feedback', {
+        success: 'Your feedback is submitted!',
+        error: 'An error occurred, please try again',
+    });
 
     // Helper function to generate cookie name for current page
     function getFeedbackCookieName() {
@@ -128,18 +146,12 @@ NDS.UserFeedback = (() => {
 
         // Show status state with success/error using NDSFeedback API
         function showStatus(status = 'success') {
-            // Set data-state to status (UI state)
-            NDS.State.set(feedbackComponent, 'status');
+            const ok = status === 'success';
+            // An error keeps the form open, so the visitor can send it again.
+            if (ok) NDS.State.set(feedbackComponent, 'status');
 
-            // Detect page language
-            const isArabic = NDS.isArabic;
-
-            // Get custom message from data attribute or use language-specific defaults
-            const defaultSuccessMessage = isArabic ? 'تم استلام ملاحظتك!' : 'Your feedback is submitted!';
-            const defaultErrorMessage = isArabic ? 'حدث خطأ، يرجى المحاولة مرة أخرى' : 'An error occurred, please try again';
-
-            const successMessage = feedbackComponent.getAttribute('data-success-message') || defaultSuccessMessage;
-            const errorMessage = feedbackComponent.getAttribute('data-error-message') || defaultErrorMessage;
+            const successMessage = feedbackComponent.getAttribute('data-success-message') || strings.text('success');
+            const errorMessage = feedbackComponent.getAttribute('data-error-message') || strings.text('error');
             const message = status === 'success' ? successMessage : errorMessage;
 
             // Create feedback message using NDSFeedback API
@@ -155,31 +167,49 @@ NDS.UserFeedback = (() => {
                     position: 'append',
                     size: 'md',
                     style: '',
-                    onDismiss: () => {
-                        // Reset feedback when dismissed
-                        resetFeedback();
-                    }
                 });
 
-                // Show status element, hide others
-                if (statusEl) statusEl.removeAttribute('hidden');
-                if (closeButton) closeButton.setAttribute('hidden', '');
-                if (detailsEl) detailsEl.setAttribute('hidden', '');
-                if (submitEl) submitEl.setAttribute('hidden', '');
+                statusEl.removeAttribute('hidden');
             } else {
                 // Fallback if NDSFeedback is not available
                 console.warn('NDS UserFeedback: NDSFeedback API not available');
                 NDS.Status.set(feedbackComponent, status);
-                if (statusEl) statusEl.removeAttribute('hidden');
-                if (closeButton) closeButton.setAttribute('hidden', '');
-                if (detailsEl) detailsEl.setAttribute('hidden', '');
-                if (submitEl) submitEl.setAttribute('hidden', '');
             }
+            if (!ok) return;
 
-            // Save feedback status to cookie if success (unless persistence is opted out)
-            if (status === 'success' && persist) {
-                saveFeedbackStatus('submitted');
-            }
+            if (closeButton) closeButton.setAttribute('hidden', '');
+            if (detailsEl) detailsEl.setAttribute('hidden', '');
+            if (submitEl) submitEl.setAttribute('hidden', '');
+
+            // Save feedback status to cookie (unless persistence is opted out)
+            if (persist) saveFeedbackStatus('submitted');
+        }
+
+        // The message the send ended with, then the widget back in view.
+        function finish(status) {
+            showStatus(status);
+            // Sticky-nav-aware scroll — no-op when the target is already
+            // below the sticky nav, so short forms don't jump on submit.
+            NDS.scrollBelowNav(feedbackComponent.closest('section') || feedbackComponent, {
+                offsetVar: '--userfeedback-scroll-offset',
+                offsetEl: feedbackComponent,
+            });
+        }
+        feedbackComponent._ndsUfFinish = finish;
+
+        // Rating variant: carry the picked score to the form field and the recap.
+        // The stars are not a form control, so the hidden input is what posts.
+        function mirrorRating() {
+            const picked = feedbackComponent.querySelector('.nds-user-feedback-details .nds-rating');
+            if (!picked) return;
+
+            const value = picked.ndsRating ? picked.ndsRating.getRating() : Number(picked.dataset.rating) || 0;
+
+            const field = feedbackComponent.querySelector('[data-rating-value]');
+            if (field) NDS.setValue(field, value);
+
+            const score = feedbackComponent.querySelector('[data-rating-score]');
+            if (score) score.textContent = '(' + value.toFixed(1) + ')';
         }
 
         // Reset to initial state (overview)
@@ -201,20 +231,22 @@ NDS.UserFeedback = (() => {
             if (submitEl) submitEl.setAttribute('hidden', '');
 
             // Reset checkboxes
-            const checkboxes = feedbackComponent.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                checkbox.checked = false;
-            });
-
-            // Reset radio buttons
-            const radios = feedbackComponent.querySelectorAll('input[type="radio"]');
-            radios.forEach(radio => {
-                radio.checked = false;
-            });
+            // Reset checkboxes and radio buttons
+            feedbackComponent.querySelectorAll('input[type="checkbox"]:checked, input[type="radio"]:checked')
+                .forEach(box => NDS.setValue(box, false));
 
             // Clear textarea
             const textarea = feedbackComponent.querySelector('textarea');
-            if (textarea) textarea.value = '';
+            if (textarea) NDS.setValue(textarea, '');
+
+            // Rating variant: send the picked stars back to zero along with the rest.
+            // Scoped away from .nds-user-feedback-score, which holds the average.
+            const picked = feedbackComponent.querySelector('.nds-user-feedback-details .nds-rating');
+            if (picked && picked.ndsRating) picked.ndsRating.setValue(0);
+            const ratingField = feedbackComponent.querySelector('[data-rating-value]');
+            if (ratingField) NDS.setValue(ratingField, '0');
+            const recapScore = feedbackComponent.querySelector('[data-rating-score]');
+            if (recapScore) recapScore.textContent = '(0.0)';
         }
 
         // Scope all listeners to an AbortController so a future destroy/reinit can detach atomically
@@ -251,14 +283,26 @@ NDS.UserFeedback = (() => {
                     }
                 }
 
-                showStatus('success');
+                mirrorRating();
 
-                // Sticky-nav-aware scroll — no-op when the target is already
-                // below the sticky nav, so short forms don't jump on submit.
-                NDS.scrollBelowNav(feedbackComponent.closest('section') || feedbackComponent, {
-                    offsetVar: '--userfeedback-scroll-offset',
-                    offsetEl: feedbackComponent,
-                });
+                // A listener that cancels the event sends the data itself, then calls showStatus().
+                const data = form && form.tagName === 'FORM' ? new FormData(form) : new FormData();
+                const go = feedbackComponent.dispatchEvent(new CustomEvent('nds:userfeedback:submit', {
+                    bubbles: true, cancelable: true, detail: { form, data },
+                }));
+                if (!go) return;
+
+                const action = form && form.getAttribute('action');
+                if (!action) return finish('success');
+
+                NDS.State.add(submitButton, 'loading');
+                submitButton.disabled = true;
+                NDS.request(action, { method: form.getAttribute('method') || 'POST', body: data })
+                    .then(() => finish('success'), () => finish('error'))
+                    .finally(() => {
+                        NDS.State.remove(submitButton, 'loading');
+                        submitButton.disabled = false;
+                    });
             }, { signal: _ufSignal });
         }
 
@@ -276,8 +320,14 @@ NDS.UserFeedback = (() => {
     function destroy(feedbackComponent) {
         feedbackComponent._ndsUfAC?.abort();
         delete feedbackComponent._ndsUfAC;
+        delete feedbackComponent._ndsUfFinish;
         feedbackComponent.removeAttribute('data-nds-user-feedback-initialized');
     }
 
-    return { init, reinit: init, create, destroy };
+    // Ends a send that a nds:userfeedback:submit listener took over.
+    function showStatus(feedbackComponent, status = 'success') {
+        feedbackComponent._ndsUfFinish?.(status);
+    }
+
+    return { init, reinit: init, create, destroy, showStatus };
 })();

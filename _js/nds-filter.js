@@ -1,5 +1,5 @@
 /* NDS.Filter — public surface
- * Rides: nds-dropmenu (portal, positioning, search, auto-close knobs) · nds-forms (validation)
+ * Rides: nds-dropmenu (top layer, positioning, search, auto-close knobs) · nds-forms (validation)
  *      · nds-pagination · nds-sort · nds-slider · nds-date-picker · nds-accordion
  *        (soft — driven only when present on the filter surface)
  * Methods:
@@ -88,7 +88,9 @@
  *   - Auto-generated options come from _buildFilterInput(): div.nds-form-container plus
  *     nds-{check,radio,switch}-container, wrapping div.nds-form-header > label[for] >
  *     span.nds-label and div.nds-form-control > the input. Hand-written options must match
- *     that shape — read the generator, do not guess it.
+ *     that shape — read the generator, do not guess it. A hand-written range is a
+ *     [data-filter] group holding a .nds-slider-container (canon in components/slider.md);
+ *     put data-filter-currency / data-filter-unit on the group for the chip.
  *   - Resetting is markup, not JS: a [data-filter-action="reset"] button inside the surface
  *     clears every input and re-emits nds:filter:change. Hand-clearing fields + syncState
  *     repaints only — it dispatches nothing.
@@ -124,6 +126,20 @@
 (function() {
     'use strict';
 
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('filter', {
+        update_failed: 'Could not update results',
+        update_failed_description: 'Something went wrong applying the filter. The results shown are unchanged.',
+        no_results: 'No Result',
+        no_results_description: 'No result for current filter criteria',
+        clear: 'Clear Filter',
+        all: 'All',
+        apply: 'Apply',
+        min: 'Minimum',
+        max: 'Maximum',
+        max_value: 'Maximum value',
+    });
+
     class NDSFilter {
         constructor(filterContainer, surfaces = null) {
             this.filterContainer = filterContainer;
@@ -140,9 +156,8 @@
             // surface set, so the constructor skips re-scanning the document for them.
             this._targetRoots = this.resolveTargetRoots(surfaces);
 
-            // Portal-safe identifier on the filter's own dropmenu menu (rule: a
-            // component-owned menu names itself so styling/hooks survive the menu
-            // portaling to <body>). The .nds-filter anchor IS the dropmenu wrapper
+            // Identifier on the filter's own dropmenu menu (rule: a component-owned
+            // menu names itself). The .nds-filter anchor IS the dropmenu wrapper
             // when filters render in a dropdown; the own-descendant check skips a
             // nested sub-component's menu (e.g. a multiselect used as a control).
             this._targetRoots.forEach(root => {
@@ -242,7 +257,10 @@
         // container and its cards is normal.
         resolveItems() {
             if (!this.targetContainer) return [];
-            const items = Array.from(this.targetContainer.querySelectorAll(this.getItemSelector()));
+            // The no-results alert is ours, not an item: it carries .nds-card, and in a table its row is a tr.
+            const alertId = `nds-filter-no-results-${this.targetId}`;
+            const items = Array.from(this.targetContainer.querySelectorAll(this.getItemSelector()))
+                .filter(el => el.id !== alertId && !el.classList.contains('nds-filter-no-results-row'));
             if (this.targetContainer.tagName !== 'TBODY') return items;
             return items.filter(el =>
                 el.parentElement === this.targetContainer && !el.classList.contains('nds-sub'));
@@ -289,16 +307,13 @@
          *
          * Searches the small linked subtrees (this._targetRoots) rather than
          * sweeping the whole document, so cost scales with the filter's own UI
-         * regions, not the page. NDS.queryAll rather than root.querySelectorAll:
-         * a filter dropmenu may carry data-portal, which moves its menu to
-         * <body> while open — every control inside it would otherwise drop out
-         * of every post-init re-resolve (refresh, sort triggers, count slot).
+         * regions, not the page.
          */
         queryAll(selector) {
             const set = new Set();
             for (const root of this._targetRoots) {
                 if (root.matches(selector)) set.add(root);
-                NDS.queryAll(root, selector).forEach(el => set.add(el));
+                root.querySelectorAll(selector).forEach(el => set.add(el));
             }
 
             let matches = Array.from(set);
@@ -322,7 +337,6 @@
             }, 500);
 
             this.setupFilterElements();
-            this.setupResetButton();
             this.setupActionButtons();
             this.setupChipStyle();
             this.applyUrlParams();
@@ -446,7 +460,8 @@
             // Dispatch preventable event
             const submitEvent = new CustomEvent('nds:filterFormSubmit', {
                 detail: {
-                    criteria: this.criteria,
+                    // A copy, as nds:filter:change hands out: a handler must not edit live filter state.
+                    criteria: this.getCriteria(),
                     form: this.submissionForm
                 },
                 cancelable: true,
@@ -491,7 +506,7 @@
             // Dispatch preventable AJAX submit event
             const ajaxEvent = new CustomEvent('nds:filterFormAjax', {
                 detail: {
-                    criteria: this.criteria,
+                    criteria: this.getCriteria(),
                     form: this.submissionForm,
                     hiddenInputsContainer: this.hiddenInputsContainer,
                     // Chips, badge and URL are already committed above, so a
@@ -510,13 +525,20 @@
             if (this.targetContainer) this.targetContainer.classList.add('nds-loading');
 
             const { url, options } = this._buildAjaxRequest();
+            const { signal } = options;
             // 4MB — an HTML fragment is legitimately larger than a JSON payload,
             // so the shared default is raised here rather than for everyone. A
             // ceiling against a runaway response, not a target.
             NDS.request(url, { ...options, maxBytes: 4194304 })
                 .then(({ isJson, data }) => {
                     const eventDetail = this._applyAjaxResponse({ isJson, data });
-                    this._finishAjaxSubmit(eventDetail, isJson);
+                    // Swapped-in results start before the complete event, so its handlers find them live.
+                    // A bundle that fails to load leaves them unstarted; it does not undo the filters.
+                    const mounted = isJson ? null : NDS.Init.mount(this.targetContainer).catch(() => {});
+                    return Promise.resolve(mounted).then(() => {
+                        // A newer request took over while this one mounted: it owns the loading state.
+                        if (!signal.aborted) this._finishAjaxSubmit(eventDetail, isJson);
+                    });
                 })
                 .catch(error => this._handleAjaxError(error, appliedUrl));
         }
@@ -593,6 +615,7 @@
 
             if (targetInResponse) {
                 const newContainer = targetInResponse.cloneNode(true);
+                NDS.Init.destroy(this.targetContainer);
                 this.targetContainer.replaceWith(newContainer);
                 this.targetContainer = newContainer;
                 this.items = this.resolveItems();
@@ -628,17 +651,19 @@
             this.targetContainer.setAttribute('data-nds-filter-initialized', 'true');
         }
 
+        // Undo what handleAjaxSubmit set on start; success and failure both release through here.
+        _releaseSubmitUi() {
+            if (this.targetContainer) this.targetContainer.classList.remove('nds-loading');
+            NDS.State.clear(this.filterContainer);
+            if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
+        }
+
         /**
          * Settle UI state after a successful response: clear loading, refresh
          * dependent UI, fire the complete event.
          */
         _finishAjaxSubmit(eventDetail, isJson) {
-            if (this.targetContainer) {
-                this.targetContainer.classList.remove('nds-loading');
-            }
-
-            NDS.State.clear(this.filterContainer);
-            if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
+            this._releaseSubmitUi();
 
             this._commitAppliedUi();
 
@@ -664,14 +689,8 @@
 
             console.error('NDS Filter: AJAX submission failed:', error);
 
-            if (this.targetContainer) {
-                this.targetContainer.classList.remove('nds-loading');
-            }
-
+            this._releaseSubmitUi();
             if (appliedUrl !== undefined) this._rollbackApplied(appliedUrl);
-
-            NDS.State.clear(this.filterContainer);
-            if (this._triggerBtn) { NDS.State.remove(this._triggerBtn, 'loading'); this._triggerBtn = null; }
 
             // Cancelable so a consumer with its own error UI can suppress the
             // toast — same opt-out idiom as nds:filterFormAjax.
@@ -730,14 +749,11 @@
             // retry fails while the first toast is still up.
             if (document.getElementById(alertId) || !NDS.Alert) return;
 
-            const isArabic = NDS.isArabic;
             NDS.Alert.create({
                 display: 'toast',
                 variant: 'error',
-                title: isArabic ? 'تعذر تحديث النتائج' : 'Could not update results',
-                description: isArabic
-                    ? 'حدث خطأ أثناء تطبيق التصفية. النتائج المعروضة لم تتغير.'
-                    : 'Something went wrong applying the filter. The results shown are unchanged.',
+                title: strings.text('update_failed'),
+                description: strings.text('update_failed_description'),
                 id: alertId,
                 // The toast is the only failure signal — the results on screen
                 // are unchanged, so nothing else marks the page.
@@ -764,17 +780,15 @@
         // URL PARAMETERS
         // ==============================================
 
-        sanitizeInput(str) {
-            if (!str) return '';
-            return str
-                .replace(/<[^>]*>/g, '')
-                .replace(/[<>"'&]/g, '')
-                .substring(0, 100);
+        // One write path for the search keyword (typed, dropmenu, URL, API), so a
+        // shared link reproduces the list. It is only matched and written to
+        // value / textContent, never rendered as HTML, so nothing is stripped.
+        _setSearch(raw) {
+            this.criteria.search = String(raw || '').trim().toLowerCase();
         }
 
         // Sanitize a URL-supplied value for *matching* against existing DOM
-        // input values (filter checkboxes/radios/switches). Unlike sanitizeInput
-        // — which strips & " ' < > for free-text search — this keeps characters
+        // input values (filter checkboxes/radios/switches). It keeps characters
         // that are legitimately part of a filter value (e.g. "Healthcare & Social")
         // so the equality match against input.value succeeds. Safe because the
         // value is only compared, never rendered as HTML (stored criteria come
@@ -795,18 +809,18 @@
             const searchParam = params.get(searchParamName);
 
             if (searchParam) {
-                const sanitized = this.sanitizeInput(searchParam);
-                this.criteria.search = sanitized.trim().toLowerCase();
-                this._mirrorSearchInputs(sanitized);
+                this._setSearch(searchParam);
+                this._mirrorSearchInputs(searchParam);
                 hasParams = true;
             }
 
-            // Sort URL params (?sort=…&dir=…) are owned by NDS.Sort (see setupSort);
-            // it reads them in its init which runs after applyUrlParams completes.
+            // Sort URL params (?sort=…&order=…) are owned by NDS.Sort (see setupSort) when the
+            // filter has sort buttons; it reads them in its init, after applyUrlParams.
+            const sorted = this.queryAll('[data-sort]').length > 0;
 
             // Apply dynamic filter params — plain input names as URL keys
             for (const [key, value] of params.entries()) {
-                if (key === searchParamName || key === 'sort' || key === 'dir') continue;
+                if (key === searchParamName || (sorted && (key === 'sort' || key === 'order'))) continue;
 
                 if (this.filterInputs[key]) {
                     if (this.filterInputs[key].type === 'range') {
@@ -883,7 +897,7 @@
             const searchParamName = this.getSearchInputName();
 
             // Managed param keys: this filter's own search + filter names.
-            // Sort/dir are owned by NDS.Sort and preserved untouched here.
+            // Sort/order are owned by NDS.Sort and preserved untouched here.
             // Other filters' params (distinct names) are also left untouched.
             const managedKeys = new Set([searchParamName]);
             for (const key of Object.keys(this.filterInputs)) {
@@ -935,7 +949,7 @@
             // any filter dropmenu panel triggers Apply.
             button.setAttribute('data-dropmenu-primary', '');
             const labelEl = button.querySelector('.nds-label');
-            this.applyButtonBaseLabel = labelEl ? labelEl.textContent : 'Apply';
+            this.applyButtonBaseLabel = labelEl ? labelEl.textContent : strings.text('apply');
 
             // In form mode, turn the apply button into a submit for the
             // submission form — works whether the button is inside the form
@@ -987,7 +1001,7 @@
         // to settle search state from the dropmenu surface.
         _syncSearchFromDropmenu() {
             if (!this.searchInputs.dropmenu) return;
-            this.criteria.search = this.searchInputs.dropmenu.input.value.trim().toLowerCase();
+            this._setSearch(this.searchInputs.dropmenu.input.value);
             if (this.searchInputs.direct) {
                 this.searchInputs.direct.input.value = this.searchInputs.dropmenu.input.value;
                 this.updateClearButtonVisibility(
@@ -1031,15 +1045,18 @@
                 items: () => this.items,
                 reorderIn: this.targetContainer,
                 triggers: () => this.queryAll('[data-sort]'),
-                mode: 'direct',
+                // As markup wiring reads it (NDS.Sort.init): one cycle trigger makes the set cycle.
+                mode: this.queryAll('[data-sort][data-sort-mode="cycle"]').length ? 'cycle' : 'direct',
                 a11y: 'pressed',
                 accessor: (item, key) => item.getAttribute('data-sort-' + key),
                 keyFrom: (trigger) => trigger.getAttribute('data-sort') || '',
-                urlSync: { keyParam: 'sort', dirParam: 'dir' },
+                urlSync: { keyParam: 'sort', orderParam: 'order' },
                 onChange: ({ orderedItems }) => {
                     this.items = orderedItems;
                     this.updatePagination();
-                    this.dispatchFilterEvent();
+                    // Counts are null in form mode only, as filter.md documents for nds:filter:change.
+                    if (this.isFormMode) this.dispatchFilterEvent();
+                    else this.dispatchFilterEvent(this.getVisibleItems().length);
                 }
             });
         }
@@ -1075,7 +1092,7 @@
         // first resolve — walked once, not on every filter change.
         _resolveFilterBtn() {
             if (this.filterButtonEl === undefined) {
-                this.filterButtonEl = this.query('.nds-filter-btn, [data-filter-btn], .filter-btn');
+                this.filterButtonEl = this.query('.nds-filter-btn, [data-filter-btn]');
             }
             return this.filterButtonEl;
         }
@@ -1101,10 +1118,8 @@
             if (!chipsContainer) return;
 
             // Find auto-fill container (optional): external first, then internal.
-            // Portal-aware: an auto-fill nested inside the menu leaves the
-            // wrapper's subtree while a data-portal dropmenu is open.
             const autoFillContainer = this.autoFillElement
-                || NDS.querySelector(this.filterContainer, '.nds-auto-fill');
+                || this.filterContainer.querySelector('.nds-auto-fill');
 
             chipsContainer.innerHTML = '';
 
@@ -1274,6 +1289,41 @@
             this._flushAccordionInit();
             this._autoDetectDirectSearch();
             this._wireDeferredFilterDropmenus();
+            this._wireMenuDraft();
+        }
+
+        // The menu's ticks are a draft until Apply: closing it any other way puts the applied
+        // filters back, so a search, a chip or a sort never applies a tick nobody applied.
+        _wireMenuDraft() {
+            const { signal } = this.abortController;
+            this._targetRoots.forEach(dm => {
+                if (!dm.matches?.('.nds-dropmenu') || dm._ndsFilterDraft === this) return;
+                dm._ndsFilterDraft = this;
+                dm.addEventListener('nds:dropmenu:opened', () => {
+                    this._appliedFilters = structuredClone(this.criteria.filters);
+                }, { signal });
+                dm.addEventListener('nds:dropmenu:closed', () => {
+                    const applied = this._appliedFilters;
+                    this._appliedFilters = null;
+                    if (applied && JSON.stringify(applied) !== JSON.stringify(this.criteria.filters)) this._restoreFilterInputs(applied);
+                }, { signal });
+            });
+        }
+
+        // Set every group's controls, and the criteria, to `applied` (a criteria.filters copy).
+        _restoreFilterInputs(applied) {
+            this._resetFilterInputs();
+            for (const [name, values] of Object.entries(applied)) {
+                const fd = this.filterInputs[name];
+                if (!fd || !values.length) continue;
+                if (fd.type === 'range') {
+                    this._applyRangeFromUrl(name, values[0]);
+                } else {
+                    this._checkInputsForValues(fd, values.join(','));
+                    this.updateFilterCriteria(name);
+                }
+            }
+            this.updateApplyButtonLabel();
         }
 
         // Dropmenus that will defer an auto-populated filter (hidden + not
@@ -1302,7 +1352,8 @@
                 this.setupSearchFilter(element);
                 return;
             }
-            if (filterType === 'slider') {
+            // A group holding a slider you wrote is a range filter too, with no data-filter-type.
+            if (filterType === 'slider' || element.querySelector('.nds-slider-container')) {
                 this.setupRangeFilter(element, filterName);
                 return;
             }
@@ -1352,7 +1403,7 @@
                 if (input.closest('.nds-dropmenu-menu')) continue;
 
                 const wrapper = input.closest('.nds-form-control') || input.parentElement;
-                const clearBtn = wrapper?.querySelector('.nds-clear, [aria-label*="مسح"], [aria-label*="clear"]');
+                const clearBtn = wrapper?.querySelector('.nds-clear');
 
                 this.searchInputs.direct = {
                     input: input,
@@ -1429,7 +1480,7 @@
 
             const isInsideDropmenu = element.closest('.nds-dropmenu-menu') !== null;
             const searchContainer = element.matches('input') ? element.parentElement : element;
-            const clearBtn = searchContainer.querySelector('.nds-clear, [aria-label*="مسح"], [aria-label*="clear"]');
+            const clearBtn = searchContainer.querySelector('.nds-clear');
 
             const searchRef = { input: searchInput, clearBtn: clearBtn, element: element };
 
@@ -1522,7 +1573,7 @@
         }
 
         applyDirectSearch(searchInput) {
-            this.criteria.search = searchInput.value.trim().toLowerCase();
+            this._setSearch(searchInput.value);
             if (this.searchInputs.dropmenu) {
                 this.searchInputs.dropmenu.input.value = searchInput.value;
                 this.updateClearButtonVisibility(
@@ -1625,7 +1676,7 @@
                 element._ndsFilterObserver = true;
                 this._offDOMAdds.push(NDS.onDOMAdd('input[type="checkbox"], input[type="radio"], .nds-switch-input', (nodes) => {
                     // Ignore nodes that already have listeners bound — they are
-                    // being moved (portal open/close), not genuinely inserted.
+                    // being moved, not genuinely inserted.
                     const fresh = nodes.filter(n => element.contains(n) && !n._ndsFilterBound);
                     if (fresh.length > 0) {
                         this.setupManualFilter(element, filterName);
@@ -1756,6 +1807,8 @@
         // both data-filter-min + data-filter-max → dual range (two thumbs);
         // data-filter-max alone → single "up to" (one thumb, floor 0).
         generateRangeControl(placeholder, filterName) {
+            // Your own slider markup is used as written.
+            if (placeholder.querySelector('.nds-slider-container')) return placeholder;
             const hasMin = placeholder.hasAttribute('data-filter-min');
             const hasMax = placeholder.hasAttribute('data-filter-max');
             const min = hasMin ? parseFloat(placeholder.getAttribute('data-filter-min')) : 0;
@@ -1797,13 +1850,13 @@
 
             if (single) {
                 // One thumb resting at max — the filter is off until dragged down.
-                track.appendChild(this._buildRangeInput(null, min, max, step, max, NDS.isArabic ? 'القيمة القصوى' : 'Maximum value'));
+                track.appendChild(this._buildRangeInput(null, min, max, step, max, 'max_value'));
                 control.appendChild(track);
                 control.appendChild(this._buildRangeOutput(null, fmt, max));
             } else {
                 control.appendChild(this._buildRangeOutput('min', fmt, min));
-                track.appendChild(this._buildRangeInput('min', min, max, step, min, NDS.isArabic ? 'الحد الأدنى' : 'Minimum'));
-                track.appendChild(this._buildRangeInput('max', min, max, step, max, NDS.isArabic ? 'الحد الأقصى' : 'Maximum'));
+                track.appendChild(this._buildRangeInput('min', min, max, step, min, 'min'));
+                track.appendChild(this._buildRangeInput('max', min, max, step, max, 'max'));
                 control.appendChild(track);
                 control.appendChild(this._buildRangeOutput('max', fmt, max));
             }
@@ -1824,7 +1877,7 @@
             return out;
         }
 
-        _buildRangeInput(which, min, max, step, value, ariaLabel) {
+        _buildRangeInput(which, min, max, step, value, labelKey) {
             const input = document.createElement('input');
             input.type = 'range';
             input.className = which ? `nds-slider nds-slider-${which}` : 'nds-slider';
@@ -1832,7 +1885,7 @@
             input.max = max;
             input.step = step;
             input.value = value;
-            input.setAttribute('aria-label', ariaLabel);
+            strings.set(input, 'aria-label', labelKey);
             return input;
         }
 
@@ -1972,15 +2025,6 @@
             this.items.forEach(card => {
                 const filterElements = card.querySelectorAll(`[data-filter="${filterName}"]`);
                 const itemHasFilter = card.getAttribute('data-filter') === filterName;
-
-                if (!filterElements.length && !itemHasFilter) {
-                    // Fallback for tags: traditional .nds-card-tags structure
-                    if (filterName === 'tags') {
-                        this._collectCardTagLabels(card).forEach(value => values.add(value));
-                    }
-                    return;
-                }
-
                 filterElements.forEach(harvest);
                 // The item itself can carry the marker too
                 if (itemHasFilter) harvest(card);
@@ -1992,21 +2036,6 @@
             }
 
             return Array.from(values).sort((a, b) => a.localeCompare(b, 'ar'));
-        }
-
-        // Harvest legacy .nds-card-tags labels from a card: the trimmed
-        // .nds-tag .nds-label text of each tag, original case. Shared by
-        // collectFilterValues (option build) and _buildItemCache (match cache);
-        // callers lowercase as needed.
-        _collectCardTagLabels(card) {
-            const cardTags = card.querySelector('.nds-card-tags');
-            if (!cardTags) return [];
-            const labels = [];
-            cardTags.querySelectorAll('.nds-tag .nds-label').forEach(el => {
-                const value = el.textContent.trim();
-                if (value) labels.push(value);
-            });
-            return labels;
         }
 
         generateFilterInputs(container, filterName, inputType, explicitValues = null) {
@@ -2033,11 +2062,12 @@
             // values, so selecting it clears the filter.
             const includeAllOption = inputType === 'radio'
                 && !container.hasAttribute('data-filter-no-all');
-            const allLabel = container.getAttribute('data-filter-all-label')
-                || (NDS.isArabic ? 'الكل' : 'All');
+            const allLabel = container.getAttribute('data-filter-all-label');
             const values = includeAllOption ? ['', ...collectedValues] : collectedValues;
 
             const isInDropmenu = container.closest('.nds-dropmenu-menu') !== null;
+            // Read before _resolveFilterFieldset: it swaps a placeholder div for a fieldset, detaching the div.
+            const searchable = isInDropmenu && !!container.closest('.nds-dropmenu[data-search]');
             const multiple = values.length > 1;
 
             const fieldset = this._resolveFilterFieldset(container, { legendText, isInDropmenu, multiple });
@@ -2068,7 +2098,7 @@
                 allLabel,
                 labelMap: this.filterLabels[filterName] || {},
                 // Row-level search opt-in gated on the parent dropmenu opting in.
-                searchable: isInDropmenu && !!container.closest('.nds-dropmenu[data-search]'),
+                searchable,
             };
 
             values.forEach((value, index) => {
@@ -2154,9 +2184,7 @@
         // Sync applied-count tags on filter-accordion headers with the current
         // criteria. Hidden at 0, shows the number of selected values otherwise.
         _updateAccordionCounts() {
-            // Portal-aware: the count tags sit inside the generated fieldsets,
-            // which travel with the menu when the dropmenu carries data-portal.
-            const tags = NDS.queryAll(this.filterContainer, '[data-filter-count-for]');
+            const tags = this.filterContainer.querySelectorAll('[data-filter-count-for]');
             tags.forEach(tag => {
                 const name = tag.getAttribute('data-filter-count-for');
                 const count = (this.criteria.filters[name] || []).length;
@@ -2266,7 +2294,8 @@
 
             const labelSpan = document.createElement('span');
             labelSpan.className = 'nds-label';
-            labelSpan.textContent = isAllOption ? allLabel : (labelMap[value] || value);
+            if (isAllOption && !allLabel) strings.set(labelSpan, 'text', 'all');
+            else labelSpan.textContent = isAllOption ? allLabel : (labelMap[value] || value);
 
             label.appendChild(labelSpan);
             formHeader.appendChild(label);
@@ -2303,7 +2332,7 @@
                 const input = document.createElement('input');
                 input.type = inputType;
                 input.id = id;
-                input.name = inputType === 'radio' ? groupName : `filter-${filterName}`;
+                input.name = `filter-${filterName}`;
                 input.value = value;
                 input.className = inputClass;
                 if (variant) {
@@ -2342,17 +2371,19 @@
         // The "commit applied UI + URL" triple: six sites route through here so a
         // path that omits one call can't silently desync the URL from the chips.
         _commitAppliedUi() {
+            // Committed while the menu is open (its Reset): this is now what closing puts back.
+            if (this._appliedFilters) this._appliedFilters = structuredClone(this.criteria.filters);
             this.updateUrlParams();
             this.updateFilterButtonBadge();
             this.updateAppliedChips();
         }
 
-        // How a criteria change gets committed. AJAX mode re-fetches from the
-        // server; every other mode filters the items already on the page. One
+        // How a criteria change gets committed. Form mode, AJAX or not, asks the
+        // server again; client mode filters the items already on the page. One
         // definition so a new commit path can't pick the wrong half — the chip,
         // clear and range-reset paths all route here.
         _commitCriteriaChange() {
-            if (!this.isAjaxMode) {
+            if (!this.isFormMode) {
                 this.applyFilters();
                 return;
             }
@@ -2453,7 +2484,6 @@
             // Soft dependency — filter skips no-results alert banner if NDS.Alert isn't bundled.
             if (document.getElementById(alertId) || !NDS.Alert) return;
 
-            const isArabic = NDS.isArabic;
             const self = this;
 
             // If the target container is a <table>/<tbody>, wrap the alert in a
@@ -2480,14 +2510,14 @@
 
             NDS.Alert.create({
                 variant: 'warning',
-                description: isArabic ? 'لا توجد نتائج لمعايير التصفية الحالية' : 'No result for current filter criteria',
+                description: strings.text('no_results_description'),
                 target: insertTarget,
-                title: isArabic ? 'لا توجد نتائج' : 'No Result',
+                title: strings.text('no_results'),
                 id: alertId,
                 closable: false,
                 actions: [
                     {
-                        label: isArabic ? 'مسح التصفية' : 'Clear Filter',
+                        label: strings.text('clear'),
                         variant: 'neutral',
                         onClick: () => {
                             self.reset();
@@ -2555,15 +2585,6 @@
                     filterValues[itemFilter].push(this.getFilterValue(item).toLowerCase());
                 }
 
-                // Legacy .nds-card-tags fallback — only contributes when no
-                // data-filter="tags" markers exist on this card.
-                if (!filterValues.tags) {
-                    const tagLabels = this._collectCardTagLabels(item);
-                    if (tagLabels.length) {
-                        filterValues.tags = tagLabels.map(v => v.toLowerCase());
-                    }
-                }
-
                 item._ndsFilterValues = filterValues;
 
                 const textSource = item.querySelector('.nds-card-content') || item;
@@ -2612,19 +2633,6 @@
         // ==============================================
         // RESET FUNCTIONALITY
         // ==============================================
-
-        setupResetButton() {
-            const resetBtn = this.filterContainer.querySelector('[class*="refresh"], button:has(.nds-hgi-refresh)');
-            const resetByIcon = this.filterContainer.querySelector('.nds-hgi-refresh-ccw-02, .nds-hgi-refresh');
-            const resetButton = resetBtn || (resetByIcon ? resetByIcon.closest('button') : null);
-
-            if (resetButton) {
-                resetButton.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    this.reset();
-                }, { signal: this.abortController.signal });
-            }
-        }
 
         // Uncheck every filter input, zero out the criteria entries, and
         // re-check the "All" radio (value="") so radio groups keep a valid
@@ -2698,8 +2706,8 @@
 
             this.dispatchResetEvent();
 
-            // In AJAX mode, resubmit to re-fetch results with cleared criteria
-            if (this.isAjaxMode) {
+            // In form mode, resubmit: the server's results still carry the old criteria
+            if (this.isFormMode) {
                 this.submitForm();
                 return;
             }
@@ -2769,8 +2777,7 @@
             // Walk up to find the .nds-paged-content wrapper (pagination expects this as the container).
             // Pagination resolves the nav itself (explicit data-auto-pagination="#id" or adjacency) and
             // no-ops when there's none, so we just hand it the wrapper.
-            const pagedContent = this.targetContainer.closest('.nds-paged-content') ||
-                                 this.targetContainer.parentElement?.closest('.nds-paged-content');
+            const pagedContent = this.targetContainer.closest('.nds-paged-content');
             if (pagedContent) NDS.Pagination.refresh(pagedContent, options);
         }
 
@@ -2804,7 +2811,7 @@
             this._targetRoots = this.resolveTargetRoots();
             // Re-stamp: a container or surface rendered (or re-rendered) after
             // createInstance is otherwise held by the skeleton gate under a live instance.
-            (this._targetRoots || []).forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
+            this._targetRoots.forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
             this.targetContainer?.setAttribute('data-nds-filter-initialized', 'true');
 
             // A replaced search box leaves the cached ref (and its listeners) on a
@@ -2851,7 +2858,7 @@
         }
 
         setSearchValue(value) {
-            this.criteria.search = value.trim().toLowerCase();
+            this._setSearch(value);
 
             this._mirrorSearchInputs(value);
 
@@ -2865,6 +2872,8 @@
         }
 
         setFilterValues(filterName, values) {
+            // A group in a menu never opened has no inputs yet.
+            this.buildDeferredFilters();
             const filterData = this.filterInputs[filterName];
             if (!filterData) return;
 
@@ -2884,11 +2893,7 @@
         }
 
         populateFilter(filterName, values, inputType = null) {
-            // Find the container element for this filter. Portal-aware: a
-            // data-portal dropmenu moves the whole menu — and every placeholder
-            // in it — to <body> while open, which is exactly when a cascading
-            // filter calls this from an nds:filter:change handler.
-            const container = NDS.querySelector(this.filterContainer, `[data-filter="${filterName}"]`);
+            const container = this.filterContainer.querySelector(`[data-filter="${filterName}"]`);
             if (!container) return;
 
             // Determine input type from data attribute or parameter
@@ -2900,11 +2905,6 @@
             // Re-setup the filter listeners
             this.setupManualFilter(actualElement, filterName);
             this._flushAccordionInit();
-        }
-
-        // Legacy API for backward compatibility
-        setSelectedTags(tags) {
-            this.setFilterValues('tags', tags);
         }
 
         destroy() {
@@ -2930,8 +2930,7 @@
             if (this.filterContainer.ndsFilter === this) {
                 // _targetRoots covers every stamped surface (incl. the
                 // representative); the target container is stamped separately.
-                this._targetRoots?.forEach(r => r.removeAttribute('data-nds-filter-initialized'));
-                this.filterContainer.removeAttribute('data-nds-filter-initialized');
+                this._targetRoots.forEach(r => r.removeAttribute('data-nds-filter-initialized'));
                 this.targetContainer?.removeAttribute('data-nds-filter-initialized');
                 delete this.filterContainer.ndsFilter;
             }
@@ -2983,7 +2982,7 @@
         // _targetRoots, not the passed-in surfaces: it is the authoritative set in
         // both paths — the loader's grouped surfaces, or the document scan a manual
         // create() falls back to — so neither leaves a linked surface unstamped.
-        (instance._targetRoots || [representative]).forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
+        instance._targetRoots.forEach(s => s.setAttribute('data-nds-filter-initialized', 'true'));
         instance.targetContainer?.setAttribute('data-nds-filter-initialized', 'true');
         if (instance.targetId) {
             _instancesByTarget.set(instance.targetId, instance);
@@ -3009,7 +3008,7 @@
         const root = scope || document;
         const groups = new Map();
         const addCandidate = el => {
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
             const id = el.getAttribute('data-filter-target');
             if (!id || liveInstance(id)) return;
             if (!groups.has(id)) groups.set(id, []);

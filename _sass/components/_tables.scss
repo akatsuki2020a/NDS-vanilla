@@ -12,7 +12,6 @@
 
 .nds-table-wrapper {
     --_max-width: var(--max-width, 100%);
-    --mask-fade-distance: 48px;
 
     position: relative;
     width: 100%;
@@ -38,35 +37,6 @@
     }
 }
 
-// Scroll mask states (determined by JS) — opt-in via .nds-mask on the table
-.nds-table-wrapper[data-state~="has-more"][data-state~="masked"] {
-    mask-image:
-        linear-gradient(to right, transparent 0%, black var(--mask-fade-distance)),
-        linear-gradient(to left, transparent 0%, black var(--mask-fade-distance));
-
-    &[data-state~="at-start"] {
-        mask-image: linear-gradient(to right, transparent 0%, black var(--mask-fade-distance));
-    }
-
-    &[data-state~="at-end"] {
-        mask-image: linear-gradient(to left, transparent 0%, black var(--mask-fade-distance));
-    }
-
-    @include ltr {
-        mask-image:
-            linear-gradient(to right, transparent 0%, black var(--mask-fade-distance)),
-            linear-gradient(to left, transparent 0%, black var(--mask-fade-distance));
-
-        &[data-state~="at-start"] {
-            mask-image: linear-gradient(to left, transparent 0%, black var(--mask-fade-distance));
-        }
-
-        &[data-state~="at-end"] {
-            mask-image: linear-gradient(to right, transparent 0%, black var(--mask-fade-distance));
-        }
-    }
-}
-
 // ==============================================
 // BASE TABLE STYLES
 // ==============================================
@@ -81,6 +51,7 @@
     --_cell-padding-inline: var(--table-cell-padding-inline, var(--spacing-xl));
     --_sub-padding: var(--table-sub-padding, var(--spacing-xl));
     --_sub-background: var(--table-sub-background, var(--background-surface-sunken));
+    --_table-row-height: var(--table-row-height, 64px);
     width: 100%;
     background-color: var(--table-cell-border);
     border: 1px solid var(--table-cell-border);
@@ -140,7 +111,7 @@
         background-color: var(--_row-bg, var(--table-background-cell));
         color: var(--table-text-body);
         border-left: 1px solid var(--table-cell-border);
-        height: var(--_table-row-height, 64px);
+        height: var(--_table-row-height);
 
         &:last-child {
             border-right: none;
@@ -256,15 +227,6 @@
         }
     }
 
-    // Sort icon swaps
-    th[data-state~="sorted-asc"] .nds-sort-icon {
-        --nds-icon: var(--nds-icon-sort-by-up-02);
-    }
-
-    th[data-state~="sorted-desc"] .nds-sort-icon {
-        --nds-icon: var(--nds-icon-sort-by-down-02);
-    }
-
     // ── Accessibility ──
 
     :is(th, td) {
@@ -285,7 +247,7 @@
 
     // ── Actions & checkbox columns ──
 
-    .table-actions {
+    .nds-table-actions {
         display: flex;
         gap: var(--spacing-xs);
         align-items: center;
@@ -295,12 +257,18 @@
         }
     }
 
-    .actions-column {
+    // Centered like the checkbox column; data-align on the header still wins.
+    .nds-actions-column {
         width: 1%;
+        text-align: center;
+
+        :is(.nds-col-header, .nds-table-actions) {
+            justify-content: center;
+        }
     }
 
     :is(th, td):has(.nds-check-container),
-    .checkbox-column {
+    .nds-checkbox-column {
         width: 40px;
         text-align: center;
 
@@ -336,7 +304,7 @@
 // tbody.nds-loading, consumer's .nds-loading on the table) render cells as
 // gradient bars; cell children hide so only the bar paints (hidden boxes
 // keep their size, so column sizing and lockTableColumns are unaffected).
-// Spinner + dim are suppressed in _loading.scss. The same look serves the
+// Spinner + dim are off at the end of this file. The same look serves the
 // pre-init hold: not-yet-initialized filter/paged table bodies show
 // shimmer rows (crit exempts tbody from its visibility hold and hides
 // rows past the first page). Pulses via the shared `processing`
@@ -381,4 +349,9 @@
     >* {
         visibility: hidden;
     }
+}
+
+// Loading shows the skeleton above, not the spinner.
+:is(.nds-table, tbody).nds-loading {
+    @include loading-skeleton-host;
 }

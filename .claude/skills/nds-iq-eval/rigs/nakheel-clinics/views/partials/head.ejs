@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr"><head><meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Al-Nakheel Medical Clinics: find a clinic, meet our doctors and book an appointment online.">
+    <title><%= title %> | Al-Nakheel Clinics</title><!-- Critical CSS - Blocking (small, cacheable) -->
+    <link rel="stylesheet" href="/nds/css/nds.critical.min.css?ver=1.0.5.e765452">
+    <!-- Icons — UI icons inlined (core) + HGI font (content/demo/doc) -->
+    <link rel="preload" href="/nds/css/nds-icons.min.css?ver=1.0.5.e765452" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/nds/css/nds-icons.min.css?ver=1.0.5.e765452">
+    </noscript>
+    <style>i.hgi-stroke{opacity:0}body[data-font-loaded~="hgi-stroke-rounded"] i.hgi-stroke{opacity:1}</style>
+    <link rel="preload" href="/nds/css/hgi-rounded-stroke-min.css?ver=1.0.5.e765452" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/nds/css/hgi-rounded-stroke-min.css?ver=1.0.5.e765452">
+    </noscript>
+    <!-- Main CSS - Deferred loading for below-the-fold content -->
+    <link rel="preload" href="/nds/css/nds-main.min.css?ver=1.0.5.e765452" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/nds/css/nds-main.min.css?ver=1.0.5.e765452">
+    </noscript>
+    <!-- Accessibility add-on (optional) - a11y panel + mode overrides -->
+    <link rel="preload" href="/nds/css/nds-accessibility.min.css?ver=1.0.5.e765452" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet" href="/nds/css/nds-accessibility.min.css?ver=1.0.5.e765452">
+    </noscript>
+    <!-- Favicon - low-priority fetch so it doesn't compete with critical assets -->
+    <link rel="icon" type="image/svg+xml" href="/img/logo.svg" fetchpriority="low">
+<% (typeof css !== 'undefined' ? css : []).forEach(function (href) { %>    <link rel="stylesheet" href="<%= href %>">
+<% }); %>    <link rel="stylesheet" href="/css/site.css">
+    <!-- Blocking scripts: FOUC / direction-mismatch prevention. Placed last so resource preloads kick off first. -->
+<script>
+    // Apply cached theme before rendering to prevent FOUC
+    (function() {
+        var t = localStorage.getItem('nds-theme');
+        if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    })();
+</script>
+<script>
+    // Apply cached a11y state before paint to prevent FOUC. The bundle
+    // table below is generated from MODE_BUNDLES in _js/nds-accessibility.js
+    // by _plugins/js_processor.rb — single source of truth, no drift.
+    (() => { try {
+        const s = JSON.parse(localStorage.getItem('nds-a11y') || '{}');const R = {
+    'epilepsy-safe':        ['reduce-motion','low-saturation'],
+    'visually-impaired':    ['high-contrast'],
+    'cognitive-disability': ['highlight-titles','reduce-motion'],
+    'motor-impaired':       [],
+    'colorblind':           ['cvd-deutan'],
+    'dyslexia-friendly':    ['dyslexia','highlight-links'],
+    'adhd-friendly':        ['reduce-motion','highlight-titles','reading-mask'],
+};
+        const t = new Set([
+            ...(s.modes || []),
+            ...(s.bundles || []).flatMap(b => b in R ? (R[b].length ? R[b] : [b]) : []),
+        ]);
+        (s.excluded || []).forEach(e => t.delete(e));
+        const c = s.settings || {};
+        const step = parseInt(c['font-step'], 10) || 0;
+        if (step > 0 && step < 4) t.add('font-step-' + step);
+        if (c['text-align'] && c['text-align'] !== 'default') t.add('text-align-' + c['text-align']);
+        if (t.size) document.documentElement.setAttribute('data-a11y', [...t].join(' '));
+    } catch {} })();
+</script>
+</head>
+<body class="nds-minimal ">

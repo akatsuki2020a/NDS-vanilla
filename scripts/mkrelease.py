@@ -3,8 +3,9 @@
 
     python scripts/mkrelease.py              # full: build, clean, format, zip
     python scripts/mkrelease.py --no-build   # reuse the existing _site
+    python scripts/mkrelease.py --preview 2.0.0   # a field rig's zip before the release (scripts/rig.py)
 
-scripts/check-release-guards.py proves verify()'s NDS-IQ guards still fire —
+scripts/check-release-guards.py proves the NDS-IQ guards (check_rules) still fire —
 run it after touching verify() or the sentences it keys on.
 
 Output: dist/nds-vanilla-template-v<version>.zip, laid out as
@@ -85,7 +86,8 @@ def stage(version):
     shutil.copytree(site, os.path.join(pkg, '_site'),
                     ignore=lambda d, names: EXCLUDE if d == site else set())
 
-    for f in ('CHANGELOG.md', 'LICENSE'):
+    # NDS-INDEX.md maps an agent's needs to this release's files; the rules name none.
+    for f in ('CHANGELOG.md', 'LICENSE', 'NDS-INDEX.md'):
         shutil.copy2(os.path.join(ROOT, f), pkg)
 
     # README.md is a human signpost only.
@@ -109,7 +111,57 @@ def zip_up(dist, pkg, version):
     return out
 
 
-def verify(out, version):
+def check_rules(block, name='_includes/NDS-IQ.md'):
+    """The rules file's own text checks. verify() runs them on the published
+    copy; publish-iq.py runs them on the draft before it publishes.
+    Returns the heading's revision ("4.0")."""
+    if '{%' in block or '{{' in block:
+        sys.exit(f'{name} contains literal Liquid delimiters — it is a Jekyll '
+                 'include (topbar + guide render it), so the build parses them and dies.')
+    # Display only — nothing compares it. The pattern takes the decimal so it
+    # can't stop at the "v0" of "v0.8" and match a stamp that isn't there.
+    m = re.search(r'instructions v([\d.]+)', block)
+    if not m:
+        sys.exit(f'{name} heading has no "instructions v<N>" stamp.')
+    # The rules name NO template version, anywhere: they read the runtime's own
+    # banner and fetch matching-version references, so they run on any release.
+    # Nothing sweeps this file, so a literal that creeps in is prose that goes
+    # stale on the next release with nothing to catch it.
+    stray = sorted(set(re.findall(r'\d+\.\d+\.\d+', block)))
+    if stray:
+        sys.exit(f'{name} names {stray}. The rules are version-agnostic by design '
+                 f'— they read the runtime banner instead — so a template version literal is a '
+                 f'regression. Reword the sentence to name no release.')
+
+    # The rules hold no release facts: paths, classes and APIs change per release and
+    # live in NDS-INDEX.md and the docs. The anchor block and URLs are exempt.
+    prose = re.sub(r'https?://\S+', '', re.sub(r'```markdown.*?```', '', block, flags=re.S))
+    facts = sorted(set(re.findall(r'_source/|_site/|\bnds-[a-z][\w-]*|\bNDS\.[A-Z]\w*', prose)))
+    if facts:
+        sys.exit(f'{name} names release facts {facts}. Route them through '
+                 f'NDS-INDEX.md or the docs instead.')
+
+    # Every consumer NDS-PLAN.md opens with the plan stamp, which is how a
+    # later session recognizes a plan these rules produced. It carries no
+    # version — nothing compares it — so presence is the whole check.
+    if 'Managed by NDS IQ' not in block:
+        sys.exit(f'{name} lost its "Managed by NDS IQ" plan-stamp line — '
+                 'consumer plan files are opened with it.')
+
+    # The canonical anchor text lives INSIDE the file (Install section); both
+    # a first install and a pasted-block migration copy the anchor from there.
+    # These literals appear ONLY inside the anchor code block — a string the
+    # surrounding prose also uses would keep passing after the anchor lost it.
+    for canon in ('- `NDS_ROOT` = `.nds/`',
+                  '- `NDS_ASSETS` = `public/assets/`',
+                  'Do no NDS work before that read.',
+                  'Never write `.nds-*` markup from memory'):
+        if canon not in block:
+            sys.exit(f'{name} anchor canon lost its line: {canon!r}')
+    return m.group(1)
+
+
+def verify(out, version, rules=None):
     """Fail loudly if a pass silently didn't happen."""
     z = zipfile.ZipFile(out)
     names = z.namelist()
@@ -148,7 +200,7 @@ def verify(out, version):
                      f'it, and the tag the consumer populates from carries this tree.')
 
     # A missing copy in stage() would silently ship an incomplete zip.
-    for anchor in ('README.md', '_site/guides/get-started.html',
+    for anchor in ('README.md', 'NDS-INDEX.md', '_site/guides/get-started.html',
                    '_site/guides/integration-quality.html'):
         if root + anchor not in names:
             sys.exit(f'Missing from zip: {anchor}')
@@ -168,7 +220,27 @@ def verify(out, version):
     if tails.returncode:
         sys.exit('check-data-state-tails.py failed:\n' + tails.stdout + tails.stderr)
 
-    # head.md prints the inline critical gate as canonical markup a consumer
+    # Dangling var(), dead fallbacks, duplicate declarations: invisible until a mode breaks.
+    css = subprocess.run('python scripts/check-css.py', cwd=ROOT,
+                         shell=True, capture_output=True, text=True)
+    if css.returncode:
+        sys.exit('check-css.py failed:\n' + css.stdout + css.stderr)
+
+    # The word packs and the docs' Word List are built from _i18n/ and the scripts' English; an edit
+    # that skipped the build ships a stale pack, and a word with no Arabic shows English.
+    words = subprocess.run('node scripts/check-i18n.mjs', cwd=ROOT,
+                           shell=True, capture_output=True, text=True)
+    if words.returncode:
+        sys.exit('check-i18n.mjs failed:\n' + words.stdout + words.stderr)
+
+    # A pack's inline <style> wins over its fresh .min.css, so a pack not rebuilt
+    # after an SCSS change ships the old look.
+    packs = subprocess.run('python scripts/check-event-css.py', cwd=ROOT,
+                           shell=True, capture_output=True, text=True)
+    if packs.returncode:
+        sys.exit('check-event-css.py failed:\n' + packs.stdout + packs.stderr)
+
+    # head.md prints the inline critical gate and head script as canonical markup a consumer
     # copies into their own <head>. It is a hand-maintained copy of what
     # _includes/critical-inline.html compiles from _sass/_fold.scss, so it can
     # drift — and it silently had, shipping a gate missing the dark-mode brand
@@ -187,14 +259,17 @@ def verify(out, version):
 
     live_page = z.read(root + '_site/index.html').decode('utf8')
     doc_page = z.read(root + '_site/ui-shell/head.html').decode('utf8')
-    live_m = re.search(r'<style>(.*?)</style>', live_page, re.S)
-    i, j = doc_page.find('id="panel-setup-html"'), doc_page.find('id="panel-setup-js"')
-    doc_m = re.search(r'&lt;style&gt;(.*?)&lt;/style&gt;', doc_page[i:j], re.S)
+    live_head = live_page[:live_page.find('</head>')]
+    # The code block docs_canon.rb writes after the head-setup canon.
+    i = doc_page.find('id="head-setup"')
+    doc_code = html.unescape(re.search(r'<code class="lang-html code">(.*?)</code>', doc_page[i:], re.S).group(1)) if i > -1 else ''
+    live_m = re.search(r'<style>(.*?)</style>', live_head, re.S)
+    doc_m = re.search(r'<style>(.*?)</style>', doc_code, re.S)
     if not live_m or not doc_m:
         sys.exit('Critical gate: could not locate the inline gate in index.html '
-                 'or the copied block in ui-shell/head.html.')
+                 'or the head-setup code block in ui-shell/head.html.')
     live_r = _rules(live_m.group(1))
-    doc_r = _rules(html.unescape(doc_m.group(1)))
+    doc_r = _rules(doc_m.group(1))
     if live_r != doc_r:
         missing = sorted(live_r - doc_r)
         extra = sorted(doc_r - live_r)
@@ -203,56 +278,41 @@ def verify(out, version):
                  + ''.join(f'  missing from the doc: {s}\n' for s in missing)
                  + ''.join(f'  in the doc only:      {s}\n' for s in extra))
 
-    # The rules file's checks run against its SOURCE include (the guide
-    # renders the same include; raw main and the zip top level serve it
-    # byte-identical). The file is universal — no per-project values — so a
-    # refresh is a whole-file replace keyed on the heading stamps; lose a
-    # stamp or the in-file anchor canon and installs or migrations break
-    # silently.
-    with open(os.path.join(ROOT, '_includes', 'NDS-IQ.md'), encoding='utf8') as f:
-        block = f.read()
+    # The inline script too: a consumer copies it, and a hash covers its bytes.
+    live_s = re.search(r'<script>\s*(\(function.*?)</script>', live_head, re.S)
+    doc_s = re.search(r'<script>\s*(\(function.*?)</script>', doc_code, re.S)
+    if not live_s or not doc_s or re.sub(r'\s', '', live_s.group(1)) != re.sub(r'\s', '', doc_s.group(1)):
+        sys.exit('Head script in ui-shell/head.md has drifted from _includes/head-inline-scripts.html. '
+                 'Copy it from the served head.')
 
+    # accessibility.md prints the FAB and the built panel for consumers to copy; both are hand copies.
+    def _markup(s):
+        return re.sub(r'\s+', ' ', re.sub(r'<!--.*?-->|\{%-? comment -?%\}.*?\{%-? endcomment -?%\}', '', s, flags=re.S)).replace('> <', '><').strip()
+    def _read(p):
+        with open(os.path.join(ROOT, p), encoding='utf8') as f:
+            return f.read()
+    a11y_doc = _read('components/accessibility.md')
+    def _canon(cid):
+        m = re.search(r'<script type="text/html" id="' + cid + r'"[^>]*>(.*?)</script>', a11y_doc, re.S)
+        return _markup(m.group(1)) if m else ''
+    built = re.search(r'return `(<aside.*?</aside>)`', _read('_js/nds-accessibility.js'), re.S).group(1)
+    if _canon('a11y-panel') != _markup('<template class="nds-panel-template">' + built.replace('${side}', 'end') + '</template>'):
+        sys.exit('Custom Panel in components/accessibility.md has drifted from panelMarkup() in '
+                 '_js/nds-accessibility.js. Copy it from there.')
+    if _canon('a11y-fab') != _markup(_read('_includes/accessibility-panel.html')):
+        sys.exit('FAB in components/accessibility.md has drifted from _includes/accessibility-panel.html.')
+
+    # The rules file's checks run against the PUBLISHED copy: the one the
+    # guides render and raw main serves.
+    rules = rules or os.path.join(ROOT, '_includes', 'NDS-IQ.md')
+    with open(rules, encoding='utf8') as f:
+        block = f.read()
+    rev = check_rules(block, os.path.relpath(rules, ROOT).replace(os.sep, '/'))
 
     guides = {}
     for name in ('get-started', 'integration-quality'):
         with open(os.path.join(ROOT, 'guides', f'{name}.md'), encoding='utf8') as f:
             guides[name] = html.unescape(f.read())
-
-    if '{%' in block or '{{' in block:
-        sys.exit('_includes/NDS-IQ.md contains literal Liquid delimiters — it is a Jekyll '
-                 'include (topbar + guide render it), so the build parses them and dies.')
-    # Display only — nothing compares it. The pattern takes the decimal so it
-    # can't stop at the "v0" of "v0.8" and match a stamp that isn't there.
-    m = re.search(r'instructions v([\d.]+)', block)
-    if not m:
-        sys.exit('_includes/NDS-IQ.md heading has no "instructions v<N>" stamp.')
-    # The rules name NO template version, anywhere: they read the runtime's own
-    # banner and fetch matching-version references, so they run on any release.
-    # Nothing sweeps this file, so a literal that creeps in is prose that goes
-    # stale on the next release with nothing to catch it.
-    stray = sorted(set(re.findall(r'\d+\.\d+\.\d+', block)))
-    if stray:
-        sys.exit(f'_includes/NDS-IQ.md names {stray}. The rules are version-agnostic by design '
-                 f'— they read the runtime banner instead — so a template version literal is a '
-                 f'regression. Reword the sentence to name no release.')
-
-    # Every consumer NDS-PLAN.md opens with the plan stamp, which is how a
-    # later session recognizes a plan these rules produced. It carries no
-    # version — nothing compares it — so presence is the whole check.
-    if 'Managed by NDS IQ' not in block:
-        sys.exit('_includes/NDS-IQ.md lost its "Managed by NDS IQ" plan-stamp line — '
-                 'consumer plan files are opened with it.')
-
-    # The canonical anchor text lives INSIDE the file (Install section); both
-    # a first install and a pasted-block migration copy the anchor from there.
-    # These literals appear ONLY inside the anchor code block — a string the
-    # surrounding prose also uses would keep passing after the anchor lost it.
-    for canon in ('- `NDS_ROOT` = `.nds/`',
-                  '- `NDS_ASSETS` = `/path/to/your-project/public/assets/`',
-                  'Do no NDS work before that read.',
-                  'Never write `.nds-*` markup from memory'):
-        if canon not in block:
-            sys.exit(f'_includes/NDS-IQ.md anchor canon lost its line: {canon!r}')
 
     # BOTH guides render the include, and both are in the zip's link graph.
     # Checking only one lets the other lose the entire rulebook silently.
@@ -260,8 +320,8 @@ def verify(out, version):
         if 'include NDS-IQ.md' not in text:
             sys.exit(f'guides/{name}.md no longer includes NDS-IQ.md — the rules file is not rendered.')
         guide_html = z.read(f'{root}_site/guides/{name}.html').decode('utf8', 'ignore')
-        if f'instructions v{m.group(1)}' not in guide_html:
-            sys.exit(f'Built guides/{name}.html lacks "instructions v{m.group(1)}" — the rendered '
+        if f'instructions v{rev}' not in guide_html:
+            sys.exit(f'Built guides/{name}.html lacks "instructions v{rev}" — the rendered '
                      'version stamp is missing or stale.')
 
     # Every literal path the rules, guides and README reference must exist —
@@ -269,11 +329,12 @@ def verify(out, version):
     # dead path, and it invents instead (the exact failure the guide
     # prevents). Placeholder/glob refs (<name>, *) are skipped.
     readme = z.read(root + 'README.md').decode('utf8', 'ignore')
+    index = z.read(root + 'NDS-INDEX.md').decode('utf8', 'ignore')
     refs = re.findall(r'NDS_ROOT/([^\s`)\]]+)', block + ''.join(guides.values()))
     # The rules' Reference index writes bare `_source/...` / `_site/...` paths
     # with no NDS_ROOT prefix, so the prefixed pattern alone never saw the one
     # section whose entire job is naming paths.
-    refs += re.findall(r'`((?:_site|_source)/[^`]*)`', block + readme)
+    refs += re.findall(r'`((?:_site|_source)/[^`]*)`', block + readme + index)
     refs = {p for p in refs if '<' not in p and '*' not in p}
 
     # _source/ is populated from the tag, not shipped, so its refs resolve
@@ -298,9 +359,11 @@ def verify(out, version):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--no-build', action='store_true', help='reuse the existing _site')
+    ap.add_argument('--preview', metavar='VERSION',
+                    help='a field rig zip before the release: named VERSION, no version guard, no verify')
     args = ap.parse_args()
 
-    version = read_version()
+    version = args.preview or read_version()
     print(f'\nPackaging v{version}\n')
 
     if not args.no_build:
@@ -311,6 +374,10 @@ def main():
     dist, pkg = stage(version)
     out = zip_up(dist, pkg, version)
     shutil.rmtree(pkg)
+    if args.preview:
+        # verify() gates a release: its CHANGELOG section and published rules do not exist yet.
+        print(f'  Preview: {out}\n')
+        return
     verify(out, version)
     print('  Upload:  gh release upload v%s "%s" --clobber\n' % (version, out))
 

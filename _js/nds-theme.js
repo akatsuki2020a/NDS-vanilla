@@ -1,19 +1,21 @@
 /* NDS.Theme — public surface
  * Rides: (none — base component)
  * Methods:
- *   NDS.Theme.init()      sync the toggle UI, inject an active stylesheet theme, re-apply
+ *   NDS.Theme.init()      sync the toggle UI, load an active stylesheet theme's assets, re-apply
  *                         a saved custom palette, wire the delegated clicks
- *   NDS.Theme.get()       the current data-theme string, e.g. "dark crimson"
- *   NDS.Theme.set(value)  set it and persist
- *   NDS.Theme.toggle()    flip light and dark, keeping the theme token
+ *   NDS.Theme.get()       the mode: 'light' or 'dark'
+ *   NDS.Theme.set(mode, el?)  set the mode and persist, keeping the theme token; the
+ *                         reveal grows from el's center (screen center without it)
+ *   NDS.Theme.toggle(el?) flip light and dark, keeping the theme token
  * Events:
  *   (none)
  * Hooks:
  *   data-theme          on <html> — a TOKEN LIST: the mode token (dark; light is the
  *                       default and writes nothing) plus an optional theme token
- *   data-theme-toggle   on a mode toggle (#ndsThemeToggle also works)
+ *   data-theme-toggle   on a mode toggle
  *   data-theme-value    on a switcher option — the theme token it applies
- *   data-theme-css · data-theme-js   on an option, for a theme that ships its own assets
+ *   data-theme-css · data-theme-js   on an option, a stylesheet and/or a script to load
+ *                       with the theme. Both optional, each loaded on its own
  *   data-seed-*         inline custom seeds on an option: primary, secondary, tertiary,
  *                       tint, font, weight-regular, weight-medium, weight-semibold,
  *                       weight-bold
@@ -42,7 +44,7 @@
 // Storage: nds-theme = the full data-theme string (mode + token); nds-palette = a
 // custom inline-seed theme only ({ seeds, value }). The pre-paint FOUC script
 // (head-inline-scripts.html) stamps data-theme before first paint; init() only syncs
-// UI, injects any active stylesheet theme's CSS/JS, re-applies a saved custom palette,
+// UI, loads any active stylesheet theme's assets, re-applies a saved custom palette,
 // and wires delegation.
 (() => {
     'use strict';
@@ -53,7 +55,7 @@
     // a runtime override could only desync the two, so it's a plain const.
     const STORAGE_KEY = 'nds-theme';            // full data-theme string ("dark crimson")
     const PALETTE_KEY = 'nds-palette';          // custom inline-seed theme only: { seeds, value }
-    const TOGGLE_SEL = '[data-theme-toggle], #ndsThemeToggle';
+    const TOGGLE_SEL = '[data-theme-toggle]';
     const SWITCH_SEL = '[data-theme-value]';
     const LINK_ID = 'nds-theme-stylesheet';
     const MODE = ['light', 'dark'];
@@ -157,6 +159,16 @@
         for (const k in SEED_PROPS) root.style.removeProperty(SEED_PROPS[k]);
         root.removeAttribute('data-palette');
     }
+    // An event pack loaded by its own <script> tag inlines its CSS as a
+    // [data-nds-event-style] block instead of taking the LINK_ID slot, so it has
+    // no href for us to swap. Drop the ones we are switching AWAY from, or their
+    // theme survives the switch; `keep` is the theme being applied, if any.
+    function dropInlineEventStyles(keep) {
+        document.querySelectorAll('[data-nds-event-style]').forEach(s => {
+            if (s.getAttribute('data-nds-event-style') !== keep) s.remove();
+        });
+    }
+    // The LINK_ID slot is shared with head.html's site-wide `brand:` link.
     function ensureStylesheet(href) {
         let l = document.getElementById(LINK_ID);
         if (l) { if (l.getAttribute('href') !== href) l.setAttribute('href', href); return; }
@@ -165,14 +177,14 @@
         document.head.appendChild(l);
     }
     function removeStylesheet() {
+        dropInlineEventStyles();
         const l = document.getElementById(LINK_ID);
         if (l) l.remove();
     }
-    // Load a stylesheet theme's optional behaviour script once. The script is a
-    // self-contained event PACK: it registers inject/teardown on
-    // window.__NDS_THEME_HOOKS[value], where inject owns link + marker token + slide
-    // and teardown removes all three (idempotent — our ensureStylesheet/setThemeToken
-    // calls overlap them harmlessly, and stay required for CSS-only themes with no js).
+    // Load a stylesheet theme's script once. NDS's own are self-contained event
+    // PACKS: they register inject/teardown on window.__NDS_THEME_HOOKS[value], where
+    // inject owns the styles + marker token + slide and teardown removes all three
+    // (idempotent — our setThemeToken calls overlap them harmlessly).
     // On load it self-activates when window.__NDS_THEME_ACTIVE matches (first-
     // activation race-guard) OR is undefined (standalone one-tag use on a page this
     // switcher never orchestrated — downstream sites drop the single script tag).
@@ -214,21 +226,23 @@
             // Re-clicking the already-active theme toggles back to the DGA default.
             // syncSwitcher stamps aria-current="true" on the active item, so this is
             // type-agnostic (predefined / stylesheet / custom seed). The default item
-            // itself carries no value/css/seed, so it is never a toggle-off.
+            // itself carries no value/pack/seed, so it is never a toggle-off.
             const off = el.getAttribute('aria-current') === 'true'
-                && !!(el.getAttribute('data-theme-value') || el.getAttribute('data-theme-css') || el.getAttribute('data-seed-primary'));
+                && !!(el.getAttribute('data-theme-value') || el.getAttribute('data-theme-js') || el.getAttribute('data-seed-primary'));
             const value = off ? '' : (el.getAttribute('data-theme-value') || '');
+            const pack = off ? null : el.getAttribute('data-theme-js');
             const css = off ? null : el.getAttribute('data-theme-css');
 
             // Leaving a stylesheet theme → tear it down first.
             if (_sheet && _sheet !== value) { runHook(_sheet, 'teardown'); window.__NDS_THEME_ACTIVE = ''; _sheet = ''; }
 
-            if (css) {
+            if (pack || css) {
                 clearInline(); savePalette(null);
                 setThemeToken(value);                       // marker token (records + persists the active sheet; the pack's addToken no-ops after this)
                 window.__NDS_THEME_ACTIVE = value;
-                ensureStylesheet(css);
-                ensureThemeJS(value, el.getAttribute('data-theme-js'));
+                dropInlineEventStyles(value);               // the theme we are leaving may have injected its own CSS
+                if (css) ensureStylesheet(css);             // each asset the option declares, independently
+                if (pack) ensureThemeJS(value, pack);
                 runHook(value, 'inject');                   // re-activation; first activation self-injects on load
                 _sheet = value;
             } else if (!off && el.getAttribute('data-seed-primary')) {
@@ -263,7 +277,7 @@
     }
 
     // Reconcile switcher state at init (post-paint): the pre-paint stamp set data-theme,
-    // so here we inject any active stylesheet theme's CSS/JS, re-apply a saved custom
+    // so here we load any active stylesheet theme's assets, re-apply a saved custom
     // palette, and sync aria. A click landing in the pre-init gap no-ops, recovers next click.
     function reconcileSwitcher() {
         if (!document.querySelector(SWITCH_SEL)) return;
@@ -287,10 +301,12 @@
 
         const active = curTokens().filter(t => themeNames().indexOf(t) !== -1)[0] || '';
         const el = item(active);
-        if (el && el.getAttribute('data-theme-css')) {       // active token is a stylesheet theme → inject
+        const pack = el && el.getAttribute('data-theme-js');
+        const css = el && el.getAttribute('data-theme-css');
+        if (pack || css) {                                   // active token is a stylesheet theme → load what it declares
             _sheet = active; window.__NDS_THEME_ACTIVE = active;
-            ensureStylesheet(el.getAttribute('data-theme-css'));
-            ensureThemeJS(active, el.getAttribute('data-theme-js'));
+            if (css) ensureStylesheet(css);
+            if (pack) ensureThemeJS(active, pack);
             runHook(active, 'inject');
         }
         syncSwitcher(active);

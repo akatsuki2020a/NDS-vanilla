@@ -13,9 +13,6 @@
 .nds-dropmenu {
   position: relative;
   display: inline-flex;
-  // Follow the parent's cross-axis when it stretches (e.g. column-flex
-  // action rows); no-op in inline / row contexts.
-  align-self: stretch;
 
   // Delayed first open (data-delay) parks the trigger in the loading state,
   // which _loading.scss makes pointer-events:none. Keep it clickable so a
@@ -33,10 +30,8 @@
     // the hidden overflow-x and clipped. Thin shrinks it to a size where the
     // overflow is visually inconsequential.
     scrollbar-width: thin;
-    // Stop scroll momentum from chaining to the page when the inner
-    // scroll hits its end — otherwise the page-scroll listener closes
-    // the menu as soon as the user hits top or bottom.
-    overscroll-behavior: contain;
+    // overscroll-behavior is set by JS in open(): `contain` here would also
+    // block the page's wheel over a list too short to scroll.
   }
 
   // ==============================================
@@ -64,20 +59,12 @@
 // ==============================================
 // 2. MENU CONTAINER
 // ==============================================
-// Default positioning is `absolute` — the menu is anchored to its `.nds-dropmenu`
-// wrapper (which has `position: relative`) and scrolls with the trigger.
-// When the menu portals — forced by the wrapper's `data-portal`, or decided
-// automatically when an ancestor clips it — JS mirrors the attribute onto the
-// menu and moves it to <body>; the `[data-portal]` rule
-// below switches to `position: fixed` so JS can write viewport coords.
-// State-driven rules apply via the menu's own data-state — we can't rely
-// on the wrapper as an ancestor selector once the menu is portaled.
+// The open menu is a [popover] in the top layer (NDS.topLayer): absolute, placed
+// once by JS so page scroll carries it, still a DOM child of its wrapper. State-driven rules key
+// on the menu's own data-state.
 
 .nds-dropmenu-menu {
-  // Variables — defined on the menu itself so portaling to body doesn't
-  // break the cascade. Consumers still set `--menu-padding` etc. on a
-  // dropmenu wrapper; JS snapshots the inherited values onto the menu
-  // before portaling.
+  // Consumers set `--menu-padding` etc. on the wrapper; the menu inherits them.
   --_menu-padding: var(--menu-padding, var(--spacing-md, 8px));
   --_dropmenu-offset: var(--spacing-xs, 4px);
   --_dropmenu-slide: calc(var(--dropmenu-slide, 8px) * -1);
@@ -87,16 +74,10 @@
   --divider: var(--_menu-padding);
 
   display: none;
-  position: absolute;
-  z-index: 1000;
-
-  // Portaled menu (forced by the wrapper's `data-portal`, or auto-decided when
-  // an ancestor clips the menu; JS mirrors the attribute here on open).
-  // Switches to viewport-anchored placement so JS can write top/left in
-  // viewport pixels via NDS.placeFixed.
-  &[data-portal] {
-    position: fixed;
-  }
+  @include top-layer;
+  // Only without popover support, where the menu stays in the page: under the
+  // mainnav (1000) and an open panel (999).
+  z-index: 998;
   width: var(--_dropmenu-width);
   min-width: var(--_dropmenu-min-width);
   max-width: var(--_dropmenu-max-width);
@@ -130,7 +111,7 @@
 
   // Center-align every item's label — used when the menu is a compact value
   // picker (per-page, currency…) whose short labels look off pinned to the
-  // start. Lives on the menu so it travels with it when portaled to <body>.
+  // start.
   &.nds-center .nds-dropmenu-item {
     justify-content: center;
   }

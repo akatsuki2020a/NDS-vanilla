@@ -1,0 +1,216 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+    <main>
+        <section class="nds-hero-section nds-sub " aria-label="Page hero">
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" hidden>
+        <ol class="nds-breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li><a href="/clinics">Our Clinics</a></li>
+            <li class="nds-truncate" aria-current="page"><%= doctor.name %></li>
+        </ol>
+    </nav>
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <div class="nds-section-action nds-minimal">
+            <div class="nds-share nds-dropmenu">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger"
+                    aria-label="Share Page">
+                    <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
+                    <span class="nds-label">Share Page</span>
+                </button>
+                <div class="nds-dropmenu-menu" hidden>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                        <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
+                        <span class="nds-label">X</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button"
+                        aria-label="Share on LinkedIn">
+                        <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
+                        <span class="nds-label">LinkedIn</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button"
+                        aria-label="Share on WhatsApp">
+                        <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
+                        <span class="nds-label">WhatsApp</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
+                        data-label="Link Copied!" data-message="Page link copied to clipboard" data-no-auto-close>
+                        <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
+                        <span class="nds-label">Copy Link</span>
+                    </button>
+                </div>
+            </div>
+            </div>
+            <h1 class="nds-section-title"><%= doctor.name %></h1>
+            <p class="nds-section-description"><%= doctor.title %> - <%= clinic.name %></p>
+        </div>
+    </div>
+</section>
+<div class="nds-content-layout nds-wSideMenu nds-cardView"><aside class="nds-sidemenu nds-top" aria-label="Sidebar">
+    <button class="nds-sidemenu-toggle nds-btn nds-peek" aria-label="Sidebar Menu" hidden>
+        <i class="nds-icon nds-hgi-menu-02" aria-hidden="true"></i>
+        <span class="nds-label nds-truncate" hidden>Side menu</span>
+    </button>
+    <nav class="nds-drawer nds-divided nds-lined nds-full-height" hidden><div class="nds-scroll-more nds-divided">
+            <ul class="nds-drawer-list nds-scroll-more-content">
+                <li>
+                    <a class="nds-btn nds-subtle nds-indicator"
+                        href="/">
+                        <span class="nds-label">Home</span>
+                    </a>
+                </li>
+                <li data-state="active">
+                    <a class="nds-btn nds-subtle nds-indicator"
+                        href="/clinics">
+                        <span class="nds-label">Our Clinics</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nds-btn nds-subtle nds-indicator"
+                        href="/book">
+                        <span class="nds-label">Book an Appointment</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nds-btn nds-subtle nds-indicator"
+                        href="/appointments">
+                        <span class="nds-label">My Appointments</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nds-btn nds-subtle nds-indicator"
+                        href="/contact">
+                        <span class="nds-label">Contact</span>
+                    </a>
+                </li>
+            </ul>
+            <button class="nds-show-more nds-btn nds-subtle">
+                <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+            </button>
+        </div>
+    </nav>
+</aside>
+    <div class="nds-main-content">
+        <section id="doctorInfo" class="nds-content-section nds-user">
+    <div class="nds-section-wrapper">
+        <div class="nds-section-image faculty-avatar nds-avatar nds-3xl nds-image nds-image-border">
+            <img src="<%= doctor.photo %>" width="112" height="112" alt="<%= doctor.name %>" fetchpriority="high" />
+        </div>
+        <div class="nds-section-head">
+            <div class="nds-section-text">
+                <h2 class="nds-section-title"><%= doctor.name %></h2>
+                <p class="nds-section-description"><%= doctor.title %></p>
+            </div>
+            <div class="nds-section-action">
+                <a href="/book?clinic=<%= clinic.id %>&amp;doctor=<%= doctor.id %>" class="nds-btn nds-primary">
+                    <span class="nds-label">Book with this doctor</span>
+                </a>
+            </div>
+        </div>
+        <div class="nds-section-body">
+            <dl class="nds-definition-list nds-tableView-lg nds-divided" style="--max-col:4;--mid-col:2;--min-col:2;">
+                <div class="nds-definition-item">
+                    <dt>
+                        <i class="hgi hgi-stroke hgi-hospital-01"></i>
+                        <span class="nds-label">Clinic</span>
+                    </dt>
+                    <dd><%= clinic.name %></dd>
+                </div>
+                <div class="nds-definition-item">
+                    <dt>
+                        <i class="hgi hgi-stroke hgi-location-01"></i>
+                        <span class="nds-label">Branch</span>
+                    </dt>
+                    <dd><%= clinic.branch %></dd>
+                </div>
+                <div class="nds-definition-item">
+                    <dt>
+                        <i class="hgi hgi-stroke hgi-stethoscope-02"></i>
+                        <span class="nds-label">Specialty</span>
+                    </dt>
+                    <dd><%= doctor.specialty %></dd>
+                </div>
+                <div class="nds-definition-item">
+                    <dt>
+                        <i class="hgi hgi-stroke hgi-clock-01"></i>
+                        <span class="nds-label">Experience</span>
+                    </dt>
+                    <dd><%= doctor.years %> years</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</section>
+<section id="doctorTabs" class="nds-content-section nds-ghost">
+    <div class="nds-section-body">
+        <div class="nds-tabs nds-divided nds-lg">
+            <div class="nds-tab-list-container nds-scroll-more">
+                <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Doctor information">
+                    <button class="nds-btn nds-subtle nds-tab" role="tab" aria-selected="true" aria-controls="panel-bio" id="tab-bio" tabindex="0">
+                        <span class="nds-label">Biography</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-tab" role="tab" aria-selected="false" aria-controls="panel-education" id="tab-education" tabindex="-1">
+                        <span class="nds-label">Education</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-tab" role="tab" aria-selected="false" aria-controls="panel-visit" id="tab-visit" tabindex="-1">
+                        <span class="nds-label">Visit</span>
+                    </button>
+                </nav>
+                <button class="nds-btn nds-subtle nds-tab nds-show-more" aria-label="Show more">
+                    <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="nds-tab-content">
+                <!-- Biography Tab -->
+                <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-bio" aria-labelledby="tab-bio" tabindex="0">
+                    <div class="nds-block">
+                        <h3 class="nds-block-title">Biography</h3>
+                        <p><%= doctor.bio %></p>
+                    </div>
+                </div>
+                <!-- Education Tab -->
+                <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-education" aria-labelledby="tab-education" aria-hidden="true" hidden tabindex="-1">
+                    <div class="nds-block">
+                        <h3 class="nds-block-title">Education and Training</h3>
+                        <ul>
+<% doctor.education.forEach(function (e) { %>                            <li><%= e %></li>
+<% }); %>                        </ul>
+                    </div>
+                </div>
+                <!-- Visit Tab -->
+                <div class="nds-tab-panel nds-card nds-shadow" role="tabpanel" id="panel-visit" aria-labelledby="tab-visit" aria-hidden="true" hidden tabindex="-1">
+                    <div class="nds-block">
+                        <h3 class="nds-block-title">Visit Information</h3>
+                        <dl class="nds-definition-list nds-tableView">
+                            <div class="nds-definition-item">
+                                <dt><span class="nds-label">Languages</span></dt>
+                                <dd><%= doctor.languages.join(', ') %></dd>
+                            </div>
+                            <div class="nds-definition-item">
+                                <dt><span class="nds-label">Clinic</span></dt>
+                                <dd><%= clinic.name %></dd>
+                            </div>
+                            <div class="nds-definition-item">
+                                <dt><span class="nds-label">Branch</span></dt>
+                                <dd><%= clinic.branch %></dd>
+                            </div>
+                            <div class="nds-definition-item">
+                                <dt><span class="nds-label">Insurance</span></dt>
+                                <dd><%= clinic.accepts_insurance ? 'Accepted' : 'Not accepted at this clinic' %></dd>
+                            </div>
+                            <div class="nds-definition-item">
+                                <dt><span class="nds-label">Rating</span></dt>
+                                <dd><%= clinic.rating.toFixed(1) %> out of 5</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    </div>
+</div>
+    </main><!-- footer -->
+<%- include('partials/footer') %>
+<%- include('partials/scripts') %>

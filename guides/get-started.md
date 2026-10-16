@@ -2,23 +2,23 @@
 layout: page
 title: Get Started
 since: "1.6.0"
-last_edit: "09/09/2026 - 07:10 PM"
+last_edit: "10/10/2026 - 08:35 PM"
 lang: en
 direction: ltr
 hero_title: Get Started with NDS
 hero_style: nds-flat
-hero_description: "A complete workflow for installing NDS, building UI with an AI coding agent, verifying the result, and keeping the system current."
+hero_description: "How to install NDS, build UI with an AI coding agent, verify the result, and upgrade to new releases."
 breadcrumb:
   - ["Guides", "/guides"]
-layout_class: nds-wSideInfo
+layout_class: nds-has-sideinfo
 sidemenu_mode: false
 ---
 
-<section id="getStartedGuide" class="nds-content-section nds-sideinfo-section">
+<section id="get-started-guide" class="nds-content-section nds-sideinfo-section">
     <div class="nds-section-body">
-        <aside class="nds-sideinfo nds-md nds-sticky nds-top" aria-label="On this page">
-            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 17"
-                data-toc-source="#getStartedGuide article" data-toc-levels="h2, h3">
+        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page">
+            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 14"
+                data-toc-source="#get-started-guide article" data-toc-levels="h2, h3">
                 <div class="nds-toc-head">
                     <span class="nds-label">On this page</span>
                     <h2 class="nds-toc-title nds-truncate">NDS Integration</h2>
@@ -33,15 +33,7 @@ sidemenu_mode: false
             <article class="nds-prose">
 
                 <h2 id="overview">Overview</h2>
-                <p>The recommended way to build with NDS is through an AI coding agent. The agent uses the NDS template as its canonical UI reference and <a class="nds-color" href="{{ 'guides/integration-quality' | relative_url }}">NDS IQ</a> as the rules for implementing, porting, and verifying UI.</p>
-
-                <p><strong>NDS IQ provides:</strong></p>
-                <ul>
-                    <li>Seven rules covering markup, styling, libraries, and porting.</li>
-                    <li>A workflow: inventory, plan, build, verify.</li>
-                    <li><code class="nds-inline-code lang-html">NDS-PLAN.md</code> to track decisions, page status, and open questions.</li>
-                    <li>The NDS template as the source for canonical markup and runtime assets.</li>
-                </ul>
+                <p>Build with NDS through an AI coding agent. The agent copies UI from the NDS template and follows <a class="nds-color" href="{{ 'guides/integration-quality' | relative_url }}">NDS IQ</a>, the rules for how to build, port, and verify pages.</p>
 
                 <div class="nds-alert nds-card nds-color" data-status="info" role="alert">
                     <span class="nds-feedback nds-alert-icon nds-outline">
@@ -52,7 +44,7 @@ sidemenu_mode: false
                     <div class="nds-alert-content">
                         <div class="nds-alert-text">
                             <span class="nds-alert-title">Validated with Claude Code</span>
-                            <p class="nds-alert-description">The workflow has been validated end to end with Claude Code. The instructions are agent-agnostic, but behavior may vary with other agents.</p>
+                            <p class="nds-alert-description">NDS IQ is validated end to end with Claude Code. It is designed to work with other agents, but results can vary.</p>
                         </div>
                     </div>
                 </div>
@@ -67,49 +59,21 @@ sidemenu_mode: false
                         <div class="nds-alert-text">
                             <span class="nds-alert-title">Prerequisites</span>
                             <ul class="nds-alert-description">
-                                <li><strong>A local CLI or IDE agent with filesystem access</strong>, such as Claude Code, Cursor, or Codex. Browser-based assistants cannot access local template files or modify your project.</li>
-                                <li><strong>An existing application</strong> that renders at least one page. NDS provides the UI layer; it does not scaffold an application.</li>
+                                <li><strong>A local AI coding agent</strong> that can read and edit your files, such as Claude Code, Cursor, or Codex. A chat assistant in the browser cannot reach your project.</li>
+                                <li><strong>An application that already serves at least one page.</strong> NDS adds the UI layer; it does not create the app.</li>
                             </ul>
                         </div>
                     </div>
                 </div>
 
-                <h2 id="template">1. Template</h2>
-                <p>The NDS template is the read-only source for components, markup, design tokens, documentation, and runtime assets. Inspect and copy from it; do not modify it. Replace the folder contents when upgrading.</p>
-
-                <h3 id="download">Download and Extract</h3>
-                <ol>
-                    <li><strong>Download</strong> <code class="nds-inline-code lang-html">nds-vanilla-template-v{{ site.latest_release }}.zip</code> from the <a class="nds-color" href="{{ site.repository_url }}/releases/latest">GitHub Releases</a> page.</li>
-                    <li><strong>Extract</strong> its contents into a gitignored <code class="nds-inline-code lang-html">.nds/</code> folder at the project root. The final path must be <code class="nds-inline-code lang-html">.nds/</code>, with <code class="nds-inline-code lang-html">_site/</code> directly inside it and no versioned folder in between.</li>
-                </ol>
-
-                <h3 id="structure">Template Structure</h3>
-                <div class="nds-code">
-                    <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
-                            <i class="nds-icon nds-hgi-copy-01"></i>
-                        </button>
-                    </div>
-                    <code class="lang-markdown">
-.nds/
-├── README.md          - Overview and entry-point documentation
-├── _site/             - Compiled documentation and runtime assets
-│   ├── components/    - Canonical component markup
-│   └── assets/        - Runtime CSS, JS, fonts, and i18n
-├── _source/           - Source files and catalogs (added on install)
-├── CHANGELOG.md       - Release history and migration notes
-└── LICENSE            - License terms
-                    </code>
-                </div>
-
-                <h2 id="setup">2. Setup</h2>
-                <p>Run the setup prompt once. It installs NDS IQ, configures the project paths, and creates the initial plan for review.</p>
+                <h2 id="setup">1. Setup</h2>
+                <p>Setup runs once. The agent installs NDS IQ, downloads the template, writes a plan, and asks you its questions once. Then it builds.</p>
 
                 <h3 id="instructions-block">Setup Prompt</h3>
-                <p>Use this as the first turn of a fresh agent session:</p>
+                <p>Open a new agent session and paste this prompt:</p>
                 <div class="nds-code">
                     <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy prompt">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy prompt">
                             <i class="nds-icon nds-hgi-copy-01"></i>
                         </button>
                     </div>
@@ -117,7 +81,7 @@ sidemenu_mode: false
 Download the raw file to `NDS-IQ.md` at the project root using `curl` or another direct HTTP client. Do not use a web-fetch tool: it may save a re-rendered copy.
 https://raw.githubusercontent.com/mazin-musleh/NDS-vanilla/refs/heads/main/_includes/NDS-IQ.md
 
-Confirm that the file starts with `# NDS IQ`, then read it from top to bottom. This is the project's UI-layer rulebook. All NDS work runs by its rules. Set up NDS IQ in this project as its install section describes.
+Confirm that the file starts with `# NDS IQ`, then read it from top to bottom. This is the project's UI-layer rulebook. All NDS work runs by its rules. Set up NDS IQ in this project as its install section describes, then build the plan.
                     </code>
                 </div>
 
@@ -129,37 +93,37 @@ Confirm that the file starts with `# NDS IQ`, then read it from top to bottom. T
                     </span>
                     <div class="nds-alert-content">
                         <div class="nds-alert-text">
-                            <span class="nds-alert-title">Setup requirements</span>
-                            <p class="nds-alert-description">Run the prompt as the first turn of a fresh session and use an edit-capable mode, since setup creates <code class="nds-inline-code lang-html">NDS-IQ.md</code> and updates the agent instruction file. Approve internet access if requested.</p>
+                            <span class="nds-alert-title">Before you paste</span>
+                            <p class="nds-alert-description">Use a mode that lets the agent edit files. Approve internet access if the agent asks for it.</p>
                         </div>
                     </div>
                 </div>
 
-                <p>Setup adds:</p>
+                <p>Setup adds three things:</p>
                 <ol>
-                    <li><code class="nds-inline-code lang-html">NDS-IQ.md</code> at the project root as the full rulebook.</li>
-                    <li>An <strong>anchor</strong> in the agent instruction file containing the project paths and instructing the agent to read the rulebook before NDS work.</li>
+                    <li><code class="nds-inline-code lang-html">NDS-IQ.md</code> at the project root. This is the rules file.</li>
+                    <li>An <strong>anchor</strong> in <code class="nds-inline-code lang-html">CLAUDE.md</code> (Claude Code) or <code class="nds-inline-code lang-html">AGENTS.md</code> (Cursor, Codex). It holds the project paths and tells the agent to read the rules before NDS work.</li>
+                    <li>The <strong>NDS template</strong> in <code class="nds-inline-code lang-html">.nds/</code>. It matches the release your project already runs, or the latest release on a first install.</li>
                 </ol>
-                <p>Use <code class="nds-inline-code lang-html">CLAUDE.md</code> for Claude Code and <code class="nds-inline-code lang-html">AGENTS.md</code> for Cursor and Codex.</p>
 
                 <h3 id="paths">Paths</h3>
-                <p>The anchor declares the two project paths. <code class="nds-inline-code lang-html">NDS_ROOT</code> ships set to <code class="nds-inline-code lang-html">.nds/</code>. The agent fills in <code class="nds-inline-code lang-html">NDS_ASSETS</code> during setup and asks only when the choice is ambiguous. It confirms the URL your assets are served at before writing the first asset tag. <code class="nds-inline-code lang-html">NDS-IQ.md</code> itself is never edited.</p>
+                <p>The anchor holds two paths. The agent fills in <code class="nds-inline-code lang-html">NDS_ASSETS</code> and asks you only when more than one folder could fit. It confirms the asset URL before it writes the first asset tag.</p>
                 <table class="nds-table nds-responsive">
                     <thead><tr><th>Variable</th><th>Description</th></tr></thead>
                     <tbody>
-                        <tr><td><code class="nds-inline-code lang-html">NDS_ROOT</code></td><td>The extracted NDS template directory. Ships set to <code class="nds-inline-code lang-html">.nds/</code>.</td></tr>
-                        <tr><td><code class="nds-inline-code lang-html">NDS_ASSETS</code></td><td>The directory where the application serves static assets, such as <code class="nds-inline-code lang-html">public/assets/</code> or <code class="nds-inline-code lang-html">wwwroot/</code>.</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">NDS_ROOT</code></td><td>The template folder. Default: <code class="nds-inline-code lang-html">.nds/</code>.</td></tr>
+                        <tr><td><code class="nds-inline-code lang-html">NDS_ASSETS</code></td><td>The folder your app serves static files from, such as <code class="nds-inline-code lang-html">public/assets/</code> or <code class="nds-inline-code lang-html">wwwroot/</code>.</td></tr>
                     </tbody>
                 </table>
+                <p>Never edit <code class="nds-inline-code lang-html">NDS-IQ.md</code>. Updates replace it as a whole.</p>
 
                 <h3 id="plan-review">Plan Review</h3>
-                <p>After setup, the agent inventories the project and creates <code class="nds-inline-code lang-html">NDS-PLAN.md</code>. It records pages, routes, legacy libraries, NDS targets, and status. The agent stops for your review before implementation.</p>
-                <p>The initial review covers project-wide decisions: the asset URL prefix, porting strategy, prior NDS work, CSP (only when the project has one), and pacing.</p>
+                <p>Next, the agent lists your pages, routes, and old UI libraries in <code class="nds-inline-code lang-html">NDS-PLAN.md</code>. Then it stops and asks all project-wide questions in one message: the asset URL, the porting strategy, what to do with earlier NDS work, CSP (only if your project has one), whether your site holds the digital stamp's verification, and the pace. Your answers approve the plan, and the agent starts building.</p>
 
-                <p>If the plan was not created automatically, run:</p>
+                <p>If the agent did not write the plan, paste:</p>
                 <div class="nds-code">
                     <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy prompt">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy prompt">
                             <i class="nds-icon nds-hgi-copy-01"></i>
                         </button>
                     </div>
@@ -168,10 +132,33 @@ Inventory the project and write NDS-PLAN.md for my review.
                     </code>
                 </div>
 
-                <p><code class="nds-inline-code lang-html">NDS-PLAN.md</code> is optional for a single-page trial. Use it when work spans multiple pages or sessions.</p>
+                <p>The plan is required for more than one page. You can skip it for a one-page trial, but then the agent keeps no record between sessions.</p>
 
                 <h3 id="manual-install">Manual Install (optional)</h3>
-                <p>For manual installation, save the complete rulebook as <code class="nds-inline-code lang-html">NDS-IQ.md</code> at the project root, then add the anchor to the agent instruction file and fill in <code class="nds-inline-code lang-html">NDS_ASSETS</code>. The anchor's exact text is in the rulebook's own <em>Install and upgrade this file</em> section. Copy the rulebook exactly; do not paraphrase it.</p>
+                <p>Setup does both steps below. Do them by hand only if the agent cannot download files.</p>
+
+                <p><strong>Step 1. Install the template.</strong> Download <code class="nds-inline-code lang-html">nds-vanilla-template-v{{ site.latest_release }}.zip</code> from <a class="nds-color" href="{{ site.repository_url }}/releases/latest">GitHub Releases</a>. Extract it into a <code class="nds-inline-code lang-html">.nds/</code> folder at the project root, and add that folder to <code class="nds-inline-code lang-html">.gitignore</code>. <code class="nds-inline-code lang-html">NDS-INDEX.md</code> must sit directly inside <code class="nds-inline-code lang-html">.nds/</code>, with no version folder between them.</p>
+                <p>The template is read-only: copy from it, never change it.</p>
+                <div class="nds-code">
+                    <div class="nds-code-action">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
+                            <i class="nds-icon nds-hgi-copy-01"></i>
+                        </button>
+                    </div>
+                    <code class="lang-markdown">
+.nds/
+├── README.md          - Overview and entry-point documentation
+├── NDS-INDEX.md       - Map from each need to this release's files
+├── _site/             - Compiled documentation and runtime assets
+│   ├── components/    - Built doc pages, the visual reference
+│   └── assets/        - Runtime CSS, JS, fonts, and i18n
+├── _source/           - Source files and catalogs (added on install)
+├── CHANGELOG.md       - Release history and migration notes
+└── LICENSE            - License terms
+                    </code>
+                </div>
+
+                <p><strong>Step 2. Install the rules.</strong> Save the rules below as <code class="nds-inline-code lang-html">NDS-IQ.md</code> at the project root. Copy them exactly. Then add the anchor to your agent file and set <code class="nds-inline-code lang-html">NDS_ASSETS</code>. The anchor text is in the rules' <em>This file</em> section.</p>
 {%- capture _instr %}{% include NDS-IQ.md %}{% endcapture %}
 {%- assign _iq_parts = _instr | split: 'instructions v' %}
 {%- assign _iq_v = _iq_parts[1] | split: ')' | first %}
@@ -181,7 +168,7 @@ Inventory the project and write NDS-PLAN.md for my review.
                         <span class="nds-tag nds-green nds-xs"><span class="nds-label">IQ v{{ _iq_v }}</span></span>
                     </span>
                     <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy NDS IQ instructions">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy NDS IQ instructions">
                             <i class="nds-icon nds-hgi-copy-01"></i>
                         </button>
                     </div>
@@ -192,29 +179,24 @@ Inventory the project and write NDS-PLAN.md for my review.
                     </div>
                 </div>
 
-                <h2 id="sessions">3. Build</h2>
-                <p>After you approve the plan, NDS IQ controls the implementation workflow. Your request only needs to provide the desired outcome, content, data, and project constraints.</p>
+                <h2 id="sessions">2. Build</h2>
+                <p>Your answers to the plan review approve the plan, and the agent starts building right away. After that, ask for what you want: the outcome, the content, the data, and any limits. NDS IQ decides how the agent builds it.</p>
 
-                <h3 id="agent-drives">Pacing</h3>
-                <p>Choose how much control you want over the workflow:</p>
+                <h3 id="agent-drives">Pace</h3>
+                <p>Pick one:</p>
                 <ul>
-                    <li><strong>Gate by gate (default)</strong>: the agent builds assets, chrome, and pages in order. Each page follows: questions → build → browser verification → status update → stop for approval.</li>
-                    <li><strong>Whole plan</strong>: the agent uses NDS IQ defaults, verifies each page, and reports all decisions and incomplete checks at the end.</li>
+                    <li><strong>Gate by gate (default)</strong>: the agent builds one page at a time. For each page it asks its questions, builds, checks the page in a browser, updates the plan, and stops for your approval.</li>
+                    <li><strong>Whole plan</strong>: the agent builds every page with the default answers. It reports all decisions and open checks at the end.</li>
                 </ul>
-
-                <p><strong>Both modes require:</strong></p>
-                <ul>
-                    <li>The chrome must render and verify before any page is built: NDS styling is active, icons work, there is no unstyled flash, and the console has no errors or <code class="nds-inline-code lang-html">NDS</code>-prefixed warnings.</li>
-                    <li>A page can reach <code class="nds-inline-code lang-html">Built and Verified</code> only after verification and your confirmation.</li>
-                </ul>
+                <p>Either way, only you can mark a page <code class="nds-inline-code lang-html">Built and Verified</code>.</p>
 
                 <h3 id="verification">Browser Verification</h3>
-                <p>Every page is verified in two passes:</p>
+                <p>The agent checks every page in a browser, twice:</p>
                 <ul>
-                    <li><strong>Behavioral</strong>: load the page, check the console, run <code class="nds-inline-code lang-js">NDS.Init.audit()</code>, and exercise the page's wired interactions and validation.</li>
-                    <li><strong>Visual</strong>: check desktop and mobile layouts for flashes, spacing, wrapper structure, dark mode, and overall visual consistency. Compare template-based pages with their canonical template reference.</li>
+                    <li><strong>Behavior</strong>: it loads the page, reads the console, runs <code class="nds-inline-code lang-js">NDS.Init.audit()</code>, and tries every interaction and form check.</li>
+                    <li><strong>Look</strong>: it compares the page with the matching template page at desktop and mobile widths, in light and dark mode.</li>
                 </ul>
-                <p>Source inspection alone is not verification.</p>
+                <p>Reading the code is not verification.</p>
 
                 <div class="nds-alert nds-card nds-inline" data-status="neutral" role="alert">
                     <span class="nds-feedback nds-alert-icon">
@@ -224,17 +206,17 @@ Inventory the project and write NDS-PLAN.md for my review.
                     </span>
                     <div class="nds-alert-content">
                         <div class="nds-alert-text">
-                            <span class="nds-alert-title">No browser access?</span>
-                            <p class="nds-alert-description">The agent produces a per-page verification checklist instead of claiming browser verification. You provide the final sign-off.</p>
+                            <span class="nds-alert-title">No browser?</span>
+                            <p class="nds-alert-description">The agent first sets up a headless browser of its own. If that fails, it gives you a checklist and names what it could not check.</p>
                         </div>
                     </div>
                 </div>
 
-                <h3 id="resuming">Resuming</h3>
-                <p>Start a new session with:</p>
+                <h3 id="resuming">Next Session</h3>
+                <p>In a new session, paste:</p>
                 <div class="nds-code">
                     <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy prompt">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy prompt">
                             <i class="nds-icon nds-hgi-copy-01"></i>
                         </button>
                     </div>
@@ -243,22 +225,22 @@ Continue: read NDS-PLAN.md and propose the next step.
                     </code>
                 </div>
 
-                <p>Implementation is complete when all plan entries are <code class="nds-inline-code lang-html">Built and Verified</code>. Entries marked <code class="nds-inline-code lang-html">Awaiting Verification</code> still require sign-off.</p>
+                <p>The work is done when every page in the plan is <code class="nds-inline-code lang-html">Built and Verified</code>. Pages marked <code class="nds-inline-code lang-html">Awaiting Verification</code> wait for your sign-off.</p>
+                <p>After that, ask for changes in plain words, with no plan. The agent checks each page it changes again, in the states the change touches. A change to a shared file, such as a layout or the project stylesheet, re-checks every page that loads it.</p>
 
-                <p>Long sessions drift. If the agent starts building without checking the plan, or asks you something the rules already answer, tell it to <strong>follow the IQ</strong>. It reads the file again and picks the workflow back up.</p>
+                <p>Long sessions drift. If the agent skips the plan or asks something the rules already answer, tell it to <strong>follow the IQ</strong>. It reads the rules again and gets back on track.</p>
 
-                <h3 id="legacy-cleanup">Retiring Legacy Libraries</h3>
-                <p>Removing legacy libraries is an invasive change and remains your decision. The agent reports when no ported page depends on a library; remove it only after approval.</p>
+                <h3 id="legacy-cleanup">Legacy Library Removal</h3>
+                <p>NDS pages never load old UI libraries such as jQuery or Bootstrap. The agent does not remove them from your project. That decision is yours.</p>
 
-                <h3 id="findings-report">Reporting Findings</h3>
-                <p>Record reproducible NDS gaps in <code class="nds-inline-code lang-html">NDS-REPORT.md</code>. Include the NDS version, instructions version, component, and a minimal generic reproduction.</p>
-                <p>Review the report and send verified findings to <a class="nds-color" href="https://github.com/mazin-musleh/NDS-vanilla/issues">GitHub Issues</a> or the maintainer.</p>
+                <h3 id="findings-report">Findings Report</h3>
+                <p>When the agent finds an NDS bug or gap, it writes it in <code class="nds-inline-code lang-html">NDS-REPORT.md</code>. Each entry names the NDS version, the rules version, the component, and a small repro. Review the report, then send real findings to <a class="nds-color" href="https://github.com/mazin-musleh/NDS-vanilla/issues">GitHub Issues</a>.</p>
 
-                <h2 id="upgrade">4. Upgrade</h2>
-                <p>When a new NDS version is published, run:</p>
+                <h2 id="upgrade">3. Upgrade</h2>
+                <p>When a new release ships, paste:</p>
                 <div class="nds-code">
                     <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy prompt">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy prompt">
                             <i class="nds-icon nds-hgi-copy-01"></i>
                         </button>
                     </div>
@@ -266,14 +248,20 @@ Continue: read NDS-PLAN.md and propose the next step.
 Upgrade the NDS template to the latest release.
                     </code>
                 </div>
-                <p>The agent replaces the template contents, keeps <code class="nds-inline-code lang-html">NDS_ROOT</code> unchanged, runs the NDS IQ upgrade workflow, reviews the changelog, and reports breaking changes and available features.</p>
-                <p>It also replaces <code class="nds-inline-code lang-html">NDS-IQ.md</code> with the latest published revision. The anchor and project paths remain unchanged.</p>
+                <p>The agent:</p>
+                <ul>
+                    <li>Replaces the template in <code class="nds-inline-code lang-html">NDS_ROOT</code> and copies the new runtime into <code class="nds-inline-code lang-html">NDS_ASSETS</code>.</li>
+                    <li>Reads the changelog's migration notes, runs the audit's migration check on every page, and fixes the affected pages through the plan.</li>
+                    <li>Replaces <code class="nds-inline-code lang-html">NDS-IQ.md</code> with the latest revision.</li>
+                    <li>Reports new features you may want.</li>
+                </ul>
+                <p>Your anchor and paths do not change.</p>
 
                 <h3 id="update-rules">Rules Update</h3>
-                <p>To update NDS IQ without upgrading the template, run:</p>
+                <p>To update only the rules, paste:</p>
                 <div class="nds-code">
                     <div class="nds-code-action">
-                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy prompt">
+                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy prompt">
                             <i class="nds-icon nds-hgi-copy-01"></i>
                         </button>
                     </div>
@@ -281,7 +269,7 @@ Upgrade the NDS template to the latest release.
 Update the NDS IQ rules file to the latest revision.
                     </code>
                 </div>
-                <p>The agent compares the published and installed rulebooks and replaces the installed copy when they differ. If the template is behind the latest release, it reports that separately.</p>
+                <p>The agent replaces <code class="nds-inline-code lang-html">NDS-IQ.md</code> when the published copy is different. If your template is also behind, it tells you. On a template older than 2.0, the agent installs revision v3.2 instead, the last revision for those templates.</p>
 
             </article>
         </div>

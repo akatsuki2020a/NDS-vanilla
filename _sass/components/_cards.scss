@@ -57,13 +57,14 @@
   --_card-padding-inline: var(--card-padding-inline, var(--_card-padding-inline-base));
   --_card-gap-base: var(--spacing-3xl);
   --_card-gap: var(--card-gap, var(--_card-gap-base));
+
   --_card-radius-base: var(--radius-lg);
   --_card-radius: var(--card-radius, var(--_card-radius-base));
-  --_card-text-base: var(--text-display);
+  --_card-text-base: var(--text-primary-paragraph);
   --_card-text: var(--card-text, var(--_card-text-base));
   --_card-title-base: var(--text-display);
   --_card-title: var(--card-title, var(--_card-title-base));
-  --_card-subtitle-base: var(--text-primary-paragraph);
+  --_card-subtitle-base: var(--text-secondary);
   --_card-subtitle: var(--card-subtitle, var(--_card-subtitle-base));
   --_card-number-base: var(--text-primary-strong);
   --_card-number: var(--card-number, var(--_card-number-base));
@@ -103,6 +104,11 @@
   gap: var(--_card-gap);
   flex-wrap: nowrap;
 
+  // Phones: a tighter gap leaves a narrow card, or a modal sheet, more room for its content.
+  @include mobile {
+    --_card-gap-base: var(--spacing-xl);
+  }
+
   // Shadow variant
   &.nds-shadow {
     box-shadow: var(--shadow-md);
@@ -121,7 +127,7 @@
     border: 1px solid var(--_card-border);
   }
 
-  &.nds-rowView {
+  &.nds-horizontal {
     flex-direction: row;
     // Actions are a SIBLING of the content, so a row card would line them up
     // beside it — squeezing the text and pushing the buttons past the card
@@ -138,7 +144,6 @@
       flex-direction: column;
       flex-wrap: wrap;
       align-content: flex-start;
-      justify-content: space-between;
 
       .nds-card-image {
         width: var(--card-image-width, 160px);
@@ -173,6 +178,24 @@
     > .nds-card-actions {
       flex-basis: 100%;
     }
+
+    // Reverse: the header at the end side of the row, for a figure that closes it (a progress
+    // ring). Once the row breaks, the header goes back on top.
+    &.nds-reverse {
+      > .nds-card-header {
+        order: 1;
+      }
+
+      > .nds-card-actions {
+        order: 2;
+      }
+
+      @container (width < 324px) {
+        > .nds-card-header {
+          order: 0;
+        }
+      }
+    }
   }
 
   // Color fill variant (tinted background) — default tracks brand primary.
@@ -188,11 +211,23 @@
     }
   }
 
-  &:is(.nds-full-width, .nds-full) {
+  &.nds-full {
     --card-width: 100%;
   }
 
-  &:is(.nds-center, .nds-statistic) {
+  // Flow content: the block or prose margins space the children, so the flex gap would double them.
+  &:is(.nds-block, .nds-prose) {
+    --card-width: 100%;
+    --_card-gap-base: 0;
+  }
+
+  // Centers the content only: the global .nds-center utility would also center the
+  // card in its parent, which is the container's job. A modal keeps its own margin.
+  &.nds-center:not(.nds-modal) {
+    margin-inline: 0;
+  }
+
+  &.nds-center {
     :is(.nds-card-header, .nds-card-content > *, .nds-card-text > *, .nds-card-tags, .nds-card-actions) {
       align-items: center;
       justify-content: center;
@@ -205,6 +240,11 @@
 
   }
 
+  // Short content sits in the middle of a taller card, or beside a taller header in a row card.
+  &.nds-middle :is(.nds-card-content, .nds-card-text) {
+    justify-content: center;
+  }
+
 
   // ==============================================
   // CARD HEADER SECTION
@@ -215,7 +255,7 @@
     display: flex;
     gap: var(--spacing-xl);
 
-    &:is(:has(.nds-close), .nds-rowView) {
+    &:is(:has(.nds-close), .nds-horizontal) {
       width: 100%;
       flex-direction: row;
       justify-content: space-between;
@@ -224,12 +264,22 @@
     > :is(.nds-card-text, .nds-card-title) {
       padding-top: var(--spacing-md);
     }
+
+    // Top end, never squeezed by the title. flex-start: the header's stretch would center the buttons.
+    > .nds-card-header-action {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: var(--spacing-xs);
+      margin-inline-start: auto;
+    }
   }
 
   // A centred card centres its header too. Wins on source order over the
   // space-between rule above, which would otherwise pin the featured icon to
   // the start. The close button leaves the flow so it cannot pull it off-centre.
-  &:is(.nds-center, .nds-statistic) .nds-card-header {
+  &.nds-center .nds-card-header {
     justify-content: center;
 
     .nds-close {
@@ -237,13 +287,6 @@
       top: 0;
       inset-inline-end: 0;
     }
-  }
-
-  // A centred card reads as a statement, so it gets a taller block gutter.
-  // Retuning the -base value keeps --card-padding-block meaning exactly what it
-  // says: set it and you get that, untouched by the multiplier.
-  &.nds-center {
-    --_card-padding-block-base: calc(var(--_card-padding) * 1.5);
   }
 
   .nds-card-image:not(.nds-avatar) {
@@ -262,7 +305,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: color-mix(in srgb, var(--img-overlay-color) calc(var(--_overlay) * 100%), transparent);
+      background: color-mix(in srgb, var(--background-image-overlay) calc(var(--_overlay) * 100%), transparent);
       z-index: 2;
       pointer-events: none;
     }
@@ -276,7 +319,7 @@
     }
   }
 
-  &:not(.nds-center, .nds-statistic) .nds-card-featured-icon {
+  &:not(.nds-center) .nds-card-featured-icon {
     align-self: flex-start;
   }
 
@@ -302,8 +345,12 @@
     flex: 1;
   }
 
-  .nds-card-title {
+  // Block beat nds-truncate's zero-specificity -webkit-box and killed its clamp.
+  .nds-card-title:not(.nds-truncate) {
     display: block;
+  }
+
+  .nds-card-title {
     font-size: var(--typo-text-lg-FS);
     line-height: var(--typo-text-lg-LH);
     font-weight: var(--font-weight-bold);
@@ -368,8 +415,8 @@
   // wrapper's own type IS the muted suffix style, so bare text like "/ كجم"
   // needs no class; the .nds-number-format child is the prominent value
   // (currency icon tracks the font via 1em); a <s> child is the crossed-out
-  // original. .nds-card-price is the pre-rename alias — see DEPRECATIONS.md.
-  :is(.nds-card-value, .nds-card-price) {
+  // original.
+  .nds-card-value {
     display: flex;
     align-items: baseline;
     gap: var(--spacing-sm);
@@ -403,13 +450,69 @@
 
 
   // ==============================================
-  // CARD Status SECTION
+  // CARD STATUS SLOT
   // ==============================================
+  // A status tag in the header: the top end when stacked, under the avatar in a
+  // row card, out of the flow when centred (so the icon stays centred), and over
+  // an image's start corner. The checkbox comes before the header in canonical
+  // markup, so a sibling rule clears it — its inset + width + a gap, minus the
+  // padding the header already sits inside. No :has(). Another part that needs
+  // this spot (a badge, an icon button) joins these rules under its own name.
+
+  .nds-card-checkbox ~ .nds-card-header {
+    --_card-status-shift: calc(var(--spacing-2xl) + var(--nds-input-size, 16px) + var(--spacing-md) - var(--_card-padding-inline));
+  }
 
   .nds-card-status {
+    display: flex;
+    align-self: flex-start;
+    margin-inline-start: auto;
+    margin-inline-end: var(--_card-status-shift, 0);
+  }
+
+  &.nds-horizontal .nds-card-status {
+    margin-inline: 0;
+  }
+
+  // A narrow row card stacks again (see .nds-horizontal), so the tag returns to the end.
+  &.nds-horizontal {
+    @container (width < 324px) {
+      .nds-card-status {
+        margin-inline-start: auto;
+        margin-inline-end: var(--_card-status-shift, 0);
+      }
+    }
+  }
+
+  &.nds-center .nds-card-status {
     position: absolute;
     top: 0;
-    inset-inline-start: 0;
+    inset-inline-end: var(--_card-status-shift, 0);
+    margin: 0;
+  }
+
+  // A row header is only a column around the icon, so the tag stays under it.
+  // Once a narrow row card stacks, the header spans the card again: back out.
+  &.nds-horizontal.nds-center {
+    .nds-card-status {
+      position: static;
+    }
+
+    @container (width < 324px) {
+      .nds-card-status {
+        position: absolute;
+      }
+    }
+  }
+
+  // Last, so it wins in every layout.
+  .nds-card-image ~ .nds-card-status {
+    position: absolute;
+    top: var(--spacing-md);
+    inset-inline-start: var(--spacing-md);
+    inset-inline-end: auto;
+    margin: 0;
+    z-index: 3;
   }
 
 
@@ -427,6 +530,25 @@
 
     &.nds-end {
       justify-content: flex-end;
+    }
+
+    // Reverse: the first button (the main action) shows last. The row stays at its side:
+    // row-reverse swaps the edges, so the packing swaps back. A stack keeps markup order.
+    &.nds-reverse {
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+
+      &.nds-end {
+        justify-content: flex-start;
+      }
+    }
+
+    // Stacked actions fill the card width. .nds-stacked is the canon; the .nds-col
+    // flex utility gives the same result, since the sign-in example already uses it.
+    &:is(.nds-stacked, .nds-col) {
+      flex-direction: column;
+      align-items: stretch;
+      --btn-width: 100%;
     }
 
   }
@@ -453,60 +575,39 @@
 // CARD VARIANTS
 // ==============================================
 
-// Statistic card variant
-.nds-card.nds-statistic {
-  justify-content: flex-start !important;
+// The card's big number, in any card; a centered card centers it.
+.nds-card .nds-card-number {
+  color: var(--_card-number);
+  font-size: var(--typo-display-clamp-lg-FS);
+  line-height: 1;
+  letter-spacing: -0.96px;
+  direction: ltr;
+  display: flex; // a number format inside keeps its gap, symbol order and icon centering
+  width: 100%;
+  --nds-skeleton-width: 100%; // the loading bar spans the row the number does
 
-  .nds-card-header {
-    align-items: center;
+  &.nds-md {
+    font-size: var(--typo-display-clamp-md-FS);
   }
 
-  .nds-card-featured-icon {
-    align-self: center;
-    margin-bottom: 0;
-  }
-
-  .nds-card-content {
-    align-items: center;
-  }
-
-  .nds-card-text {
-
-    &>* {
-      align-items: center;
-      text-align: center;
-    }
-
-    :is(.nds-card-number, .nds-counter-value, .nds-number-format) {
-      color: var(--_card-number);
-      font-size: var(--typo-display-clamp-lg-FS);
-      line-height: 1;
-      letter-spacing: -0.96px;
-      direction: ltr;
-      display: block;
-      width: 100%;
-
-      &.nds-md {
-        font-size: var(--typo-display-clamp-md-FS);
-      }
-
-      &.nds-sm {
-        font-size: var(--typo-display-clamp-sm-FS);
-      }
-    }
-
+  &.nds-sm {
+    font-size: var(--typo-display-clamp-sm-FS);
   }
 }
 
+// Starts on the card's side, not the forced ltr's: :dir() reads the dir attribute, not CSS direction.
+// Chrome resolves match-parent against the element's own direction, so it cannot do this.
+// start/end follow the forced ltr, not a number format's reversed row. text-align lines up a wrapped number.
+.nds-card .nds-card-number {
+  justify-content: start;
+  text-align: left;
 
-// Statistic card variant
-.nds-card.nds-user {
-  --_card-width: var(--card-width, 224px);
-
-  .nds-card-tags {
-    min-height: 48px;
+  &:where(:dir(rtl)) {
+    justify-content: end;
+    text-align: right;
   }
 }
+
 
 // ==============================================
 // COLORED CARD VARIANTS
@@ -522,7 +623,8 @@
   &:is(.nds-neutral, .nds-gray, [data-status="neutral"]) {
     --_card-border-hover-base: var(--colors-neutral-500);
     --_card-border-active-base: var(--colors-neutral-300);
-    --_card-title-base: var(--colors-neutral-800);
+    --_card-title-base: var(--text-display);
+    --_card-subtitle-base: var(--text-secondary-paragraph); // a neutral card carries no brand accent
     --_card-number-base: var(--colors-neutral-600);
     --featuredicon-color: var(--colors-neutral-600); // softer than the core's neutral-700
 
@@ -534,7 +636,6 @@
     }
 
     @include dark {
-      --_card-title-base: var(--colors-neutral-200);
       --_card-number-base: var(--colors-neutral-400);
       --featuredicon-color: var(--colors-neutral-400);
 
@@ -708,7 +809,13 @@
   box-shadow: none;
   pointer-events: none;
 
-  :is(.nds-card-image, .nds-card-meta, .nds-card-actions) {
+  :is(.nds-card-image, .nds-card-meta, .nds-card-status) {
+    opacity: 0.5;
+  }
+
+  // A control the page marked disabled shows its own disabled look; the fade only covers one it missed.
+  :is(.nds-card-actions, .nds-card-header-action) .nds-btn:not(:disabled, [aria-disabled="true"], [data-state~="disabled"]),
+  .nds-card-checkbox .nds-check:not(:disabled) {
     opacity: 0.5;
   }
 }
@@ -717,8 +824,8 @@
 // PROCESSING SKELETON
 // ==============================================
 // While a filter/pagination pass runs, the loading container renders its
-// cards as skeleton placeholders instead of the spinner + dim (suppression
-// in _loading.scss). The card chrome (bg, border, padding) stays; content
+// cards as skeleton placeholders instead of the spinner + dim (turned
+// off at the end of this file). The card chrome (bg, border, padding) stays; content
 // slots become gradient bars/fills. Bars pulse via the shared `processing`
 // keyframes; the a11y reduce-motion kill leaves them static.
 // The same look serves the pre-init hold: not-yet-initialized filter grids
@@ -743,6 +850,16 @@ html:not([data-nds-loaded]) .nds-card {
     @include skeleton-bar;
   }
 
+  // One bar the width of the price line.
+  .nds-card-value {
+    @include skeleton-bar;
+
+    // Outranks the value line's own colour on the prominent number.
+    .nds-number-format {
+      color: transparent;
+    }
+  }
+
   .nds-card-image:not(.nds-avatar) {
     aspect-ratio: var(--img-ratio, 2/1);
     border-radius: var(--radius-md);
@@ -754,7 +871,7 @@ html:not([data-nds-loaded]) .nds-card {
     }
   }
 
-  :is(.nds-tag, .nds-chip, .nds-btn):not(.nds-tab) {
+  :is(.nds-tag, .nds-chip, .nds-btn):not(.nds-tab, .nds-accordion-btn) {
     border-color: transparent;
     border-radius: var(--nds-skeleton-radius);
     @include skeleton-fill;
@@ -781,4 +898,9 @@ html:not([data-nds-loaded]) .nds-card {
       visibility: hidden;
     }
   }
+}
+
+// Loading shows the skeleton above, not the spinner.
+:is(.nds-grid, .nds-paged-content, .nds-card).nds-loading {
+  @include loading-skeleton-host;
 }

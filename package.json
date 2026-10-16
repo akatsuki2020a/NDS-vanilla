@@ -27,7 +27,7 @@
     "url": "https://github.com/mazin-musleh/NDS-vanilla/issues"
   },
   "devDependencies": {
-    "puppeteer-core": "^25.1.0",
+    "playwright-core": "^1.63.0",
     "terser": "^5.43.1"
   }
 }

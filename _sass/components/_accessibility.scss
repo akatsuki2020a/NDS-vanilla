@@ -191,7 +191,7 @@
     opacity: 0.25;
     transition: opacity var(--nds-transition);
 
-    &.is-active {
+    &[data-state~="active"] {
         opacity: 1;
     }
 }

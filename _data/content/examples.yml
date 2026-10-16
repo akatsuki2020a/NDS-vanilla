@@ -7,6 +7,16 @@
 #   and the words developers actually use for it. Never conclude NDS lacks a
 #   pattern until every use_when here has been read.
 #   description/icon/category/tags drive the index cards; use_when renders nowhere.
+#   new: true shows a "New" tag on the card.
+
+- title: "Student Portal"
+  description: "A student's home page with grades, today's classes, requests, exams and services."
+  use_when: "A personal home page that a signed-in user opens first: a profile section with a photo and key details, metric tiles with a trend chart, a progress ring, lists of today's items and the user's requests, a dated list of upcoming events, quick-action cards that open modals, swipers of link cards, and a FAB that opens a help panel. Use for a student, employee, patient, citizen or member portal, a my-account page, or any user dashboard. Its lists are Drawer rows: each row is one link with an icon or a Date Tile at the start, a title with a status tag, and a Meta line of icon facts such as time and place. Full chrome with a sub hero, striped sections through content_class: nds-stripe, and no side menu."
+  icon: '<i class="hgi hgi-stroke hgi-mortarboard-01"></i>'
+  category: "Dashboard"
+  tags: ["Drawer", "Date Tile", "Meta", "Metric", "Modal", "FAB"]
+  url: "/examples/student-portal.html"
+  new: true
 
 - title: "Services List"
   description: "Filterable government services catalog with search and category filters."
@@ -18,7 +28,7 @@
 
 - title: "Registration"
   description: "Sign-up form with field validation, a matching password check, and an OTP step."
-  use_when: "A standalone create-account or sign-up flow, with field validation, a confirm-password match check, and an OTP verification step. The page carries no topbar, header, or footer (the minimal chrome shape), so use it for any full-screen auth flow."
+  use_when: "A standalone create-account or sign-up flow, with field validation, a confirm-password match check, and an OTP verification step. The page carries no topbar, header, or footer (the minimal chrome shape), so use it for any full-screen auth flow. Its steps are sibling cards swapped in place with plain `[hidden]`."
   icon: '<i class="hgi hgi-stroke hgi-file-validation"></i>'
   category: "Form"
   tags: ["Forms", "OTP", "Validation"]
@@ -26,7 +36,7 @@
 
 - title: "Sign In"
   description: "National single sign-on with a credentials fallback, one-time code, and account settings."
-  use_when: "A standalone login page: national single sign-on as the primary path, a username and password fallback, an OTP step, and a resend button with a cooldown timer. No topbar, header, or footer (the minimal chrome shape)."
+  use_when: "A standalone login page: national single sign-on as the primary path, a username and password fallback, an OTP step, and a resend button with a cooldown timer. No topbar, header, or footer (the minimal chrome shape). Its steps are sibling cards swapped in place with plain `[hidden]`: the pattern for any same-page switch between auth forms, such as sign-in and create-account."
   icon: '<i class="hgi hgi-stroke hgi-login-circle-01"></i>'
   category: "Form"
   tags: ["Forms", "OTP", "Cooldown Button", "Alert"]
@@ -34,7 +44,7 @@
 
 - title: "Faculty Profile"
   description: "Faculty member page with profile, tabbed content, and structured academic information."
-  use_when: "A profile page for one person: avatar header, tabbed sections, a definition list of structured fields, and tables of related records. Sits in a card-view content layout beside a side menu, through nds-cardView and nds-wSideMenu. It is the only example whose side menu becomes a top dropdown bar on mobile, through nds-top on the aside. Use for staff bios, employee profiles, member directory detail pages, or any view-this-person screen."
+  use_when: "A profile page for one person: avatar header, tabbed sections, a definition list of structured fields, and tables of related records. Sits in a card-view content layout beside a side menu, through nds-card-view and nds-has-sidemenu. It is the only example whose side menu becomes a top dropdown bar on mobile, through nds-top on the aside. Use for staff bios, employee profiles, member directory detail pages, or any view-this-person screen."
   icon: '<i class="hgi hgi-stroke hgi-school"></i>'
   category: "Content"
   tags: ["Tabs", "Avatar", "Definition List"]
@@ -42,7 +52,7 @@
 
 - title: "Faculty CV"
   description: "Long-form academic profile with a table of contents, a career timeline, qualifications, and paginated publications."
-  use_when: "A profile page read top to bottom instead of through tabs, with a sticky table of contents tracking the sections as you scroll: a portrait and name in the hero, a contact menu, a card grid of key fields, a prose block, a dated career timeline built from a reversed vertical stepper so the newest entry sits on top, qualification cards, and a long list of records split into pages. Use for a CV, resume, portfolio, staff bio, work history, or any person page whose sections are too long to hide behind tabs. The table of contents is the side info column, through nds-wSideInfo on the content layout."
+  use_when: "A profile page read top to bottom instead of through tabs, with a sticky table of contents tracking the sections as you scroll: a portrait and name in the hero, a contact menu, a card grid of key fields, a prose block, a dated career timeline built from a reversed vertical stepper so the newest entry sits on top, qualification cards, and a long list of records split into pages. Use for a CV, resume, portfolio, staff bio, work history, or any person page whose sections are too long to hide behind tabs. The table of contents is the side info column, through nds-has-sideinfo on the content layout."
   icon: '<i class="hgi hgi-stroke hgi-profile"></i>'
   category: "Content"
   tags: ["Stepper", "TOC", "Divider", "Pagination", "Cards"]
@@ -50,7 +60,7 @@
 
 - title: "Academic Program"
   description: "Degree program page with expandable content, curriculum, and admission information."
-  use_when: "A detail page for one program or offering: overview text, stat tiles, tabbed sections, expandable blocks, and detail tables. Sits in a card-view content layout beside a side menu, through nds-cardView and nds-wSideMenu. Use for courses, training programs, grant schemes, initiatives, or any about-this-thing page too long for a card."
+  use_when: "A detail page for one program or offering: overview text, stat tiles, tabbed sections, expandable blocks, and detail tables. Sits in a card-view content layout beside a side menu, through nds-card-view and nds-has-sidemenu. Use for courses, training programs, grant schemes, initiatives, or any about-this-thing page too long for a card."
   icon: '<i class="hgi hgi-stroke hgi-mortarboard-02"></i>'
   category: "Content"
   tags: ["Expandable", "Accordion"]

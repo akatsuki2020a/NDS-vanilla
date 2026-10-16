@@ -6,12 +6,19 @@
 .nds-flex {
   display: flex;
   justify-content: var(--justify, flex-start);
-  // Default `stretch` matches CSS default. Column layouts get full-width
-  // children (common for forms/lists); row layouts with same-height children
-  // (buttons, icons+text) look identical to `center`. Override with
-  // `--align: center` when a row mixes children of differing heights.
+  // stretch, so a column's children fill its width
   align-items: var(--align, stretch);
   gap: var(--gap, var(--spacing-xl));
+}
+
+// Centers the children along the row; a column also centers them across, where a
+// lone child (a card) would otherwise start at the edge.
+.nds-flex.nds-center {
+  --justify: center;
+
+  &.nds-col {
+    --align: center;
+  }
 }
 
 // Direction overrides — unscoped so components like .nds-card-actions
@@ -24,9 +31,8 @@
   flex-direction: column !important;
 }
 
-// Reverse directions — flip visual child order (RTL action-flips, timelines).
-// Scoped to the flex utility (.nds-flex default row, or explicit .nds-row) so it
-// never overrides a component's own .nds-reverse (stepper column-reverse, sideinfo order).
+// Reverse directions — flip the flex utility's child order. Scoped to .nds-flex / .nds-row:
+// a component that takes .nds-reverse defines its own meaning (card, card actions, stepper, sideinfo).
 :is(.nds-flex, .nds-row).nds-reverse:not(.nds-col) {
   flex-direction: row-reverse !important;
 }

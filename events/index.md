@@ -1,5 +1,4 @@
 ---
-exclude_showcase: true
 layout: page
 title: Events
 hero_title: Events
@@ -21,10 +20,10 @@ sidemenu_mode: false
                     <div class="nds-search-content">
                         <div class="nds-form-control">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <input id="eventSearch" type="text" class="nds-search-input" name="search" autocomplete="off"
+                            <input id="event-search" type="text" class="nds-search-input" name="search" autocomplete="off"
                                 placeholder="Search events...">
                             <div class="nds-form-action">
-                                <button class="nds-btn nds-subtle nds-clear" hidden aria-label="Clear search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
+                                <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <button class="nds-btn nds-primary nds-search-btn" type="button">
@@ -105,7 +104,7 @@ sidemenu_mode: false
                 {% endfor %}
 
             </div>
-            <nav class="nds-pagination" data-auto-pagination="events_list" aria-label="Pagination"></nav>
+            <nav class="nds-pagination" data-auto-pagination="events_list" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
         </div>
     </div>
 </section>

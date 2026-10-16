@@ -14,21 +14,19 @@ into a <template> on arm (saved prefs or FAB press), same as a page-authored
 To reposition: set data-panel-side HERE, on this button (not 'end'|'start'|
 'top' on the panel — the panel no longer ships in HTML to carry it).
 resolvePanel() reads it off the FAB and threads it into the built panel, so
-this one attribute is the single control point. Set data-fab-pos below to
-match by hand either way — the FAB docks before the panel is built, so
-`auto` can't read the side back off it. A page-authored <template
-class="nds-panel-template"><aside id="ndsAccessibilityPanel"> still wins
+this one attribute is the single control point: data-fab-pos="auto" reads
+it too, so the FAB docks on the same side. A page-authored <template
+class="nds-panel-template"><aside id="nds-accessibility-panel"> still wins
 over the built-in markup if you need more than repositioning.
 {%- endcomment -%}
 <button class="nds-btn nds-primary nds-circle nds-icon-only nds-fab nds-accessibility-toggle"
         type="button"
         aria-label="Accessibility settings"
-        data-i18n-attr="aria-label:panel_label"
-        aria-controls="ndsAccessibilityPanel"
+        data-i18n-aria-label="accessibility.panel_label"
         aria-expanded="false"
         data-fab-pos="auto"
         data-panel-side="end"
-        data-panel-toggle="ndsAccessibilityPanel"
+        data-panel-toggle="nds-accessibility-panel"
         data-accessibility-toggle
         hidden>
     <i class="nds-icon nds-hgi-accessibility" aria-hidden="true"></i>

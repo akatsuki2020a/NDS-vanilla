@@ -10,7 +10,7 @@
     // Private custom properties with public override capability
     --_name-FS: var(--persona-name-FS, var(--typo-text-xl-FS));
     --_name-LH: var(--persona-name-LH, var(--typo-text-xl-LH));
-    --_name-color: var(--persona-name-color, var(--text-default));
+    --_name-color: var(--persona-name-color, var(--text-display));
     --_role-FS: var(--persona-role-FS, var(--typo-text-lg-FS));
     --_role-LH: var(--persona-role-LH, var(--typo-text-lg-LH));
     --_role-color: var(--persona-role-color, var(--text-primary-paragraph));
@@ -56,6 +56,11 @@
         align-self: stretch;
     }
 
+    // Whatever follows the divider (actions, a definition list) takes its own row.
+    .nds-divider ~ * {
+        flex: 1 100%;
+    }
+
     .nds-persona-action {
         flex: 1 100%;
         display: flex;
@@ -66,7 +71,7 @@
         }
     }
 
-    &.nds-colView {
+    &.nds-vertical {
         flex-direction: column;
     }
 

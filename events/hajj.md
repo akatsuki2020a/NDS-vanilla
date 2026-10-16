@@ -38,40 +38,36 @@ hero_float_actions:
 </section>
 
 <!-- Automatic -->
-<section id="hajjApply" class="nds-content-section nds-demo-section">
+<section id="hajj-apply" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Automatic</h2>
             <p class="nds-section-description">Add one tag to your shared <code class="nds-inline-code lang-html">&lt;head&gt;</code>, after the NDS stylesheets and without <code class="nds-inline-code lang-html">defer</code>. It applies the event stylesheet and the hero slide; remove it when the season ends. That one tag is the whole install — every value has a built-in default. Use the <strong>With overrides</strong> tab to change any of them; see the attribute table below.</p>
-            <p class="nds-section-description">The pack is self-contained. Download the zip, then copy its files into your own assets folder. A template copy already ships them at <code class="nds-inline-code lang-html">docs-assets/events/Hajj/</code>. The paths below assume <code class="nds-inline-code lang-html">assets/events/Hajj/</code>. The script finds its own CSS and images relative to itself, so the folder works at any location as long as its contents stay together.</p>
+            <p class="nds-section-description">The pack is self-contained. Download the zip, then copy its files into your own assets folder. A template copy already ships them at <code class="nds-inline-code lang-html">docs-assets/events/Hajj/</code>. The paths below assume <code class="nds-inline-code lang-html">assets/events/Hajj/</code>. The script carries its own CSS and finds its images next to itself, so the folder works at any location as long as its contents stay together. You need the <code class="nds-inline-code lang-html">.min.css</code> file only for the no-script setup below, or when you want to override a rule.</p>
         </div>
         <div class="nds-section-body">
-            <div class="nds-showcase">
-                <div class="nds-demo-card">
-                    <div class="demo-header">
-                        <div class="demo-label">One tag applies everything</div>
-                    </div>
-                    <div class="demo-code">
+            <div class="nds-block">
+                <h3 class="nds-block-title">One tag applies everything</h3>
                         <div class="nds-tabs nds-code nds-divided">
                             <div class="nds-tab-list-container nds-scroll-more">
                                 <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
                                         aria-controls="panel-hajj-apply-1" id="tab-hajj-apply-1">
-                                        <span class="nds-tab-label">HTML</span>
+                                        <span class="nds-label">HTML</span>
                                     </button>
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="false"
                                         aria-controls="panel-hajj-apply-2" id="tab-hajj-apply-2">
-                                        <span class="nds-tab-label">With overrides</span>
+                                        <span class="nds-label">With overrides</span>
                                     </button>
                                 </nav>
                                 <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="nds-tab-content">
-                                <div class="nds-tab-panel code-example" role="tabpanel" id="panel-hajj-apply-1"
+                                <div class="nds-tab-panel" role="tabpanel" id="panel-hajj-apply-1"
                                     aria-labelledby="tab-hajj-apply-1">
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -79,10 +75,10 @@ hero_float_actions:
 &lt;script src="/assets/events/Hajj/nds-theme-hajj.min.js"&gt;&lt;/script&gt;
                                     </code>
                                 </div>
-                                <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-hajj-apply-2"
+                                <div class="nds-tab-panel nds-expandable" role="tabpanel" id="panel-hajj-apply-2"
                                     aria-labelledby="tab-hajj-apply-2" hidden>
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -99,47 +95,41 @@ hero_float_actions:
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Manual (no JavaScript) -->
-<section id="hajjManual" class="nds-content-section nds-demo-section">
+<section id="hajj-manual" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Manual (no JavaScript)</h2>
             <p class="nds-section-description">No-JS alternative: link the stylesheet for the decorations, and paste the slide markup yourself. Add the CSS link in <code class="nds-inline-code lang-html">&lt;head&gt;</code>, and place the slide as the first child of <code class="nds-inline-code lang-html">.nds-swiper-wrapper</code> (raise the hero's <code class="nds-inline-code lang-css">--total</code> by one). The background flips for direction automatically.</p>
         </div>
         <div class="nds-section-body">
-            <div class="nds-showcase">
-                <div class="nds-demo-card">
-                    <div class="demo-header">
-                        <div class="demo-label">No-JS setup: stylesheet link and slide markup</div>
-                    </div>
-                    <div class="demo-code">
+            <div class="nds-block">
+                <h3 class="nds-block-title">No-JS setup: stylesheet link and slide markup</h3>
                         <div class="nds-tabs nds-code nds-divided">
                             <div class="nds-tab-list-container nds-scroll-more">
                                 <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
                                         aria-controls="panel-hajj-manual-1" id="tab-hajj-manual-1">
-                                        <span class="nds-tab-label">CSS file</span>
+                                        <span class="nds-label">CSS file</span>
                                     </button>
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="false"
                                         aria-controls="panel-hajj-manual-2" id="tab-hajj-manual-2">
-                                        <span class="nds-tab-label">Hero markup</span>
+                                        <span class="nds-label">Hero markup</span>
                                     </button>
                                 </nav>
                                 <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="nds-tab-content">
-                                <div class="nds-tab-panel code-example" role="tabpanel" id="panel-hajj-manual-1"
+                                <div class="nds-tab-panel" role="tabpanel" id="panel-hajj-manual-1"
                                     aria-labelledby="tab-hajj-manual-1">
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -148,10 +138,10 @@ hero_float_actions:
       href="/assets/events/Hajj/nds-theme-hajj.min.css"&gt;
                                     </code>
                                 </div>
-                                <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-hajj-manual-2"
+                                <div class="nds-tab-panel nds-expandable" role="tabpanel" id="panel-hajj-manual-2"
                                     aria-labelledby="tab-hajj-manual-2" hidden>
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -169,15 +159,13 @@ hero_float_actions:
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Data Attributes -->
-<section id="hajjAttributes" class="nds-content-section nds-demo-section">
+<section id="hajj-attributes" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Data Attributes</h2>
@@ -202,7 +190,7 @@ hero_float_actions:
 </section>
 
 <!-- Built-in Features -->
-<section id="hajjFeatures" class="nds-content-section nds-demo-section">
+<section id="hajj-features" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Built-in Features</h2>
@@ -214,7 +202,7 @@ hero_float_actions:
                         <i class="hgi hgi-stroke hgi-plug-socket"></i>
                         <span class="nds-label">One-Tag Activation</span>
                     </span>
-                    <p class="nds-item-desc">One script tag applies the stylesheet, root marker, and hero slide. No build, no markup edits.</p>
+                    <p class="nds-item-desc">One script tag applies the stylesheet it carries, the root marker, and the hero slide. No build, no markup edits.</p>
                 </div>
                 <div class="nds-definition-item">
                     <span class="nds-item-title">
@@ -257,7 +245,7 @@ hero_float_actions:
 </section>
 
 <!-- Usage Guidelines -->
-<section id="hajjGuidelines" class="nds-content-section nds-demo-section">
+<section id="hajj-guidelines" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Usage Guidelines</h2>

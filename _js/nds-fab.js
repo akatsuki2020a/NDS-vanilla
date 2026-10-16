@@ -49,8 +49,9 @@
  *     start | end             LOGICAL — resolves by direction: end → left in
  *                             RTL / right in LTR; start → the mirror
  *     auto                    follow the toggled panel to its edge
- *                             (data-panel-toggle → panel data-panel-side); a
- *                             top sheet or a FAB with no panel → the reading-end
+ *                             (data-panel-toggle → panel data-panel-side, or the
+ *                             toggle's own while the panel is unbuilt); a
+ *                             top sheet or a FAB with no side → the reading-end
  *                             edge; a bottom sheet resolves to the bottom dock
  *
  * Delegated: routing runs after the reveal. A FAB ships with `hidden`, so the
@@ -95,10 +96,11 @@
         // `auto` has to descend to find it. ridePanel climbs the same boundary
         // from the other side (btn.closest('.nds-fab')); both must agree or a
         // grouped FAB docks at one edge while its panel opens from another.
-        const id = fab.dataset.panelToggle
-            || fab.querySelector('[data-panel-toggle]')?.dataset.panelToggle;
-        const panel = id ? document.getElementById(id) : null;
-        return sideToEdge(panel ? (panel.getAttribute('data-panel-side') || 'end') : 'end');
+        const btn = fab.matches('[data-panel-toggle]') ? fab : fab.querySelector('[data-panel-toggle]');
+        const panel = btn ? document.getElementById(btn.dataset.panelToggle) : null;
+        // A panel built on first press (accessibility) is absent at dock time and takes
+        // its side from the toggle, so read the same value there.
+        return sideToEdge((panel || btn)?.getAttribute('data-panel-side') || 'end');
     }
 
     // Find the static slot at `pos`, creating it lazily if absent.
@@ -120,10 +122,10 @@
     // `override` forces a position, ignoring the FAB's own data-fab-pos.
     function register(fab, override) {
         if (!fab) return null;
-        // Remember where the FAB was authored BEFORE the first move, so destroy() can put
-        // it back. Recorded once: a re-register (a direction flip re-routes every FAB)
-        // reads the dock as the parent, which would overwrite the real origin with a slot.
-        if (!fab._ndsFabOrigin) fab._ndsFabOrigin = { parent: fab.parentNode, nextSibling: fab.nextSibling };
+        // Mark where the FAB was authored before the first move, so destroy() can put it back
+        // and a framework holding it still finds its spot. A re-register (a direction flip
+        // re-routes every FAB) keeps the first mark: relocate() skips a node already moved.
+        NDS.relocate(fab);
         const d = dock(resolvePos(fab, override));
         d.appendChild(fab);
         [...d.children].sort((a, b) => order(a) - order(b)).forEach(c => d.appendChild(c));
@@ -235,7 +237,7 @@
         // panel (which flips via CSS). Physical FABs and the docks don't move.
         runtimeOffs.push(NDS.onAttrChange('html', ['dir'], () => {
             document.querySelectorAll('.nds-fab').forEach(fab => {
-                if (fab.closest('code, .code-example')) return;
+                if (fab.closest('code')) return;
                 if (fab.parentElement?.closest('.nds-fab')) return;   // outermost wins, as in init()
                 register(fab);
             });
@@ -258,7 +260,7 @@
     // The container form is what NDS.Init.destroy needs, and it cannot be a plain scan:
     // register() MOVED the button to a dock on <body>, so a docked FAB is no longer inside
     // the view that authored it and no querySelectorAll on that view will ever find it.
-    // The origin recorded at register() time is the only link back, so the match is on
+    // The marker register() left (NDS.homeOf) is the only link back, so the match is on
     // where the FAB CAME FROM, not on where it sits now.
     //
     // Putting it back matters beyond tidiness: a framework unmounts the view by removing
@@ -272,15 +274,8 @@
         if (elOrRoot.classList?.contains('nds-fab')) {
             const fab = elOrRoot;
             if (!fab.hasAttribute(INIT_ATTR)) return 0;   // never routed — nothing was taken
-            const origin = fab._ndsFabOrigin;
-            if (origin?.parent?.isConnected) {
-                const before = origin.nextSibling?.parentNode === origin.parent ? origin.nextSibling : null;
-                origin.parent.insertBefore(fab, before);
-                fab.setAttribute('hidden', '');
-            } else {
-                fab.remove();   // authored inside a view the app already removed
-            }
-            delete fab._ndsFabOrigin;
+            // Back to its marker: with a view the app already removed, it leaves with that view.
+            if (NDS.restore(fab)) fab.setAttribute('hidden', '');
             fab.removeAttribute(INIT_ATTR);
             fab.removeAttribute('data-fab-riding');
             fab.style.removeProperty('--_fab-ride');
@@ -295,7 +290,7 @@
 
         let count = 0;
         document.querySelectorAll('.nds-fab[' + INIT_ATTR + ']').forEach(fab => {
-            const parent = fab._ndsFabOrigin?.parent;
+            const parent = NDS.homeOf(fab);
             if (elOrRoot === document || (parent && (parent === elOrRoot || elOrRoot.contains?.(parent)))) {
                 count += destroy(fab);
             }
@@ -315,7 +310,7 @@
     function init() {
         document.querySelectorAll('.nds-fab').forEach(fab => {
             if (fab.hasAttribute(INIT_ATTR)) return;
-            if (fab.closest('code, .code-example')) return;
+            if (fab.closest('code')) return;
             if (fab.parentElement?.closest('.nds-fab')) return;
             register(fab);
         });

@@ -9,6 +9,13 @@
 
 @use '../mixins' as *;
 
+// What "disabled" means for a button, in one place. Loading, progress and status
+// are carved out of it: a button locked for its own request or countdown, or
+// during NDS.Copy's success flash, keeps its colours and its group seam. The seam rules outrank the base
+// disabled rule, so all of them must exclude exactly the same set — hence one
+// string, not five copies.
+$btn-disabled: ':is(:disabled, [data-state~="disabled"], [aria-disabled="true"]):not(.nds-loading, .nds-progress, [data-status])';
+
 // ==============================================
 // BASE BUTTON STYLES
 // ==============================================
@@ -51,10 +58,14 @@
     border-color: var(--_btn-border-active);
   }
 
-  &:is(:disabled, [data-state~="disabled"], [aria-disabled="true"]) {
+  &#{$btn-disabled} {
     background-color: var(--_btn-bg-disabled);
     color: var(--_btn-color-disabled);
     border-color: var(--_btn-border-disabled);
+  }
+
+  // The lock applies to every disabled button; only the colours are carved out above.
+  &:is(:disabled, [data-state~="disabled"], [aria-disabled="true"]) {
     // DEAD-06 defensive: project-wide disabled-affordance pattern paired with pointer-events:none (see _chips, _pagination, _switch); keeps the cursor signal for a11y tooling and authoring docs.
     cursor: not-allowed;
     pointer-events: none;
@@ -68,11 +79,12 @@
   // STATUS STATES (data-status attribute)
   // ==============================================
 
+  // Feedback that a script sets for a moment after an action (NDS.Copy's success
+  // flash). Each status names its colours once; the shared rule below holds them
+  // in every state, since the flash starts while the button is still hovered.
   &[data-status="success"] {
-    --btn-bg-hover: var(--button-status-success-bg) !important;
-    --btn-bg: var(--button-status-success-bg) !important;
-    --btn-color: var(--button-status-success-text) !important;
-    --btn-color-hover: var(--button-status-success-text) !important;
+    --_status-bg: var(--button-status-success-bg);
+    --_status-text: var(--button-status-success-text);
     --_status-border: var(--button-border-success);
     // Status swaps every mask icon inside through the icon base's --nds-icon-forced
     // hook (PERF-06: no `.nds-icon` tail after [data-status]).
@@ -80,39 +92,42 @@
   }
 
   &[data-status="error"] {
-    --btn-bg-hover: var(--button-status-error-bg) !important;
-    --btn-bg: var(--button-status-error-bg) !important;
-    --btn-color: var(--button-status-error-text) !important;
-    --btn-color-hover: var(--button-status-error-text) !important;
+    --_status-bg: var(--button-status-error-bg);
+    --_status-text: var(--button-status-error-text);
     --_status-border: var(--button-border-error);
     --nds-icon-forced: var(--nds-icon-cancel-circle);
   }
 
   &[data-status="info"] {
-    --btn-bg-hover: var(--button-status-info-bg) !important;
-    --btn-bg: var(--button-status-info-bg) !important;
-    --btn-color: var(--button-status-info-text) !important;
-    --btn-color-hover: var(--button-status-info-text) !important;
+    --_status-bg: var(--button-status-info-bg);
+    --_status-text: var(--button-status-info-text);
     --_status-border: var(--button-border-info);
     --nds-icon-forced: var(--nds-icon-information-circle);
   }
 
   &[data-status="warning"] {
-    --btn-bg-hover: var(--button-status-warning-bg) !important;
-    --btn-bg: var(--button-status-warning-bg) !important;
-    --btn-color: var(--button-status-warning-text) !important;
-    --btn-color-hover: var(--button-status-warning-text) !important;
+    --_status-bg: var(--button-status-warning-bg);
+    --_status-text: var(--button-status-warning-text);
     --_status-border: var(--button-border-warning);
     --nds-icon-forced: var(--nds-icon-alert-circle);
   }
 
-  // Status border paints only on the outline variant; --_status-border is set per status above.
-  // PERF-04 complexity-required: variant grid (outline × 4 statuses × :not(:active) guard); restructuring (Solution A) grows the bundle for a sub-ms match-cost win.
-  &.nds-secondary-outline:is([data-status="success"], [data-status="error"], [data-status="info"], [data-status="warning"]):not(:active) {
-    --btn-border: var(--_status-border) !important;
-    --btn-border-hover: var(--_status-border) !important;
-    --btn-border-active: var(--_status-border) !important;
-    --btn-border-selected: var(--_status-border) !important;
+  // !important: the variant and on-colour rules come later at equal or higher specificity.
+  &:is([data-status="success"], [data-status="error"], [data-status="info"], [data-status="warning"]) {
+    --btn-bg: var(--_status-bg) !important;
+    --btn-bg-hover: var(--_status-bg) !important;
+    --btn-bg-active: var(--_status-bg) !important;
+    --btn-bg-selected: var(--_status-bg) !important;
+    --btn-color: var(--_status-text) !important;
+    --btn-color-hover: var(--_status-text) !important;
+
+    // The border paints only on the outline variant.
+    &.nds-secondary-outline {
+      --btn-border: var(--_status-border) !important;
+      --btn-border-hover: var(--_status-border) !important;
+      --btn-border-active: var(--_status-border) !important;
+      --btn-border-selected: var(--_status-border) !important;
+    }
   }
 
   // ==============================================
@@ -150,6 +165,7 @@
     // button fills its slot rather than sitting at the one-line --btn-height.
     white-space: normal;
     height: stretch;
+    --btn-height-min: fit-content; // two rows: the one-line minimum would clip them
     // Column direction makes justify-content the vertical axis: the base centre
     // would float the icon mid-button once a taller sibling stretches the row,
     // so icons stay pinned to the top and line up across a row of choices.
@@ -258,12 +274,12 @@
   // would colour the group's outer side edge and leave the real seam plain.
   // Disabled is excluded on every seam rule: they all outrank the base disabled
   // rule, so without it a disabled button keeps an enabled-coloured inner edge.
-  .nds-btn-group:not(.nds-vertical) &:not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
-    border-inline-start-color: var(--_btn-bg-hover);
+  .nds-btn-group:not(.nds-vertical) &:not(:first-child, #{$btn-disabled}) {
+    border-inline-start-color: var(--_btn-seam, var(--_btn-bg-hover));
   }
 
-  .nds-btn-group.nds-vertical &:not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
-    border-block-start-color: var(--_btn-bg-hover);
+  .nds-btn-group.nds-vertical &:not(:first-child, #{$btn-disabled}) {
+    border-block-start-color: var(--_btn-seam, var(--_btn-bg-hover));
   }
 
   // ==============================================
@@ -279,6 +295,9 @@
     --btn-color-disabled: var(--text-default-oncolor-disabled);
     --btn-color: var(--colors-base-black);
     --btn-loading-color: var(--colors-base-black);
+    --btn-loading-track: var(--colors-alpha-black-10);
+    // The hover wash is white on white here, so a group seam would vanish.
+    --_btn-seam: color-mix(in srgb, var(--_btn-color) 20%, transparent);
 
     &:is(.focus, :focus-visible, [data-state~="focused"]) {
       @include btn-focus-oncolor;
@@ -293,7 +312,8 @@
 
   @at-root {
     .nds-btn.nds-oncolor,
-    :where(:root[data-theme~="dark"]) .nds-btn:not(.nds-primary, .nds-neutral) {
+    :where(:root[data-theme~="dark"]) .nds-btn:not(.nds-primary, .nds-neutral),
+    .nds-btn:not(.nds-primary, .nds-neutral):where([data-theme~="dark"], [data-theme~="dark"] *) {
       --btn-color-disabled: var(--text-default-oncolor-disabled);
       // The alpha wash is an ONCOLOR treatment: the button sits on an arbitrary
       // brand fill, so any fixed neutral would fight it. Dark overrides the
@@ -435,7 +455,8 @@
 
   @at-root {
     .nds-btn.nds-oncolor.nds-destructive,
-    :where(:root[data-theme~="dark"]) .nds-btn.nds-destructive {
+    :where(:root[data-theme~="dark"]) .nds-btn.nds-destructive,
+    .nds-btn.nds-destructive:where([data-theme~="dark"], [data-theme~="dark"] *) {
       --btn-loading-color: var(--text-oncolor-primary);
       --btn-loading-track: var(--colors-alpha-white-20);
 
@@ -540,6 +561,11 @@
       mask: var(--nds-icon-more-horizontal) center / contain no-repeat;
       opacity: var(--nds-icons-opacity);
     }
+
+    // The dots only: while loading, ::after is the spinner.
+    &.nds-vertical:not(.nds-loading)::after {
+      rotate: 90deg;
+    }
   }
 
   // ==============================================
@@ -552,6 +578,7 @@
     position: relative;
     width: var(--_btn-after-size, var(--_btn-icon-size));
     height: var(--_btn-after-size, var(--_btn-icon-size));
+    flex-shrink: 0; // a squeezed button cuts its label, not the arrow
     background: currentColor;
     mask: var(--nds-icon-arrow-left-01) center / contain no-repeat;
     opacity: var(--nds-icons-opacity);
@@ -630,10 +657,13 @@
     width: var(--btn-size);
     --btn-padding: 0;
 
-    &.nds-menu-btn {
+    // A built-in icon is a second icon: widen to fit both, inset like the square's
+    // one. Minus the 1px border, so an arrow-only button stays square.
+    &:is(.nds-menu-btn, .nds-next, .nds-prev, .nds-up, .nds-down) {
       width: fit-content;
+      --btn-padding: calc((var(--_btn-size) - var(--_btn-icon-size)) / 2 - 1px);
     }
-    
+
   }
 
   &.nds-circle {
@@ -647,6 +677,15 @@
     height: var(--_btn-icon-size);
     font-size: var(--_btn-icon-size);
     line-height: var(--_btn-icon-size);
+  }
+
+  > .nds-avatar {
+    --avatar-size: var(--_btn-icon-size);
+  }
+
+  // A photo ignores the transparent text color that hides the content under the spinner.
+  &.nds-loading > .nds-avatar {
+    visibility: hidden;
   }
 
   // ==============================================
@@ -690,16 +729,9 @@
     --progress-color: var(--_btn-color);
     --_progress-size: var(--progress-size, calc(var(--btn-size) - 8px));
 
-    // Hide text/percentage display
+    // Hide text/percentage display; the fill itself is Progress's, from --progress-value
     .nds-progress-info {
       display: none !important;
-    }
-
-    // Progress circle SVG
-    svg circle.nds-progress-track {
-      // Static progress value (default)
-      stroke-dashoffset: calc((var(--progress-circumference, 62.83) - (var(--progress-circumference, 62.83) * min(var(--progress-value, 0), 100) / 100)) * 1px);
-      transition: stroke-dashoffset 0.3s ease;
     }
   }
 
@@ -710,12 +742,6 @@
       animation: button-progress-countdown linear forwards;
       animation-duration: var(--progress-duration, 4000ms);
     }
-  }
-
-  // On-color variant adjustments
-  &.nds-oncolor .nds-progress-circle {
-    --progress-track-color: var(--colors-alpha-white-20);
-    --progress-color: var(--text-oncolor-primary);
   }
 
   &:not(.nds-progress) .nds-progress-circle {
@@ -761,6 +787,7 @@
     line-height: normal;
     padding: var(--spacing-xs);
     pointer-events: none;
+    z-index: 1;
   }
 }
 
@@ -775,14 +802,32 @@
     --btn-group-radius: var(--radius-sm);
   }
 
+  // Opt-in: no divider between the buttons (the 1px seam stays, transparent, so widths hold).
+  &.nds-seamless .nds-btn {
+    --_btn-seam: transparent;
+  }
+
+  // The group fills its container and the buttons share the width equally.
+  &.nds-full {
+    width: 100%;
+
+    > .nds-btn {
+      flex: 1 1 0;
+    }
+  }
+
   // Stack down instead of across. The seam moves from the inline axis to the
   // block axis, so each rule below restores what the horizontal rule collapsed
   // and collapses its own axis — the rounded corners move from the two ends of
   // the row to the top and bottom of the column.
   &.nds-vertical {
     flex-direction: column;
+    // Every button takes the width of the widest one.
+    --btn-width: 100%;
 
     .nds-btn {
+      padding-block: var(--_btn-padding);
+
       &:not(:last-child) {
         border-inline-end-width: 1px;
         border-block-end-width: 0;
@@ -813,12 +858,12 @@
 // in either mode), falling back to the shared divider tint for solid secondary —
 // a 10% wash reads as an internal seam rather than an outer edge, and it stays
 // legible over the alpha fill secondary takes on a dark surface.
-.nds-btn-group:not(.nds-vertical) .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
-  border-inline-start-color: var(--btn-border, var(--divider-color));
+.nds-btn-group:not(.nds-vertical) .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child, #{$btn-disabled}) {
+  border-inline-start-color: var(--_btn-seam, var(--btn-border, var(--divider-color)));
 }
 
-.nds-btn-group.nds-vertical .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child, :disabled, [data-state~="disabled"], [aria-disabled="true"]) {
-  border-block-start-color: var(--btn-border, var(--divider-color));
+.nds-btn-group.nds-vertical .nds-btn:is(.nds-secondary, .nds-secondary-outline):not(:first-child, #{$btn-disabled}) {
+  border-block-start-color: var(--_btn-seam, var(--btn-border, var(--divider-color)));
 }
 
 // ==============================================

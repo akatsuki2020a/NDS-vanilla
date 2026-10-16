@@ -15,15 +15,9 @@
 //
 //   node scripts/check-filter-server-mode.mjs [baseUrl]
 // Defaults to the dev server. Start it with `bundle exec jekyll serve` if down.
-import puppeteer from 'puppeteer-core';
-import { existsSync } from 'node:fs';
+import { launch } from './lib/browser.mjs';
 
 const BASE = (process.argv[2] || 'http://localhost:4002/NDS-vanilla').replace(/\/$/, '');
-const CHROME = [
-    process.env.CHROME_PATH,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-].find((p) => p && existsSync(p));
 
 const probe = await fetch(`${BASE}/components/filter.html`).catch(() => null);
 if (!probe?.ok) {
@@ -31,13 +25,13 @@ if (!probe?.ok) {
     process.exit(2);
 }
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });
+const browser = await launch();
 const page = await browser.newPage();
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(String(e)));
 
-await page.goto(`${BASE}/components/filter.html`, { waitUntil: 'networkidle2' });
-await page.waitForFunction(() => window.NDS?.Filter?.init, { timeout: 20000 });
+await page.goto(`${BASE}/components/filter.html`, { waitUntil: 'networkidle' });
+await page.waitForFunction(() => window.NDS?.Filter?.init, null, { timeout: 20000 });
 
 const report = await page.evaluate(async () => {
     const findings = [];
@@ -134,7 +128,7 @@ const report = await page.evaluate(async () => {
     // Put sort state in the URL the way NDS.Sort does, so the run measures
     // whether ANY out-of-form param survives into the request instead of
     // inferring it from the fact that the query is built out of FormData.
-    history.replaceState({}, '', `${location.pathname}?sort=name&dir=asc`);
+    history.replaceState({}, '', `${location.pathname}?sort=name&order=asc`);
 
     f.submitForm();
     await settle();
@@ -173,7 +167,7 @@ const report = await page.evaluate(async () => {
     findings.push({ id: 'slider in request', detail: has('price') ? `yes (price=${req.get('price')})` : 'NO' });
     findings.push({ id: 'search in request', detail: has('search') ? `yes (search=${req.get('search')})` : 'NO' });
     findings.push({ id: 'slider thumbs have a name attribute', detail: thumbs.length ? thumbs.map((t) => t.name || '(none)').join(' / ') : 'no slider built' });
-    findings.push({ id: 'sort/dir from the URL in request', detail: has('sort') || has('dir') ? 'yes' : 'NO — dropped' });
+    findings.push({ id: 'sort/order from the URL in request', detail: has('sort') || has('order') ? 'yes' : 'NO — dropped' });
 
     // The general rule behind every "X is missing" row above: is the request
     // exactly FormData, nothing more? If so, no out-of-form state can ever ride

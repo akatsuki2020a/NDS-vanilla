@@ -35,7 +35,6 @@
     --_section-description-LH-base: var(--typo-text-lg-LH);
     --_section-description-LH: var(--section-description-LH, var(--_section-description-LH-base));
     --_section-description-MB: var(--section-description-MB, var(--spacing-2xl));
-    --_section-image-MB: var(--section-image-MB, var(--spacing-2xl));
 
     width: 100%;
     padding-block: var(--_section-padding-block-start) var(--_section-padding-block-end);
@@ -48,13 +47,11 @@
     position: relative;
     column-gap: var(--spacing-xl);
 
+    // Centered beside the image as a flex item, not a flex column: a flex
+    // container ignores float, which the head's float action needs.
     .nds-section-image~& {
-        display: flex;
         text-align: start;
-        align-items: flex-start;
-        justify-content: center;
-        gap: 0;
-        flex-direction: column;
+        align-self: center;
     }
 }
 
@@ -64,7 +61,7 @@
 :is(.nds-hero-section, .nds-content-section)>.nds-section-head~.nds-section-body {
     margin-block-start: var(--spacing-4xl);
 
-    .nds-content-layout.nds-cardView & {
+    .nds-content-layout.nds-card-view & {
         margin-block-start: var(--spacing-2xl);
     }
 }
@@ -79,7 +76,7 @@
 .nds-section-wrapper + .nds-section-body {
     margin-block-start: var(--spacing-4xl);
 
-    .nds-content-layout.nds-cardView & {
+    .nds-content-layout.nds-card-view & {
         margin-block-start: var(--spacing-2xl);
     }
 }
@@ -102,9 +99,9 @@
     font-weight: var(--font-weight-bold);
     letter-spacing: -0.02rem;
     margin-top: 0;
-    // No wrap: the text is one flex item, so wrapping drops an icon beside it
-    // onto a line of its own. Nowrap lets the text shrink and wrap inside
-    // itself while the icon stays put. .nds-center stacks via column instead.
+    // Each child is its own flex item, so a tag inside the title drops to a new
+    // line instead of squeezing beside the text.
+    flex-wrap: wrap;
     max-width: var(--paragraph-max-width);
 
     // Same escape the subtitle and description carry.
@@ -112,7 +109,7 @@
         max-width: none;
     }
 
-    .nds-center &,
+    :is(.nds-center, .nds-status-section) &,
     &.nds-center {
         flex-direction: column;
         gap: var(--spacing-xl);
@@ -120,6 +117,17 @@
         // word, so it stops tracking the title size. Re-declared rather than
         // given a -base: the section root already resolved the knob above.
         --_section-icon-size: var(--section-icon-size, 48px);
+
+        .nds-section-icon + * {
+            flex: initial;
+        }
+    }
+
+    // Zero basis always fits the row, so the text wraps beside the mark
+    // instead of wrapping below it.
+    .nds-section-icon + * {
+        flex: 1 1 0;
+        min-width: 0;
     }
 
     &:not(:last-child) {
@@ -230,7 +238,6 @@
     align-items: flex-end;
     line-height: 1;
     --btn-padding: var(--spacing-xs);
-    --btn-height: 24px;
 }
 
 /* ── Section action ── */
@@ -242,6 +249,19 @@
     align-items: center;
     gap: var(--spacing-sm);
     position: relative;
+}
+
+// In a body it sits among content, so it keeps a block's space.
+.nds-content-section .nds-section-body > .nds-section-action {
+    margin-block: var(--spacing-4xl);
+
+    &:first-child {
+        margin-block-start: 0;
+    }
+
+    &:last-child {
+        margin-block-end: 0;
+    }
 }
 
 /* ── Section wrapper ── */
@@ -294,7 +314,8 @@
 
 /* ── Centered layout ── */
 
-.nds-content-section.nds-center {
+.nds-content-section.nds-center,
+:is(.nds-hero-section, .nds-content-section).nds-status-section {
     >.nds-section-wrapper {
         flex-direction: column;
         align-items: center;
@@ -307,6 +328,8 @@
         flex-direction: column;
         align-items: center;
         width: 100%;
+        // Beats the start alignment a head takes after .nds-section-image.
+        text-align: center;
     }
 
     .nds-section-description {
@@ -336,7 +359,12 @@
     flex-wrap: wrap;
     --btn-width: 100%;
 
-    &.nds-rowView {
+    // The column aligns to the start, so a dropmenu stretches to fill it like the buttons.
+    &:not(.nds-horizontal) > .nds-dropmenu {
+        align-self: stretch;
+    }
+
+    &.nds-horizontal {
         flex-direction: row;
         --btn-width: unset;
     }
@@ -348,7 +376,7 @@
     --btn-width: unset;
 }
 
-:is(.nds-center, .nds-horizontal)>.nds-section-wrapper>.nds-section-head>.nds-section-action {
+:is(.nds-center, .nds-status-section, :is(.nds-hero-section, .nds-content-section).nds-horizontal)>.nds-section-wrapper>.nds-section-head>.nds-section-action {
     float: none;
     order: 1;
     margin-inline-start: 0;
@@ -388,31 +416,23 @@
 }
 
 /* ── Status section (an outcome message: not found, submitted, failed) ──
-   .nds-404 is the old name of this variant, kept so pages copied from the
-   previous 404 template keep working. Drop it at the next major. ── */
+   Its parts center through the centered-layout rules above. ── */
 
-:is(.nds-hero-section, .nds-content-section):is(.nds-404, .nds-status-section) {
-    max-height: unset;
+:is(.nds-hero-section, .nds-content-section).nds-status-section {
     --feedback-size: 56px;
     display: flex;
     align-items: center;
     flex: 1;
-
-    * {
-        text-align: center;
-        margin-inline: auto;
-        justify-content: center;
-        flex-direction: column;
-    }
-
-    .nds-section-action {
-        flex: 1;
-    }
 }
 
 /* ── Horizontal layout ── */
 
 @include desktop(min) {
+    // --gap does not inherit: hand the section's down to its wrapper.
+    :is(.nds-hero-section, .nds-content-section).nds-horizontal {
+        --_section-gap: var(--gap);
+    }
+
     :is(.nds-hero-section, .nds-content-section).nds-horizontal>.nds-section-wrapper {
 
         &:not(.nds-grid) {
@@ -421,7 +441,7 @@
         }
 
         align-items: center;
-        gap: var(--gap, var(--spacing-6xl));
+        gap: var(--gap, var(--_section-gap, var(--spacing-6xl)));
 
         .nds-section-action {
             --btn-width: fit-content;

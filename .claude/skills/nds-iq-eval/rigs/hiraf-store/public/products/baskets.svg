@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" role="img" aria-label="سلال وسعف">
+  <rect width="800" height="800" fill="#8a8d3b"/>
+  <path d="M200 300h400l-50 220H250z" fill="#fff" fill-opacity=".85"/><path d="M280 300c0-120 240-120 240 0" fill="none" stroke="#fff" stroke-width="22"/>
+  <text x="400" y="700" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-size="64" fill="#fff">سلال وسعف</text>
+</svg>

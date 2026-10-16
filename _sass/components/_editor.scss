@@ -51,12 +51,11 @@
     // pointer signals click-to-select over the surrounding text I-beam.
     img { max-inline-size: 100%; block-size: auto; cursor: pointer; }
 
-    // Click-to-select paints the native selection wash over the image —
-    // tone it to a brand tint: feedback stays, the heavy blue goes.
-    img::selection { background: color-mix(in srgb, var(--background-primary) 25%, transparent); }
+    // A selected image shows the focus ring below, not the selection wash.
+    img::selection { background: transparent; }
 
-    // Whole-selected component (click-select) — the selection wash only
-    // paints text runs, so textless atoms would show nothing; JS stamps
+    // Whole-selected component or image (click-select) — the selection wash
+    // only paints text runs, so textless atoms would show nothing; JS stamps
     // this ephemeral marker (sanitize keeps it out of the value) and the
     // system focus ring provides the feedback.
     [data-editor-selected] {
@@ -83,6 +82,9 @@
 
   // Pressed state for toolbar toggles — aria-pressed is standard ARIA; NDS buttons don't style it natively.
   .nds-toolbar .nds-btn[aria-pressed="true"] { background: var(--form-field-background-darker); }
+
+  // Disabled, the toolbar's buttons match the label, as a field's own buttons do (_forms.scss).
+  .nds-toolbar .nds-btn { --btn-color-disabled: var(--icon-default-disabled); }
 
   // Popover width via the dropmenu's own knob (the filter/date-picker
   // pattern); min() keeps it inside small viewports.
@@ -158,7 +160,8 @@
       block-size: 32px; // .nds-md --btn-size
       margin-block-start: var(--spacing-md);
       --nds-skeleton-width: 100%;
-      @include skeleton-bar;
+      @include skeleton-fill;
+      border-radius: var(--nds-skeleton-radius);
     }
 
     // The not-yet-adopted textarea IS the skeleton surface: the field box

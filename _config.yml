@@ -76,9 +76,9 @@ headerBrandH: 40
 
 # Brand Name
 brandName: "NDS" #comment this to remove text from brand
-brandNameColor: var(--text-display,#1f2a37)
+# brandNameColor: "#0a3d62" # optional; the CSS default is --text-display
 brandSlogan: Vanilla Design System
-brandSloganColor: var(--text-secondary-paragraph,#6c727e)
+# brandSloganColor: "#6c727e" # optional; the CSS default is --text-secondary-paragraph
 
 hero_image: assets/img/riyadhcenter_ai.webp
 hero_image_small: assets/img/riyadhcenter3s.webp
@@ -124,27 +124,6 @@ dga_registration_url: "#"
 # defaults to development, so the snippet never ships during local dev.
 google_analytics: "G-RP24HRW7CD"
 
-# Digital Stamp Content (multilingual)
-digital_stamp:
-  ar:
-    tab_text_lg: 'موقع إلكتروني حكومي مسجل لدى هيئة الحكومة الرقمية.'
-    tab_text_sm: 'موقع حكومي مسجل لدى هيئة الحكومة الرقمية'
-    tab_verify_text: 'كيف تتحقق؟'
-    domain_title: 'روابط المواقع الالكترونية الرسمية السعودية تنتهي بـ <span class="nds-digitalStamp-highlight">gov.sa</span>'
-    domain_desc: 'جميع روابط المواقع الرسمية التابعة للجهات الحكومية في المملكة العربية السعودية تنتهي بـ .gov.sa'
-    https_title: 'المواقع الالكترونية الحكومية تستخدم بروتوكول <span class="nds-digitalStamp-highlight">HTTPS</span> للتشفير و الأمان.'
-    https_desc: 'المواقع الالكترونية الآمنة في المملكة العربية السعودية تستخدم بروتوكول HTTPS للتشفير.'
-    register_text: 'مسجل لدى هيئة الحكومة الرقمية برقم:'
-  en:
-    tab_text_lg: 'A government website registered with the Digital Government Authority.'
-    tab_text_sm: 'Government website registered with DGA'
-    tab_verify_text: 'How you know?'
-    domain_title: 'Official Saudi Government website URL ends with <span class="nds-digitalStamp-highlight">gov.sa</span>'
-    domain_desc: 'Website belongs to an official government organization in the Kingdom of Saudi Arabia always ends with .gov.sa .'
-    https_title: 'Official Secure websites use <span class="nds-digitalStamp-highlight">HTTPS</span>'
-    https_desc: 'Secured governments websites in the Kingdom of Saudi Arabia use Https encryption.'
-    register_text: 'Registered on Digital Government Authority:'
-
 # Default navigation data files
 mainnav: mainnav
 sidemenu: sidemenu
@@ -179,6 +158,8 @@ exclude:
   - EDITORIAL.md
   - TODO.md
   - DEPRECATIONS.md
+  - NDS-INDEX.md
+  - plans
   - .claude
   - .github
   - package.json
@@ -193,5 +174,6 @@ exclude:
   - CODE_OF_CONDUCT.md
   - SECURITY.md
   - CHANGELOG.md
+  - CHANGELOG-v1.md
   - LICENSE
 

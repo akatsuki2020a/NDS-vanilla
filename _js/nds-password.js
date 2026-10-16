@@ -1,6 +1,8 @@
 /* NDS.Password — public surface
  * Rides: nds-forms (setCustomValidity gates submit; soft. .nds-toggle-password is
  *        wired by Forms — see initPasswordToggle. This component only owns rules + match.)
+ * Requires:
+ *   .nds-password needs [data-rule], [data-password-match] — no rule is checked
  * Methods:
  *   NDS.Password.init() / .reinit()   scan + wire every .nds-password container
  *   NDS.Password.create(el)           wire one — pass the .nds-form-container
@@ -27,8 +29,8 @@
  *                                data-permanent, so Forms hides them while a
  *                                validation message holds that slot and restores
  *                                them once it clears — message and rules never
- *                                show at once, which is also why a chip can never
- *                                sit under the container's error tint.
+ *                                show at once. A chip under the error outline is
+ *                                always success or error itself, never neutral.
  *   [data-rule="length|upper|lower|digit|special|match"]   on feedback chips inside
  *                                the container — data-status is toggled
  *                                neutral/success/error per keystroke. "match" needs
@@ -55,11 +57,12 @@
  *     inert: stays neutral, not counted, no gate. Rules resolve per keystroke, so a
  *     late addRule() activates its chips on the next input — no rewire needed.
  *   - Match mode resolves data-password-match at init. A source input that hydrates
- *     later needs a NDS.Password.reinit() (or a targeted create() on the confirm
- *     container).
- *   - Rules and match on the SAME container are allowed: the mismatch message wins the
- *     customValidity slot, being the one specific cause. The chips already name which
- *     rules failed, so the catch-all "does not meet the rules" is the redundant one.
+ *     later needs destroy() then create() on the confirm container — reinit() and
+ *     create() skip a container that already started.
+ *   - allPass is false on an empty field and on a mismatch, chips or not.
+ *   - A failing chip blocks the submit with a blank customValidity, so Forms outlines the
+ *     field and the red chips stay in view. Only a match-only field (no match chip) shows
+ *     the mismatch message.
  */
 (function () {
     'use strict';
@@ -97,19 +100,11 @@
         return RULES[chip.getAttribute('data-rule')] || null;
     }
 
-    var STRINGS = {
-        en: {
-            weak: 'This password does not meet the rules',
-            mismatch: 'The two passwords do not match',
-            met: function (n, total) { return n + ' of ' + total + ' password rules met'; }
-        },
-        ar: {
-            weak: 'كلمة المرور لا تستوفي الشروط',
-            mismatch: 'كلمتا المرور غير متطابقتين',
-            met: function (n, total) { return 'تم استيفاء ' + n + ' من ' + total + ' من شروط كلمة المرور'; }
-        }
-    };
-    var S = function () { return STRINGS[NDS.langKey]; };
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    var strings = NDS.i18n.strings('password', {
+        mismatch: 'The two passwords do not match',
+        met: '{n} of {total} password rules met',
+    });
 
     class NDSPassword {
         constructor(container) {
@@ -211,22 +206,23 @@
                 if (pass) passing += 1;
             });
 
-            var allPass = active === 0 || passing === active;
-            if (active) this.container.setAttribute('data-password-strength', passing);
-
-            // customValidity precedence: mismatch first — it names the one exact cause,
-            // while "does not meet the rules" is a catch-all the chips already detail.
-            // Nothing fires on an empty field: required owns that message.
             // Same condition the match rule tests, so chip and message never disagree.
             var mismatched = matchValue !== null && matchValue !== value;
+            // A match-only field has no chips to count, so the mismatch decides it.
+            var allPass = !!value && !mismatched && passing === active;
+            if (active) this.container.setAttribute('data-password-strength', passing);
+
+            // A red chip already names the cause, so the block is blank (' ': Forms shows no
+            // message). Only a mismatch with no match chip needs words.
+            // Nothing fires on an empty field: required owns that message.
             var msg = '';
-            if (value) msg = mismatched ? S().mismatch : (allPass ? '' : S().weak);
+            if (value && !allPass) msg = mismatched && !('match' in results) ? strings.text('mismatch') : ' ';
             this.input.setCustomValidity(msg);
 
             // Announce the error, else progress. Empty field says nothing — otherwise
             // every page load would announce "0 of 6 rules met".
             if (this.statusEl) {
-                this._announce(value ? (msg || (active ? S().met(passing, active) : '')) : '');
+                this._announce(value ? (msg.trim() || (active ? strings.text('met', { n: passing, total: active }) : '')) : '');
             }
 
             // No raw value in the detail — a listener that needs it reads the input.
@@ -255,7 +251,7 @@
 
     function initializePasswords() {
         document.querySelectorAll('.nds-form-container.nds-password').forEach(function (el) {
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
             if (el.hasAttribute('data-nds-password-initialized')) return;
             new NDSPassword(el);
         });

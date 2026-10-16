@@ -198,8 +198,25 @@
                 font-size: var(--typo-text-sm-FS);
                 line-height: var(--typo-text-sm-LH);
                 font-weight: var(--font-weight-medium);
+                // One line: the base ends in an ellipsis, the extension stays whole.
                 display: flex;
-                align-items: center;
+                white-space: nowrap;
+
+                .nds-file-base {
+                    min-width: 0;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .nds-file-ext { flex: none; }
+            }
+
+            .nds-file-size {
+                color: var(--text-primary-paragraph);
+                font-size: var(--typo-text-xs-FS);
+                line-height: var(--typo-text-xs-LH);
+
+                &:empty { display: none; }
             }
         }
 

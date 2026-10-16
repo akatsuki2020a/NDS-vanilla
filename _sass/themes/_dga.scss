@@ -64,8 +64,6 @@
     --colors-tertiary-800: #3d1d5e;
     --colors-tertiary-900: #281047;
     --colors-tertiary-950: #16072e;
-    --colors-tertiary-alpha-10: #80519f19;
-    --colors-tertiary-alpha-20: #80519f33;
     
     // ── Brand slot: neutral ──
     --colors-neutral-25: #fcfcfd;
@@ -77,9 +75,9 @@
     --colors-neutral-500: #6c727e;
     --colors-neutral-600: #4d5761;
     --colors-neutral-700: #384250;
-    --colors-neutral-750: #2b3643;
+    --colors-neutral-750: #2b3643; // NDS-added, not DGA: dark-mode contrast step (midpoint 700/800)
     --colors-neutral-800: #1f2a37;
-    --colors-neutral-850: #18212f;
+    --colors-neutral-850: #18212f; // NDS-added, not DGA: dark-mode contrast step (midpoint 800/900)
     --colors-neutral-900: #111927;
     --colors-neutral-950: #0c111b;
 
@@ -128,6 +126,8 @@
     --colors-blue-800: #1849a9;
     --colors-blue-900: #194084;
     --colors-blue-950: #102a56;
+    --colors-blue-alpha-10: #156fee19;
+    --colors-blue-alpha-20: #156fee33;
 
     // ── Status: green ──
     --colors-green-25: #f6fef9;
@@ -142,6 +142,8 @@
     --colors-green-800: #085d3a;
     --colors-green-900: #074c30;
     --colors-green-950: #053321;
+    --colors-green-alpha-10: #06945419;
+    --colors-green-alpha-20: #06945433;
 
     // ── Status: yellow ──
     --colors-yellow-25: #fffcf5;
@@ -156,6 +158,8 @@
     --colors-yellow-800: #93370c;
     --colors-yellow-900: #7a2e0e;
     --colors-yellow-950: #4e1d09;
+    --colors-yellow-alpha-10: #dc680319;
+    --colors-yellow-alpha-20: #dc680333;
 
     // ── Status: red ──
     --colors-red-25: #fffbfa;
@@ -170,4 +174,6 @@
     --colors-red-800: #912018;
     --colors-red-900: #7a2619;
     --colors-red-950: #54150c;
+    --colors-red-alpha-10: #d92c2019;
+    --colors-red-alpha-20: #d92c2033;
 }

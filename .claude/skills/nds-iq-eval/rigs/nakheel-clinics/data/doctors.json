@@ -1,0 +1,440 @@
+[
+  {
+    "id": 1,
+    "name": "Dr. Khalid Al-Otaibi",
+    "title": "Consultant Family Physician",
+    "specialty": "Family Medicine",
+    "clinic_id": 1,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 14,
+    "bio": "Dr. Khalid leads family care at the Al-Malqa branch. He focuses on long-term conditions such as diabetes and high blood pressure, and on keeping routine check-ups simple for busy families.",
+    "education": [
+      "MBBS, King Saud University",
+      "Saudi Board in Family Medicine",
+      "Fellowship in Chronic Disease Management, Toronto"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 2,
+    "name": "Dr. Noura Al-Qahtani",
+    "title": "Family Medicine Specialist",
+    "specialty": "Family Medicine",
+    "clinic_id": 1,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 8,
+    "bio": "Dr. Noura treats patients of every age, with a special interest in women's health and preventive screening.",
+    "education": [
+      "MBBS, Princess Nourah University",
+      "Arab Board in Family Medicine"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 3,
+    "name": "Dr. Faisal Al-Dosari",
+    "title": "Consultant Family Physician",
+    "specialty": "Family Medicine",
+    "clinic_id": 2,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 12,
+    "bio": "Dr. Faisal sees adults and teenagers for everyday illness, vaccinations and annual health reviews.",
+    "education": [
+      "MBBS, King Faisal University",
+      "Saudi Board in Family Medicine"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 4,
+    "name": "Dr. Hanan Bakr",
+    "title": "Family Medicine Specialist",
+    "specialty": "Family Medicine",
+    "clinic_id": 3,
+    "languages": [
+      "Arabic",
+      "English",
+      "Urdu"
+    ],
+    "years": 9,
+    "bio": "Dr. Hanan has worked in Jeddah for nine years and runs the weight and nutrition follow-up programme at the branch.",
+    "education": [
+      "MBBS, King Abdulaziz University",
+      "Arab Board in Family Medicine",
+      "Diploma in Clinical Nutrition"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 5,
+    "name": "Dr. Abdullah Al-Mutairi",
+    "title": "Family Medicine Specialist",
+    "specialty": "Family Medicine",
+    "clinic_id": 4,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 7,
+    "bio": "Dr. Abdullah provides primary care for families in Dammam and coordinates referrals to the other clinics in the group.",
+    "education": [
+      "MBBS, Imam Abdulrahman bin Faisal University",
+      "Saudi Board in Family Medicine"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 6,
+    "name": "Dr. Sara Al-Shehri",
+    "title": "Consultant Pediatrician",
+    "specialty": "Pediatrics",
+    "clinic_id": 5,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 15,
+    "bio": "Dr. Sara has cared for newborns and young children for fifteen years. She runs the vaccination and growth-monitoring service at Al-Malqa.",
+    "education": [
+      "MBBS, King Saud University",
+      "Saudi Board in Pediatrics",
+      "Fellowship in Neonatology, London"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 7,
+    "name": "Dr. Omar Hamdan",
+    "title": "Pediatric Specialist",
+    "specialty": "Pediatrics",
+    "clinic_id": 5,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 6,
+    "bio": "Dr. Omar treats childhood asthma, allergies and recurrent infections.",
+    "education": [
+      "MBBS, University of Jordan",
+      "Jordan Board in Pediatrics"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 8,
+    "name": "Dr. Maha Al-Zahrani",
+    "title": "Consultant Pediatrician",
+    "specialty": "Pediatrics",
+    "clinic_id": 6,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 11,
+    "bio": "Dr. Maha follows children from birth to adolescence and gives parents clear, practical advice on feeding and sleep.",
+    "education": [
+      "MBBS, King Saud University",
+      "Saudi Board in Pediatrics"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 9,
+    "name": "Dr. Yousef Al-Ghamdi",
+    "title": "Pediatric Specialist",
+    "specialty": "Pediatrics",
+    "clinic_id": 7,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 8,
+    "bio": "Dr. Yousef is the pediatrician at the Al-Rawdah branch and leads the school-age health check programme.",
+    "education": [
+      "MBBS, Umm Al-Qura University",
+      "Arab Board in Pediatrics"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 10,
+    "name": "Dr. Lama Al-Harthi",
+    "title": "Consultant Dermatologist",
+    "specialty": "Dermatology",
+    "clinic_id": 8,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 13,
+    "bio": "Dr. Lama treats acne, eczema and pigmentation, and performs laser procedures at the Al-Malqa clinic.",
+    "education": [
+      "MBBS, King Saud University",
+      "Saudi Board in Dermatology",
+      "Fellowship in Laser Dermatology, Seoul"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 11,
+    "name": "Dr. Tariq Nasser",
+    "title": "Dermatology Specialist",
+    "specialty": "Dermatology",
+    "clinic_id": 8,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 7,
+    "bio": "Dr. Tariq has a special interest in hair and scalp conditions and in skin checks for adults.",
+    "education": [
+      "MBBS, Cairo University",
+      "Arab Board in Dermatology"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 12,
+    "name": "Dr. Rania Fouad",
+    "title": "Dermatology Specialist",
+    "specialty": "Dermatology",
+    "clinic_id": 9,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 10,
+    "bio": "Dr. Rania treats common skin conditions in adults and children and offers a monthly skin-check day.",
+    "education": [
+      "MBBS, Alexandria University",
+      "Saudi Board in Dermatology"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 13,
+    "name": "Dr. Saud Al-Anazi",
+    "title": "Consultant Dermatologist",
+    "specialty": "Dermatology",
+    "clinic_id": 10,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 16,
+    "bio": "Dr. Saud has sixteen years of experience in medical and cosmetic dermatology and trains junior doctors in the group.",
+    "education": [
+      "MBBS, King Faisal University",
+      "Saudi Board in Dermatology"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 14,
+    "name": "Dr. Dalal Al-Subaie",
+    "title": "Consultant Dentist",
+    "specialty": "Dentistry",
+    "clinic_id": 11,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 12,
+    "bio": "Dr. Dalal leads the dental team at Al-Malqa. She focuses on restorative treatment and on making first visits calm for nervous patients.",
+    "education": [
+      "BDS, King Saud University",
+      "Master of Restorative Dentistry, Manchester"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 15,
+    "name": "Dr. Majed Al-Rashid",
+    "title": "Orthodontist",
+    "specialty": "Dentistry",
+    "clinic_id": 11,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 9,
+    "bio": "Dr. Majed fits braces and clear aligners for teenagers and adults.",
+    "education": [
+      "BDS, King Saud University",
+      "Saudi Board in Orthodontics"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 16,
+    "name": "Dr. Ahmed Kamal",
+    "title": "Dental Specialist",
+    "specialty": "Dentistry",
+    "clinic_id": 12,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 8,
+    "bio": "Dr. Ahmed provides fillings, root canal treatment and routine cleaning at the Al-Nakheel branch.",
+    "education": [
+      "BDS, Ain Shams University",
+      "Arab Board in Endodontics"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 17,
+    "name": "Dr. Reem Al-Juhani",
+    "title": "Dental Specialist",
+    "specialty": "Dentistry",
+    "clinic_id": 13,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 6,
+    "bio": "Dr. Reem is the general dentist for the Dammam branch and sees both adults and children.",
+    "education": [
+      "BDS, Imam Abdulrahman bin Faisal University"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 18,
+    "name": "Dr. Waleed Al-Sudairi",
+    "title": "Consultant Cardiologist",
+    "specialty": "Cardiology",
+    "clinic_id": 14,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 18,
+    "bio": "Dr. Waleed has eighteen years of experience in heart disease prevention and echocardiography. He heads the cardiology service for the group.",
+    "education": [
+      "MBBS, King Saud University",
+      "Saudi Board in Cardiology",
+      "Fellowship in Echocardiography, Boston"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 19,
+    "name": "Dr. Huda Al-Jabri",
+    "title": "Cardiology Specialist",
+    "specialty": "Cardiology",
+    "clinic_id": 14,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 9,
+    "bio": "Dr. Huda follows patients with high blood pressure and rhythm problems, and runs the cardiac rehabilitation sessions.",
+    "education": [
+      "MBBS, King Abdulaziz University",
+      "Arab Board in Cardiology"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 20,
+    "name": "Dr. Basem Idris",
+    "title": "Consultant Cardiologist",
+    "specialty": "Cardiology",
+    "clinic_id": 15,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 14,
+    "bio": "Dr. Basem sees patients in Jeddah for chest pain, palpitations and heart check-ups before surgery.",
+    "education": [
+      "MBBS, Damascus University",
+      "Arab Board in Cardiology"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 21,
+    "name": "Dr. Nasser Al-Khaldi",
+    "title": "Consultant Orthopedic Surgeon",
+    "specialty": "Orthopedics",
+    "clinic_id": 16,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 17,
+    "bio": "Dr. Nasser treats knee and hip problems and plans joint replacement for patients who need it.",
+    "education": [
+      "MBBS, King Saud University",
+      "Saudi Board in Orthopedic Surgery",
+      "Fellowship in Joint Replacement, Sydney"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 22,
+    "name": "Dr. Amal Al-Tamimi",
+    "title": "Orthopedic Specialist",
+    "specialty": "Orthopedics",
+    "clinic_id": 16,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 8,
+    "bio": "Dr. Amal treats fractures, shoulder pain and sports injuries and guides patients through physiotherapy.",
+    "education": [
+      "MBBS, Princess Nourah University",
+      "Arab Board in Orthopedics"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 23,
+    "name": "Dr. Ibrahim Al-Shammari",
+    "title": "Orthopedic Specialist",
+    "specialty": "Orthopedics",
+    "clinic_id": 17,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 10,
+    "bio": "Dr. Ibrahim is the orthopedic specialist in Dammam, with a focus on spine and back pain.",
+    "education": [
+      "MBBS, King Faisal University",
+      "Saudi Board in Orthopedic Surgery"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  },
+  {
+    "id": 24,
+    "name": "Dr. Layla Al-Mansour",
+    "title": "Sports Medicine Consultant",
+    "specialty": "Orthopedics",
+    "clinic_id": 18,
+    "languages": [
+      "Arabic",
+      "English"
+    ],
+    "years": 11,
+    "bio": "Dr. Layla treats athletes and active adults, from muscle strains to ligament injuries, and designs recovery plans.",
+    "education": [
+      "MBBS, King Saud University",
+      "Fellowship in Sports Medicine, Melbourne"
+    ],
+    "photo": "/img/doctors/placeholder.svg"
+  }
+]

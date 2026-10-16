@@ -1,0 +1,57 @@
+/* Al-Nakheel Clinics: site styles on top of NDS */
+
+/* brand wants squarer buttons and a bigger hero title */
+.nds-btn {
+  border-radius: 4px;
+}
+
+.nds-hero-section .nds-section-title {
+  font-size: 44px;
+}
+
+/* Clinics list */
+.clinic-count {
+  margin: 0 0 var(--spacing-lg);
+  color: var(--text-secondary-paragraph, #6c727e);
+}
+
+.nds-clinic-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  border: 1px solid var(--border-neutral-primary, #d2d6db);
+  border-radius: var(--radius-md);
+  background: var(--background-card, #fff);
+}
+
+.nds-clinic-card h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.nds-clinic-card h3 a {
+  color: var(--text-primary, #166a45);
+  text-decoration: none;
+}
+
+.nds-clinic-card h3 a:hover {
+  text-decoration: underline;
+}
+
+.nds-clinic-card p {
+  margin: 0;
+  color: var(--text-secondary-paragraph, #6c727e);
+}
+
+.nds-clinic-card span {
+  color: #b7791f;
+  font-weight: 600;
+}
+
+/* Appointments */
+#appointmentsTable td:last-child {
+  text-align: end;
+  white-space: nowrap;
+}

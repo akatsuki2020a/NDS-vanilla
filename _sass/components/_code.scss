@@ -44,7 +44,7 @@ $prose-langs: '.lang-markdown, .lang-md, .language-markdown, .language-md, .lang
     min-height: unset;
   }
 
-  .nds-tab-panel.code-example {
+  .nds-tab-panel {
     padding: 0;
   }
 
@@ -250,6 +250,12 @@ $prose-langs: '.lang-markdown, .lang-md, .language-markdown, .language-md, .lang
   &:is(.lang-js, .lang-javascript, .language-js, .language-javascript) {
     color: var(--_syntax-keyword);
   }
+
+  // In a table a value never splits at its hyphens; the table wrapper scrolls
+  // instead. Not in prose, where a long value would push the page sideways.
+  :is(.nds-table, table) & {
+    white-space: nowrap;
+  }
 }
 
 .nds-code {
@@ -276,6 +282,18 @@ $prose-langs: '.lang-markdown, .lang-md, .language-markdown, .language-md, .lang
   .nds-syntax-comment {
     color: var(--_syntax-comment);
     font-style: italic;
+  }
+
+  // The color swatch before a CSS color value: empty, so copy and selection skip it.
+  .nds-code-swatch {
+    display: inline-block;
+    inline-size: 0.75em;
+    block-size: 0.75em;
+    margin-inline-end: 0.35em;
+    border-radius: var(--radius-xs);
+    box-shadow: inset 0 0 0 1px var(--border-neutral-secondary);
+    vertical-align: -0.05em;
+    user-select: none;
   }
 }
 

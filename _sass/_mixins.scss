@@ -5,6 +5,7 @@
 
 @use "sass:math";
 @use "sass:map";
+@use "sass:selector";
 
 // ==============================================
 // BREAKPOINTS
@@ -97,14 +98,33 @@ $breakpoints-range: (
 }
 
 // ==============================================
+// LINK COLORS
+// ==============================================
+
+// One link color family (primary, neutral, oncolor) for every state. Set on a link,
+// or on a host whose links take that family.
+@mixin link-colors($family) {
+  --link-color: var(--link-#{$family});
+  --link-hover: var(--link-#{$family}-hovered);
+  --link-pressed: var(--link-#{$family}-pressed);
+  --link-focused: var(--link-#{$family}-focused);
+  --link-visited: var(--link-#{$family}-visited);
+}
+
+// ==============================================
 // DARK MODE
 // ==============================================
+
+// A dark area (data-theme="dark" on any element) matches the element itself and
+// everything inside it, at the same specificity as page dark mode.
+$dark-area: ':is([data-theme~="dark"]:not(:root), [data-theme~="dark"]:not(:root) *)';
 
 @mixin dark {
   @at-root {
     @each $selector in & {
 
-      :root[data-theme~="dark"] #{$selector} {
+      :root[data-theme~="dark"] #{$selector},
+      #{selector.unify($selector, $dark-area)} {
         @content;
       }
     }
@@ -145,6 +165,17 @@ $breakpoints-range: (
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+// A popup NDS.topLayer shows as a [popover]: undo the browser's popover box (centred,
+// inset 0, its own overflow and colours) so the component's placement and look apply.
+// Absolute: in the top layer the page is its containing block, so page scroll carries it.
+@mixin top-layer {
+  position: absolute;
+  inset: auto;
+  margin: 0;
+  overflow: visible;
+  color: inherit;
 }
 
 
@@ -208,8 +239,10 @@ $breakpoints-range: (
   --_btn-loading-track: var(--btn-loading-track, var(--colors-alpha-black-10));
   --_btn-size: var(--btn-size, 40px);
   --_btn-height: var(--btn-height, var(--_btn-size));
-  --_btn-height-min: var(--btn-height-min, fit-content);
-  --_btn-width: var(--btn-width, auto);
+  // Floored at the button's own size, so an auto/100% height never shrinks it; one
+  // content line (+ 1px border each side) still grows it with the text scale.
+  --_btn-height-min: var(--btn-height-min, max(var(--_btn-size), var(--_btn-LH) + 2px, var(--_btn-icon-size) + 2px));
+  --_btn-width: var(--btn-width, fit-content);
   --_btn-gap: var(--btn-gap, var(--spacing-xs));
   --_btn-padding-default: calc((var(--_btn-size) - 8px) / 2);
   --_btn-padding: var(--btn-padding, var(--_btn-padding-default));
@@ -291,6 +324,11 @@ $breakpoints-range: (
     --btn-radius: 0;
     position: relative;
     z-index: 1;
+
+    // The strip owns the corners: a circle would round every seam.
+    &.nds-circle {
+      border-radius: 0;
+    }
 
     &:not(:last-child) {
       border-inline-end-width: 0;
@@ -418,7 +456,7 @@ $breakpoints-range: (
       line-height: normal;
     }
     .nds-progress-of {
-      font-size: clamp(14px, calc(var(--_progress-size, #{$size}) * 0.1 + 4px), 30px);
+      font-size: clamp(12px, calc(var(--_progress-size, #{$size}) * 0.1 + 4px), 30px);
       line-height: normal;
     }
     .nds-progress-text {
@@ -465,13 +503,30 @@ $breakpoints-range: (
 }
 
 // Paint a text element as a skeleton bar — fill + radius, descendants'
-// text hidden too.
+// text hidden too, and its pseudos (a required star, a divider rule) keep
+// their space unseen. Not for a pseudo-element itself: use skeleton-fill.
 @mixin skeleton-bar {
   @include skeleton-fill;
   border-radius: var(--nds-skeleton-radius);
 
   >* {
     color: transparent;
+  }
+
+  &::before,
+  &::after {
+    opacity: 0;
+  }
+}
+
+// On the element that carries .nds-loading, for a component that draws its own
+// skeleton: the skeleton is the feedback, so the spinner and the child dim go.
+// Clicks stay blocked by the base rule.
+@mixin loading-skeleton-host {
+  --_loading-opacity: 1;
+
+  &::after {
+    content: none;
   }
 }
 

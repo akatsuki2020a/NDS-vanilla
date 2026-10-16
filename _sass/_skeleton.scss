@@ -51,11 +51,13 @@ html {
             display: flex;
             flex-direction: column;
             gap: 2px;
-            font-size: var(--typo-text-clamp-md-FS);
+            font-size: max(var(--typo-text-clamp-md-FS), var(--typo-text-sm-FS));
             line-height: var(--typo-text-clamp-md-LH);
+            color: var(--text-display);
 
             :where(.nds-brand-slogan) {
                 display: block;
+                color: var(--text-secondary-paragraph);
                 font-size: var(--typo-text-sm-FS);
                 line-height: var(--typo-text-sm-LH);
                 font-weight: 400;
@@ -93,7 +95,7 @@ html {
         width: 100%;
 
         @include desktop(min) {
-            &:where(.nds-wSideMenu) {
+            &:where(.nds-has-sidemenu) {
                 grid-template-columns: var(--nds-sidemenu-width) 1fr;
             }
         }
@@ -168,9 +170,8 @@ html:not([data-nds-loaded]) :where(.nds-form-control,
 
 /* Icon gate (initial 0) lives in fold; the reveal (→ 1) is the :root block of
    _sass/_icons.scss, so it lands in the nds-icons sheet's own style pass.
-   HGI font gate (initial 0) lives in fold; the reveal
-   (data-nds-fonts-loaded~="hgi-stroke-rounded" → 1) lives in
-   _sass/_hgiRoundedStroke.scss. */
+   Content icons need no gate: until their font lands they render the hgi-blank
+   fallback (_fonts-hgi-blank.scss), an invisible box of their final size. */
 
 /* ── Filterable / paged content hold ──
    Filter + pagination are delegated — they init after the reveal, so their
@@ -273,10 +274,13 @@ tbody[data-filter-items]:not([data-nds-filter-initialized], .nds-paged-content) 
     --nds-skeleton-angle: 270deg;
 }
 
-:root[data-theme~="dark"] {
+:root[data-theme~="dark"],
+[data-theme~="dark"]:not(:root) {
     --nds-skeleton-stops: rgba(77, 87, 97, 0.2) 0%,
         rgba(108, 114, 126, 0.2) 50%,
         rgba(157, 164, 174, 0.2) 100%;
+    // Re-declared so a dark area resolves it with its own stops.
+    --nds-skeleton-fill: linear-gradient(var(--nds-skeleton-angle), var(--nds-skeleton-stops));
     --nds-skeleton-solid: rgba(108, 114, 126, 0.2);
 }
 
@@ -327,7 +331,7 @@ tbody[data-filter-items]:not([data-nds-filter-initialized], .nds-paged-content) 
    .nds-full-width / .nds-max-width descendants inherit (0,2,0), matching
    the specificity main-CSS rules expect when adjusting these knobs. */
 :is(.nds-content-wrapper, .nds-hero-section, .nds-content-section) {
-    --_wrapper-padding: max(var(--nds-viewport-padding), calc((100% - var(--nds-content-MaxWidth)) / 2));
+    --_wrapper-padding: max(var(--nds-viewport-padding), calc((100% - var(--nds-content-max-width)) / 2));
     width: 100%;
     padding-inline: var(--_wrapper-padding);
 
@@ -336,9 +340,16 @@ tbody[data-filter-items]:not([data-nds-filter-initialized], .nds-paged-content) 
         margin-inline: calc(50% - 50vw);
     }
 
+    // Full gutter while the section is narrower than the max width (runs to the
+    // screen edge); eases to half a gutter past it, so it never exceeds max width + one gutter.
     .nds-max-width {
-        margin-inline: calc(var(--_wrapper-padding) * -1);
+        margin-inline: calc(min(var(--_wrapper-padding), (var(--nds-content-max-width) + var(--_wrapper-padding) - 100%) / 2) * -1);
     }
+}
+
+// MaxWidth 100% re-resolves against the body itself, so the cap never applies here.
+body.nds-full-width :is(.nds-content-wrapper, .nds-hero-section, .nds-content-section) .nds-max-width {
+    margin-inline: calc(var(--_wrapper-padding) * -1);
 }
 
 /* ── Nav background + shadow ──

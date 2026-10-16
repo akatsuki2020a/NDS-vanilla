@@ -1,5 +1,4 @@
 ---
-exclude_showcase: true
 layout: page
 title: KPIs Template
 hero_style: ""
@@ -13,7 +12,7 @@ direction: ltr
 sidemenu_mode: false
 ---
 <!-- Section 1: Portal Performance Statistics -->
-<section id="portalStats" class="nds-content-section">
+<section id="portal-stats" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">
@@ -26,7 +25,7 @@ sidemenu_mode: false
             <!-- KPI tiles -->
             <div class="nds-block">
             <div class="nds-grid" style="--max-col:4; --min-col:2;">
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -36,12 +35,12 @@ sidemenu_mode: false
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-text">
-                            <span class="nds-card-number nds-counter-value nds-number-format nds-md" data-target="543210">0</span>
+                            <span class="nds-card-number nds-md" data-counter="543210">0</span>
                             <p class="nds-card-description">Users</p>
                         </div>
                     </div>
                 </div>
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -51,12 +50,12 @@ sidemenu_mode: false
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-text">
-                            <span class="nds-card-number nds-counter-value nds-number-format nds-md" data-target="876543">0</span>
+                            <span class="nds-card-number nds-md" data-counter="876543">0</span>
                             <p class="nds-card-description">Visits</p>
                         </div>
                     </div>
                 </div>
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -66,12 +65,12 @@ sidemenu_mode: false
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-text">
-                            <span class="nds-card-number nds-counter-value nds-number-format nds-md" data-target="1234567">0</span>
+                            <span class="nds-card-number nds-md" data-counter="1234567">0</span>
                             <p class="nds-card-description">Page Views Count</p>
                         </div>
                     </div>
                 </div>
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -312,7 +311,7 @@ sidemenu_mode: false
 </section>
 
 <!-- Section 3: Service Performance Statistics -->
-<section id="serviceStats" class="nds-content-section">
+<section id="service-stats" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">
@@ -325,7 +324,7 @@ sidemenu_mode: false
             <!-- KPI tiles -->
             <div class="nds-block">
             <div class="nds-grid" style="--max-col:4; --min-col:2;">
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -340,7 +339,7 @@ sidemenu_mode: false
                         </div>
                     </div>
                 </div>
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -355,7 +354,7 @@ sidemenu_mode: false
                         </div>
                     </div>
                 </div>
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -370,7 +369,7 @@ sidemenu_mode: false
                         </div>
                     </div>
                 </div>
-                <div class="nds-card nds-shadow nds-statistic">
+                <div class="nds-card nds-shadow nds-center">
                     <div class="nds-card-header">
                         <div class="nds-card-featured-icon">
                             <span class="nds-featured-icon nds-circle nds-xl">
@@ -380,7 +379,7 @@ sidemenu_mode: false
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-text">
-                            <span class="nds-card-number nds-counter-value nds-number-format nds-md" data-target="458200">0</span>
+                            <span class="nds-card-number nds-md" data-counter="458200">0</span>
                             <p class="nds-card-description">Total Transactions</p>
                         </div>
                     </div>

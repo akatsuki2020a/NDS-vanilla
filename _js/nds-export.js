@@ -2,6 +2,9 @@
  * Rides: nds-tables (the table adapter reads the header and body through getCellText;
  *        soft) · nds-pagination (a paged list still exports every page; soft)
  *      · nds-filter (rows the filter removed are left out; soft)
+ *      · nds-selection (NDS.Selection.isSelected decides the selected scope; init() loads it)
+ * Requires:
+ *   [data-export] is [data-export="csv"], [data-export="xls"], [data-export="pdf"] — any other format does nothing
  * Methods:
  *   NDS.Export.init()                            wire the delegated [data-export] click
  *   NDS.Export.export(source, format, scope, opts)   collect and download.
@@ -18,16 +21,19 @@
  *   (none)
  * Hooks:
  *   on the button:      data-export="csv|xls|pdf" · data-export-target (selector)
- *                       data-export-name (filename) · data-export-scope
- *   on any source:      data-export-rows (row selector — this is what picks the generic
- *                       adapter over the table one)
+ *                       data-export-scope
+ *   on any source:      data-export-name (filename) · data-export-rows (row selector; a
+ *                       source that is not a table reads its direct children without it)
+ *                       · data-export-skip (space-separated field keys, non-table only)
  *   on a cell or field: data-export-field (its key) · data-export-value (the exact value)
  *   on a <th>:          data-export-label (column header override) · data-export-skip
  * Gotchas:
  *   - scope "auto" means: the selected rows if any row is selected, otherwise all of them.
  *   - Rows hidden by PAGINATION are exported (every page); rows hidden by a FILTER are not.
- *   - Cell value order: data-export-value, then data-sort-value (tables only), then the
- *     cell's text.
+ *   - Cell value order: data-export-value, then the cell's text. data-sort-value is never read.
+ *   - data-export-skip works on a <th> or a field, never on a single <td>.
+ *   - A cell starting = + - @ TAB CR gets a leading ' (formula guard); a plain negative
+ *     number is left alone.
  *   - The row-selection checkbox column is detected and dropped automatically.
  *   - "pdf" opens a print window — the user saves as PDF. No PDF file is generated.
  */
@@ -51,13 +57,19 @@
  *                    from [data-export-field="key"] descendants per row.
  *
  * Cell value precedence (both adapters):
- *   data-export-value > data-sort-value (tables only) > NDS.Tables.getCellText / textContent
+ *   data-export-value > NDS.Tables.getCellText / textContent
  */
 (function () {
     'use strict';
 
-    // Selection rule lives in nds-core.js (NDS.isRowSelected), shared with the
-    // selection-count widget — see the semantics comment there.
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('export', {
+        exported: { one: 'Exported {n} row', other: 'Exported {n} rows' },
+    });
+
+    // The "is this row selected" rule is NDS.Selection.isSelected: init() loads it.
+    // Before Selection loads (a JS-only export), its stub returns a truthy Promise: nothing is selected yet.
+    const isSelected = (row) => !NDS.Selection.__ndsStub && NDS.Selection.isSelected(row);
 
     // A row filtered OUT by NDS.Filter carries data-filtered (hidden via the
     // critical-layer rule [data-filtered]{display:none!important}). This is a
@@ -105,7 +117,7 @@
                 ? Array.from(tbody.querySelectorAll(':scope > tr.nds-page-item'))
                 : Array.from(tbody.rows))
                 .filter(row => !row.classList.contains('nds-sub') && !isRowFiltered(row));
-            if (scope === 'selected') return rows.filter(NDS.isRowSelected);
+            if (scope === 'selected') return rows.filter(isSelected);
             return rows;
         },
 
@@ -129,10 +141,10 @@
         getRows(source, scope) {
             const sel = source.dataset.exportRows;
             const rows = (sel
-                ? NDS.queryAll(source, sel)
+                ? Array.from(source.querySelectorAll(sel))
                 : Array.from(source.children))
                 .filter(row => !isRowFiltered(row));
-            if (scope === 'selected') return rows.filter(NDS.isRowSelected);
+            if (scope === 'selected') return rows.filter(isSelected);
             return rows;
         },
 
@@ -144,7 +156,7 @@
             const cols = [];
             const seen = new Set();
             rows.forEach(row => {
-                const fields = NDS.queryAll(row, '[data-export-field]');
+                const fields = row.querySelectorAll('[data-export-field]');
                 fields.forEach(el => {
                     if (el.hasAttribute('data-export-skip')) return;
                     const key = el.dataset.exportField;
@@ -157,7 +169,7 @@
         },
 
         getCell(row, col) {
-            const el = NDS.querySelector(row, '[data-export-field="' + col.key + '"]');
+            const el = row.querySelector('[data-export-field="' + col.key + '"]');
             if (!el || el.hasAttribute('data-export-skip')) return '';
             const override = el.getAttribute('data-export-value');
             if (override !== null) return override;
@@ -186,7 +198,7 @@
     // getRows doesn't own (an unmarked <tr> in a paginated table), which flips
     // the scope to 'selected' and then exports nothing.
     function inferScope(source, adapter) {
-        return adapter.getRows(source, 'all').some(NDS.isRowSelected) ? 'selected' : 'all';
+        return adapter.getRows(source, 'all').some(isSelected) ? 'selected' : 'all';
     }
 
     function collect(source, scope) {
@@ -217,6 +229,8 @@
     function spreadsheetSafe(value) {
         const s = value == null ? '' : String(value);
         if (!s) return s;
+        // A plain negative number is no formula: keep it a number so the column still sums.
+        if (/^-(\d+\.?\d*|\.\d+)$/.test(s)) return s;
         const c = s.charCodeAt(0);
         // = + - @ \t \r
         if (c === 0x3D || c === 0x2B || c === 0x2D || c === 0x40 || c === 0x09 || c === 0x0D) {
@@ -383,7 +397,7 @@
         // next tick is safe across engines.
         setTimeout(() => URL.revokeObjectURL(url), 0);
         if (typeof rowCount === 'number') {
-            NDS.announce('Exported ' + rowCount + ' row' + (rowCount === 1 ? '' : 's'));
+            NDS.announce(strings.text('exported', { n: rowCount }));
         }
     }
 
@@ -398,16 +412,19 @@
         return s || 'nds-export';
     }
 
+    // The site's day (<html data-timezone>), not toISOString's UTC day.
+    const today = () => NDS.date.format(NDS.date.today(), { format: 'YYYY-MM-DD' });
+
     function defaultFilename(source, ext) {
         const raw = source && source.dataset && source.dataset.exportName;
         const name = sanitizeFilename(raw);
-        return name + '-' + new Date().toISOString().slice(0, 10) + '.' + ext;
+        return name + '-' + today() + '.' + ext;
     }
 
     function download(data, format, opts) {
         opts = opts || {};
         const ext = format === 'pdf' ? 'pdf' : format === 'xls' ? 'xls' : 'csv';
-        const rawName = opts.filename || ('nds-export-' + new Date().toISOString().slice(0, 10) + '.' + ext);
+        const rawName = opts.filename || ('nds-export-' + today() + '.' + ext);
         // sanitize the stem (before extension) — keep the trailing extension as-is.
         const stem = rawName.replace(/\.[a-z]+$/i, '');
         const filename = sanitizeFilename(stem) + (rawName.match(/\.[a-z]+$/i)?.[0] || '.' + ext);
@@ -471,6 +488,8 @@
         if (_initDone) return;
         _initDone = true;
         document.addEventListener('click', onExportClick);
+        // Loads Selection's bundle now: isSelected is read synchronously per row, and a stub would answer with a Promise.
+        NDS.Selection.init();
     }
 
     NDS.Export = {

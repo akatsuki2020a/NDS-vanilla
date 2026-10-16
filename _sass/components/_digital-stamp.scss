@@ -1,0 +1,180 @@
+@use '../mixins' as *;
+
+/* ========================================
+   DGA DROPDOWN STYLES
+   ======================================== */
+#nds-digital-stamp-verify-text {
+    line-height: normal;
+}
+
+.nds-digital-stamp-tab {
+    z-index: 10;
+    cursor: pointer;
+    font-size: var(--typo-text-clamp-sm-FS);
+    line-height: var(--typo-text-clamp-sm-LH);
+    font-weight: var(--font-weight-medium);
+    text-align: start;
+    padding-inline: 0;
+    gap: var(--spacing-xs);
+}
+
+.nds-digital-stamp-tab {
+    .nds-flag {
+        width: 20px;
+        margin-inline-end: var(--spacing-xs);
+    }
+
+}
+
+@include desktop(min) {
+    .nds-digital-stamp-tab>.nds-digital-stamp-sm-text {
+        display: none!important;
+    }
+}
+
+@include tablet(max) {
+    .nds-digital-stamp-tab>.nds-digital-stamp-lg-text {
+        display: none!important;
+    }
+
+}
+
+
+#nds-digital-stamp {
+    background-color: var(--background-topbar);
+    position: relative;
+    transition: grid-template-rows var(--nds-transition);
+    grid-template-rows: 0fr;
+    overflow: clip;
+    z-index: 1000;
+    &[data-state~="open"] {
+        display: grid;
+        grid-template-rows: 1fr;
+    }
+
+    &:is([data-state~="opening"], [data-state~="closing"]) {
+        grid-template-rows: 0fr;
+    }
+
+    >* {
+        grid-row: 1 / span 2;
+    }
+
+
+}
+
+.nds-digital-stamp-notices {
+    margin-block: var(--spacing-5xl);
+    display: flex;
+    gap: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+.nds-digital-stamp-card {
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-xl);
+}
+
+.nds-digital-stamp-register {
+    width: 100%;
+    margin: 0 auto;
+    background-color: var(--background-card);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-xl) var(--spacing-3xl);
+    margin-block: var(--spacing-5xl);
+    line-height: 24px;
+    text-align: start;
+    display: flex;
+    gap: var(--spacing-sm);
+    flex: 0 0 100%;
+    justify-content: start;
+    align-items: center;
+}
+
+.nds-digital-stamp-register>img {
+    height: 30px;
+    margin-inline-end: var(--spacing-2xl);
+}
+
+.nds-digital-stamp-icon {
+    position: relative;
+    border: 1px solid var(--border-primary);
+    border-radius: 50%;
+    width: var(--spacing-6xl);
+    height: var(--spacing-6xl);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    @include tablet(max) {
+        width: var(--spacing-4xl);
+        height: var(--spacing-4xl);
+        font-size: 1rem;
+    }
+
+}
+
+.nds-digital-stamp-icon>:is(.nds-icon, i) {
+    color: var(--icon-primary);
+}
+
+.nds-digital-stamp-content {
+    flex: 1;
+}
+
+.nds-digital-stamp-heading {
+    font-size: var(--typo-text-clamp-lg-FS);
+    line-height: var(--typo-text-clamp-lg-LH);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-default);
+    margin-bottom: var(--spacing-md);
+}
+
+.nds-digital-stamp-description {
+    color: var(--text-default);
+    line-height: 1.5;
+}
+
+@include mobile {
+
+    .nds-digital-stamp-notices {
+        flex-direction: column;
+        gap: var(--spacing-lg);
+    }
+
+    .nds-digital-stamp-card {
+        gap: var(--spacing-lg);
+    }
+
+    .nds-digital-stamp-heading {
+        font-size: var(--typo-text-md-FS);
+        line-height: var(--typo-text-md-LH);
+    }
+
+    .nds-digital-stamp-description {
+        font-size: var(--typo-text-sm-FS);
+        line-height: var(--typo-text-sm-LH);
+    }
+
+}
+
+#nds-digital-stamp-verify-text{
+    color: var(--text-primary-strong);
+}
+
+.nds-digital-stamp-highlight {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+
+/*Hero Section*/
+
+.nds-hero-section img {
+    pointer-events: none
+}

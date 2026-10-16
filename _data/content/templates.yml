@@ -7,6 +7,16 @@
 #   and the words developers actually use for it. These are DGA-official pages,
 #   so a match here outranks any hand-composed page or an examples.yml entry.
 #   description/icon/category/tags drive the index cards; use_when renders nowhere.
+#   new: true shows a "New" tag on the card.
+
+- title: "Life Journeys Template"
+  description: "Life journeys hub: a first-visit intro modal and how-it-works alert, and tabs for current, available and completed journeys with progress rings."
+  use_when: "The landing hub of a set of life journeys: services grouped around a life event such as having a baby, starting a business, or getting a building permit. A first visit gets a three-step intro modal and a how-it-works alert; a returning user also gets current and completed journey tabs, each card with a progress ring. The page marks each conditional part with a comment. Its cards open two internal pages of the same set, reached only from the hub: Details opens the Journey page (templates/life-journey-page-template.md): the journey's services in a stepper with the user's progress, which a completed card opens with ?status=completed and a rating survey. Start, Continue and a step's Start service open the Journey Service page (templates/journey-service-template.md): the journey itself, laid out like a service page, where the user starts it or continues from the last completed service."
+  icon: '<i class="hgi hgi-stroke hgi-route-01"></i>'
+  category: "Service"
+  tags: ["DGA", "Alert", "Tabs", "Cards", "Grid"]
+  url: "/templates/life-journey-template.html"
+  new: true
 
 - title: "Home Page Template"
   description: "Organization home page with a main hero slider, headline figures, a services card deck, a news row, and a partner logo strip."
@@ -18,7 +28,7 @@
 
 - title: "Form Template"
   description: "Multi-step form layout with grouped text inputs, side stepper (vertical on desktop, radial on mobile), and a flat sub-hero."
-  use_when: "Any multi-step form or wizard: service application, request submission, registration workflow, onboarding, or checkout. Carries the grouped input types and a progress stepper that runs vertically beside the form on desktop and as a radial dial on mobile. The stepper column is the side info arrangement, through nds-wSideInfo on the content layout."
+  use_when: "Any multi-step form or wizard: service application, request submission, registration workflow, onboarding, or checkout. Carries the grouped input types and a progress stepper that runs vertically beside the form on desktop and as a radial dial on mobile. The stepper column is the side info arrangement, through nds-has-sideinfo on the content layout."
   icon: '<i class="hgi hgi-stroke hgi-file-edit"></i>'
   category: "Form"
   tags: ["DGA", "Forms", "Stepper", "Side Info", "Grid"]
@@ -26,7 +36,7 @@
 
 - title: "Service Page Template"
   description: "Government digital service with side info, breadcrumbs, and structured content layout."
-  use_when: "The landing page for a single government service: what it is, who is eligible, the steps, the fees, and the start-service action. The side-info column, breadcrumbs, hero tags, and the rating widget are all switched on from front matter (layout_class: nds-wSideInfo, breadcrumb, rating)."
+  use_when: "The landing page for a single government service: what it is, who is eligible, the steps, the fees, and the start-service action. The side-info column, breadcrumbs, hero tags, and the rating widget are all switched on from front matter (layout_class: nds-has-sideinfo, breadcrumb, rating)."
   icon: '<i class="hgi hgi-stroke hgi-menu-square"></i>'
   category: "Service"
   tags: ["DGA", "Tabs", "Side Info", "Rating"]
@@ -34,7 +44,7 @@
 
 - title: "Contact Us Template"
   description: "Contact page with two-column form, country-code prefix, select, textarea, file upload, and a side info card with emergency contacts."
-  use_when: "A contact or enquiry page: a two-column message form with a country-code phone prefix, select, textarea, and file upload, beside a card listing phone, email, and emergency contacts. Use for contact us, feedback, support request, or get-in-touch pages. The contacts card is the side info column (nds-wSideInfo)."
+  use_when: "A contact or enquiry page: a two-column message form with a country-code phone prefix, select, textarea, and file upload, beside a card listing phone, email, and emergency contacts. Use for contact us, feedback, support request, or get-in-touch pages. The contacts card is the side info column (nds-has-sideinfo)."
   icon: '<i class="hgi hgi-stroke hgi-mail-01"></i>'
   category: "Service"
   tags: ["DGA", "Forms", "Upload", "Side Info", "Grid"]
@@ -42,7 +52,7 @@
 
 - title: "Content Template"
   description: "Long-form editorial layout with article-style sections, numbered sub-sections, and a sticky on-this-page table of contents for in-page navigation."
-  use_when: "Any long-form editorial page: policy, terms of use, privacy notice, regulation, news article, press release, or a written guide. Carries article sections, numbered sub-sections, and a sticky on-this-page table of contents. The table of contents is the side info column (nds-wSideInfo)."
+  use_when: "Any long-form editorial page: policy, terms of use, privacy notice, regulation, news article, press release, or a written guide. Carries article sections, numbered sub-sections, and a sticky on-this-page table of contents. The table of contents is the side info column (nds-has-sideinfo)."
   icon: '<i class="hgi hgi-stroke hgi-book-open-01"></i>'
   category: "Content"
   tags: ["DGA", "Side Info", "Article", "TOC"]

@@ -1,0 +1,63 @@
+<header><div class="nds-topbar nds-content-wrapper" role="region" aria-label="Top bar utilities">
+    <div class="nds-topbar-info">
+        <span id="nds-date" class="nds-text-icon" data-calendar="gregorian"></span>
+        <span id="nds-realTimeClock" class="nds-text-icon"></span>
+        <button class="nds-btn nds-subtle nds-icon-only nds-theme-toggle-wrap" data-theme-toggle aria-label="Toggle dark mode">
+            <i class="nds-icon nds-hgi-moon-02" aria-hidden="true"></i>
+        </button>
+    </div>
+</div><nav class="nds-main-nav nds-content-wrapper" id="ndsMainNav" aria-label="Primary navigation">
+    <div class="nds-nav-container"><a href="/" class="nds-brand">
+            <img class="nds-brand-logo" src="/img/logo.svg"
+                width="40" height="40" loading="lazy" alt="Al-Nakheel Clinics Logo">
+            <span class="nds-brand-name" style="color: var(--text-display,#1f2a37);">Al-Nakheel
+                <span class="nds-brand-slogan" style="color: var(--text-secondary-paragraph,#6c727e);">Clinics</span>
+            </span>
+        </a>
+        <ul class="nds-nav-minimal" hidden>
+            <li class="nds-mainNav-toggler nds-nav-item">
+                <button class="nds-nav-link nds-btn nds-subtle nds-indicator" aria-label="Toggle navigation menu"
+                    aria-expanded="false" aria-controls="ndsNavCollapse">
+                    <i class="nds-icon nds-hgi-menu-01" aria-hidden="true"></i>
+                </button>
+            </li>
+        </ul>
+        <div class="nds-collapse" id="ndsNavCollapse" hidden>
+            <div class="nds-collapse-content">
+                <ul class="nds-nav-primary">
+                    <li class="nds-nav-item" >
+                        <a href="/" class="nds-nav-link nds-btn nds-subtle nds-indicator"<% if (active === 'home') { %> data-state="current" aria-current="page"<% } %>>
+                            <span class="nds-label">Home</span>
+                        </a>
+                    </li>
+                    <li class="nds-nav-item" >
+                        <a href="/clinics" class="nds-nav-link nds-btn nds-subtle nds-indicator"<% if (active === 'clinics') { %> data-state="current" aria-current="page"<% } %>>
+                            <span class="nds-label">Clinics</span>
+                        </a>
+                    </li>
+                    <li class="nds-nav-item" >
+                        <a href="/book" class="nds-nav-link nds-btn nds-subtle nds-indicator"<% if (active === 'book') { %> data-state="current" aria-current="page"<% } %>>
+                            <span class="nds-label">Book</span>
+                        </a>
+                    </li>
+                    <li class="nds-nav-item" >
+                        <a href="/appointments" class="nds-nav-link nds-btn nds-subtle nds-indicator"<% if (active === 'appointments') { %> data-state="current" aria-current="page"<% } %>>
+                            <span class="nds-label">My Appointments</span>
+                        </a>
+                    </li>
+                    <li class="nds-nav-item" >
+                        <a href="/contact" class="nds-nav-link nds-btn nds-subtle nds-indicator"<% if (active === 'contact') { %> data-state="current" aria-current="page"<% } %>>
+                            <span class="nds-label">Contact</span>
+                        </a>
+                    </li>
+                </ul>
+                <div class="nds-nav-item nds-show-more">
+                    <a href="#" class="nds-nav-link nds-btn nds-subtle nds-indicator nds-full" title="Show More">
+                        <i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+</header>

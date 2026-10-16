@@ -1,5 +1,7 @@
 /* NDS.Accordion — public surface
  * Rides: (none — base component)
+ * Requires:
+ *   .nds-accordion needs one .nds-accordion-collapse per .nds-accordion-btn — a button without its collapse toggles nothing
  * Methods:
  *   NDS.Accordion.init() / .reinit()   scan .nds-accordion; a live root adopts new items
  *   NDS.Accordion.create(container)    instance one accordion — returns the live controller
@@ -75,8 +77,8 @@
         setupInitialState() {
             // The init-time 0fr → 1fr transition is suppressed by a CSS
             // gate keyed on `:not([data-nds-accordion-initialized])` on the
-            // container. initializeAccordions defers the marker stamp by two
-            // rAFs so the browser commits the state change in a paint where
+            // container. activate() defers the marker stamp by one
+            // rAF so the browser commits the state change in a paint where
             // the rule still applies; the marker then lands in the next
             // paint and future user clicks animate normally.
             this.buttons.forEach((button, index) => this._syncItem(button, this.collapses[index]));
@@ -140,9 +142,9 @@
 
         handleKeyDown(e) {
             const currentButton = e.target;
-            if (!currentButton.classList.contains('nds-accordion-btn')) return;
-
             const currentIndex = this.buttons.indexOf(currentButton);
+            // A nested accordion's keys bubble here; they are not this accordion's.
+            if (currentIndex === -1) return;
             let targetIndex = currentIndex;
 
             switch (e.key) {
@@ -356,7 +358,7 @@
         
         accordionContainers.forEach(container => {
             // Skip elements inside code examples
-            if (container.closest('code, .code-example')) {
+            if (container.closest('code')) {
                 return;
             }
             
@@ -396,7 +398,7 @@
         });
     }
 
-    // CRITICAL: Expose global API immediately (called by unified init system)
+    // Assigned at module eval so the loader's lazy stub resolves.
     NDS.Accordion = {
         init: initializeAccordions,
         reinit: initializeAccordions,

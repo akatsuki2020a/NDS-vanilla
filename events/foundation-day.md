@@ -38,40 +38,36 @@ hero_float_actions:
 </section>
 
 <!-- Automatic -->
-<section id="fdayApply" class="nds-content-section nds-demo-section">
+<section id="fday-apply" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Automatic</h2>
             <p class="nds-section-description">Add one tag to your shared <code class="nds-inline-code lang-html">&lt;head&gt;</code>, after the NDS stylesheets and without <code class="nds-inline-code lang-html">defer</code>. It applies the palette and the hero slide; remove it when the event ends. That one tag is the whole install — every value has a built-in default. Use the <strong>With overrides</strong> tab to change any of them; see the attribute table below.</p>
-            <p class="nds-section-description">The pack is self-contained. Download the zip, then copy its files into your own assets folder. A template copy already ships them at <code class="nds-inline-code lang-html">docs-assets/events/foundation_day/</code>. The paths below assume <code class="nds-inline-code lang-html">assets/events/foundation_day/</code>. The script finds its own CSS and images relative to itself, so the folder works at any location as long as its contents stay together.</p>
+            <p class="nds-section-description">The pack is self-contained. Download the zip, then copy its files into your own assets folder. A template copy already ships them at <code class="nds-inline-code lang-html">docs-assets/events/foundation_day/</code>. The paths below assume <code class="nds-inline-code lang-html">assets/events/foundation_day/</code>. The script carries its own CSS and finds its images next to itself, so the folder works at any location as long as its contents stay together. You need the <code class="nds-inline-code lang-html">.min.css</code> file only for the no-script setup below, or when you want to override a rule.</p>
         </div>
         <div class="nds-section-body">
-            <div class="nds-showcase">
-                <div class="nds-demo-card">
-                    <div class="demo-header">
-                        <div class="demo-label">One tag applies everything</div>
-                    </div>
-                    <div class="demo-code">
+            <div class="nds-block">
+                <h3 class="nds-block-title">One tag applies everything</h3>
                         <div class="nds-tabs nds-code nds-divided">
                             <div class="nds-tab-list-container nds-scroll-more">
                                 <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
                                         aria-controls="panel-fday-apply-1" id="tab-fday-apply-1">
-                                        <span class="nds-tab-label">HTML</span>
+                                        <span class="nds-label">HTML</span>
                                     </button>
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="false"
                                         aria-controls="panel-fday-apply-2" id="tab-fday-apply-2">
-                                        <span class="nds-tab-label">With overrides</span>
+                                        <span class="nds-label">With overrides</span>
                                     </button>
                                 </nav>
                                 <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="nds-tab-content">
-                                <div class="nds-tab-panel code-example" role="tabpanel" id="panel-fday-apply-1"
+                                <div class="nds-tab-panel" role="tabpanel" id="panel-fday-apply-1"
                                     aria-labelledby="tab-fday-apply-1">
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -79,10 +75,10 @@ hero_float_actions:
 &lt;script src="/assets/events/foundation_day/nds-theme-foundation-day.min.js"&gt;&lt;/script&gt;
                                     </code>
                                 </div>
-                                <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-fday-apply-2"
+                                <div class="nds-tab-panel nds-expandable" role="tabpanel" id="panel-fday-apply-2"
                                     aria-labelledby="tab-fday-apply-2" hidden>
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -103,47 +99,41 @@ hero_float_actions:
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Manual (no JavaScript) -->
-<section id="fdayManual" class="nds-content-section nds-demo-section">
+<section id="fday-manual" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Manual (no JavaScript)</h2>
             <p class="nds-section-description">No-JS alternative: link the stylesheet for the palette, and paste the slide markup yourself. Add the CSS link in <code class="nds-inline-code lang-html">&lt;head&gt;</code>, and place the slide as the first child of <code class="nds-inline-code lang-html">.nds-swiper-wrapper</code> (raise the hero's <code class="nds-inline-code lang-css">--total</code> by one).</p>
         </div>
         <div class="nds-section-body">
-            <div class="nds-showcase">
-                <div class="nds-demo-card">
-                    <div class="demo-header">
-                        <div class="demo-label">No-JS setup: stylesheet link and slide markup</div>
-                    </div>
-                    <div class="demo-code">
+            <div class="nds-block">
+                <h3 class="nds-block-title">No-JS setup: stylesheet link and slide markup</h3>
                         <div class="nds-tabs nds-code nds-divided">
                             <div class="nds-tab-list-container nds-scroll-more">
                                 <nav class="nds-tab-list nds-scroll-more-content" role="tablist" aria-label="Tab navigation">
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="true"
                                         aria-controls="panel-fday-manual-1" id="tab-fday-manual-1">
-                                        <span class="nds-tab-label">CSS file</span>
+                                        <span class="nds-label">CSS file</span>
                                     </button>
                                     <button class="nds-btn nds-subtle nds-tab" type="button" role="tab" aria-selected="false"
                                         aria-controls="panel-fday-manual-2" id="tab-fday-manual-2">
-                                        <span class="nds-tab-label">Hero markup</span>
+                                        <span class="nds-label">Hero markup</span>
                                     </button>
                                 </nav>
                                 <button class="nds-btn nds-subtle nds-tab nds-show-more" type="button" aria-label="Show more"><i class="nds-icon nds-hgi-arrow-down-01" aria-hidden="true"></i>
                                 </button>
                             </div>
                             <div class="nds-tab-content">
-                                <div class="nds-tab-panel code-example" role="tabpanel" id="panel-fday-manual-1"
+                                <div class="nds-tab-panel" role="tabpanel" id="panel-fday-manual-1"
                                     aria-labelledby="tab-fday-manual-1">
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
@@ -152,16 +142,16 @@ hero_float_actions:
       href="/assets/events/foundation_day/nds-theme-foundation-day.min.css"&gt;
                                     </code>
                                 </div>
-                                <div class="nds-tab-panel code-example nds-expandable" role="tabpanel" id="panel-fday-manual-2"
+                                <div class="nds-tab-panel nds-expandable" role="tabpanel" id="panel-fday-manual-2"
                                     aria-labelledby="tab-fday-manual-2" hidden>
                                     <div class="nds-code-action">
-                                        <button class="nds-btn nds-subtle nds-copy" aria-label="Copy code example">
+                                        <button class="nds-btn nds-subtle nds-copy nds-icon-only" aria-label="Copy code example">
                                             <i class="nds-icon nds-hgi-copy-01"></i>
                                         </button>
                                     </div>
                                     <div class="nds-expandable-content">
                                         <code class="lang-html code">
-&lt;div class="nds-swiper-slide nds-content-wrapper nds-foundingDay"&gt;
+&lt;div class="nds-swiper-slide nds-content-wrapper nds-founding-day"&gt;
   &lt;div class="nds-hero-image-wrapper" style="--overlay:0;"&gt;
     &lt;picture&gt;
       &lt;img src="/assets/events/foundation_day/Hero_bg.webp" class="nds-hero-image" alt="" fetchpriority="high"&gt;
@@ -188,15 +178,13 @@ hero_float_actions:
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- Data Attributes -->
-<section id="fdayAttributes" class="nds-content-section nds-demo-section">
+<section id="fday-attributes" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Data Attributes</h2>
@@ -221,7 +209,7 @@ hero_float_actions:
 </section>
 
 <!-- Built-in Features -->
-<section id="fdayFeatures" class="nds-content-section nds-demo-section">
+<section id="fday-features" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Built-in Features</h2>
@@ -233,14 +221,14 @@ hero_float_actions:
                         <i class="hgi hgi-stroke hgi-plug-socket"></i>
                         <span class="nds-label">One-Tag Activation</span>
                     </span>
-                    <p class="nds-item-desc">One script tag applies the palette, root marker, and hero slide. No build, no markup edits.</p>
+                    <p class="nds-item-desc">One script tag applies the palette, root marker, and hero slide. It carries its own CSS, so nothing else is linked. No build, no markup edits.</p>
                 </div>
                 <div class="nds-definition-item">
                     <span class="nds-item-title">
                         <i class="hgi hgi-stroke hgi-paint-bucket"></i>
                         <span class="nds-label">Zero-Flash First Paint</span>
                     </span>
-                    <p class="nds-item-desc">Placed in the head, the stylesheet resolves before first paint, so the default colours never flash.</p>
+                    <p class="nds-item-desc">The script writes its CSS while the page parses, with no second request, so the default colours never flash.</p>
                 </div>
                 <div class="nds-definition-item">
                     <span class="nds-item-title">
@@ -276,7 +264,7 @@ hero_float_actions:
 </section>
 
 <!-- Usage Guidelines -->
-<section id="fdayGuidelines" class="nds-content-section nds-demo-section">
+<section id="fday-guidelines" class="nds-content-section nds-demo-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Usage Guidelines</h2>

@@ -33,10 +33,23 @@ tr[data-nds-empty-placeholder] > td {
   text-align: center;
   vertical-align: middle;
 
+  // The cell spans a table that may scroll sideways: a sticky inset is a share of
+  // the scroll box, so each line holds the visible centre at any scroll position.
   > i {
     display: block;
+    inline-size: 1em;
     margin-inline: auto;
     margin-block-end: var(--spacing-md);
+    position: sticky;
+    inset-inline: calc(50% - 0.5em);
+  }
+
+  > .nds-empty-message {
+    display: block;
+    max-inline-size: 20rem;
+    margin-inline: auto;
+    position: sticky;
+    inset-inline: calc(50% - 10rem);
   }
 }
 

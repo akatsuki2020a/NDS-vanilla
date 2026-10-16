@@ -1,0 +1,553 @@
+{
+  "brand": {
+    "name": "Souq Al-Hiraf",
+    "tagline": "Saudi crafts and local products"
+  },
+  "nav": {
+    "home": "Home",
+    "categories": "Categories",
+    "allProducts": "All products",
+    "search": "Search",
+    "searchPlaceholder": "Search products",
+    "cart": "Cart",
+    "switchLang": "العربية",
+    "switchLangLabel": "Switch to Arabic",
+    "giftBox": "Gift box"
+  },
+  "footer": {
+    "links": "Information",
+    "about": "About us",
+    "shipping": "Shipping and returns",
+    "contact": "Contact us",
+    "payments": "Payment methods",
+    "paymentNames": [
+      "mada",
+      "Visa",
+      "Mastercard",
+      "Apple Pay",
+      "Cash on delivery"
+    ],
+    "rights": "All rights reserved."
+  },
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "remove": "Remove",
+    "breadcrumb": "Breadcrumb",
+    "continueShopping": "Continue shopping",
+    "clearFilters": "Clear filters",
+    "vatIncluded": "Price includes 15% VAT",
+    "inStock": "In stock",
+    "outOfStock": "Out of stock",
+    "lowStock": "Only {n} left",
+    "reviewsCount": "({n} reviews)",
+    "sale": "Sale",
+    "new": "New",
+    "bestseller": "Best seller",
+    "handmade": "Handmade",
+    "cancel": "Cancel",
+    "backToTop": "Back to top"
+  },
+  "miniCart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty.",
+    "viewCart": "View cart",
+    "checkout": "Checkout",
+    "subtotal": "Subtotal",
+    "close": "Close",
+    "qty": "Qty"
+  },
+  "home": {
+    "heroTitle": "Crafts made by Saudi hands",
+    "heroLine": "Dates, coffee, incense, pottery, palm baskets and Sadu weaving, from makers across the Kingdom.",
+    "heroButton": "Shop now",
+    "categoriesTitle": "Shop by category",
+    "bestSellersTitle": "Best sellers",
+    "viewAll": "View all",
+    "promoTitle": "10% off your first order",
+    "promoText": "Use the code at checkout on orders of 100 SAR or more.",
+    "flash": {
+      "title": "Flash sale ends tonight",
+      "text": "Selected crafts at special prices until 11:59 pm.",
+      "endsIn": "Time left",
+      "hours": "hours",
+      "minutes": "min",
+      "seconds": "sec",
+      "button": "See the deals"
+    }
+  },
+  "products": {
+    "title": "All products",
+    "searchResults": "Results for \"{q}\"",
+    "results": "{n} products",
+    "filters": "Filters",
+    "category": "Category",
+    "priceRange": "Price range (SAR)",
+    "inStockOnly": "In stock only",
+    "ratingFrom": "Rating and up",
+    "sort": "Sort by",
+    "sorts": {
+      "featured": "Featured",
+      "price-asc": "Price: low to high",
+      "price-desc": "Price: high to low",
+      "rating": "Top rated",
+      "newest": "Newest"
+    },
+    "pagination": "Product pages",
+    "emptyTitle": "No products found",
+    "emptyText": "Try a different search or remove some filters.",
+    "view": {
+      "group": "Product layout",
+      "grid": "Grid view",
+      "list": "List view"
+    }
+  },
+  "product": {
+    "variant": "Option",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "addToCart": "Add to cart",
+    "adding": "Adding...",
+    "added": "Added to your cart",
+    "thumb": "Show image {n}",
+    "tabsLabel": "Product information",
+    "tabs": {
+      "description": "Description",
+      "reviews": "Reviews",
+      "shipping": "Shipping"
+    },
+    "noReviews": "No reviews yet.",
+    "related": "You may also like",
+    "shippingInfo": [
+      "Standard delivery takes 3 to 5 working days.",
+      "Express delivery arrives the next day for 35 SAR.",
+      "Shipping costs 25 SAR and is free on orders over 300 SAR.",
+      "You can return unused items within 7 days of delivery."
+    ],
+    "errors": {
+      "invalid": "This option is not available.",
+      "out_of_stock": "This product is out of stock.",
+      "max": "You have reached the most you can order of this product."
+    },
+    "zoom": "Zoom in on the image",
+    "previous": "Previous image",
+    "nextImage": "Next image",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "faqTitle": "Common questions",
+    "faq": [
+      {
+        "q": "How long does delivery take?",
+        "a": "Standard delivery takes 3 to 5 working days. Choose express at checkout to get your order the next day."
+      },
+      {
+        "q": "Can I return this product?",
+        "a": "Yes, within 7 days of delivery if it is unused and in its original packaging. Food, incense and perfume oils can only be returned if they arrive damaged."
+      },
+      {
+        "q": "Does the price include VAT?",
+        "a": "Yes. All prices include 15% VAT, and the VAT part is shown in your order total."
+      }
+    ],
+    "about": {
+      "dates": "The dates are picked at harvest, sorted by hand and packed within days. Keep them in a cool, dry place and they stay soft for months.",
+      "coffee": "The coffee is roasted in small batches and packed the same week. Store it in a closed jar away from light and heat to keep its aroma.",
+      "incense": "Each piece is blended and dried by hand. Burn it on a lit charcoal disc and keep the container closed between uses.",
+      "pottery": "Every piece is shaped on the wheel and fired in a local kiln, so size and colour vary a little. Wash it by hand with mild soap.",
+      "baskets": "The palm fronds are cut, dried and woven by hand, which gives each piece its own pattern. Wipe it with a dry cloth and keep it out of damp places.",
+      "weaving": "The wool is spun and dyed locally, then woven on a ground loom in traditional Sadu patterns. Spot clean it gently and avoid strong sunlight."
+    }
+  },
+  "cart": {
+    "title": "Shopping cart",
+    "empty": "Your cart is empty",
+    "emptyText": "Add something from the shop and it will show up here.",
+    "summary": "Order summary",
+    "couponLabel": "Coupon code",
+    "apply": "Apply",
+    "applied": "Coupon {code} applied",
+    "removeCoupon": "Remove",
+    "errors": {
+      "required": "Enter a coupon code.",
+      "invalid": "This coupon code is not valid.",
+      "expired": "This coupon has expired.",
+      "minimum": "This coupon needs an order of at least {min} SAR."
+    },
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "shipping": "Shipping",
+    "free": "Free",
+    "fees": "Delivery and payment fees",
+    "total": "Total",
+    "vatLine": "Includes VAT of",
+    "checkout": "Proceed to checkout",
+    "currency": "SAR",
+    "removeTitle": "Remove this item?",
+    "removeText": "{name} will be removed from your cart."
+  },
+  "checkout": {
+    "title": "Checkout",
+    "steps": {
+      "address": "Address",
+      "delivery": "Delivery",
+      "payment": "Payment"
+    },
+    "fullName": "Full name",
+    "phone": "Mobile number",
+    "city": "City",
+    "district": "District",
+    "street": "Street",
+    "building": "Building number",
+    "notes": "Delivery notes (optional)",
+    "deliveryTitle": "Delivery method",
+    "paymentTitle": "Payment method",
+    "cardNumber": "Card number",
+    "cardName": "Name on card",
+    "expiry": "Expiry date",
+    "cvv": "CVV",
+    "fixErrors": "Please fix the highlighted fields.",
+    "placeOrder": "Place order",
+    "placing": "Placing order...",
+    "failedTitle": "Payment was not completed",
+    "failedDeclined": "Your bank declined the payment.",
+    "failedGeneric": "We could not take the payment.",
+    "failedHelp": "Your cart is still saved. Try the same card again or pick another payment method.",
+    "retryPayment": "Try again",
+    "changeMethod": "Change payment method",
+    "backToCart": "Back to cart"
+  },
+  "cities": {
+    "riyadh": "Riyadh",
+    "jeddah": "Jeddah",
+    "dammam": "Dammam",
+    "makkah": "Makkah",
+    "madinah": "Madinah",
+    "abha": "Abha",
+    "buraydah": "Buraydah",
+    "tabuk": "Tabuk"
+  },
+  "delivery": {
+    "standard": "Standard, 3 to 5 days",
+    "express": "Express, next day"
+  },
+  "payment": {
+    "mada": "mada",
+    "card": "Credit card",
+    "applepay": "Apple Pay",
+    "cod": "Cash on delivery"
+  },
+  "validation": {
+    "required": "This field is required.",
+    "fullName": "Enter your full name.",
+    "phone": "Enter a mobile number like 05xxxxxxxx.",
+    "building": "Enter the building number using digits.",
+    "cardNumber": "Enter the 16 digits on your card.",
+    "expiry": "Enter the date as MM/YY.",
+    "expired": "This card has expired.",
+    "cvv": "Enter the 3-digit security code.",
+    "email": "Enter a valid email address.",
+    "messageShort": "Write at least 10 characters."
+  },
+  "order": {
+    "thanks": "Thank you for your order",
+    "thanksText": "We have received your order and will update its status here.",
+    "number": "Order number",
+    "items": "Items",
+    "product": "Product",
+    "quantity": "Quantity",
+    "unitPrice": "Unit price",
+    "lineTotal": "Total",
+    "address": "Delivery address",
+    "delivery": "Delivery",
+    "payment": "Payment",
+    "cardEnding": "Card ending {n}"
+  },
+  "status": {
+    "pending_payment": "Awaiting payment",
+    "paid": "Paid",
+    "preparing": "Preparing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "pages": {
+    "about": {
+      "title": "About Souq Al-Hiraf",
+      "body": [
+        "Souq Al-Hiraf is a small online market for Saudi crafts and local products. We work with farms, roasters, potters and weavers across the Kingdom and pay them a fair price for their work.",
+        "Every item is chosen by our team. We pack each order by hand and ship it from Riyadh."
+      ]
+    },
+    "shipping": {
+      "title": "Shipping and returns",
+      "intro": "Everything about how we send your order and what to do if something is not right.",
+      "onThisPage": "On this page",
+      "sections": [
+        {
+          "id": "delivery-times",
+          "title": "Delivery times",
+          "body": [
+            "Standard delivery takes 3 to 5 working days from the day we confirm your payment. Working days are Sunday to Thursday.",
+            "Orders placed after 2 pm start on the next working day. Remote areas can take one extra day, and we show the expected date on the tracking page."
+          ]
+        },
+        {
+          "id": "shipping-fees",
+          "title": "Shipping fees",
+          "body": [
+            "Shipping costs 25 SAR for each order, however many items it holds. It is free when the order total is above 300 SAR.",
+            "The FREESHIP coupon also removes the shipping fee. The fee is shown in your cart before you pay."
+          ]
+        },
+        {
+          "id": "express",
+          "title": "Express delivery",
+          "body": [
+            "Express delivery adds 35 SAR and brings your order the next working day. It is available in Riyadh, Jeddah, Dammam, Makkah and Madinah.",
+            "Orders paid before 2 pm leave the same day. Express orders cannot include large items such as rugs.",
+            "If we miss the express date, we refund the express fee."
+          ]
+        },
+        {
+          "id": "cash-on-delivery",
+          "title": "Cash on delivery",
+          "body": [
+            "You can pay the courier in cash when the order arrives. This adds a 10 SAR fee to the order.",
+            "Please keep the exact amount ready. The courier may not have change."
+          ]
+        },
+        {
+          "id": "tracking",
+          "title": "Tracking your order",
+          "body": [
+            "Every order has a tracking page that shows each step, from payment to delivery. Open it from your order confirmation.",
+            "When the courier collects the parcel, the page shows the courier name and a tracking number that you can copy.",
+            "The page updates by itself every few seconds while the order is on its way."
+          ]
+        },
+        {
+          "id": "returns",
+          "title": "Returns",
+          "body": [
+            "You can return unused items in their original packaging within 7 days of delivery. Write to us with your order number and we send you a return label.",
+            "Food, incense and perfume oils cannot be returned once opened, unless they arrive damaged. Gift boxes can be returned only as a whole."
+          ]
+        },
+        {
+          "id": "refunds",
+          "title": "Refunds",
+          "body": [
+            "We refund returned items to the original payment method within 5 to 10 working days of receiving them. Cash on delivery orders are refunded by bank transfer.",
+            "The shipping fee is not refunded unless the return is our mistake."
+          ]
+        },
+        {
+          "id": "damaged-or-missing",
+          "title": "Damaged or missing items",
+          "body": [
+            "If something arrives damaged or is missing, tell us within 48 hours and attach a photo. We send a replacement or refund you, whichever you prefer.",
+            "Keep the outer box until we have solved the problem. It helps us claim from the courier."
+          ]
+        }
+      ]
+    },
+    "contact": {
+      "title": "Contact us",
+      "body": [
+        "Write to us and we will reply within two working days. You can also reach us at care@hiraf.example or 800 123 4567, Sunday to Thursday, 9 am to 5 pm."
+      ]
+    }
+  },
+  "contact": {
+    "name": "Your name",
+    "email": "Email address",
+    "message": "Message",
+    "send": "Send message",
+    "success": "Thank you. We received your message and will reply soon."
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "text": "We could not finish that step. Your cart is safe. Please try again.",
+    "retry": "Try again",
+    "backToCart": "Back to cart",
+    "notFoundTitle": "Page not found",
+    "notFoundText": "The page you are looking for does not exist or was moved.",
+    "home": "Go to the home page"
+  },
+  "admin": {
+    "title": "Staff panel",
+    "menu": "Admin menu",
+    "orders": "Orders",
+    "products": "Products",
+    "backToShop": "Back to shop",
+    "backToOrders": "Back to orders",
+    "kpi": {
+      "today": "Orders today",
+      "revenue": "Revenue",
+      "pending": "Awaiting payment"
+    },
+    "statusTabs": "Filter orders by status",
+    "all": "All",
+    "searchPlaceholder": "Order number or customer",
+    "noOrders": "No orders match.",
+    "columns": {
+      "number": "Order",
+      "customer": "Customer",
+      "date": "Date",
+      "items": "Items",
+      "total": "Total",
+      "status": "Status",
+      "product": "Product",
+      "category": "Category",
+      "price": "Price",
+      "stock": "Stock",
+      "actions": "Actions"
+    },
+    "lowStock": "Low stock",
+    "newStatus": "New status",
+    "note": "Note (optional)",
+    "updateStatus": "Update status",
+    "updated": "Order status updated",
+    "history": "Status history",
+    "errors": {
+      "transition": "This order cannot move to that status."
+    },
+    "viewOrder": "View order",
+    "productsPage": {
+      "hint": "Click a price or a stock number to edit it. Press Enter to save or Esc to cancel.",
+      "edit": "Edit",
+      "save": "Save",
+      "saved": "Saved",
+      "view": "Open product page",
+      "markOut": "Mark out of stock",
+      "selected": "{n} selected",
+      "selectAll": "Select all products",
+      "confirmText": "Set the stock of {n} products to 0? Customers will no longer be able to buy them.",
+      "priceError": "Enter a price greater than 0, with at most 2 decimals.",
+      "stockError": "Enter a whole number, 0 or more."
+    },
+    "settings": {
+      "title": "Settings",
+      "shippingTitle": "Shipping",
+      "fee": "Flat shipping fee",
+      "freeOver": "Free shipping threshold",
+      "freeOverHint": "Orders above this amount ship free.",
+      "taxTitle": "Tax",
+      "vatNumber": "VAT registration number",
+      "vatHint": "15 digits, starting with 3.",
+      "storeTitle": "Store",
+      "open": "Store is open",
+      "closed": "Store is closed",
+      "closedMessage": "Message shown while closed",
+      "closedHint": "Shown at the top of every shop page and when someone tries to check out.",
+      "closedDefault": "The store is closed right now. Please come back soon.",
+      "notifyTitle": "Notifications",
+      "notifyHint": "These addresses get an email for every new order.",
+      "noEmails": "No addresses yet.",
+      "addEmail": "Email address",
+      "add": "Add",
+      "emailExists": "This address is already in the list.",
+      "unsaved": "You have unsaved changes",
+      "discard": "Discard",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "savedMessage": "Settings saved",
+      "errors": {
+        "fee": "Enter a fee between 0 and 1000.",
+        "freeOver": "Enter an amount of 0 or more.",
+        "vat": "Enter 15 digits starting with 3.",
+        "messageLong": "Use at most 200 characters.",
+        "emailsMany": "You can add up to 10 addresses."
+      }
+    },
+    "roles": {
+      "title": "Roles and permissions",
+      "permission": "Permission",
+      "selectAll": "Select all",
+      "ownerNote": "The owner role always has every permission.",
+      "save": "Save roles",
+      "saved": "Roles saved",
+      "groups": {
+        "orders": "Orders",
+        "products": "Products",
+        "customers": "Customers",
+        "settings": "Settings"
+      },
+      "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "packer": "Packer",
+        "support": "Support"
+      },
+      "permissions": {
+        "orders.view": "View orders",
+        "orders.update": "Update order status",
+        "orders.cancel": "Cancel and refund orders",
+        "products.view": "View products",
+        "products.edit": "Edit prices and stock",
+        "products.delete": "Delete products",
+        "customers.view": "View customers",
+        "customers.edit": "Edit customers",
+        "customers.export": "Export customer data",
+        "settings.view": "View settings",
+        "settings.edit": "Change settings",
+        "settings.roles": "Manage roles"
+      }
+    }
+  },
+  "gift": {
+    "title": "Build a gift box",
+    "intro": "Pick a box, fill it with dates, coffee and incense, add a card and we pack it for you.",
+    "chooseSize": "1. Choose a box",
+    "slots": "Slots: {n}",
+    "chooseItems": "2. Choose what goes inside",
+    "itemsHint": "Some items take two slots. Items in the box are priced at their smallest size.",
+    "summary": "Your box",
+    "slotsUsed": "Slots used",
+    "over": "The items do not fit. Remove some or choose a bigger box.",
+    "empty": "Add at least {n} items to your box.",
+    "message": "Card message (optional)",
+    "wrap": "Gift wrap",
+    "addBox": "Add box to cart",
+    "count": "{n} items in the box",
+    "noStock": "No more in stock",
+    "noRoom": "Needs {need} slots, {left} left",
+    "cardLine": "Card: {text}",
+    "errors": {
+      "size": "Choose a box size.",
+      "invalid": "One of the items cannot go in a gift box.",
+      "stock": "Not enough {name} in stock.",
+      "min": "Add at least {n} items to the box.",
+      "capacity": "The items do not fit in this box ({n} slots).",
+      "message": "The message can be up to {n} characters."
+    }
+  },
+  "tracking": {
+    "title": "Track order",
+    "trackOrder": "Track order",
+    "backToOrder": "Back to the order",
+    "timeline": "Order progress",
+    "pending": "Not yet",
+    "refreshing": "This page updates by itself.",
+    "courier": "Courier",
+    "couriers": {
+      "safar": "Safar Express",
+      "durub": "Durub Delivery"
+    },
+    "number": "Tracking number",
+    "copy": "Copy tracking number",
+    "copied": "Copied",
+    "notAssigned": "A courier is assigned when your order leaves the warehouse.",
+    "eta": "Expected delivery",
+    "cancelled": "This order was cancelled.",
+    "steps": {
+      "ordered": "Order placed",
+      "paid": "Payment received",
+      "preparing": "Preparing your order",
+      "handed_to_courier": "Handed to the courier",
+      "out_for_delivery": "Out for delivery",
+      "delivered": "Delivered"
+    }
+  }
+}

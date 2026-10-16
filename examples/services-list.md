@@ -8,37 +8,36 @@ breadcrumb:
 hero_title: "Government Services"
 hero_description: "Browse all available government digital services"
 sidemenu_mode: false
-exclude_showcase: false
-last_edit: "10/08/2026 - 12:42 AM"
+last_edit: "13/10/2026 - 11:23 AM"
 ---
 
-<section id="servicesList" class="nds-content-section">
+<section id="services-list" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-body">
             <div class="nds-toolbar">
-                <div class="nds-form-container nds-search-box nds-demo-showcase" data-filter-target="services_list_content"
+                <div class="nds-form-container nds-search-box" data-filter-target="services_list_content"
                     data-url="{{ '/docs-assets/data/services-autocomplete.json' | relative_url }}" data-name="Title"
                     data-query-param="q">
                     <div class="nds-search-content">
                         <div class="nds-form-control">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <input id="filterSearch" type="text" class="nds-search-input" name="search" autocomplete="on"
+                            <input id="filter-search" type="text" class="nds-search-input" name="search" autocomplete="on"
                                 placeholder="Search in services...">
                             <div class="nds-form-action">
-                                <button class="nds-btn nds-subtle nds-clear" hidden aria-label="Clear search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
-                                <button class="nds-btn nds-subtle nds-voice-input" aria-label="Voice input"><i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i></button>
+                                <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
+                                <button class="nds-btn nds-subtle nds-voice-input nds-icon-only" aria-label="Voice input" data-i18n-aria-label="voice-input.voice_input"><i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <button class="nds-btn nds-primary nds-search-btn" type="button">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <span class="nds-label" data-hidden="sm sr">Search</span>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                         </button>
                     </div>
                 </div>
                 <div class="nds-dropmenu nds-filter" data-filter-target="services_list_content">
                     <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger">
                         <i class="hgi hgi-stroke hgi-filter"></i>
-                        <span class="nds-label" data-hidden="sm sr">Filter</span>
+                        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
                     </button>
                     <div class="nds-dropmenu-menu" style="min-width: 300px;" hidden>
                         <div class="nds-dropmenu-scroll">
@@ -55,21 +54,21 @@ last_edit: "10/08/2026 - 12:42 AM"
                             <div class="nds-dropmenu-action">
                                 <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
                                     data-filter-action="clear" data-no-auto-close>
-                                    <span class="nds-label">Reset</span>
+                                    <span class="nds-label" data-i18n="filter.reset">Reset</span>
                                 </button>
                                 <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
                                     data-filter-action="apply">
-                                    <span class="nds-label">Filter</span>
+                                    <span class="nds-label" data-i18n="filter.filter">Filter</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="nds-filter-applied" data-filter-target="services_list_content" hidden>
-                    <span class="nds-label">Applied Filters:</span>
+                    <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
                     <div class="nds-chips"></div>
                 </div>
-                <div class="nds-auto-fill" data-target="filterSearch" data-filter-target="services_list_content">
+                <div class="nds-auto-fill" data-target="filter-search" data-filter-target="services_list_content">
                     <span class="nds-label">Most Searched:</span>
                     <div class="nds-chips">
                         <button class="nds-chip nds-neutral nds-rounded nds-item">
@@ -129,7 +128,7 @@ last_edit: "10/08/2026 - 12:42 AM"
             {% endfor %}
 
         </div>
-        <nav class="nds-pagination" data-auto-pagination="services_list_content" aria-label="Pagination"></nav>
+        <nav class="nds-pagination" data-auto-pagination="services_list_content" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
         </div>
     </div>
 </section>

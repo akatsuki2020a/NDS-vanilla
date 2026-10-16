@@ -1,8 +1,7 @@
 ---
-exclude_showcase: true
 layout: page
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
-layout_class: nds-wSideInfo
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
+layout_class: nds-has-sideinfo
 title: Content Template
 hero_style: "nds-flat"
 hero_title: Standard Content Page Example
@@ -14,13 +13,13 @@ lang: en
 direction: ltr
 sidemenu_mode: false
 ---
-<section id="contentTemplate" class="nds-content-section nds-sideinfo-section">
+<section id="content-template" class="nds-content-section nds-sideinfo-section">
     <div class="nds-section-body">
-        <aside class="nds-sideinfo nds-md nds-sticky nds-top" aria-label="On this page">
-            <nav class="nds-toc" aria-label="Table of contents" style="--toc-skeleton-rows: 11"
-                data-toc-source="#contentTemplate article" data-toc-levels="h2, h3, h4">
+        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="On this page" data-i18n-aria-label="toc.on_this_page">
+            <nav class="nds-toc" aria-label="Table of contents" data-i18n-aria-label="toc.table_of_contents" style="--toc-skeleton-rows: 11"
+                data-toc-source="#content-template article" data-toc-levels="h2, h3, h4">
                 <div class="nds-toc-head">
-                    <span class="nds-label">On this page</span>
+                    <span class="nds-label" data-i18n="toc.on_this_page">On this page</span>
                     <h2 class="nds-toc-title nds-truncate">Page Title</h2>
                 </div>
                 <div class="nds-drawer nds-lined">
@@ -31,7 +30,7 @@ sidemenu_mode: false
         <div class="nds-info-content">
             <article class="nds-prose">
 
-                <h2 id="section-1" class="nds-section-title">Section 1</h2>
+                <h2 id="section-1">Section 1</h2>
                 <p>This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system.</p>
                 <ol>
                     <li>Ordered list item
@@ -72,7 +71,7 @@ sidemenu_mode: false
                     </li>
                 </ul>
 
-                <h2 id="section-2" class="nds-section-title">Section 2</h2>
+                <h2 id="section-2">Section 2</h2>
                 <p>This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections.</p>
                 <ol>
                     <li>Ordered list item
@@ -93,10 +92,10 @@ sidemenu_mode: false
                     <li>Unordered list item</li>
                 </ul>
 
-                <h2 id="section-3" class="nds-section-title">Section 3</h2>
+                <h2 id="section-3">Section 3</h2>
                 <p>When using forms, the standard form fields used are text fields which are typically used for short text input. Statuses of the form field are default, active, focused, error, hint, and disabled. When using forms, the standard form fields used are text fields which are typically used for short text input.</p>
 
-                <h2 id="section-4" class="nds-section-title">Section 4</h2>
+                <h2 id="section-4">Section 4</h2>
                 <p>Links are used when there is a need to use a linking mechanism for directing the user to another page within the portal or to an external portal. There are two types of links that can be used. <a href="#" class="nds-primary">Links within a text body</a> just like this example are underlined with a bold primary color. Standalone links which can be used separately are underlined and contain an icon.</p>
                 <p>
                     <a href="#" class="nds-btn nds-transparent nds-color nds-trail-icon">
@@ -126,7 +125,7 @@ sidemenu_mode: false
                     <p>This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system.</p>
                 </div>
 
-                <h2 id="section-5" class="nds-section-title">Section 5</h2>
+                <h2 id="section-5">Section 5</h2>
                 <p>This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections. This is an example of the paragraph style followed by the design system. The same style is consistent across all body text sections.</p>
 
             </article>

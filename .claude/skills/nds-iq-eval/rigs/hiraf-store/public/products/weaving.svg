@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" width="800" height="800" role="img" aria-label="سدو ونسيج">
+  <rect width="800" height="800" fill="#a33a3a"/>
+  <path d="M400 160l180 180-180 180-180-180z" fill="#fff" fill-opacity=".85"/><path d="M400 250l90 90-90 90-90-90z" fill="#a33a3a"/>
+  <text x="400" y="700" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-size="64" fill="#fff">سدو ونسيج</text>
+</svg>

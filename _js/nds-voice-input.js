@@ -1,6 +1,8 @@
 /* NDS.VoiceInput — public surface
  * Rides: nds-forms (the `listening` state on the field container; soft — a bare input just
  *        gets its value set)
+ * Requires:
+ *   .nds-voice-input:not([data-voice-target]):not([data-target]) sits in .nds-form-control — there is no input to fill
  * Methods:
  *   NDS.VoiceInput.init() / .reinit()   install the delegated click handler (idempotent)
  *   NDS.VoiceInput.isSupported()        Web Speech API available? — gate your own UI on it
@@ -10,11 +12,16 @@
  *   data-voice-target · data-target   id, name, or data-name of the input to dictate into.
  *                                     With neither, the button's own .nds-form-control input.
  * Gotchas:
- *   - The button is never hidden on an unsupported browser; a click shows a message in the
- *     field instead. Gate on isSupported() if you want it gone.
+ *   - The button is never hidden on an unsupported browser; a click shows a message under
+ *     the field instead. Gate on isSupported() if you want it gone.
  *   - Listening auto-stops after 30 seconds.
+ *   - Words go in at the caret, or over the selection, and keep the text around them; a field
+ *     the user was not in, or one with no caret (email), takes them at the end.
  *   - Interim words are written into the input as they arrive; only the final result
  *     dispatches input/change.
+ *   - Messages (no speech, permission, timeout) are a neutral field message for 4 seconds,
+ *     through NDS.Forms.setStatus, so they sit where the field's validation message does;
+ *     a message they cover comes back after.
  */
 // NDS Voice Input — voice-dictation for a text field.
 //
@@ -46,30 +53,21 @@
 
     var VOICE_TIMEOUT = 30000; // auto-stop after 30s of listening
 
-    var MESSAGES = {
-        ar: {
-            'no-speech': 'لم يتم اكتشاف صوت',
-            'not-allowed': 'مطلوب إذن الميكروفون',
-            'audio-capture': 'تم رفض الوصول للميكروفون',
-            'network': 'خطأ في الشبكة',
-            'aborted': 'تم إلغاء إدخال الصوت',
-            'language-not-supported': 'اللغة غير مدعومة',
-            'default': 'خطأ في إدخال الصوت',
-            'timeout': 'انتهت مهلة إدخال الصوت',
-            'unsupported': 'إدخال الصوت غير مدعوم في هذا المتصفح'
-        },
-        en: {
-            'no-speech': 'No speech detected',
-            'not-allowed': 'Microphone permission required',
-            'audio-capture': 'Microphone access denied',
-            'network': 'Network error',
-            'aborted': 'Voice input cancelled',
-            'language-not-supported': 'Language not supported',
-            'default': 'Voice input error',
-            'timeout': 'Voice input timed out',
-            'unsupported': 'Voice input is not supported in this browser'
-        }
-    };
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    var strings = NDS.i18n.strings('voice-input', {
+        start: 'Start voice input ({language})',
+        stop: 'Stop voice input',
+        language: 'English',
+        'no-speech': 'No speech detected',
+        'not-allowed': 'Microphone permission required',
+        'audio-capture': 'Microphone access denied',
+        network: 'Network error',
+        aborted: 'Voice input cancelled',
+        'language-not-supported': 'Language not supported',
+        default: 'Voice input error',
+        timeout: 'Voice input timed out',
+        unsupported: 'Voice input is not supported in this browser',
+    });
 
     // ── Web Speech engine (internal, lazy) ────────────────────────────
     // The AudioContext is created on the first tone and recognition on the
@@ -118,7 +116,7 @@
     }
 
     function getLanguage() {
-        return NDS.isArabic ? 'ar-SA' : 'en-US';
+        return NDS.isArabic ? 'ar-SA' : (document.documentElement.lang || 'en-US');
     }
 
     function createRecognition() {
@@ -182,35 +180,30 @@
             || fc.querySelector(':scope > input, :scope > textarea');
     }
 
-    // Transient message in the field's placeholder, restored after `duration`.
-    // Captures the true original only when no message is already showing and
-    // cancels any pending restore, so overlapping messages can't strand a
-    // message string as the "original".
-    function showMessage(input, message, duration) {
+    // A 4-second field message, placed like any field message (a placeholder hides once the
+    // field has text). Neutral: a mic problem is not an invalid value. The message it covered
+    // comes back.
+    function showMessage(input, message) {
         if (!input) return;
-        if (input._ndsMsgTimer) clearTimeout(input._ndsMsgTimer);
-        else input._ndsMsgOrig = input.placeholder;
-        input.placeholder = message;
-        input.style.fontStyle = 'italic';
-        input.style.opacity = '0.7';
-        input._ndsMsgTimer = setTimeout(function() {
-            input.placeholder = input._ndsMsgOrig;
-            input.style.fontStyle = '';
-            input.style.opacity = '';
-            input._ndsMsgTimer = null;
-        }, duration || 3000);
+        var container = input.closest('.nds-form-container');
+        if (!container) {
+            var el = NDS.Feedback.create({ message: message, status: 'neutral', target: input, position: 'after', size: 'sm', style: 'outline' });
+            setTimeout(function() { NDS.Feedback.dismiss(el); }, 4000);
+            return;
+        }
+        var prev = { status: container.getAttribute('data-status'), message: container.getAttribute('data-message') };
+        NDS.Forms.setStatus({ element: input, status: 'neutral', message: message });
+        setTimeout(function() {
+            if (container.getAttribute('data-message') !== message) return; // validation wrote since
+            if (prev.status && prev.message) NDS.Forms.setStatus({ element: input, status: prev.status, message: prev.message });
+            else NDS.Forms.clearStatus(input);
+        }, 4000);
     }
 
-    // Localized button labels, computed fresh each use so a runtime language
-    // switch is reflected (the engine messages already read NDS.langKey lazily).
-    function labels() {
-        var ar = NDS.isArabic;
-        var langName = ar ? 'العربية' : 'English';
-        return {
-            start: ar ? 'بدء إدخال الصوت (' + langName + ')' : 'Start voice input (' + langName + ')',
-            stop: ar ? 'إيقاف إدخال الصوت' : 'Stop voice input'
-        };
-    }
+    // The element that last lost focus: a click on the mic moves focus off the field,
+    // and its caret counts only if the user was just in it.
+    var lastBlurred = null;
+
 
     // ── Per-button session (lazy, kept in a WeakMap) ──────────────────
     var sessions = new WeakMap();
@@ -227,6 +220,28 @@
         var timeout = null;
         var input = null;
         var container = null;
+        var before = '', after = '';
+
+        // Dictation goes in at the caret (or over the selection), like OS dictation;
+        // a field the user was not in, or one with no caret (email), takes it at the end.
+        function markInsertPoint() {
+            var value = input.value, s = null, e = null;
+            if (document.activeElement === input || lastBlurred === input) {
+                try { s = input.selectionStart; e = input.selectionEnd; } catch (err) {}
+            }
+            if (s == null) s = e = value.length;
+            before = value.slice(0, s);
+            after = value.slice(e);
+        }
+
+        // Each partial result fires input, as typing does; the final one adds change.
+        function write(text, done) {
+            if (text && before && !/\s$/.test(before)) text = ' ' + text;
+            if (text && after && !/^\s/.test(after)) text += ' ';
+            NDS.setValue(input, before + text + after, { change: !!done });
+            var caret = before.length + text.length;
+            try { input.setSelectionRange(caret, caret); } catch (err) {}
+        }
 
         function stop() {
             isListening = false;
@@ -242,11 +257,7 @@
 
             if (container) NDS.State.remove(container, 'listening');
             NDS.aria.pressed(button, false);
-            NDS.aria.label(button, labels().start);
-            if (input) {
-                input.style.fontStyle = '';
-                input.style.opacity = '';
-            }
+            NDS.aria.label(button, strings.text('start', { language: strings.text('language') }));
         }
 
         function start() {
@@ -262,33 +273,24 @@
             isListening = true;
             if (container) NDS.State.add(container, 'listening');
             NDS.aria.pressed(button, true);
-            NDS.aria.label(button, labels().stop);
+            NDS.aria.label(button, strings.text('stop'));
+            markInsertPoint();
             input.focus();
 
             timeout = setTimeout(function() {
                 stop();
-                showMessage(input, MESSAGES[NDS.langKey].timeout, 4000);
+                showMessage(input, strings.text('timeout'));
             }, VOICE_TIMEOUT);
 
             listen(recognition, {
                 onResult: function(result) {
-                    var value = result.isFinal ? result.final.trim() : result.interim;
-                    input.style.fontStyle = result.isFinal ? '' : 'italic';
-                    input.style.opacity = result.isFinal ? '' : '0.7';
-                    input.value = value;
-
-                    if (result.isFinal) {
-                        stop();
-                        // Standard signal — forms (and any consumer) sync chrome
-                        // off the input/change events, no reach into forms internals.
-                        NDS.triggerEvents(input);
-                    }
+                    write(result.isFinal ? result.final.trim() : (result.final + result.interim).trim(), result.isFinal);
+                    if (result.isFinal) stop();
                 },
                 onError: function(error) {
                     stop();
                     var errorType = typeof error === 'string' ? error : (error && error.error);
-                    var dict = MESSAGES[NDS.langKey];
-                    showMessage(input, dict[errorType] || dict['default']);
+                    showMessage(input, strings.text(strings.has(errorType) ? errorType : 'default'));
                 },
                 onEnd: stop
             });
@@ -308,7 +310,7 @@
         if (!button) return;
         if (!isSupported()) {
             // No hiding — tell the user in the field, leave the button alone.
-            showMessage(resolveInput(button), MESSAGES[NDS.langKey].unsupported);
+            showMessage(resolveInput(button), strings.text('unsupported'));
             return;
         }
         getSession(button).toggle();
@@ -318,9 +320,10 @@
         if (_initDone) return;
         _initDone = true;
         document.addEventListener('click', onVoiceClick);
+        document.addEventListener('focusout', function(e) { lastBlurred = e.target; });
         // If a button is removed mid-listening, stop its session so the mic
         // doesn't stay open until the 30s timeout. Pooled observer, fires only
-        // on real removals (portal reparents are filtered out by the bus).
+        // on real removals (reparents are filtered out by the bus).
         NDS.onDOMRemove('.nds-voice-input', function(buttons) {
             buttons.forEach(function(btn) {
                 var s = sessions.get(btn);

@@ -1,6 +1,10 @@
 /* NDS.Slider — public surface
  * Rides: nds-numbers (locale, thousand separators and the currency mark on the value
  *        output; soft — the raw value shows without it)
+ * Requires:
+ *   .nds-slider-container:not(.nds-slider-range) needs .nds-slider-track — the fill never paints
+ *   .nds-slider-container.nds-slider-range needs .nds-slider-min — the thumbs are not clamped and the fill never paints
+ *   .nds-slider-container.nds-slider-range needs .nds-slider-max — the thumbs are not clamped and the fill never paints
  * Methods:
  *   NDS.Slider.init()          wire the delegated input listener; initialize every
  *                              .nds-slider-container
@@ -16,6 +20,8 @@
  * Gotchas:
  *   - The native <input type="range"> owns drag, keyboard, touch and screen-reader
  *     behaviour. Read input.value; there is no custom event and no getValue().
+ *   - A readonly input ignores the step keys (browsers ignore readonly on a range input);
+ *     data-state="readonly" on the container sets it through the forms script.
  *   - Range mode is the .nds-slider-range class on the container. The two thumbs are
  *     clamped so they can never cross.
  *   - Add .nds-number-format to the value element to opt into number formatting.
@@ -35,6 +41,7 @@
     if (!window.NDS) window.NDS = {};
 
     var SENTINEL = 'data-nds-slider-initialized';
+    var STEP_KEYS = /^(Arrow(Up|Down|Left|Right)|Home|End|Page(Up|Down))$/;
 
     function pct(input) {
         var min = parseFloat(input.min);
@@ -48,7 +55,7 @@
     // Soft dependency — Slider skips locale/currency formatting when NDS.Numbers
     // (a deferred, optional sibling) isn't bundled; the output keeps the raw value.
     function formatOutput(el) {
-        if (NDS.Numbers && NDS.Numbers.format) NDS.Numbers.format(el);
+        if (el.classList.contains('nds-number-format') && NDS.Numbers && NDS.Numbers.format) NDS.Numbers.format(el);
     }
 
     // Re-format on every update: NDS.Numbers also paints the [data-currency]::after
@@ -98,8 +105,8 @@
 
         // Never let the thumbs cross: clamp the dragged one to the other's value.
         if (parseFloat(minInput.value) > parseFloat(maxInput.value)) {
-            if (document.activeElement === minInput) minInput.value = maxInput.value;
-            else                                     maxInput.value = minInput.value;
+            var clamped = document.activeElement === minInput ? minInput : maxInput;
+            NDS.setValue(clamped, clamped === minInput ? maxInput.value : minInput.value);
         }
 
         var track = container.querySelector('.nds-slider-track');
@@ -159,6 +166,11 @@
             var c = t.closest('.nds-slider-container');
             if (c) paint(c);
         });
+        // Browsers ignore readonly on a range input, so the keys would still move it.
+        document.addEventListener('keydown', function (e) {
+            var t = e.target;
+            if (t && t.readOnly && t.matches && t.matches('.nds-slider') && STEP_KEYS.test(e.key)) e.preventDefault();
+        });
         // Toggling .nds-stacked (a class change) neither re-runs init nor fires a
         // resize — re-apply the reservation when a container's class changes.
         // onAttrChange hands the callback a nodes array.
@@ -173,6 +185,7 @@
             document.querySelectorAll('.nds-slider-container').forEach(initOne);
         },
         reinit: function (el) {
+            bindOnce();
             var list = el ? [el] : document.querySelectorAll('.nds-slider-container');
             list.forEach(function (c) {
                 c.removeAttribute(SENTINEL);
@@ -189,6 +202,7 @@
             // reinit re-uses it. Upgrade to AbortController if a future variant
             // needs per-instance teardown (e.g. native vertical orientation).
         },
-        create: function (el) { initOne(el); return el; }
+        // A page with no slider at load never runs init(), so create() binds the delegates too.
+        create: function (el) { bindOnce(); initOne(el); return el; }
     };
 })();

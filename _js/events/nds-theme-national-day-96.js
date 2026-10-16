@@ -8,19 +8,19 @@
 // Two ways to activate, one code path:
 //   1. Downstream one-tag: a site drops a single <script src=".../nds-theme-
 //      national-day-96.min.js"> tag. Placed synchronously in <head>, the
-//      stylesheet it injects is render-blocking → themed first paint, zero FOUC
+//      styles it injects apply during parse → themed first paint, zero FOUC
 //      (with `defer` it still works, with a brief default-theme flash). The pack
-//      injects its own <link>, stamps the marker token on <html data-theme>, and
+//      injects its own styles, stamps the marker token on <html data-theme>, and
 //      injects the event hero slide. Deleting the tag ends the event cleanly.
 //   2. Showcase switcher: _js/nds-theme.js loads this file on demand and drives
 //      it via the hooks below; its own link/token writes overlap ours idempotently.
 //
 // Hooks contract: window.__NDS_THEME_HOOKS[THEME] = { inject, teardown }, both
-// idempotent and self-contained — inject = link + token + slide, teardown removes
-// all three. Token writes are attribute-only; persistence stays the switcher's job.
+// idempotent and self-contained — inject = styles + token + slide, teardown
+// removes all three. Token writes are attribute-only; persistence stays the switcher's job.
 //
 // Two hero types (data-type on the script tag):
-//   2 (default) the official six-slide campaign hero on the swiper's deck mode —
+//   2 (default) the official six-slide campaign hero with its deck of cards —
 //               the site's own slides step aside while the pack is on
 //   1           one plain slide, the standard hero markup with the event photo
 //
@@ -45,9 +45,9 @@
     var LINK_ID = 'nds-theme-stylesheet';   // shared slot: nds-theme.js LINK_ID + head.html brand path
     var SWIPER_SEL = '.nds-hero-section .nds-swiper.nds-hero';
     // Both are injection/teardown hooks only — the stylesheet styles neither.
-    var SLIDE_CLASS = 'nds-nationalDay';      // the type 1 slide
+    var SLIDE_CLASS = 'nds-national-day';      // the type 1 slide
     var DECK_SLIDE = 'nds-nd96-slide';         // a type 2 slide
-    var LOGO_CLASS = 'nds-nationalDay-logo';
+    var LOGO_CLASS = 'nds-national-day-logo';
 
     // This script ships beside its assets (…/docs-assets/events/national_day_96/), so
     // its own folder is the asset base. Captured at load — currentScript is null
@@ -56,6 +56,20 @@
         document.querySelector('script[src*="nds-theme-national-day-96"]');
     var BASE = SCRIPT && SCRIPT.src ? SCRIPT.src.slice(0, SCRIPT.src.lastIndexOf('/') + 1) : '';
     var CSS_HREF = BASE + 'nds-theme-' + THEME + '.min.css';
+    // The pack's own CSS, injected inline. scripts/mkevent.py prepends the
+    // assignment to the minified file; read off a global rather than declared as
+    // a constant here because a minifier folds a constant '' and takes the whole
+    // inline branch with it as dead code. Unset (repo, or a JS rebuild after
+    // mkevent) the link fallback runs -- slower, never broken.
+    var CSS_TEXT = window.__NDS_EVENT_CSS || '';
+    try { delete window.__NDS_EVENT_CSS; } catch (e) { window.__NDS_EVENT_CSS = void 0; }
+    // mkevent.py rewrote every relative url() to this token, because an inlined
+    // <style> resolves them against the document instead of the stylesheet. BASE
+    // is this script's own folder, so the assets resolve wherever the pack sits.
+    if (CSS_TEXT) CSS_TEXT = CSS_TEXT.split('__NDS_EVENT_BASE__').join(BASE);
+    // Copied onto the injected <style> so a nonce-based CSP accepts it. Read off
+    // SCRIPT, captured above -- currentScript is null inside any later callback.
+    var NONCE = (SCRIPT && SCRIPT.nonce) || '';
     var DATA = SCRIPT ? SCRIPT.dataset : {};
 
     function pick(key, fallback) {
@@ -234,10 +248,25 @@
     }
 
     // ── Stylesheet link (shared #nds-theme-stylesheet slot) ─────────────────
-    // Create only if absent: in the switcher/brand paths the link already exists
-    // (ensureStylesheet / head.html) — leave its href (incl. ?ver=) alone.
-    function ensureLink() {
+    // Create only if absent: the brand: path in head.html fills that slot itself —
+    // leave its href (incl. ?ver=) alone. The switcher never fills it: it loads this
+    // pack and nothing else, because the CSS below is already inside this file.
+    // The stylesheet reaches the page inline when the build filled CSS_TEXT, and
+    // as a fetched link otherwise. Inline is ~400ms of first paint on slow 4G:
+    // the link costs a SECOND blocking round trip, discovered only once this
+    // script has run. Either way it is skipped when LINK_ID already exists --
+    // the brand: path in head.html owns that slot.
+    function ensureStyles() {
         if (document.getElementById(LINK_ID)) return;
+        if (document.querySelector('[data-nds-event-style]')) return;
+        if (CSS_TEXT) {
+            var s = document.createElement('style');
+            s.setAttribute('data-nds-event-style', THEME);
+            if (NONCE) s.setAttribute('nonce', NONCE);
+            s.textContent = CSS_TEXT;
+            document.head.appendChild(s);
+            return;
+        }
         if (document.readyState === 'loading') {
             // Parser-inserted = render-blocking in every browser; script-created
             // links are NOT, so appendChild alone flashes the default theme.
@@ -249,9 +278,11 @@
         l.blocking = 'render';
         document.head.appendChild(l);
     }
-    function removeLink() {
+    function removeStyles() {
         var l = document.getElementById(LINK_ID);
         if (l) l.remove();
+        var s = document.querySelector('[data-nds-event-style="' + THEME + '"]');
+        if (s) s.remove();
     }
 
     // ── Marker token on <html data-theme> (attribute-only, no storage) ──────
@@ -325,7 +356,8 @@
     function removeSlide() {
         var swiper = document.querySelector(SWIPER_SEL);
         if (!swiper) return;
-        var slide = swiper.querySelector('.nds-swiper-slide.' + SLIDE_CLASS);
+        // A loop's head clones copy the class and come first; reinit drops them.
+        var slide = swiper.querySelector('.nds-swiper-slide.' + SLIDE_CLASS + ':not(.nds-swiper-clone)');
         if (!slide) return;
         slide.remove();
         var total = parseInt(swiper.style.getPropertyValue('--total'), 10) || (swiper.querySelectorAll('.nds-swiper-slide').length + 1);
@@ -333,12 +365,12 @@
         if (swiper.hasAttribute('data-nds-swiper-initialized')) reinit(swiper);
     }
 
-    // ── Type 2: six slides + the swiper's deck of cards ─────────────────────
-    // Slides are standard hero markup; the cards are the deck mode's own markup
-    // (components/swiper: .nds-deck). The section carries nds-nd96 + the active
+    // ── Type 2: six slides + the pack's deck of cards ───────────────────────
+    // Slides are standard hero markup; the cards are the pack's deck markup
+    // (.nds-deck, drawn by the pack's stylesheet). The section carries nds-nd96 + the active
     // slide's theme class, which is all the stylesheet keys on.
     var DECK_CLASS = 'nds-nd96';
-    var _siteSlides = [], _siteTotal = '', _navHadCenter = false, _pageHadMd = false;
+    var _siteSlides = [], _siteTotal = '', _navHadCenter = false, _pageHadMd = false, _siteLoop = false;
     var _deckAbort = null, _typeTimer = 0, _holdTimer = 0, _current = -1, _paused = false, _wordDone = false;
 
     function fullTitle(s) { return t(LEAD) + ' ' + t(s.word); }
@@ -365,12 +397,8 @@
         card.type = 'button';
         card.className = 'nds-swiper-card';
         card.setAttribute('aria-label', fullTitle(s));
-        // First-paint state (slide 0 open); JS owns it from init.
-        var n = SLIDES.length, srel = i > n / 2 ? i - n : i;
-        card.style.setProperty('--rel', i);
-        card.style.setProperty('--srel', srel);
-        if (!i) card.setAttribute('data-status', 'active');
-        else if (Math.abs(srel) === 1) card.setAttribute('data-status', 'near');
+        // No first-paint stamps: the mode's CSS places the cards by DOM order
+        // until the swiper inits, and the pack ships that CSS too.
         card.innerHTML = '<img src="' + esc(assetUrl(s.card)) + '" width="491" height="491" alt=""' +
             (i ? ' loading="lazy" decoding="async"' : ' fetchpriority="high"') + '>';
         return card;
@@ -399,6 +427,8 @@
         // Snapshot: removing from the live collection while walking it skips every other child.
         Array.prototype.slice.call(wrapper.children).forEach(function (el) {
             if (el.classList.contains(DECK_SLIDE)) return;
+            // A live loop's clones would come back as real slides; the swiper re-clones.
+            if (el.classList.contains('nds-swiper-clone')) { el.remove(); return; }
             _siteSlides.push(el);
             el.remove();
         });
@@ -422,7 +452,8 @@
         });
         wrapper.parentNode.insertBefore(deck, wrapper.nextSibling);
         swiper.classList.add('nds-deck');
-        swiper.setAttribute('data-swiper-loop', '');   // deck mode loops on its own; older runtimes need the attribute
+        _siteLoop = swiper.hasAttribute('data-swiper-loop');
+        swiper.setAttribute('data-swiper-loop', '');   // the deck wraps, so the track does too
         swiper.style.setProperty('--total', String(SLIDES.length));
         var nav = swiper.querySelector('.nds-swiper-navigation'), page = swiper.querySelector('.nds-swiper-pagination');
         _navHadCenter = !!(nav && nav.classList.contains('nds-center'));
@@ -440,7 +471,7 @@
         var dirWatch = new MutationObserver(retext);
         dirWatch.observe(document.documentElement, { attributes: true, attributeFilter: ['dir'] });
         sig.addEventListener('abort', function () { dirWatch.disconnect(); });
-        // Runtimes older than deck mode: adopt the swiper once it initializes
+        // Adopt the swiper once it initializes
         // (and again after every reinit — the attribute comes back each time).
         var initWatch = new MutationObserver(function () {
             if (swiper.hasAttribute('data-nds-swiper-initialized')) adoptDeck(swiper);
@@ -584,7 +615,7 @@
         _siteSlides.forEach(function (s) { wrapper.appendChild(s); });
         _siteSlides = [];
         swiper.classList.remove('nds-deck');
-        swiper.removeAttribute('data-swiper-loop');
+        if (!_siteLoop) swiper.removeAttribute('data-swiper-loop');
         var nav = swiper.querySelector('.nds-swiper-navigation'), page = swiper.querySelector('.nds-swiper-pagination');
         if (nav && !_navHadCenter) nav.classList.remove('nds-center');
         if (page && !_pageHadMd) page.classList.remove('nds-md');
@@ -593,16 +624,16 @@
         if (swiper.hasAttribute('data-nds-swiper-initialized')) reinit(swiper);
     }
 
-    // ── Older runtimes (before the swiper's deck mode, 1.13) ────────────────
-    // The pack's stylesheet already carries the deck CSS. This drives what the
-    // runtime lacks: card placement on every index change, the change event the
+    // ── The deck driver ──────────────────────────────────────────────────────
+    // The pack's stylesheet carries the deck CSS. This drives what the swiper
+    // lacks: card placement on every index change, the change event the
     // text follows, clone twins for syncClones (1.12 loops; earlier runtimes do
     // not, and there the arrows stop at the ends while auto-advance, drag and the
     // fan still wrap by index), the stacked-layout drag, and an instant text
-    // switch. A runtime with deck mode is left alone.
+    // switch.
     function adoptDeck(swiper) {
         var inst = swiper._ndsSwiper;
-        if (!inst || inst.updateDeck || inst._nd96Adopted) return;
+        if (!inst || inst._nd96Adopted) return;
         inst._nd96Adopted = true;
         var cards = Array.prototype.slice.call(swiper.querySelectorAll('.nds-swiper-card'));
         var n = cards.length;
@@ -673,7 +704,10 @@
                 try { deck.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer */ }
             }, { signal: sig });
             deck.addEventListener('pointermove', function (e) {
-                if (x0 === null || mq.matches) return;
+                // The fan layout has the arrows; only the stacked layout drags, and
+                // .nds-stacked asks for that layout above the breakpoint too. Read
+                // live so toggling the class needs no reinit.
+                if (x0 === null || (mq.matches && !swiper.classList.contains('nds-stacked'))) return;
                 dx = e.clientX - x0;
                 if (Math.abs(dx) > 4) { deck.classList.add('nds-dragging'); deck.style.setProperty('--drag', dx + 'px'); }
             }, { signal: sig });
@@ -753,7 +787,7 @@
 
     // ── Hooks (own link + token + slide + footer mark) + self-activation ─────
     function inject() {
-        ensureLink();
+        ensureStyles();
         addToken();
         scheduleSlide();
         scheduleLogo();
@@ -763,7 +797,7 @@
         removeHero();
         removeLogo();
         removeToken();
-        removeLink();
+        removeStyles();
     }
 
     window.__NDS_THEME_HOOKS = window.__NDS_THEME_HOOKS || {};

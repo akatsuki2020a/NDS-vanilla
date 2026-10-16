@@ -11,20 +11,15 @@
 //
 // Drives a real page — components/filter.html — and destroys a CLONE of its own demo
 // markup, so the harness cannot drift from canon. Then manage-records for the relocated
-// nodes (FAB, portaled menu) and an open modal, then a breadth sweep over every doc and
+// node (FAB), an open menu in the top layer and an open modal, then a breadth sweep over every doc and
 // example page with a coverage line for the registry components no page exercised.
 //
 //   node scripts/check-init-destroy.mjs [baseUrl]
 // Defaults to the dev server. Start it with `bundle exec jekyll serve` if it is down.
-import puppeteer from 'puppeteer-core';
-import { existsSync, readdirSync } from 'node:fs';
+import { launch } from './lib/browser.mjs';
+import { readdirSync } from 'node:fs';
 
 const BASE = (process.argv[2] || 'http://localhost:4002/NDS-vanilla').replace(/\/$/, '');
-const CHROME = [
-    process.env.CHROME_PATH,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-].find((p) => p && existsSync(p));
 
 const probe = await fetch(`${BASE}/components/filter.html`).catch(() => null);
 if (!probe?.ok) {
@@ -32,12 +27,12 @@ if (!probe?.ok) {
     process.exit(2);
 }
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });
+const browser = await launch();
 const page = await browser.newPage();
 const pageErrors = [];
 page.on('pageerror', (e) => pageErrors.push(e.message));
-await page.setViewport({ width: 1400, height: 1000 });
-await page.goto(`${BASE}/components/filter.html`, { waitUntil: 'networkidle0' });
+await page.setViewportSize({ width: 1400, height: 1000 });
+await page.goto(`${BASE}/components/filter.html`, { waitUntil: 'networkidle' });
 await page.evaluate(() => window.NDS.loadBundle('delegated').catch(() => {}));
 await new Promise((r) => setTimeout(r, 1200));
 
@@ -48,9 +43,12 @@ const report = await page.evaluate(async () => {
 
     ok('NDS.Init.destroy is exposed', typeof NDS.Init.destroy === 'function', typeof NDS.Init.destroy);
 
-    const srcToolbar = document.querySelector('#basicFilter .nds-toolbar');
-    const srcGrid = document.getElementById('basicFilterCards');
-    if (!srcToolbar || !srcGrid) return [{ name: 'fixture present', pass: false, detail: '#basicFilter markup not found' }];
+    // The page's canon block (#filter-bar): toolbar + list, as markup text.
+    const tpl = document.createElement('template');
+    tpl.innerHTML = document.getElementById('filter-bar')?.textContent || '';
+    const srcToolbar = tpl.content.querySelector('.nds-toolbar');
+    const srcGrid = tpl.content.getElementById('flt-items');
+    if (!srcToolbar || !srcGrid) return [{ name: 'fixture present', pass: false, detail: '#filter-bar canon block not found' }];
 
     // A whole view: toolbar and grid together, the shape a framework route unmounts.
     const host = document.createElement('div');
@@ -60,7 +58,7 @@ const report = await page.evaluate(async () => {
         el.removeAttribute('data-nds-filter-initialized');
         el.removeAttribute('data-paged-initialized');
     });
-    const grid = host.querySelector('#basicFilterCards');
+    const grid = host.querySelector('#flt-items');
     grid.id = 'destroyView';
     grid.removeAttribute('data-auto-pagination');
     document.body.appendChild(host);
@@ -72,6 +70,12 @@ const report = await page.evaluate(async () => {
         .flatMap(el => Object.keys(el).filter(k => k.startsWith('nds') && typeof el[k]?.destroy === 'function'));
 
     const before = backrefs();
+    // destroyEach components keep no backref (the filter's fee slider); destroy() counts them by stamp.
+    const eachOwned = NDS.Init.components
+        .filter((c) => c.destroyEach && c.selector)
+        .flatMap((c) => [...host.querySelectorAll(c.destroySelector || c.selector)])
+        .filter((el) => !Object.keys(el).some((k) => k.startsWith('nds') && typeof el[k]?.destroy === 'function')
+            && el.getAttributeNames().some((n) => n.startsWith('data-nds-') && n.endsWith('-initialized')));
     ok('setup: the view holds live instances', before.length > 0, before.join(', ') || 'none');
     ok('setup: filter claimed the view', !!NDS.Filter.getByTarget('destroyView'));
     ok('setup: init stamps present', host.querySelectorAll('[data-nds-filter-initialized]').length > 0,
@@ -80,7 +84,8 @@ const report = await page.evaluate(async () => {
     const count = NDS.Init.destroy(host);
     await settle();
 
-    ok('destroy reports what it released', count === before.length, `returned ${count}, found ${before.length}`);
+    ok('destroy reports what it released', count === before.length + eachOwned.length,
+        `returned ${count}, found ${before.length} backref + ${eachOwned.length} stamped`);
     ok('no instance left behind', backrefs().length === 0, backrefs().join(', ') || 'clean');
     ok('deregistered from the filter target map', NDS.Filter.getByTarget('destroyView') === null,
         NDS.Filter.getByTarget('destroyView')?.targetId || 'null');
@@ -136,11 +141,11 @@ const report = await page.evaluate(async () => {
 // the whole page must release every distinct backref type and leave nothing stamped.
 const records = await browser.newPage();
 records.on('pageerror', (e) => pageErrors.push(`manage-records: ${e.message}`));
-await records.setViewport({ width: 1400, height: 1000 });
-await records.goto(`${BASE}/examples/manage-records.html`, { waitUntil: 'networkidle0' });
+await records.setViewportSize({ width: 1400, height: 1000 });
+await records.goto(`${BASE}/examples/manage-records.html`, { waitUntil: 'networkidle' });
 await records.evaluate(() => Promise.all([
     window.NDS.loadBundle('delegated').catch(() => {}),
-    window.NDS.loadBundle('extras').catch(() => {}),
+    ...['extras', 'editor', 'chart', 'code'].map((b) => window.NDS.loadBundle(b).catch(() => {})),
 ]));
 await new Promise((r) => setTimeout(r, 1500));
 
@@ -158,35 +163,33 @@ report.push(...await records.evaluate(async () => {
     // so a scan of that view can never find it again. Prove the round trip, not just the
     // stamp: docked before, back where it was authored after, and hidden as it shipped.
     const fab = document.querySelector('.nds-fab-dock .nds-fab');
-    const fabOrigin = fab?._ndsFabOrigin?.parent;
+    const fabOrigin = fab && NDS.homeOf(fab);
     // Direct parent, not contains(): this page authors its FAB straight in <body>, and the
     // dock lives in <body> too, so containment reads true in both states.
     ok('setup: a FAB is docked away from its origin', !!fab && !!fabOrigin && fab.parentElement !== fabOrigin,
         fab?.parentElement?.className || 'no docked FAB on this page');
 
-    // The FAB case again, in a second shape: `data-portal` moves the open MENU to <body>,
-    // so it leaves the view that authored it and no scan of that view can find it. Scoped
-    // to one cell — destroy(document.body) below would hold both halves and prove nothing.
-    // A menu left behind is a click-eating overlay in <body> that nothing owns.
-    const dm = document.querySelector('td .nds-dropmenu[data-portal]');
+    // An open menu sits in the top layer: destroying its view must take it out, or it is a
+    // click-eating overlay nothing owns. Scoped to one cell, so the page-wide destroy below
+    // still has work to do.
+    const dm = document.querySelector('td .nds-dropmenu');
     const dmHost = dm?.closest('td');
     if (dm) {
         dm.querySelector('.nds-dropmenu-trigger').click();
         await new Promise((r) => setTimeout(r, 350));
         const menu = NDS.Dropmenu.menuOf(dm);
-        ok('setup: an open menu portaled out of its container',
-            !!menu && menu.parentElement === document.body && !dmHost.contains(menu),
-            menu?.parentElement?.tagName || 'no menu resolved');
+        ok('setup: an open menu in the top layer, inside its cell',
+            !!menu && menu.matches(':popover-open') && dmHost.contains(menu),
+            menu ? 'popover-open ' + menu.matches(':popover-open') : 'no menu resolved');
 
         NDS.Init.destroy(dmHost);
         await new Promise((r) => setTimeout(r, 350));
-        ok('the portaled menu went back inside its container', dmHost.contains(menu),
-            menu.parentElement?.className || menu.parentElement?.tagName);
+        ok('the menu left the top layer', !menu.matches(':popover-open'));
         ok('the menu is hidden again, as it shipped',
-            menu.hasAttribute('hidden') && !menu.hasAttribute('data-portal'),
+            menu.hasAttribute('hidden') && !menu.hasAttribute('popover'),
             menu.outerHTML.slice(0, 60));
-        ok('no menu is stranded in <body>', !document.body.querySelector(':scope > .nds-dropmenu-menu'),
-            `${document.body.querySelectorAll(':scope > .nds-dropmenu-menu').length} left`);
+        ok('no menu is left in the top layer', !document.querySelector('.nds-dropmenu-menu:popover-open'),
+            `${document.querySelectorAll('.nds-dropmenu-menu:popover-open').length} left`);
 
         // Two-way, and it re-arms the instance for the page-wide destroy below.
         NDS.Init.refresh(dmHost);
@@ -194,7 +197,7 @@ report.push(...await records.evaluate(async () => {
         ok('the dropmenu re-initializes after destroy', !!dm.ndsDropmenu,
             dm.hasAttribute('data-nds-dropmenu-initialized') ? 'stamped' : 'not stamped');
     } else {
-        ok('setup: an open menu portaled out of its container', false, 'no [data-portal] dropmenu in a table cell');
+        ok('setup: an open menu in the top layer, inside its cell', false, 'no dropmenu in a table cell');
     }
 
     const count = NDS.Init.destroy(document.body);
@@ -215,8 +218,8 @@ report.push(...await records.evaluate(async () => {
     ok('the page-level FAB runtime is released', !document.querySelector('.nds-fab-sentinel')
         && !document.documentElement.hasAttribute('data-fab-tucked'));
 
-    // An open modal is the worst thing to leave behind: the backdrop covers the app and the
-    // page is scroll-locked, and the element that could close it has been removed.
+    // An open modal is the worst thing to leave behind: the page behind it is inert and
+    // scroll-locked, and the element that could close it has been removed.
     const modal = document.querySelector('.nds-modal');
     if (modal) {
         NDS.Modal.open(modal);
@@ -228,11 +231,7 @@ report.push(...await records.evaluate(async () => {
         await new Promise((r) => setTimeout(r, 250));
         ok('destroy released the open modal', !NDS.Modal.isOpen());
         ok('the scroll lock is released', !document.body.style.top, document.body.style.top || 'clear');
-        // The backdrop ELEMENT is a shared singleton that persists by design — what has to
-        // be released is its active state and the display it was given.
-        ok('the backdrop is released', !NDS.Backdrop.isActive()
-            && !document.querySelector('.nds-backdrop')?.style.display,
-            document.querySelector('.nds-backdrop')?.style.display || 'clear');
+        ok('the dialog is closed', !modal.open);
     } else {
         ok('setup: the modal locked the page', false, 'no .nds-modal on this page');
     }
@@ -257,22 +256,25 @@ const pageList = (dir) => readdirSync(new URL(`../${dir}/`, import.meta.url))
     .filter((f) => f.endsWith('.md'))
     .map((f) => `${dir}/${f.replace(/\.md$/, '.html')}`);
 const PAGES = [...pageList('components'), ...pageList('examples'), 'index.html', 'playground.html'];
+// Instances a page SCRIPT made with create(): refresh() re-runs registry inits only, so the
+// script that made one re-makes it. ponytail: drop sort.html when Sort gets its markup API (TODO.md).
+const SCRIPT_CREATED = { 'components/sort.html': ['ndsSort'] };
 
 const results = [];
 const queue = [...PAGES];
 
 async function sweepOne(tab, errs, path) {
-    await tab.goto(`${BASE}/${path}`, { waitUntil: 'networkidle0' });
+    await tab.goto(`${BASE}/${path}`, { waitUntil: 'networkidle' });
     await tab.evaluate(() => Promise.all([
         window.NDS.loadBundle('delegated').catch(() => {}),
-        window.NDS.loadBundle('extras').catch(() => {}),
+        ...['extras', 'editor', 'chart', 'code'].map((b) => window.NDS.loadBundle(b).catch(() => {})),
     ]));
     await new Promise((r) => setTimeout(r, 900));
 
     const live = await tab.evaluate(() => NDS.Init.components
         // Markup a code sample shows is never initialized (the init pass skips it), so it
         // is not coverage either — same exclusion the pass itself uses.
-        .filter((c) => c.selector && [...document.querySelectorAll(c.selector)].some((el) => !el.closest('code, .code-example')))
+        .filter((c) => c.selector && [...document.querySelectorAll(c.selector)].some((el) => !el.closest('code')))
         .map((c) => c.name));
 
     // Only teardown-time errors count. A demo that throws on its own is a different bug.
@@ -301,7 +303,7 @@ await Promise.all(Array.from({ length: 4 }, async () => {
     const tab = await browser.newPage();
     const errs = [];
     tab.on('pageerror', (e) => errs.push(e.message));
-    await tab.setViewport({ width: 1400, height: 1000 });
+    await tab.setViewportSize({ width: 1400, height: 1000 });
     for (let path = queue.shift(); path; path = queue.shift()) {
         try {
             results.push(await sweepOne(tab, errs, path));
@@ -325,7 +327,7 @@ const culprits = (pick, label) => {
 };
 report.push(
     culprits((r) => r.leftKinds, `sweep: ${PAGES.length} pages, destroy released every instance`),
-    culprits((r) => r.missing.map((k) => `${k} (${r.path})`), 'sweep: every destroyed component mounts again'),
+    culprits((r) => r.missing.filter((k) => !SCRIPT_CREATED[r.path]?.includes(k)).map((k) => `${k} (${r.path})`), 'sweep: every destroyed component mounts again'),
     culprits((r) => r.errors.map((e) => `${r.path}: ${e}`), 'sweep: teardown threw on no page'),
 );
 

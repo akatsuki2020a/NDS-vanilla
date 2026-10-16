@@ -1,6 +1,6 @@
 ---
 name: nds-doc
-description: Work with NDS documentation pages — create new pages, refine existing ones, add sections, fix code tabs, update guidelines. Covers all doc page categories: components (components/*.md), UI Shell (ui-shell/*.md), layout (layout/*.md), and utilities (utilities/*.md). Use this skill for any task involving demo cards, code examples, toggle controls, or usage guidelines sections.
+description: Work with NDS documentation pages — create new pages, rewrite old-format pages into the one-source format (data-canon blocks, a generated builder, a hidden Variants table), refine or audit existing ones, rewrite their prose in plain English. Covers components/*.md, ui-shell/*.md, layout/*.md, utilities/*.md, and core/*.md. Use for any task on canon markup, builder options, Variants tables, reference tables, Built-in Features, Best Practices, or doc-page wording ("rewrite this doc", "simplify this doc", "add an option to the builder").
 argument-hint: "[name] [optional: specific task]"
 ---
 
@@ -8,377 +8,327 @@ argument-hint: "[name] [optional: specific task]"
 
 Apply this skill to: `$ARGUMENTS`
 
-This skill builds documentation pages that serve as a **component inventory**. Developers browse the live demos, configure options with toggle controls, then copy the production-ready code. Every page must be a complete, accurate representation of what the SCSS and JS source files actually define.
+A doc page has two readers. **People** browse it, try options in the builder and copy code. **AI coding agents** read its `.md` source and copy the canon. So each fact lives once on the page, in a form both can use, and every fact matches the SCSS and JS source.
+
+| Concern | Source |
+|---|---|
+| Facts: classes, attributes, knobs, states, APIs, events | the component's SCSS and JS |
+| Page format | this skill, and the model pages below |
+| Words: sentences, terms, claims, tone | `EDITORIAL.md` |
+
+**Model pages** (read the one that fits before you write):
+
+| Page | Shows |
+|---|---|
+| `components/switch.md` | a simple component, a JS event table, the Forms dedup link |
+| `components/cards.md` | structure canons, part inserts, combo rows, many groups |
+| `components/alert.md` | a JS twin (`data-js`), `create()` rows, a JS-only structure with a Run button |
+| `components/button.md` | many structures, `:not()` targets that disable bad combinations |
+| `ui-shell/topbar.md` | a shell page: a part canon framed with `data-preview="page"`, a Parts table |
+| `layout/grid.md` | a reference page: one `Example` group of whole examples |
+| `core/init.md` | an info page: a `Usage` section of code-only canons, no preview |
 
 ---
 
-## Phase 1: RESOLVE
+## Phase 1: Resolve
 
-Determine the target page and locate its source files.
+1. Glob for `$0.md` in `components/`, `ui-shell/`, `layout/`, `utilities/`, `core/`. Found: use it. Not found: a new page (default `components/`).
+2. Find the source files. **Never assume file names:** `sidemenu` → `_js/nds-sideMenu.js`, `truncate-text` → `_sass/_utilities.scss`, grid → `_sass/_grid.scss`. Try the exact name, then partial matches in `_sass/components/`, `_sass/layout/`, `_sass/` and `_js/`, then grep the root class (`.nds-$0`). The component's entry in `_js/nds-loader.js` names its namespace and init.
+3. Pick the page type:
 
-### Page Resolution
-
-1. Glob for `$0.md` across `components/`, `ui-shell/`, `layout/`, `utilities/`
-2. If found: use that path and its category
-3. If not found: creating a new page (default to `components/`)
-
-| Category | Directory | SCSS source | Example |
-|----------|-----------|-------------|---------|
-| Components | `components/` | `_sass/components/` | `accordion`, `modal`, `tags` |
-| UI Shell | `ui-shell/` | `_sass/components/` | `header`, `side-nav`, `footer` |
-| Layout | `layout/` | `_sass/layout/` | `grid`, `section` |
-| Utilities | `utilities/` | `_sass/` or `_sass/layout/` | `expandable-content`, `numbers`, `truncate-text` |
-
-### Source File Discovery
-
-Page names don't always match SCSS/JS filenames (e.g., `side-nav` maps to `nds-sideMenu.js`, `truncate-text` maps to `_truncateText.scss`). **NEVER assume filenames.** Search broadly: try exact match first, then partial/wildcard matches across `_sass/components/`, `_sass/layout/`, and `_js/`. If no direct match, grep for the component's root class (`.nds-$0`) to locate the defining file.
-
-Some components share JS files rather than having their own (e.g., form controls live in `_js/nds-forms.js`). Check `_js/nds-loader.js` for the component's registry entry to find which init function and namespace it uses.
-
-### Category Adaptation
-
-- **Components / UI Shell / Utilities**: full treatment with variants, sizes, states, JS API, usage guidelines
-- **Layout**: lighter treatment. Skip Variants/States. Focus on CSS custom properties, grid demos, responsive behavior
+| Type | Pages | Builder |
+|---|---|---|
+| Component | most of `components/`, `utilities/` | options you combine: Structure plus modifier groups |
+| Shell | `ui-shell/` (mainnav, footer, topbar, sidemenu, hero) | a part canon in a frame (`data-preview="page"`), at every screen size |
+| Reference | `layout/` (grid) | one `Example` group of whole examples, never mixed toggles. A layout whose options combine freely (flex: direction, gap, align) is a Component builder |
+| Info | `core/`, `ui-shell/header` | none. Explains how something works: a `Usage` section with code-only canons (`data-preview="none"`). A page that only composes parts with their own pages (the header) shows each part's root with a comment linking that page, never the parts' markup again |
 
 ---
 
-## Phase 2: READ
+## Phase 2: Read
 
-Read source files to build a complete understanding of the component. **The source files are the single source of truth. The existing page is suspect until validated.**
+**The source is the truth. The old page is only a checklist.** Old pages drift: never copy a fact from one without finding it in the source.
 
-### MUST read every time
+Read every time:
+- **`EDITORIAL.md`.**
+- **The SCSS, whole:** every class, modifier, knob (`--x` and its `var()` fallback), state selector, media rule, and the accessibility mixins.
+- **The JS, whole:** init, every public method, every event and its `detail`, keyboard handling, every `data-*` it reads, every state it writes. The banner at the top of the file is the public surface.
+- **The shared files it rides, banner only:** `_js/nds-forms.js` and `_sass/components/_forms.scss` for fields, `_js/nds-core.js` for `NDS.State` and `NDS.Status`. Read further only for a fact the banner does not answer: each JS file is ~86 KB.
+- **`_data/sidemenu/sidemenu.yml`:** confirm every part you link exists.
+- **The page's entry in `_data/content/*.yml`:** its catalog card must agree with the hero description.
+- **The model page** for this page type.
 
-- **`components/alert.md`**: the base standard for all page patterns. Extract from it:
-  - Demo card skeleton (`.nds-demo-card` with `demo-header`, `demo-container`, `demo-code`)
-  - Code tab structure (`.nds-tabs .nds-code` with HTML and JS API panels)
-  - Toggle controls (dropmenu pattern for selection groups, flat buttons for on/off)
-  - Built-in Features section (`.nds-definition-list.nds-divided.nds-grid.nds-doc-features` — the `.nds-doc-features` modifier sets the shared column/gap/icon-size custom properties; do NOT inline `style="--max-col:..."`)
-  - Usage Guidelines section (`nds-block` with `nds-block-title`)
-  - JS API documentation block (expandable code with inline comments)
-
-### MUST read when they exist
-
-- **SCSS source file**: read the entire file. Understand every variant class, size class, state, modifier, layout mode, and accessibility feature (`@include reduced-motion`, `@include high-contrast`, `@include print-media`). The page must document all of these.
-- **JS source file**: read the entire file **deeply**. Do not skim. Understand the full logic:
-  - How the component initializes and what triggers it
-  - Every public method exposed on the `NDS.*` namespace and on instances
-  - Every custom event dispatched (`CustomEvent`) and its `detail` shape
-  - Every keyboard interaction handled
-  - Every data attribute the JS reads for configuration
-  - Every state the JS manages (open/close, active/inactive, validation, etc.)
-  - How instances are accessed from the DOM
-  - The page must document all of these.
-- **Existing page** (if refining): read it but do NOT trust it. You will validate it against source files in Phase 3.
-
-### Split & de-criticalized components (affect doc accuracy)
-
-Some components are restructured for bundle performance (see `CLAUDE.md` → "JS Bundles & Shrinking the Critical Bundle"). Two cases change what the page must capture:
-
-- **Split component** — the JS is TWO files: `nds-X.js` (eager shell) + `nds-X__delegated.js` (lazy behavior half), each opening with a `// SPLIT COMPONENT` header. **Read BOTH.** The public `NDS.X` surface and first-paint behavior live in the shell, but deferred behavior — including some `CustomEvent`s and their `detail` shapes (e.g. Filter's `nds:filterFormComplete` / `nds:filterFormError` live in `nds-filter__delegated.js`) — lives in the half. The split is transparent to consumers (`NDS.X.method()` is unchanged), so demos and copy-paste markup don't change.
-- **De-criticalized component** (moved to the delegated bundle, e.g. accordion) — its JS now loads AFTER first paint, so any state the JS used to stamp must be **server-rendered in the canonical markup**. The live demo AND the code tab MUST carry those attributes (e.g. a default-open accordion item ships `data-state="open"` on BOTH the toggle button and the `.nds-accordion-collapse`), and the developer-facing ones belong in the **Data Attributes** table. Markup that omits them copies a component that flashes / CLSs on load.
-
-### MUST read for context
-
-- **`_data/sidemenu/sidemenu.yml`**: read this every time. It is your map of the entire design system: every component, layout, utility, UI shell element, and example page. Use it to:
-  - Know what related components exist when writing Best Practices ("don't use" alternatives, "use X with Y" suggestions)
-  - Link to related pages with `{{ 'path' | relative_url }}`
-  - Verify any component you mention by name actually exists
-  - Understand where the current component fits in the system
-
-### Read when relevant
-
-- `standard-page.md`: front matter template (new pages)
-- `layout/section.md`: section hierarchy and tiers (new pages or adding sections)
-- `playground.md`: existing demo HTML if available
-- Icon class lookup: **NEVER guess icon class names.** Plausible-sounding names frequently don't exist in the shipped font.
-  - **Always use content icons** for every `<i>` you add on a doc page (Built-in Features list, inline decorations, copy buttons, etc.): `<i class="hgi hgi-stroke hgi-NAME">`. The authoritative glyph list is `_sass/_hgiRoundedStroke.scss`. Verify names with the anchored pattern in Phase 5 ("Icon Verification") BEFORE emitting HTML.
-  - **Never introduce UI icons** (`<i class="nds-icon nds-hgi-NAME" aria-hidden="true">`) when authoring a doc page. They are reserved for chrome and pseudo-elements. The only time `nds-icon nds-hgi-*` may appear in your output is inside a code tab that copies the component's own live demo verbatim (e.g. a modal's close button icon the component itself renders). Do not substitute one mechanism for the other.
-- **Additional reference pages** for complex components: `components/chart.md` (API-heavy with options reference), `components/cards.md` (builder-style multi-dropmenu demos). Judge whether the component's complexity warrants reading these.
+**Delegated components** (loaded after first paint, e.g. accordion) ship their first-paint state in the canon: a default-open accordion item has `data-state="open"` on both the toggle and the collapse.
 
 ---
 
-## Phase 3: ANALYZE (Existing Pages Only)
+## Phase 3: Analyze (existing pages)
 
-Compare the existing page against what the source files actually define. Approach with fresh eyes. Do not assume the existing page is correct.
+**Old format:** the page has `nds-demo-card`, `demo-toggle-btn`, `data-toggler` or hand-escaped code tabs (`&lt;`). Status: **REWRITE**. Skip the section-by-section check: inventory the source, list the old page's facts, and go to Phase 4.
 
-### Build Understanding
+**New format:** check each section twice, for structure (this skill) and content (the source). Give it one status:
 
-Thoroughly analyze the SCSS and JS source files from Phase 2. Build a complete mental model of what the component supports: every variant, size, state, modifier, layout mode, public method, event, keyboard interaction, and accessibility feature.
-
-### Validate the Existing Page
-
-For each section of the existing page, check two things:
-
-1. **Structure**: does the HTML skeleton match `alert.md` patterns? (demo card layout, code tab structure, toggle controls, bottom sections). Code tabs must contain entity-encoded markup (`&lt;div&gt;` not `<div>`) — raw HTML inside `<code class="lang-html code">` counts as OUTDATED and must be converted during rebuild.
-2. **Content**: does it accurately and completely reflect what the source files define? Are all variants/methods/events/states covered?
-
-### Classify Each Section
-
-- **CURRENT**: both structure and content match. Leave untouched.
-- **INCOMPLETE**: structure is correct but content is missing items the source defines (undocumented variants, missing API methods, missing events). Add what is missing.
-- **OUTDATED**: structure doesn't match `alert.md` patterns, OR content contradicts/misrepresents the source files, OR contains placeholder text. Rebuild the section using `alert.md` patterns, preserving any valid content/text.
-- **MISSING**: a section that should exist but doesn't. Create it.
+| Status | Meaning | Action |
+|---|---|---|
+| CURRENT | structure, content and prose pass | leave it |
+| PROSE | the wording fails the `EDITORIAL.md` checklist | rewrite the prose only |
+| INCOMPLETE | the source defines items the page lacks | add them |
+| OUTDATED | a claim the source contradicts, or a structure break | fix it |
+| MISSING | a skeleton section is absent | create it |
 
 ---
 
-## Phase 4: REPORT
+## Phase 4: Report
 
-**STOP. Present the classification report to the user before making any edits.**
+**Stop. Show the report and wait for approval before any edit.**
 
 ```
-## {Name} — Smart Merge Report
+## {Name} — Doc Report
 
 ### Source Inventory
-- SCSS: [list key variants, sizes, states, modifiers found]
-- JS: [list key methods, events, keyboard handling found]
+- SCSS: [classes, modifiers, knobs, states]
+- JS: [methods, events, keyboard, data attributes]
 
-### Section Status
-- [Section name]: CURRENT | INCOMPLETE (missing: ...) | OUTDATED (reason: ...) | MISSING
-- ...repeat for each section...
+### Status
+- REWRITE (old format), or per section: CURRENT | PROSE | INCOMPLETE | OUTDATED | MISSING
 
-### Actions Planned
-- CURRENT sections: skip (no changes)
-- INCOMPLETE sections: add [specific items]
-- OUTDATED sections: rebuild [specific sections], preserving [valid content]
-- MISSING sections: create [specific sections]
+### Planned
+- Structures and groups for the builder, one line each
+- Old claims the source disproves (these are dropped, and named in the commit)
 ```
 
-Wait for user approval, then proceed to Phase 5.
+New pages and targeted edits skip Phases 3 and 4.
 
-For **new pages** and **targeted edits**: skip Phases 3-4 and go directly to Phase 5.
+**Timing:** while a component's markup or API is still changing, do not edit its page. Do one pass once the design settles.
 
 ---
 
-## Phase 5: BUILD
-
-Apply changes following the patterns extracted from `alert.md`. All HTML structure must match those patterns.
+## Phase 5: Build
 
 ### Front Matter
 
-All documentation pages are **English, LTR**. Always set `lang: en` and `direction: ltr`. Use `standard-page.md` as template for new pages. Do NOT use `layout_class: nds-cardView` or `sidemenu_mode: top`.
+- `lang: en`, `direction: ltr`. Copy `standard-page.md` for a new page.
+- `title`: the component name. `hero_title`: `{Name} - National Design System`.
+- `hero_description`: one sentence on what it is. Not repeated in the Overview.
+- `since`: set once. `updated`: bump only when the COMPONENT changed (source, markup, API), to `version` in `_config.yml` without `-dev`. `last_edit`: bump on any content change, from the local `date` (`DD/MM/YYYY - HH:MM AM/PM`, Riyadh time).
 
-### Naming
+### Skeleton
 
-- **Page title** (`title` in front matter): component name only
-- **Hero title**: `{Name} - National Design System`
-- **Hero description**: one sentence answering "What is this component and what does it do for me?" Study ALL demos on the page before writing this. Components often serve multiple purposes beyond what their name suggests. Do NOT list internal features ("smart positioning, keyboard navigation, accessibility support"). Do NOT narrow the component to one use case. Instead, state its purpose covering the full range of what the demos show. Example: "A toggle-activated menu for presenting actions, navigation links, or filter controls in a compact overlay."
-- **Section titles**: descriptive and SEO-friendly. Including the component name is fine
-- **Section descriptions**: orient the developer on what they are looking at and when they would pick this variant over other sections on the page. Do not restate the title. Do not describe internal mechanisms. Good: "A condensed layout for contextual messages placed near the content they relate to." Bad: "Compact single-line layout with bottom stripe and solid icon."
-- Each demo card gets its own section. The section title describes the variant or mode shown (e.g., "Standard", "With Leading Icons", "Inline", "Toast Notifications"), not generic labels like "Overview"
+Sections in this order. Each `<section>` carries its class. A section the component does not need is left out, never reordered.
 
-### Page Structure
+| Section | Class | Holds |
+|---|---|---|
+| Overview | `nds-doc-overview` | a paragraph on what it is and its parts, then "Pick another component when:" and a list |
+| Markup | `nds-doc-markup nds-demo-section` | the base canon (the builder), then its structure, part and JS canons |
+| Parts (shell only) | `nds-doc-parts` | Part \| Holds \| Required |
+| Variants | `nds-doc-variants`, with `hidden` | the builder's table |
+| Behavior (optional) | `nds-doc-behavior` | one entry per structure or option that behaves differently, for people |
+| Framework Views (optional) | `nds-doc-frameworks` | what a framework host or an HTML-swap library must do differently, in one place |
+| Examples (optional) | `nds-doc-examples` | real uses of a layout component, each with a preview and its code |
+| Built-in Features | `nds-doc-features` | the component's highlights |
+| Best Practices | `nds-doc-practices` | do and don't bullets |
+| API | `nds-doc-api` | reference tables and one JS example |
+| Related | `nds-doc-related` | the examples and templates that use it |
 
-```
-Section 1: Overview / Main Demo (demo cards with toggle controls)
-Section 2: Variants (if applicable)
-Section 3: Sizes (if applicable)
-Section 4: States (if applicable)
-Section 5: Built-in Features (definition-list grid with icons, its own section)
-Section 6: Usage Guidelines (content blocks: Best Practices + Modifier Classes + Data Attributes + CSS Custom Properties + JS API)
-```
+Ids are kebab case. Section ids are `{name}-{section}`: `btn-overview`, `grid-api`.
 
-Components with distinct **display modes** (e.g., default/inline/toast for alerts) get a separate section per mode rather than forcing them into the Variants/Sizes/States structure.
+**Markdown bodies.** Prose and tables are markdown: the section body gets `markdown="1"` (and `nds-prose` for text). A table takes the IAL `{: .nds-table .nds-responsive}`. Inside a `markdown="1"` body, a line indented 4 or more spaces is a code block, so the closing `</div>` tags after markdown start at column 0 to 3. Headings inside the API section are `### Title` then `{: .nds-block-title}`.
 
-Complex components may need additional sections beyond this baseline (e.g., API Reference for chart, builder demos for cards). Judge based on source file complexity.
+**Inline code is plain backticks.** The build gives it the NDS look and picks `lang-html`, `lang-js` or `lang-css` from its shape and its table. Hand-written HTML (the features list) writes `<code class="nds-inline-code lang-…">` itself.
 
-### Variant Organization
+### Overview
 
-- **Simple class-based variants** (style, size): use `data-toggler` buttons within a single demo card
-- **Structurally different variants** (different HTML structure): separate demo cards with their own code examples
-- MUST cover **all** variants and states the SCSS defines
+A short paragraph: what the component is and what it is made of. Then `Pick another component when:` and a list, each item `condition: [Component](../path)`. A shell page ends with a sentence that names where the other navigation lives instead. Rules go to Best Practices. A fact the page states elsewhere is not repeated here.
 
-### Demo Actions
+### Canon Blocks
 
-Get the exact HTML patterns from `alert.md`:
-- **Selection groups** (one-of-many): dropmenu with `.demo-toggle-menu`. Place these first.
-- **On/off toggles** (independent): flat buttons with `.demo-toggle-btn`. Place these after dropmenus.
-- Add `selected` class to the button/item matching the demo's default state
-- **Demo cards with no actions**: add a `<div class="demo-label">` inside `.demo-header` with a short descriptive title. Only demo cards that have toggle controls (dropmenus or buttons) omit the label.
+The canon is the one copy of the markup. Both readers use it: the build renders the preview and the code from it, and an agent copies it from the `.md`.
 
-### Code Examples
-
-Code tabs are for **production-ready, copy-paste markup only**.
-
-- **The code tab MUST be a direct copy of the live demo HTML.** Copy the markup from `.state-demo`, remove demo-only wrappers (`.state-demo`, `.demo-container`), and clean indentation. Do NOT simplify, abbreviate, reduce items, or use placeholder text like "Item title" or "<!-- more items -->". The developer copies what they see in the live demo.
-- MUST be production-ready: no demo wrappers, no showcase classes
-- **Use unique IDs** per demo card: `{component}-{variant}-{number}` (e.g., `modal-default-1`)
-- **HTML tab**: markup to render the component
-- **JS API tab** (label: "JS API"): only when the component has a **programmatic creation API** (e.g., `NDS.Alert.create()`, `NDS.Chart.create()`). This is the JS alternative to the HTML tab. Do NOT add a JS tab for event listeners or method calls.
-- For long code (>15 lines), add `nds-expandable` to the tab panel and wrap `<code>` in `<div class="nds-expandable-content">`
-- **Tab/Panel IDs**: use `panel-{component}-{variant}-{number}` / `tab-{component}-{variant}-{number}` pattern
-
-### Overlay Components
-
-Modal, drawer, and dropmenu need a **trigger button** + hidden component markup inside `.state-demo`. Check the component's JS for the trigger attribute. See `components/modal.md` for the pattern.
-
-### Custom JS in Demos
-
-Demo-wiring JS goes in `_js/nds-showcase.js`, NOT the component's own JS file. For components that require JS to render (charts, programmatic alerts), use a page-level `<script>` wrapped in `DOMContentLoaded`. For toggle logic beyond class/attr swapping, use inline `<script>` inside the demo card.
-
-### Icon Verification (MANDATORY before writing any `<i>` tag)
-
-Plausible-sounding names often don't exist. Before emitting HTML for Built-in Features or anywhere else, verify every HGI font icon name:
-
-```bash
-# One grep, all icons, anchored pattern (colon required — don't drop it):
-grep -E "\.hgi-(name1|name2|name3|name4|name5|name6):" _sass/_hgiRoundedStroke.scss
+```html
+<script type="text/html" id="switch-single" data-canon data-variants="switch-variants-table">
+<div class="nds-form-container nds-switch-container">
+  …
+</div>
+</script>
 ```
 
-- Any name NOT printed by that command **does not exist** and must be replaced.
-- Do NOT use unanchored `grep "hgi-NAME"` — it gives false matches against unrelated class fragments.
-- To find a replacement for a missing name, browse candidates by topic:
+- **Written once, plain HTML.** No Liquid, no escaping, no demo-only parts: no `demo-` ids, no `<form>` or Submit wrapper, no attribute that a builder option adds.
+- **Ids are unique across the page's canons.** Text, images and URLs are sample content; the structure is the canon.
+- **URLs are page-relative:** `../assets/img/x.webp`, `href="#"`.
+- **Indent with 2 spaces.** Write each element that a part is inserted into on its own lines, so the insert lands indented.
+- **Kinds of canon:**
+  - **Base:** carries `data-variants="{table id}"`. It is the builder.
+  - **Structure:** named by a `Structure` (or `Example`) row. Reached only through the builder.
+  - **Part:** a small block that a row inserts, such as an icon or an actions row.
+  - **JS:** `data-lang="js"`. `data-js="{id}"` on the base names its JS twin: the same component as one `create()` call, shown in a JS tab. `data-tab-label` on either canon renames its tab, and a twin with no `data-lang` shows as HTML (the head's Head and JS Library tabs). A JS-only structure (a toast) previews as a Run button that runs the code shown.
+  - **Code-only:** `data-preview="none"`, for `<head>` and JS examples.
+  - **CSS twin:** a builder whose `data-js` twin is `data-lang="css"` shows that CSS alone as its code, and each Structure (or `Pack`) canon shows its own twin. The preview is a picture of the code (the token packs, `components/tokens.md`).
+  - **Generated:** `data-generated`, for a canon whose body is build output: one Liquid output tag, such as `{{ site.data.tokens.packs.spacing.html }}`. `check-docs.py` allows the Liquid there.
+  - **Run:** `data-preview="run"`, for markup that leaves the card (a FAB docks at the screen edge). The card holds Run (`data-run-label` renames it), which adds a copy of the code shown, and Clear. A choice rebuilds the last copy added.
+  - **Panel:** `data-preview="panel"`, for markup that needs a page around it (a TOC over a long article, a shell). The card holds Preview (`data-run-label` renames it), which opens a tall, resizable bottom panel with the code shown mounted in it. The panel body zeroes `--nds-nav-height`, so sticky parts pin to its top. Add `data-preview-flush` when the markup brings its own padding (a section): the body gets `nds-flush`. Closing it removes the copy.
+  - **Page:** `data-preview="page"`, for a canon that is a whole `<body>` (Page Layout), or a page part that must not share the doc page (the top bar: its ids would clash with the page's own). The preview is a page of its own in a frame, Desktop at 1280px wide scaled to fit, with the header and footer left out. Desktop is a plain frame with no device around it; Tablet and Phone show a device. A whole-body canon's rows can target `body`. A part's code is the part alone. `data-preview-height="360"` (page px at 1280 wide) sets its Desktop frame height, 800 without it: make it fit the tallest open state (a menu, a panel). `data-preview-height="fit"` sizes it to each render's content instead, and follows the content as it grows (an opened step): use it when the options change the height, as the section and user feedback pages do. Never on a page whose canons hold a menu, modal, tooltip or panel: those open over the page and add no height, so `check-docs.py` fails it.
+  - **JS-started:** `data-preview="js"` with `data-js`, for a component with no `init()` (Sort). The preview runs the JS tab after each render. A Structure canon may reuse the base's root id, since the one call names it.
+  - **Demo-only:** `data-code="none"`, a Behavior demo in a preview card with no code. Its wiring `<script>` sits after the canon, never in it. Mark it `data-demo-script` to run it in each screen too: it then runs before the runtime, so its top level only binds listeners.
+- **A canon never holds `</script>`:** the first one ends it. Code with a `<script>` tag inside is written as plain HTML in a Liquid `capture`, and the canon holds `{{ x | strip | escape }}` with `data-escaped`, so the build does not escape it twice (`ui-shell/head.md`).
+- **Screen widths:** every preview card has Desktop, Tablet and Phone buttons beside Dark mode. Tablet and Phone show the preview in a device screen 768×720 or 390×720 at full size (a card too narrow for one hides its button, and a phone reader gets none; the first button, no frame, names the reader's own device), so a breakpoint class (`nds-vertical-sm`) shows on a desktop too and a popup has a real screen to open in. The screen pads its content by the template's page gutter (`--nds-viewport-padding`: 32px, 16px on a phone); `data-preview-flush` on the base canon drops it, for markup that brings its own padding (a section). A Panel card has none. A Run card's screen holds its own Run and Clear, and its copies open in that screen. `data-screens="none"` on a canon drops them, for a preview that drives the real page (Themes: a toggle in a screen would theme the frame, not the page).
+- **Preview width:** `data-demo-width="300px"` on the base canon fixes the preview's width, for a field that would otherwise shrink or stretch to its content. Preview only: the code never shows it. `data-demo-size="32px"` sets the preview's font-size, for parts that size in em (icons).
+- **Top-aligned preview:** `data-preview-start` on the base canon puts the preview at the top of its card instead of the middle, so markup that grows when it opens (an accordion) grows down and does not jump up. Preview only.
+- **Light frame:** `data-preview-light` on a page canon keeps the frame light on a dark site, so a dark area shows against a light page (Themes' Dark Areas). On Desktop the frame takes the card's width and its content's height, like a plain preview; `data-preview-height` is only its height before it loads. Tablet and Phone show the usual screens. The card's own Dark toggle still darkens it.
+- **Preview style:** `data-preview-style="…"` on a page canon (`data-preview="page"`) adds CSS to the preview frame only, for a demo that needs a size the markup must not carry (the side info's column grows to 500px with Beside the title). Key it on the option's own class, so it shows only with that option.
+- **Form fields** whose validation is worth trying add `data-harness="form"` to the base canon: the preview sits in a real `form.nds-form`, with Validate and Reset buttons that show only while a rule can fail (required, min and max checked, pattern, length). A pass shows an inline success alert: fields carry errors only. The code never shows the form. Make rules that can combine (at least, at most) a combo row, not separate exclusive options. Skip it where a field can fail only one way that the builder already shows (radio: only when nothing is chosen).
+- **A stepper** adds `data-harness="stepper"`: Back and Next buttons under the preview move the canon's root id. The code never shows them.
+- **A form that is the component's own markup** (user feedback validates the form it sits in) stays in the canon: add `data-form` to the canon script, and `check-docs.py` allows the `<form>`. Never use it for a demo wrapper.
+- **Dark mode:** every preview card gets Dark mode and Grid lines toggles in its top corner, builder or not. On a builder card, Dark writes `data-theme="dark"` on the markup's outer element, so the copied code carries it; on a plain card it darkens the card only. Dark hides while the site itself is dark: NDS has no light area to switch to. Never add a Dark option to the Variants table. Grid lines changes only the card, never the code.
+- **Shell pages** preview in a frame, Desktop included: `data-preview="page"` with the shell part as the canon (no `<body>`). The frame keeps the part's ids and scripts apart from the doc page's own shell, which has the same ids.
+- **Options placement:** up to 3 rows sit inline above the preview; 4 or more open in a bottom panel, so the preview stays in view. `data-options="inline"` or `"panel"` on the base canon overrides it. A panel or fab doc needs `inline`: its demo's own panel closes the options panel.
+- **Reference pages:** each example canon opens with an HTML comment that says what it does: `<!-- 3 columns on desktop, 2 on tablets, 1 on phones -->`.
+
+### Variants Table
+
+The builder is generated from this table, and agents read it as the list of every option. People never see it: the section ships `hidden`, so anything a person needs goes to Best Practices, the Overview, or a feature.
+
+```
+| Group | Option | Markup | On element | Use |
+|---|---|---|---|---|
+| Size | SM (default) | — | — | … |
+| Size | LG | `.nds-lg` | `.nds-switch-container` | … |
+{: #switch-variants-table .nds-table .nds-responsive}
+```
+
+A short paragraph above the table explains any target that is not obvious (what `:first-child` or `create()` means on this page).
+
+**Groups and options**
+- Rows that share a Group are one set of chips. `(default)` marks the one the canon already shows. A group whose default is `None` shows no None chip: a second tap on the chosen chip turns it off.
+- A Group with one row is an on/off chip in the "More" row.
+- `Group (any)` (Validation (any)) is a row of on/off chips: each turns on and off by itself, so any mix stacks with no combo rows. Use it for parts that add up (password rules). The row label drops `(any)`.
+- **A default part:** a `(default)` row whose Markup is `canon #part` says the canon carries a copy of that part. The builder takes the copy out (found by its markup, so write the part exactly as the canon has it) and puts every part that is on back in table order, so any mix keeps one order. Its ids may repeat the base's. With `(any)`, parts toggle one by one (the top bar's widgets).
+- **Two rows with the same Group and Option are one choice** that makes both changes. Tell agents to write both.
+- `Structure` (or `Example` on a reference page, `Pack` on the tokens page) rows swap the whole markup: `canon #id` and `—` in On element.
+- **Option markers:** `(hint: text)` is the chip's tooltip. `(limit: 2 widgets)` caps the chips that share it: once two are on, the others stay off and their tooltip says "Up to 2 widgets" (the top bar's DGA limit). A limit of 1 makes the chips exclusive, and the tooltip names the other one: "Not with Desktop: Start side". `(demo: + size-sm)` also turns on the row marked `(id: size-sm)`, for a demo that only shows with it. It goes by id, never by name, so a translated page keeps working. Mark every row of that choice with the id. A row can carry several `demo` markers. `(not: home, minimal)` turns the option off while a Structure row marked `(id: home)` or `(id: minimal)` is chosen: use it when that structure has no class of its own for a `:not()` target, and when its canon already carries the option (`check-docs.py` then allows it). `A + B` is a combo row: its group becomes multi-select, and both chips on use the combo's markup.
+
+**Markup cell** (CSS selector syntax):
+- `.cls` class · `[attr]` bare attribute · `[attr="v"]` attribute · `[data-state~="t"]` a token
+- `--prop: value` a custom property in `style` · `prop: value;` a CSS property in `style` (the `;` tells it from a `create()` option) · `.prop = value` a JS property (checkbox `indeterminate`)
+- `canon #id` in Structure: swap the markup; elsewhere: insert that part
+- `remove` deletes the On element · `key: value` sets a `create()` option, and `key.sub: value` one key inside an object option, so chips that share it stack · `—` no change
+
+**On element cell:**
+- A selector for the element the change goes on. A row whose element is not in the current markup is disabled, and its row label says why ("Needs Structure: Group", "Not on Structure: Progress").
+- **Prefer a target on one element:** a tag, classes, pseudo-classes, `:not(.cls)`, `:not(:has(…))`, or an `#id`. A descendant target (`.a > .b`) is read loosely: `.b` must be in the markup and `.a` anywhere in it. When a choice also has a one-element target, the build and the browser ignore its descendant targets, so a descendant row is best as the second row of a choice.
+- **One item of a repeated set** (the first radio in a group): target it by its canon id (`#radio-1`), or by `:first-of-type` / `:first-child` on the element itself. Say in the paragraph above the table that the option goes on the item the user means.
+- A `(default)` row with `—` in Markup and a target in On element is disabled where the target is missing: `Click (default)` on `.nds-tooltip:not(.nds-btn)` is off on the Button structure. Pair it with a `demo` marker on that structure so it starts on its own default.
+- `(start)`, `(after)`: where a part is inserted. The default is the end.
+- `:not(.cls)` disables an option where it does not fit: `.nds-btn:not(.nds-progress)`, `.nds-btn:not(.nds-btn-group > .nds-btn)`. **Use it for every combination the component cannot style.** When the fix belongs in the component, fix the SCSS instead: the docs never paper over a component gap.
+- `create()`, `create({ key: value })`, `create():not({ key: value })`: a row on the JS twin.
+
+**Use cell:** when to pick it, one or two sentences, and what not to combine it with.
+
+**Not in the builder:** state that a script sets for a moment (a button's `data-status` flash) goes in the API table, not the Variants table. Field states shared with every field are one reference row that links to Forms, with `—` in Markup and On element, so it gets no chip: `| Field states | Label, info, feedback, required | — | — | Shared by every form field. See [Forms](../components/forms) |`.
+
+### Behavior
+
+Only for a component whose structures or options change what it DOES, not only how it looks: a picker, a search box, a portal, a lazy menu (dropmenu, pagination, filter, tables, the form fields). A page of looks only (tags, cards, link) has no Behavior section.
+
+- Written for people, who never see the Variants table. It explains; it never copies a Use cell.
+- One `### Name` heading per entry (a noun), then 2 to 4 sentences: what it does, when to pick it, how it behaves, and the attribute or class that turns it on.
+- Facts that a table holds (every attribute, every key) stay in the API and are not repeated.
+- **Behavior or Built-in Features?** A fact that a structure or an option turns on goes to Behavior. A fact that happens with no option goes to Built-in Features. It never goes in both.
+
+### Examples
+
+Only for a layout component whose builder shows placeholders, not a real use (toolbar). The builder teaches the layout; each example is one real use of it that an agent can copy whole.
+
+- One `### Name` heading per example (a noun, "Table Bar"), one sentence on what it shows, then one canon. The canon renders a preview and its code.
+- Copy a real use from `examples/` or from a component that builds the layout itself. Do not invent a use no page has.
+- An example has no options: it is one fixed use. The layout options stay in the builder.
+- A component that builds the layout itself (the editor's toolbar) is a visual example: a preview only, `data-code="none"`, and one short line that links its page. Do not explain how it builds the layout.
+
+### Built-in Features
+
+The component's showcase: its highlights and what they give the developer. An existing list is kept, with its titles and icons: improve the wording, fix a claim the source disproves, and add a highlight the source supports that the list misses.
+
+- Wrapper: `<div class="nds-definition-list nds-divided nds-grid">` inside the section. The build sets the columns: no inline style, no extra class.
+- Item markup comes from a model page. Title: a short noun phrase. Description: one or two sentences.
+- RTL and dark mode are project features, not a component's: leave them out.
+- Only what happens with no option. What an option turns on goes to Behavior.
+- A structure or a part (a status tag's dot, a group) is not a feature: the Markup section shows it.
+- Usually 4 to 8 items.
+
+### Best Practices
+
+Do and don't bullets, one instruction each, with the reason when it is not obvious: when to pick an option, what not to combine, content limits, accessibility the developer must write (a label, an `aria-label`). Usually 5 to 10.
+
+### API
+
+In this order, each only when the source has it:
+1. **Classes** or **Other Classes:** classes the builder does not show. Class \| Element \| Effect.
+2. **Data Attributes:** Attribute \| Element \| Effect. Skip internal init stamps.
+3. **CSS Custom Properties:** Property \| Default \| Controls. Say where to set them when that matters.
+4. **Tokens:** the component's group in `_sass/tokens/_components.scss` gets `### Tokens` with `{{ site.data.tokens.components.<name>.html }}`, the generated Token \| Preview \| Value table. Never hand-written. A line above it names the source, since an agent reading the `.md` sees only the Liquid tag: `Source: the \`<name>\` group in \`_sass/tokens/_components.scss\`.` A knob whose default is a token names it in its Default cell: that is not a duplicate.
+5. **JavaScript:** a Method \| Effect table, an Option \| Default \| Effect table for `create()`, an Event \| Fired on \| Detail table, then one `data-lang="js"` canon example, then "The full API is in the banner of `_js/nds-x.js`."
+
+The Effect, Controls, Holds, Detail and Use columns keep 320px on a phone: the build sets it from those header names, so use those names for a prose column.
+
+**The Data Attributes table needs its own pass: it drifts on almost every rewrite.** Build it from the JS, not the old page. Grep every read and write of each attribute (`getAttribute`, `setAttribute`, `removeAttribute`, `NDS.State.add` / `remove`, `dataset`, selectors in `querySelector`), and write each row from those hits:
+- **Group rows by element**, in the order a reader builds the markup: the owner or container, then its parts, then the items. The rows of one element sit together.
+- **One attribute on two kinds of element is two rows.** Each Element cell names its element so the two cannot be confused: "an `input.nds-check`" and "any element except a checkbox", never "the element" twice.
+- **A state row says who writes it and every way it goes:** "The script sets it when…, and removes it when…". Name each method that also writes it (`clear()` removes it). Say "Set it yourself" for the case the script leaves to the page.
+- **A value the page writes at load is stated exactly:** "Write the count at page load in it (usually `0`)", never "a starting number" or "so it reads right".
+- **Fact, not benefit.** No "so the line needs no X": say what the attribute does, and what another attribute does instead.
+- **No undefined term.** A word the page has not defined ("slot", "host") is replaced with the element it means.
+
+### Related
+
+Links to the examples and templates that use the component, each with what it shows there.
+
+### Links, Icons and Languages
+
+- **Links are page-relative:** `[Modal](../components/modal)` in markdown, `href="../components/modal"` in HTML. No Liquid.
+- **Never guess an icon name.** A feature icon is `<i class="hgi hgi-stroke hgi-NAME"></i>`. Verify every name with one anchored grep before you write it:
   ```bash
-  grep -E "\.hgi-TOPIC" _sass/_hgiRoundedStroke.scss | head -20
-  # TOPIC examples: resize, size, scale, arrow, toggle, text, color
+  grep -E "\.hgi-(name1|name2):" _sass/_hgiRoundedStroke.scss
   ```
-- For UI icons (`nds-hgi-NAME`), apply the same discipline to `UI_ICONS` in `scripts/generate-icons-scss.mjs`.
+  UI icons in a canon (`nds-icon nds-hgi-NAME`) come from `_data/content/icons.yml`.
+- **Demo languages** follow `EDITORIAL.md` section 7.
 
-Run this check once, covering every icon on the page. If you revise the page and add new icons, re-run.
+### No Docs CSS
 
-**Content icons only.** Doc pages author only `hgi hgi-stroke hgi-NAME`. Never add `nds-icon nds-hgi-NAME` yourself. The only place `nds-icon` may appear in your output is inside a code tab that verbatim copies a component's own live demo where the component itself uses one. If you catch an `nds-icon nds-hgi-*` you wrote by hand (Built-in Features, inline decoration, anywhere else), replace it with the equivalent `hgi hgi-stroke hgi-NAME`.
+Build the page only from NDS components. If the page looks wrong, the gap is in a component: fix its SCSS. The only doc styling is what `_plugins/docs_canon.rb` writes: the features grid knobs, the Variants table width, the preview frame, the Preview divider, the form harness's alert gap, the token catalog's swatches, the prose column width, and the Dark mode toggle hidden on a dark site.
 
-### Built-in Features Section
+### Registration (new pages only)
 
-Its own section (NOT inside Usage Guidelines). The wrapper is `<div class="nds-definition-list nds-divided nds-grid nds-doc-features">` — the `.nds-doc-features` modifier (defined in `_sass/components/_definition-list.scss`) sets `--max-col`, `--mid-col`, `--min-col`, `--dl-icon-size`, `--row-gap`, and `--col-gap` so no inline `style="..."` is needed. Get the rest of the HTML pattern (item structure, icons) from `alert.md`.
-
-- **Sells the component's capabilities.** Each item should make a developer think "I get that for free just by using this component."
-- **Titles**: short, concrete noun phrases that name the capability. Prefer specific names over abstract ones ("Active Page Tracking" over "State Management", "Programmatic Control" over "JavaScript API").
-- **Descriptions**: one flowing sentence per item. Lead with what the developer sees or controls, not how it works internally.
-  - **Interaction patterns are fine**: accordion, collapsible, toggle, responsive. These describe how the developer experiences it.
-  - **Internal mechanisms are not**: CSS selectors (`:has()`), DOM detection techniques, CSS positioning strategies (`fixed positioning`), internal state tracking. The developer never touches these.
-  - **Mention code references only when the developer writes or calls them**: `data-state="active"` (developer sets this in HTML) is useful. `aria-expanded` (auto-applied by JS) is noise.
-  - Example shift: "Automatically detects viewport boundaries and adjusts positioning" becomes "Menus stay fully visible regardless of trigger position, flipping direction near screen edges."
-- **Verify every icon name BEFORE emitting the HTML.** Names that sound plausible (`hgi-text-size`, `hgi-file-check`, etc.) often don't exist in the shipped font. Grep the font file directly with the anchored pattern below. Do NOT use unanchored `grep "hgi-NAME"` — it matches substrings in unrelated lines and gives false positives.
-
-  ```bash
-  # Run once with ALL icons you plan to use in the Built-in Features + any other <i> tags:
-  grep -E "\.hgi-(name1|name2|name3|name4|name5|name6):" _sass/_hgiRoundedStroke.scss
-  ```
-
-  Each found line reports one OK icon. Any name NOT in the output doesn't exist and must be replaced before writing the HTML. For a missing name, browse candidates with `grep -E "\.hgi-TOPIC" _sass/_hgiRoundedStroke.scss | head -20` (e.g. TOPIC = `resize|size|scale` for sizing concepts) and pick a real one. For UI icons (`nds-hgi-NAME`), check `UI_ICONS` in `scripts/generate-icons-scss.mjs` the same way.
-- Aim for an **even number** of items (4, 6, 8) for the 2-column grid
-- For components with JS: include "Auto-initialization" (first item) and "Programmatic Control" (last item)
-
-### Usage Guidelines Section
-
-Required content blocks:
-
-1. **Best Practices**: 7-12 bullets mixing decision guidance and practical tips:
-   - **Primary use cases** (2-3 bullets): when to reach for this component. Go beyond the obvious. Add value by explaining specific scenarios.
-   - **"Don't use" guidance** (1-2 bullets): when this is the wrong choice and what to use instead. Only suggest alternatives that exist in NDS. Check `_data/sidemenu/sidemenu.yml` to verify before naming any component as an alternative.
-   - **Variant selection** (1-2 bullets): how to choose between variants/sizes/modes when it's not obvious from the demos.
-   - **Practical tips** (2-3 bullets): recommended item counts, grouping strategies, icon usage, content guidelines. These help developers who already chose the component build it well.
-2. **Modifier Classes** (when the component has class-based variants, sizes, or modes): a compact `nds-table nds-responsive` listing every modifier class with what it does. Developers should not need to click through demo toggles to discover available options. Extract these from the SCSS source. Example format:
-
-```html
-<table class="nds-table nds-responsive">
-    <thead><tr><th>Class</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code class="nds-inline-code lang-html">nds-sm</code></td><td>Compact size with reduced padding and font size</td></tr>
-        <tr><td><code class="nds-inline-code lang-html">nds-divided</code></td><td>Adds separator lines between list items</td></tr>
-    </tbody>
-</table>
-```
-
-Skip this block if the component has no modifier classes beyond its base.
-
-3. **Data Attributes** (when the component's JS reads `data-*` attributes for configuration): a table listing each attribute, where to place it, and valid values. These are the knobs a developer turns without writing JS. Extract from the JS source by searching for `dataset` or `getAttribute('data-`. Example:
-
-```html
-<table class="nds-table nds-responsive">
-    <thead><tr><th>Attribute</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code class="nds-inline-code lang-html">data-state="active"</code></td><td>Set on <code class="nds-inline-code lang-html">&lt;li&gt;</code> to mark the current page. Parent menus expand automatically.</td></tr>
-    </tbody>
-</table>
-```
-
-Skip if the component has no developer-facing data attributes (ignore internal ones like `data-initialized`).
-
-4. **CSS Custom Properties** (when the SCSS defines `--component-*` variables or exposes tokens via `var()` fallbacks): a table of overridable properties with their defaults. Developers use these to customize without touching SCSS. Search the SCSS for custom property definitions. Example:
-
-```html
-<table class="nds-table nds-responsive">
-    <thead><tr><th>Property</th><th>Default</th><th>Description</th></tr></thead>
-    <tbody>
-        <tr><td><code class="nds-inline-code lang-html">--drawer-max-height</code></td><td>none</td><td>Maximum height before scroll overflow activates</td></tr>
-    </tbody>
-</table>
-```
-
-Skip if the component exposes no custom properties.
-
-5. **JavaScript API** (if the component has JS): auto-init note + expandable code block documenting the full API with inline comments. See `alert.md` for format.
-
-Additional blocks based on component needs (only when genuinely warranted):
-- Accessibility, Responsive Behavior, Content Guidelines, Performance
-
-Do NOT document things the developer already gets from copying the code examples (ARIA attributes, semantic structure) or from the demo toggles (configuration classes). Focus on capabilities and decision guidance.
-
-### Content Rules
-
-- **Read `EDITORIAL.md` before writing prose.** It carries the canonical NDS term list, how to describe NDS IQ, the claim ladder (`designed to` / `supported` / `validated` / `tested`), and the doc-page tone. The rules below are what this skill adds on top.
-- **Be brief.** Every sentence must earn its place. A section description is one or two sentences, a Built-in Features description is one line, a Best Practices bullet is one clause. Say the thing and stop: no restating the title, no explaining the same point twice in different words, no trailing "so that…" clause that repeats what the sentence already said. If a sentence can be cut without losing information the developer acts on, cut it.
-- **Write for the developer using the system, not for its maintainers.** No repo tooling (`scripts/*.mjs`, build steps, SCSS internals), no "how we register icons/tokens" mechanics. If the reader cannot act on it from their own project, it belongs in a skill or a source comment, not on a doc page.
-- **NEVER use em dashes** in any generated content. Use colons, commas, periods, or restructure instead.
-- **Use HTML entities inside code tabs**, not raw HTML. The `<code class="lang-html code">` body contains entity-encoded markup (`&lt;div&gt;`, `&lt;span class="..."&gt;`) so the browser renders it as literal text instead of parsing it. Live demo markup above (inside `.state-demo`) stays as raw HTML — only the code-tab copy is entity-encoded. When reviewing an existing page with raw HTML inside a code tab, convert every tag character: `<` → `&lt;`, `>` → `&gt;`, `&` → `&amp;` (when not already part of an entity like `&lt;`).
-- Use `<code class="nds-inline-code lang-html">` for HTML references. Use `<code class="nds-inline-code lang-js">` for JS references. Do NOT use plain `<code>` or the `nds-code` wrapper for inline text.
-- **Links to other pages**: always use Jekyll's `relative_url` filter with `nds-color` class. Example: `<a class="nds-color" href="{{ 'components/stepper' | relative_url }}">Stepper</a>`. Never use absolute paths like `/components/stepper`.
-
-### Registration (New Pages Only)
-
-1. Create SCSS file if needed, add `@use` to `assets/css/nds-main.min.scss`
-2. Add to `_data/sidemenu/sidemenu.yml` under correct parent
-3. Set breadcrumb to match the category
-4. Run `bundle exec jekyll build` to verify
+1. Add the page to `_data/sidemenu/sidemenu.yml`.
+2. Add its catalog entry to the matching `_data/content/*.yml`, copying a neighbor entry's keys.
+3. Set the breadcrumb for its category.
 
 ---
 
-## Phase 6: VERIFY
+## Phase 6: Verify
 
-Before finishing, validate your work against this checklist. Every item MUST pass.
+**Steps 1, 2 and 3 (and 6, once approved) run in one sonnet agent**, not in the main session: the build, check and screenshot loop is most of a page's turns, and every turn re-sends the whole session. Give it the page path and these steps; it fixes what the page owns (canons, Variants rows) and reports back only its findings, the fixes it made, and any component bug it did not fix. A component SCSS fix comes back to the main session.
 
-### Source Completeness
-- [ ] Every variant class from the SCSS source is demoed on the page
-- [ ] Every size class from the SCSS source is demoed on the page
-- [ ] Every state from the SCSS source is represented
-- [ ] Every public JS method is documented (in code block or Usage Guidelines)
-- [ ] Every custom event and its `detail` shape is documented
-- [ ] Every keyboard interaction is documented
-- [ ] Accessibility features from SCSS (`reduced-motion`, `high-contrast`, `print-media`) are mentioned in Built-in Features
+1. **Build:** `bundle exec jekyll build`. Restart `jekyll serve` after a change to `_plugins/`.
+2. **Check the page:** `python scripts/check-docs.py <page>`. It checks the section order, the canons (no Liquid, escaping, `<form>` or `demo-` id), unique ids, every canon the Variants table names, and that no canon already carries an option it can turn off.
+3. **Inspect the built options:** list the chips in the built HTML and confirm the defaults and the disabled chips are right.
+4. **Cold read:** a sonnet agent reads ONLY the `.md` and writes 3 or 4 copy tasks ("a disabled large switch", "a vertical group of three medium buttons with the second chosen"). Every answer must be right. Fix the page where the agent guessed.
+5. **Parity:** a sonnet agent lists every fact in the old page (`git show HEAD:<page>`) as KEPT, CHANGED, LOST or CONTRADICTION against the new one. Check each LOST, CHANGED and CONTRADICTION item in the source: restore the true ones, and name the ones the source disproves in the commit message.
+6. **Browser check — only on the owner's go-ahead.** The owner checks most changes in the browser; a run on every small edit wastes time and tokens (owner call 2026-09-27). After a change, say what to look at and offer the run in one line. Run it only after a yes. This covers builder changes in `_plugins/docs_canon.rb` and `_js/nds-docs.js` too. `node scripts/doc-check.mjs <page>` clicks every builder option and prints findings: console errors, an empty preview, a small component stretched to full width, a disabled icon that differs from its label. It writes one contact sheet per theme to `tmp/doc-check/`: look at both. The preview frame centers its content, so a part meant to fill its container that shows shrunk (or spilling out) there has a real bug: fix the component, then compare that part's size on every page against the old build. A finding in a component is fixed in its SCSS, in its own commit. The owner still reviews the page last.
+   **What to offer it for:** a change to a canon, a Variants row, the component's CSS or the builder. A prose edit does not change what it clicks, so never offer it for one. It tries one option at a time, so a bug that needs two options (an icon and More, Vertical and Loading) passes it. Check such a pair with a short script that picks both.
 
-### Structure and Patterns
-- [ ] All demo card HTML structure matches `alert.md` patterns
-- [ ] All code tabs contain production-ready, copy-paste markup
-- [ ] Code tab markup is entity-encoded (`&lt;`, `&gt;`, `&amp;`) — no raw `<` or `>` inside `<code class="lang-html code">`
-- [ ] Code tab markup is a direct copy of the live demo (same structure, classes, attributes, content, number of items. No abbreviation or placeholders)
-- [ ] All icons verified against `_sass/_hgiRoundedStroke.scss` (content-icon names) or `UI_ICONS` in `scripts/generate-icons-scss.mjs` (UI-icon names) — none guessed; chosen mechanism (`nds-hgi-` for UI vs `hgi hgi-stroke hgi-` for content) matches the usage context
-- [ ] Built-in Features section exists with even number of items
-- [ ] Usage Guidelines has "Best Practices" block
-- [ ] Usage Guidelines has "JS API" block (if component has JS)
-- [ ] Additional Usage Guidelines blocks exist where the component warrants them (API Reference for option-heavy components, Accessibility for keyboard-managed components, etc.)
+   **Compact before the owner tests.** Once the first pass of steps 1 to 6 is clean, stop and tell the user to run `/compact keep the page path, the old claims the source disproves, and the open items`. The owner's test rounds (drop a chip, rename a structure, fix a default) come next, and each round re-sends the whole session: the source, the old page and the model page read in Phase 2 would ride along on every one (measured 2026-09-27: one page cost 3% of the weekly limit, mostly in those rounds). Re-read a file after the compact only when a round needs it.
 
-### Content Quality
-- [ ] Hero description states what the component does for the developer, not a list of internal features
-- [ ] Hero description covers the full range of use cases shown in the demos
-- [ ] Section descriptions orient the developer on when/why to pick this variant, not how it works internally
-- [ ] Built-in Features descriptions lead with outcomes, not internal mechanisms
-- [ ] Best Practices has at least 7 bullets including "don't use" guidance and practical tips
-- [ ] Best Practices covers both when to use/not use AND how to use well
-- [ ] Alternative components mentioned in "don't use" bullets actually exist in NDS
-- [ ] Prose is brief: section descriptions are one or two sentences, feature descriptions one line, bullets one clause. No sentence restates the title or makes the same point twice
-- [ ] No repo tooling, build steps, or maintainer mechanics anywhere on the page
+7. **Text review:** read the page's prose top to bottom against `EDITORIAL.md`, the Variants and API cells included: one word for one thing, sentences under ~25 words, no semicolon joining two instructions, no fact said twice, no claim you did not check. The owner asks for this before every commit.
 
-### Reference Tables
-- [ ] Modifier Classes table exists (if component has class-based variants/sizes/modes)
-- [ ] Data Attributes table exists (if component JS reads data-* for configuration)
-- [ ] CSS Custom Properties table exists (if SCSS exposes overridable custom properties)
-- [ ] All table entries extracted from source files, not guessed
+**Checklist**
+- [ ] Every class, attribute, knob, method and event in the source is on the page.
+- [ ] Every claim was checked against the source.
+- [ ] The Data Attributes table was rebuilt from a grep of the JS, per its rules under API.
+- [ ] Sections in skeleton order, each with its class; Variants is `hidden`.
+- [ ] Canons: no Liquid, no escaping, no demo-only parts, unique ids, 2-space indent.
+- [ ] Every combination the component cannot style is disabled with `:not()`, or fixed in the SCSS.
+- [ ] Every icon name was verified.
+- [ ] The page passes the `EDITORIAL.md` checklist.
+- [ ] `since`, `updated`, `last_edit` set per the rules.
+- [ ] The commit names every old claim the source disproved.
 
-### Formatting
-- [ ] No em dashes anywhere in the page
-- [ ] Front matter has `lang: en` and `direction: ltr`
-- [ ] Unique IDs on all tabs/panels (no conflicts across demo cards)
-- [ ] Registered in `sidemenu.yml` (new pages only)
-
-If any item fails, fix it before presenting the result.
+**One page per session.** After the commit, tell the user to `/clear` before the next page: a session that runs page after page re-sends every earlier page's history on each turn (160–560 M cached tokens per session, measured 2026-09-27).

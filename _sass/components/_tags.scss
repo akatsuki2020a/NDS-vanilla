@@ -10,14 +10,14 @@
 // ==============================================
 
 .nds-tag {
-  // Private custom properties with public override capability
-  --_bg: var(--tag-bg, var(--tag-background-neutral-light));
-  --_text: var(--tag-text, var(--tag-text-neutral));
-  --_border: var(--tag-border, var(--tag-border-neutral-light));
-  --_icon: var(--tag-icon, var(--tag-icon-neutral));
-  --_tag-height: var(--tag-height, 32px);
-  --_tag-fs: var(--tag-fs, var(--typo-text-md-FS));
-  --_tag-padding-inline: var(--tag-padding-inline, var(--spacing-xl));
+  // Colors, statuses, styles and sizes set the -base values, so a public knob on the tag or a parent wins over them.
+  --_bg: var(--tag-bg, var(--_tag-bg-base, var(--tag-background-neutral-light)));
+  --_text: var(--tag-text, var(--_tag-text-base, var(--tag-text-neutral)));
+  --_border: var(--tag-border, var(--_tag-border-base, var(--tag-border-neutral-light)));
+  --_icon: var(--tag-icon, var(--_tag-icon-base, var(--tag-icon-neutral)));
+  --_tag-height: var(--tag-height, var(--_tag-height-base, 32px));
+  --_tag-fs: var(--tag-fs, var(--_tag-fs-base, var(--typo-text-md-FS)));
+  --_tag-padding-inline: var(--tag-padding-inline, var(--_tag-padding-inline-base, var(--spacing-lg)));
   --_tag-dot-size: var(--tag-dot-size, 10px);
   --_tag-label-max: var(--tag-label-max, 160px);
 
@@ -29,6 +29,8 @@
   font-size: var(--_tag-fs);
   line-height: var(--_tag-height);
   height: var(--_tag-height);
+  // A column layout would otherwise stretch a lone tag to its full width.
+  width: fit-content;
   // Shrink to the container before the label does, so a long tag ellipsizes
   // instead of escaping the card or cell it sits in.
   min-width: 0;
@@ -59,15 +61,15 @@
   // ==============================================
 
   &.nds-sm {
-    --tag-height: 24px;
-    --tag-fs: var(--typo-text-sm-FS);
-    --tag-padding-inline: var(--spacing-md);
+    --_tag-height-base: 24px;
+    --_tag-fs-base: var(--typo-text-sm-FS);
+    --_tag-padding-inline-base: var(--spacing-md);
   }
 
   &.nds-xs {
-    --tag-height: 20px;
-    --tag-fs: var(--typo-text-xs-FS);
-    --tag-padding-inline: var(--spacing-md);
+    --_tag-height-base: 20px;
+    --_tag-fs-base: var(--typo-text-xs-FS);
+    --_tag-padding-inline-base: var(--spacing-md);
   }
 
   // ==============================================
@@ -88,100 +90,95 @@
     padding: var(--spacing-none) var(--spacing-xxs);
     justify-content: center;
 
+    // Visually hidden, not display:none: the label stays the tag's text for screen readers.
     .nds-label {
-      display: none !important;
+      @include label-hidden;
     }
   }
 
   // ==============================================
-  // COLOR VARIANTS — status defaults set the light fill; .nds-inverted
-  // and .nds-outline overlay only what differs (bg + border style).
-  // Variant chrome is gated to status selectors so a bare .nds-inverted /
-  // .nds-outline (no color) stays inert.
+  // COLOR VARIANTS — color and status set the light fill. .nds-outline (normal
+  // tags) and .nds-inverted (status tags) overlay only what differs.
   // ==============================================
 
-  // No neutral rung: the base defaults above already resolve to the neutral tokens, so
-  // .nds-gray / .nds-neutral / [data-status="neutral"] need no rule to look right — and
-  // leaving them out keeps an author's own --tag-bg winning on a plain tag.
+  // No neutral rung: the defaults above already resolve to the neutral tokens, so
+  // .nds-gray / .nds-neutral / [data-status="neutral"] need no rule to look right.
 
   &:is(.nds-green:where(:not([data-status])), [data-status="success"]) {
-    --tag-bg: var(--tag-background-success-light);
-    --tag-text: var(--tag-text-success);
-    --tag-border: var(--tag-border-success-light);
-    --tag-icon: var(--tag-icon-success);
+    --_tag-bg-base: var(--tag-background-success-light);
+    --_tag-text-base: var(--tag-text-success);
+    --_tag-border-base: var(--tag-border-success-light);
+    --_tag-icon-base: var(--tag-icon-success);
   }
 
   &:is(.nds-blue:where(:not([data-status])), [data-status="info"]) {
-    --tag-bg: var(--tag-background-info-light);
-    --tag-text: var(--tag-text-info);
-    --tag-border: var(--tag-border-info-light);
-    --tag-icon: var(--tag-icon-info);
+    --_tag-bg-base: var(--tag-background-info-light);
+    --_tag-text-base: var(--tag-text-info);
+    --_tag-border-base: var(--tag-border-info-light);
+    --_tag-icon-base: var(--tag-icon-info);
   }
 
   &:is(.nds-yellow:where(:not([data-status])), [data-status="warning"]) {
-    --tag-bg: var(--tag-background-warning-light);
-    --tag-text: var(--tag-text-warning);
-    --tag-border: var(--tag-border-warning-light);
-    --tag-icon: var(--tag-icon-warning);
+    --_tag-bg-base: var(--tag-background-warning-light);
+    --_tag-text-base: var(--tag-text-warning);
+    --_tag-border-base: var(--tag-border-warning-light);
+    --_tag-icon-base: var(--tag-icon-warning);
   }
 
   &:is(.nds-red:where(:not([data-status])), [data-status="error"], [data-status="critical"]) {
-    --tag-bg: var(--tag-background-error-light);
-    --tag-text: var(--tag-text-error);
-    --tag-border: var(--tag-border-error-light);
-    --tag-icon: var(--tag-icon-error);
+    --_tag-bg-base: var(--tag-background-error-light);
+    --_tag-text-base: var(--tag-text-error);
+    --_tag-border-base: var(--tag-border-error-light);
+    --_tag-icon-base: var(--tag-icon-error);
   }
 
-  // Variant chrome — only applies when the tag also has a status.
-  &:is(.nds-gray, .nds-neutral, .nds-green, .nds-blue, .nds-yellow, .nds-red, [data-status]) {
-    &.nds-inverted {
-      --tag-text: var(--text-oncolor-primary);
-      --tag-border: transparent;
-      --tag-icon: var(--tag-dot);
-    }
-    &.nds-outline { --tag-bg: transparent; }
+  // Outline — normal tags only; neutral border, per-color below.
+  &.nds-outline:not([data-status]) {
+    --_tag-bg-base: transparent;
+    --_tag-border-base: var(--tag-border-neutral);
+
+    &.nds-green { --_tag-border-base: var(--tag-border-success); }
+    &.nds-blue { --_tag-border-base: var(--tag-border-info); }
+    &.nds-yellow { --_tag-border-base: var(--tag-border-warning); }
+    &.nds-red { --_tag-border-base: var(--tag-border-error); }
   }
 
-  // Inverted — per-status solid bg (only value that differs).
-  &.nds-inverted {
-    &:is(:is(.nds-gray, .nds-neutral):where(:not([data-status])), [data-status="neutral"]) { --tag-bg: var(--tag-background-neutral); }
-    &:is(.nds-green:where(:not([data-status])), [data-status="success"]) { --tag-bg: var(--tag-background-success); }
-    &:is(.nds-blue:where(:not([data-status])), [data-status="info"]) { --tag-bg: var(--tag-background-info); }
-    &:is(.nds-yellow:where(:not([data-status])), [data-status="warning"]) { --tag-bg: var(--tag-background-warning); }
-    &:is(.nds-red:where(:not([data-status])), [data-status="error"], [data-status="critical"]) { --tag-bg: var(--tag-background-error); }
+  // Inverted — status tags only; neutral solid bg, per-status below.
+  &[data-status].nds-inverted {
+    --_tag-bg-base: var(--tag-background-neutral);
+    --_tag-text-base: var(--text-oncolor-primary);
+    --_tag-border-base: transparent;
+    --_tag-icon-base: var(--tag-dot);
+
+    &[data-status="success"] { --_tag-bg-base: var(--tag-background-success); }
+    &[data-status="info"] { --_tag-bg-base: var(--tag-background-info); }
+    &[data-status="warning"] { --_tag-bg-base: var(--tag-background-warning); }
+    &:is([data-status="error"], [data-status="critical"]) { --_tag-bg-base: var(--tag-background-error); }
   }
 
-  // Outline — per-status full-strength border (only value that differs).
-  &.nds-outline {
-    &:is(:is(.nds-gray, .nds-neutral):where(:not([data-status])), [data-status="neutral"]) { --tag-border: var(--tag-border-neutral); }
-    &:is(.nds-green:where(:not([data-status])), [data-status="success"]) { --tag-border: var(--tag-border-success); }
-    &:is(.nds-blue:where(:not([data-status])), [data-status="info"]) { --tag-border: var(--tag-border-info); }
-    &:is(.nds-yellow:where(:not([data-status])), [data-status="warning"]) { --tag-border: var(--tag-border-warning); }
-    &:is(.nds-red:where(:not([data-status])), [data-status="error"], [data-status="critical"]) { --tag-border: var(--tag-border-error); }
-  }
-
-  &.nds-oncolor {
-    --tag-bg: var(--tag-background-oncolor);
-    --tag-text: var(--text-oncolor-primary);
-    --tag-border: transparent;
-    --tag-icon: var(--text-oncolor-primary);
+  // Normal tags only: a status tag keeps its colors (data-theme="dark" on a dark surface).
+  &.nds-oncolor:not([data-status]) {
+    --_tag-bg-base: var(--tag-background-oncolor);
+    --_tag-text-base: var(--text-oncolor-primary);
+    --_tag-border-base: transparent;
+    --_tag-icon-base: var(--text-oncolor-primary);
 
     &.nds-outline {
-      --tag-bg: transparent;
-      --tag-border: var(--tag-border-oncolor);
-      --tag-text: var(--text-oncolor-primary);
+      --_tag-bg-base: transparent;
+      --_tag-border-base: var(--tag-border-oncolor);
+      --_tag-text-base: var(--text-oncolor-primary);
     }
   }
 
 
   // ==============================================
-  // GHOST VARIANT
+  // GHOST VARIANT — status tags only
   // ==============================================
 
-  &.nds-ghost {
-    --tag-bg: transparent;
-    --tag-border: transparent;
-    --tag-text: var(--tag-text-neutral);
+  &[data-status].nds-ghost {
+    --_tag-bg-base: transparent;
+    --_tag-border-base: transparent;
+    --_tag-text-base: var(--tag-text-neutral);
   }
 
   // ==============================================
@@ -202,7 +199,7 @@
 
   &[data-status] {
     border-radius: 999px;
-    --tag-border: transparent;
+    --_tag-border-base: transparent;
     --_tag-dot: "";
   }
 

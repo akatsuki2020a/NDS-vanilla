@@ -16,47 +16,21 @@ surface the theme controls. Count spellings and you will deprecate half the syst
 
 ## Confirmed — the source says deprecated
 
+Empty. v2.0.0 removed every row this table held, along with the two grandfathered menu names
+(`.nds-rating-dropmenu`, `.nds-date-picker-dropdown`). Each one is now a "renamed" or "removed"
+row in `_data/migrations.yml`, which the audit's migration rules and the Migration doc page read.
+
+**A new deprecation gets a row in both places:** a row here, and a row in `_data/migrations.yml`
+with `status: deprecated`, so the audit warns about it until the next major removes it.
+
 | Class | Replacement | Deprecated in | Declared at |
 |---|---|---|---|
-| `slides-max`, `slides-mid`, `slides-min`, `peek` **attributes on `.nds-swiper`** | inline `--max-slides`, `--mid-slides`, `--min-slides`, `--peek` (`style="…"` on the same element) | 1.12.0 | `_js/nds-swiper.js` (constructor knob read), `_js/nds-loader.js` (presetSwipers) |
-| `.nds-card-price` | `.nds-card-value` | 1.11.0 | `_sass/components/_cards.scss` (value line) |
-| `[data-loading]` **on `.nds-slider-container`** | `.nds-loading` (or the `loading` token from JS) | 1.12.0 | `_sass/components/_slider.scss` (skeleton rule) |
-| `.nds-404` | `.nds-status-section` | 1.10.0 | `_sass/layout/_section-layout.scss` (status section banner) |
-| `.nds-green` **on a section or footer** | `.nds-primary` / `.nds-brand` | before 1.9 | `_sass/layout/_section.scss`, `_sass/components/_footer.scss` |
-| `.nds-gradient-green` | `.nds-gradient-primary` | before 1.9 | `_sass/layout/_section.scss`, `_sass/_variables-a11y.scss` |
-| `.nds-focus`, `.focus` | none — the field styles its own focus | before 1.9 | `_sass/components/_forms.scss` ("Legacy class support") |
-| `NDS.Filter` instance method `setSelectedTags(tags)` | `setFilterValues('tags', tags)` | before 1.9 | `_js/nds-filter.js` (marked "Legacy API for backward compatibility") |
-| `NDS.loadExtras()` | `NDS.loadBundle('extras')` | 1.1.0 | `_js/nds-loader.js` (marked "Back-compat shim … still calling the old extras-specific API") |
-| `NDS.Stepper._applyLayout()`, `NDS.Stepper._stamp()` | `NDS.Stepper.init()` — idempotent, and it stamps and applies layout itself | 1.1.0 | `_js/nds-stepper.js` (marked "Kept on the public surface for back-compat with any consumer that reached the shell-private stamping helpers") |
-| `open` **class on a `.nds-drawer` item** | `data-open-on="always"` on the item (or on the drawer as the default) | 1.0.0 | `_js/nds-drawer.js` `getOpenOnValue` (marked "Fallback … backward compatibility") |
-
-**`.nds-{color}` is canon, and only the brand surface is not.** Tags take colour names as
-their public API — `.nds-gray`, `.nds-green`, `.nds-blue`, `.nds-yellow`, `.nds-red`, each
-paired with a `[data-status]` twin. Those stay. What is deprecated is `.nds-green` as a name
-for the *brand* surface on a section or footer, where the surface is the theme colour and
-never a fixed green — that is what `.nds-primary` / `.nds-brand` say.
-
-So the removal is selector-scoped, not repo-wide: strip the alias from the section, footer
-and a11y selectors only. All 67 documented uses of `nds-green` sit on tags and must survive.
-Grep with the component in the pattern, never the bare class name.
-
-## Grandfathered names — rename at the same time
-
-`AGENTS.md` fixes the menu identifier as `.nds-{component}-menu`. Two predate the rule and
-are exempt by name, not by design:
-
-| Current | Should be | Declared at |
-|---|---|---|
-| `.nds-rating-dropmenu` | `.nds-rating-menu` | `_sass/components/_rating.scss` |
-| `.nds-date-picker-dropdown` | `.nds-date-picker-menu` | `_sass/components/_date-picker.scss` |
 
 ## Needs an owner call — two live names for one thing
 
 Neither is marked deprecated, and the docs use both. Pick the survivor before the major,
 then the loser moves to the table above.
 
-- **`.nds-ghost` vs `.nds-noBg`** — the same section reset (`_sass/layout/_section.scss`
-  routes both to `reset-section-style`). Docs: `nds-noBg` in 43 pages, `nds-ghost` in 6.
 - **What each status component answers to.** All of these work and none misleads, so this
   is a consistency question, not deprecation — but a dev who learns one component guesses
   wrong at the next.
@@ -80,15 +54,6 @@ then the loser moves to the table above.
   learned on every other component silently does nothing there. A gap to fill, not a name
   to remove. And leave feedback icons alone: attribute-only, and the only one that reads
   the status off an ancestor, which is what lets a status section paint the chip inside it.
-- **`.nds-full` vs `.nds-full-width`** on cards (`_sass/components/_cards.scss`). Note
-  `body.nds-full-width` is a different switch in `_reset.scss` — check before renaming.
-- **`nds:table:sort` vs `nds:sort:change`** — one reorder, dispatched twice. `nds-sort.js`
-  fires `nds:sort:change` with `{key, dir}` (documented in `components/sort.md`), and
-  `nds-tables.js` `dispatchSortEvent` fires `nds:table:sort` straight after it, kept because
-  "existing listeners expect columnIndex + direction" (documented in `components/tables.md`).
-  The back-compat payload now misleads: its `detail.columnIndex` carries the sort KEY, because
-  the caller passes `key` into a parameter still named `columnIndex`. Renaming the field breaks
-  the listeners the event exists for, so the survivor is an owner call, not an audit call.
 
 ## Finding the next one
 

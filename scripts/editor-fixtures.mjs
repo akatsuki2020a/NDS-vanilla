@@ -3,7 +3,7 @@
 // demos pull the extras bundle) and injects its own two harness fields
 // (#story, #report) — the playground stays a clean scratch page.
 // Run: node scripts/editor-fixtures.mjs  (dev server must be up on :4002)
-import puppeteer from 'puppeteer-core';
+import { launch } from './lib/browser.mjs';
 
 const FIXTURES = [
     {
@@ -74,6 +74,19 @@ const FIXTURES = [
             ['contains', '<p>'],
             ['contains', 'data-status="success"'],
             ['contains', 'nds-tag'],
+        ],
+    },
+    {
+        // Atoms are one line: block structure smuggled into a button/tag's
+        // label (a <p>, a <ul>) unwraps to plain text, never survives as
+        // structure — only the label/icon vocabulary (SPAN, I, IMG) is kept.
+        name: 'atom-content-restricted-to-phrasing',
+        html: '<p><button class="nds-btn nds-primary" type="button"><span class="nds-label"><p>فقرة</p><ul><li>أول</li><li>ثانٍ</li></ul></span></button></p>',
+        expect: [
+            ['contains', '<span class="nds-label">فقرةأولثانٍ</span>'],
+            ['not', '<p>فقرة'],
+            ['not', '<ul>'],
+            ['not', '<li>'],
         ],
     },
     {
@@ -587,14 +600,11 @@ p.MsoListParagraph {margin-left:36.0pt; mso-add-space:auto;}
     },
 ];
 
-const browser = await puppeteer.launch({
-    executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    headless: 'new',
-});
+const browser = await launch();
 try {
     const page = await browser.newPage();
-    await page.goto('http://localhost:4002/NDS-vanilla/components/editor.html', { waitUntil: 'networkidle2', timeout: 60000 });
-    await page.waitForSelector('.nds-editor[data-nds-editor-initialized]', { timeout: 20000 });
+    await page.goto('http://localhost:4002/NDS-vanilla/components/editor.html', { waitUntil: 'networkidle', timeout: 60000 });
+    await page.waitForSelector('.nds-editor[data-nds-editor-initialized]', { state: 'attached', timeout: 20000 });
 
     // Inject the harness fields the fixtures drive by id — self-contained, so
     // no authored page has to carry them.
@@ -1487,6 +1497,491 @@ try {
         console.log('PASS atom-caret-guard-e2e');
     }
 
+    // E2E: reported bug — selecting a button's whole label text (double-click
+    // word-select) and pressing Enter must escape like a collapsed caret
+    // does, not fall into the multi-part insertLineBreak path: that corrupted
+    // the label into duplicated <br> content instead of leaving it intact.
+    const btnLabelSelectOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        editable.innerHTML = '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">زر</span></button> بعد</p>';
+        const label = editable.querySelector('.nds-label');
+        const r = document.createRange();
+        r.selectNodeContents(label); // whole-text select, like a double-click word-select
+        sel.removeAllRanges();
+        sel.addRange(r);
+        await raf();
+        const before = editable.innerHTML;
+        const prevented = !editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        await raf();
+        const afterEnter = editable.innerHTML;
+        return {
+            enterPrevented: prevented,
+            labelUnchanged: afterEnter === before,
+            noBr: !afterEnter.includes('<br>'),
+            oneLabel: editable.querySelectorAll('.nds-label').length === 1,
+        };
+    });
+    const btnLabelSelectProblems = Object.entries(btnLabelSelectOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (btnLabelSelectProblems.length) {
+        failures++;
+        console.log('FAIL button-label-select-enter-e2e');
+        btnLabelSelectProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS button-label-select-enter-e2e');
+    }
+
+    // E2E: linking a button whose label text is fully SELECTED (double-click,
+    // the flow right before renaming it) converts whole, same as a collapsed
+    // caret does — one <a>, label nested inside it, never duplicated.
+    const btnLinkSelectOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        editable.innerHTML = '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">Button fgd</span></button> بعد</p>';
+        const label = editable.querySelector('.nds-label');
+        const r = document.createRange();
+        r.selectNodeContents(label);
+        sel.removeAllRanges();
+        sel.addRange(r);
+        const linkBtn = root.querySelector('[data-cmd="link"]');
+        linkBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        linkBtn.click();
+        await raf();
+        const menu = root.querySelector('[data-editor-link-dropmenu] .nds-dropmenu-menu');
+        menu.querySelector('[data-editor-link-url]').value = 'https://wwww';
+        menu.querySelector('[data-editor-link-external]').checked = true;
+        menu.querySelector('[data-editor-link-confirm]').click();
+        await raf();
+        const a = editable.querySelector('a.nds-btn');
+        return {
+            oneAnchor: editable.querySelectorAll('a').length === 1,
+            oneLabel: editable.querySelectorAll('.nds-label').length === 1,
+            noStrayButton: !editable.querySelector('button'),
+            labelInsideAnchor: !!a?.querySelector('.nds-label'),
+            labelTextKept: a?.querySelector('.nds-label')?.textContent === 'Button fgd',
+        };
+    });
+    const btnLinkSelectProblems = Object.entries(btnLinkSelectOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (btnLinkSelectProblems.length) {
+        failures++;
+        console.log('FAIL button-link-select-e2e');
+        btnLinkSelectProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS button-link-select-e2e');
+    }
+
+    // E2E: a button-link built via the full-label-select flow round-trips
+    // through the HTML source toggle unchanged — the toggle re-hydrates from
+    // sanitizeHtml(source.value), which must be idempotent on canon markup.
+    const sourceToggleOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        editable.innerHTML = '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">Button fgd</span></button> بعد</p>';
+        const label = editable.querySelector('.nds-label');
+        const r = document.createRange();
+        r.selectNodeContents(label);
+        sel.removeAllRanges();
+        sel.addRange(r);
+        const linkBtn = root.querySelector('[data-cmd="link"]');
+        linkBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        linkBtn.click();
+        await raf();
+        const menu = root.querySelector('[data-editor-link-dropmenu] .nds-dropmenu-menu');
+        menu.querySelector('[data-editor-link-url]').value = 'https://wwww';
+        menu.querySelector('[data-editor-link-external]').checked = true;
+        menu.querySelector('[data-editor-link-confirm]').click();
+        await raf();
+        const before = editable.innerHTML;
+        const toggle = root.querySelector('[data-source-toggle]');
+        toggle.click(); // enter source
+        await raf();
+        toggle.click(); // exit source, re-hydrate editable
+        await raf();
+        const after = editable.innerHTML;
+        return { roundTrips: after === before };
+    });
+    const sourceToggleProblems = Object.entries(sourceToggleOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (sourceToggleProblems.length) {
+        failures++;
+        console.log('FAIL button-link-source-toggle-e2e');
+        sourceToggleProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS button-link-source-toggle-e2e');
+    }
+
+    // E2E: reported bug — a fast double-click on the link popover's Insert
+    // button (data-no-auto-close keeps it live through a validation error, so
+    // it's still clickable for a beat after a valid submit too) re-entered
+    // _confirmLink. _restoreSelection() consumes its saved range once, so the
+    // second call restored nothing, its atom/existing-anchor lookups came up
+    // empty, and it fell through to the plain-text insertHTML branch — a
+    // stray second <a> duplicating the button's text alongside the real one.
+    const doubleConfirmOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        editable.innerHTML = '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">Button fgd</span></button> بعد</p>';
+        const label = editable.querySelector('.nds-label');
+        const r = document.createRange();
+        r.selectNodeContents(label);
+        sel.removeAllRanges();
+        sel.addRange(r);
+        const linkBtn = root.querySelector('[data-cmd="link"]');
+        linkBtn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+        linkBtn.click();
+        await raf();
+        const menu = root.querySelector('[data-editor-link-dropmenu] .nds-dropmenu-menu');
+        menu.querySelector('[data-editor-link-url]').value = 'https://wwww';
+        menu.querySelector('[data-editor-link-external]').checked = true;
+        const confirmBtn = menu.querySelector('[data-editor-link-confirm]');
+        confirmBtn.click();
+        confirmBtn.click(); // rapid second click, no raf between
+        await raf();
+        return {
+            oneAnchor: editable.querySelectorAll('a').length === 1,
+            oneLabel: editable.querySelectorAll('.nds-label').length === 1,
+        };
+    });
+    const doubleConfirmProblems = Object.entries(doubleConfirmOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (doubleConfirmProblems.length) {
+        failures++;
+        console.log('FAIL link-confirm-double-click-e2e');
+        doubleConfirmProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS link-confirm-double-click-e2e');
+    }
+
+    // E2E: reported bug — toolbar heading/list/formatting commands, and their
+    // Ctrl+B/I/U keyboard shortcuts, could still restructure a button's label
+    // (wrap it in a heading, a list, bold/italic/underline/strike) even
+    // though paste/source already refuse that content. Both paths route
+    // through _applyCommand, so both must refuse while the caret is in an
+    // atom; a command outside one still works normally.
+    const atomToolbarLockOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        const putCaretInLabel = () => {
+            const label = editable.querySelector('.nds-label');
+            const r = document.createRange();
+            r.setStart(label.firstChild, 1);
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+        };
+        // mousedown's preventDefault (in _bindToolbar) is what keeps the
+        // editable's selection alive through a button click — a plain
+        // .click() alone lets the browser shift focus/selection first.
+        const clickCmd = (cmd) => {
+            const btn = root.querySelector(`[data-cmd="${cmd}"]`);
+            btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+            btn.click();
+        };
+
+        // Toolbar click path.
+        editable.innerHTML = '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">زر</span></button> بعد</p>';
+        putCaretInLabel();
+        clickCmd('h2'); // h1 is deliberately excluded from the default toolbar
+        putCaretInLabel();
+        clickCmd('ul');
+        putCaretInLabel();
+        clickCmd('bold');
+        await raf();
+        const toolbarBlocked = editable.innerHTML
+            === '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">زر</span></button> بعد</p>';
+
+        // Ctrl+B keyboard shortcut path — same choke point (_applyCommand),
+        // reached differently (_onKeydown, not the toolbar button).
+        putCaretInLabel();
+        editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', ctrlKey: true, bubbles: true, cancelable: true }));
+        await raf();
+        const shortcutBlocked = !editable.querySelector('.nds-label strong');
+
+        // Buttons visibly grey out while the caret sits in the atom...
+        putCaretInLabel();
+        document.dispatchEvent(new Event('selectionchange'));
+        await raf(); await raf();
+        const boldDisabledInAtom = root.querySelector('[data-cmd="bold"]').disabled;
+
+        // ...and a command elsewhere in the document still works normally
+        // (a real, non-collapsed selection — execCommand('bold') on a
+        // collapsed caret only sets typing state, wraps nothing).
+        const plainText = editable.querySelector('p').firstChild;
+        const r2 = document.createRange();
+        r2.setStart(plainText, 0);
+        r2.setEnd(plainText, 3);
+        sel.removeAllRanges();
+        sel.addRange(r2);
+        document.dispatchEvent(new Event('selectionchange'));
+        await raf(); await raf();
+        const boldEnabledOutsideAtom = !root.querySelector('[data-cmd="bold"]').disabled;
+        clickCmd('bold');
+        await raf();
+        // execCommand('bold') writes <b> in the live DOM — sanitize
+        // normalizes that to <strong> only on sync/save.
+        const boldWorksOutsideAtom = !!editable.querySelector('p > b, p > strong');
+
+        return { toolbarBlocked, shortcutBlocked, boldDisabledInAtom, boldEnabledOutsideAtom, boldWorksOutsideAtom };
+    });
+    const atomToolbarLockProblems = Object.entries(atomToolbarLockOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (atomToolbarLockProblems.length) {
+        failures++;
+        console.log('FAIL atom-toolbar-lock-e2e');
+        atomToolbarLockProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS atom-toolbar-lock-e2e');
+    }
+
+    // E2E: undo restores via a re-parse of the pretty-printed value, which
+    // carries indent text nodes inside lists that the live DOM lacked when
+    // the caret was recorded. The caret must land back in "b", not "a".
+    const undoCaretOut = await page.evaluate(async () => {
+        const root = document.getElementById('story').closest('.nds-editor');
+        const inst = root.ndsEditor;
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        const put = (node, off) => {
+            const r = document.createRange();
+            r.setStart(node, off);
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+        };
+        editable.innerHTML = '<ul><li>a</li><li>b</li></ul><p><br></p>';
+        editable.focus();
+        put(editable.querySelectorAll('li')[1].firstChild, 1);
+        inst._syncSource(false);
+        const textB = editable.querySelectorAll('li')[1].firstChild;
+        textB.textContent = 'bc';
+        put(textB, 2);
+        inst._syncSource(false);
+        editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'z', ctrlKey: true, bubbles: true, cancelable: true }));
+        const li = (sel.anchorNode?.nodeType === 3 ? sel.anchorNode.parentNode : sel.anchorNode)?.closest('li');
+        return {
+            valueRestored: editable.querySelectorAll('li')[1]?.textContent === 'b',
+            indentNodesPresent: [...editable.querySelector('ul').childNodes].some(n => n.nodeType === 3 && !n.textContent.trim()),
+            caretInB: !!li && li.textContent === 'b' && sel.anchorOffset === 1,
+        };
+    });
+    const undoCaretProblems = Object.entries(undoCaretOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (undoCaretProblems.length) {
+        failures++;
+        console.log('FAIL undo-caret-list-e2e');
+        undoCaretProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS undo-caret-list-e2e');
+    }
+
+    // E2E: alignment in a table cell aligns the COLUMN the table way —
+    // data-align on its <th> (logical, from the physical button), body cells
+    // preview it live, and only the data-align reaches the value.
+    const columnAlignOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const source = root.querySelector('.nds-editor-source');
+        const sel = getSelection();
+        const clickCmd = (cmd) => {
+            const btn = root.querySelector(`[data-cmd="${cmd}"]`);
+            btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+            btn.click();
+        };
+        const caretIn = (cell) => {
+            const r = document.createRange();
+            r.setStart(cell.firstChild, 1);
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+            document.dispatchEvent(new Event('selectionchange'));
+        };
+        editable.innerHTML = '<table class="nds-table"><thead><tr><th>الاسم</th><th>المبلغ</th></tr></thead>'
+            + '<tbody><tr><td>أ</td><td>١٠</td></tr><tr><td>ب</td><td>٢٠</td></tr></tbody></table><p><br></p>';
+        const th = editable.querySelectorAll('th')[1];
+        const rtl = getComputedStyle(th).direction === 'rtl';
+        caretIn(editable.querySelectorAll('tbody td')[1]);
+        clickCmd('align-center');
+        await raf(); await raf();
+        const cells = [...editable.querySelectorAll('tbody tr > td:nth-child(2)')];
+        const centered = th.getAttribute('data-align') === 'center'
+            && cells.every(td => td.style.textAlign === 'center')
+            && editable.querySelector('tbody td').style.textAlign === '';
+        const valueCanon = source.value.includes('data-align="center"') && !source.value.includes('text-align');
+        caretIn(editable.querySelectorAll('tbody td')[1]);
+        await raf(); await raf();
+        const pressedShows = root.querySelector('[data-cmd="align-center"]').getAttribute('aria-pressed') === 'true';
+        clickCmd('align-center');
+        await raf();
+        const toggledOff = !th.hasAttribute('data-align') && cells.every(td => !td.hasAttribute('style'));
+        caretIn(editable.querySelectorAll('tbody td')[1]);
+        clickCmd('align-right');
+        await raf();
+        const physicalToLogical = th.getAttribute('data-align') === (rtl ? 'start' : 'end');
+        return { centered, valueCanon, pressedShows, toggledOff, physicalToLogical };
+    });
+    const columnAlignProblems = Object.entries(columnAlignOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (columnAlignProblems.length) {
+        failures++;
+        console.log('FAIL table-column-align-e2e');
+        columnAlignProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS table-column-align-e2e');
+    }
+
+    // E2E: a click-selected bare image carries the focus-ring marker (the
+    // selection wash is gone), and the marker never reaches the value.
+    const imageRingOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const inst = root.ndsEditor;
+        const editable = root.querySelector('.nds-editor-editable');
+        const source = root.querySelector('.nds-editor-source');
+        editable.innerHTML = '<p>نص <img src="https://example.com/a.png" alt="a"> نص</p>';
+        const img = editable.querySelector('img');
+        const sel = getSelection();
+        const r = document.createRange();
+        r.selectNode(img);
+        sel.removeAllRanges();
+        sel.addRange(r);
+        document.dispatchEvent(new Event('selectionchange'));
+        await raf(); await raf();
+        inst._syncSource(false);
+        const cs = getComputedStyle(img);
+        return {
+            marked: img.hasAttribute('data-editor-selected'),
+            outlined: cs.outlineStyle === 'solid' && parseFloat(cs.outlineWidth) >= 2,
+            notInValue: !source.value.includes('data-editor-selected'),
+        };
+    });
+    const imageRingProblems = Object.entries(imageRingOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (imageRingProblems.length) {
+        failures++;
+        console.log('FAIL image-select-ring-e2e');
+        imageRingProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS image-select-ring-e2e');
+    }
+
+    // E2E: a toolbar sync on a readonly surface must not re-enable the
+    // atom-locked commands, and they come back once editable again.
+    const readonlyToolbarOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const bold = root.querySelector('[data-cmd="bold"]');
+        const sel = getSelection();
+        const caretInText = () => {
+            const r = document.createRange();
+            r.setStart(editable.querySelector('p').firstChild, 2);
+            r.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(r);
+        };
+        editable.innerHTML = '<p>مرحبا</p>';
+        NDS.State.add(root, 'readonly');
+        await raf();
+        caretInText();
+        document.dispatchEvent(new Event('selectionchange'));
+        await raf(); await raf();
+        const boldDisabledReadonly = bold.disabled;
+        NDS.State.remove(root, 'readonly');
+        await raf();
+        caretInText();
+        document.dispatchEvent(new Event('selectionchange'));
+        await raf(); await raf();
+        return { boldDisabledReadonly, boldEnabledAfter: !bold.disabled };
+    });
+    const readonlyToolbarProblems = Object.entries(readonlyToolbarOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (readonlyToolbarProblems.length) {
+        failures++;
+        console.log('FAIL readonly-toolbar-lock-e2e');
+        readonlyToolbarProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS readonly-toolbar-lock-e2e');
+    }
+
+    // E2E: reported bug — a SECOND Enter, right where the first escape left
+    // the caret (beside the button, still in its paragraph), used to hit a
+    // native Chrome quirk splitting a block that touches an interactive
+    // element: it nested a stray <p> INSIDE the original instead of after
+    // it. Must split into two clean sibling paragraphs, button untouched.
+    const doubleEnterOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        const sel = getSelection();
+        editable.innerHTML = '<p>قبل <button class="nds-btn nds-primary" type="button"><span class="nds-label">زر</span></button> بعد</p>';
+        const label = editable.querySelector('.nds-label');
+        const r = document.createRange();
+        r.setStart(label.firstChild, 1);
+        r.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(r);
+        editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        await raf();
+        editable.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+        await raf();
+        const ps = editable.querySelectorAll(':scope > p');
+        return {
+            twoTopLevelParagraphs: ps.length === 2,
+            noNestedP: !editable.querySelector('p p'),
+            buttonIntact: !!editable.querySelector('button.nds-btn .nds-label')
+                && editable.querySelector('.nds-label').textContent === 'زر',
+            oneLabel: editable.querySelectorAll('.nds-label').length === 1,
+            tailMoved: ps[1]?.textContent.trim() === 'بعد',
+        };
+    });
+    const doubleEnterProblems = Object.entries(doubleEnterOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (doubleEnterProblems.length) {
+        failures++;
+        console.log('FAIL double-enter-beside-atom-e2e');
+        doubleEnterProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS double-enter-beside-atom-e2e');
+    }
+
+    // E2E: reported bug — clicking empty space below the content, meant to
+    // start a new line after a trailing button/link, used to collapse the
+    // caret to the document end and split it there via native
+    // execCommand('insertParagraph') — corrupting the atom the same way
+    // unguarded Enter would. It must add a clean empty <p> instead, leaving
+    // the atom untouched.
+    const clickBelowOut = await page.evaluate(async () => {
+        const raf = () => new Promise(requestAnimationFrame);
+        const root = document.getElementById('story').closest('.nds-editor');
+        const editable = root.querySelector('.nds-editor-editable');
+        editable.innerHTML = '<p>قبل <a class="nds-btn nds-primary nds-external" href="https://wwww" target="_blank" rel="noopener noreferrer"><span class="nds-label">Button fgd</span></a></p>';
+        editable.dispatchEvent(new Event('input', { bubbles: true }));
+        await raf();
+        const rect = editable.lastElementChild.getBoundingClientRect();
+        editable.dispatchEvent(new MouseEvent('click', {
+            bubbles: true, cancelable: true, view: window,
+            clientX: rect.left, clientY: rect.bottom + 20,
+        }));
+        await raf();
+        return {
+            atomIntact: !!editable.querySelector('a.nds-btn'),
+            oneAnchor: editable.querySelectorAll('a').length === 1,
+            oneLabel: editable.querySelectorAll('.nds-label').length === 1,
+            freshEmptyLine: editable.lastElementChild.tagName === 'P' && !editable.lastElementChild.textContent.trim(),
+        };
+    });
+    const clickBelowProblems = Object.entries(clickBelowOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (clickBelowProblems.length) {
+        failures++;
+        console.log('FAIL click-below-trailing-atom-e2e');
+        clickBelowProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS click-below-trailing-atom-e2e');
+    }
+
     // E2E: toolbar direction command — dir-rtl/dir-ltr write the native dir on
     // the caret's block, re-click clears it, the buttons reflect pressed
     // state, and the direction round-trips into the form value.
@@ -1710,6 +2205,7 @@ try {
 
         // 5 — embed mode still enforces the size cap on screenshot paste
         // (container's live-read NDS.Upload config; generated default 2MB).
+        NDS.Forms?.clearStatus?.(root);
         editable.innerHTML = '<p><br></p>';
         editable.focus();
         const bigDt = new DataTransfer();
@@ -1717,7 +2213,7 @@ try {
         editable.dispatchEvent(new ClipboardEvent('paste', { clipboardData: bigDt, bubbles: true, cancelable: true }));
         await new Promise(r => setTimeout(r, 400));
         const oversizePasteBlocked = !editable.querySelector('img')
-            && root.getAttribute('data-status') === 'warning';
+            && root.getAttribute('data-status') === 'neutral';
 
         // 6 — multi-image paste embeds every file in clipboard order (reads
         // chain sequentially; parallel readers would finish size-ordered, so
@@ -1749,7 +2245,7 @@ try {
         editable.dispatchEvent(new ClipboardEvent('paste', { clipboardData: bmpDt, bubbles: true, cancelable: true }));
         await new Promise(r => setTimeout(r, 400));
         const typePasteBlocked = !editable.querySelector('img')
-            && root.getAttribute('data-status') === 'warning';
+            && root.getAttribute('data-status') === 'neutral';
 
         // 8 — the 'embed' sentinel keeps autoUpload off across LATER calls,
         // not just the call that set it — no re-armed POST to "/embed".
@@ -1770,13 +2266,8 @@ try {
     // E2E: server-upload mode — the consumer stamps NDS.Upload's own attrs on
     // the generated container; the URL field takes the server's {url} response
     // and no base64 enters the value. The POST is intercepted in-flight.
-    await page.setRequestInterception(true);
-    const onFakeUpload = (req) => {
-        if (req.url().includes('/fake-upload')) {
-            req.respond({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: 'https://cdn.example.com/uploaded-42.png' }) });
-        } else req.continue();
-    };
-    page.on('request', onFakeUpload);
+    const onFakeUpload = (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ url: 'https://cdn.example.com/uploaded-42.png' }) });
+    await page.route('**/fake-upload*', onFakeUpload);
     const serverOut = await page.evaluate(async () => {
         const waitFor = async (fn) => {
             for (let i = 0; i < 40; i++) {
@@ -1802,9 +2293,8 @@ try {
         await new Promise(requestAnimationFrame);
         const menu = root.querySelector('[data-editor-image-dropmenu] .nds-dropmenu-menu');
         const up = menu.querySelector('[data-editor-image-upload]');
-        // The doc page's showcase script hijacks beforeUpload into a fake
-        // slow simulation — stop it at the container so the REAL XHR runs,
-        // matching a consumer page (which doesn't load nds-showcase.js).
+        // The doc page's docs script fakes uploads in a preview — stop it
+        // at the container so the REAL XHR runs, as on a consumer page.
         up.addEventListener('nds:upload:beforeUpload', (e) => e.stopPropagation());
         up.dataset.uploadUrl = '/NDS-vanilla/fake-upload';
         up.dataset.autoUpload = 'true';
@@ -1824,8 +2314,7 @@ try {
         delete up.dataset.autoUpload;
         return { serverUrlArrives, chipComplete, inserted };
     });
-    page.off('request', onFakeUpload);
-    await page.setRequestInterception(false);
+    await page.unroute('**/fake-upload*', onFakeUpload);
     const serverProblems = Object.entries(serverOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
     if (serverProblems.length) {
         failures++;
@@ -1874,13 +2363,14 @@ try {
             && !urlInput.closest('.nds-form-container').hasAttribute('data-status');
         menu.querySelector('[data-editor-image-cancel]').click();
         await new Promise(r => setTimeout(r, 250));
+        NDS.Forms?.clearStatus?.(root);
         const dt = new DataTransfer();
         dt.items.add(new File([new Uint8Array([137, 80, 78, 71])], 's.png', { type: 'image/png' }));
         editable.focus();
         editable.dispatchEvent(new ClipboardEvent('paste', { clipboardData: dt, bubbles: true, cancelable: true }));
         await new Promise(r => setTimeout(r, 400));
         const pasteBlocked = !editable.querySelector('img')
-            && root.getAttribute('data-status') === 'warning'
+            && root.getAttribute('data-status') === 'neutral'
             && !!root.querySelector('.nds-form-footer .nds-feedback');
         inst.setImageUpload({ uploadUrl: '/api/images' });
         const apiShows = up.style.display !== 'none';
@@ -1895,6 +2385,67 @@ try {
         policyProblems.forEach(pr => console.log(`  ${pr}`));
     } else {
         console.log('PASS image-default-policy-e2e');
+    }
+
+    // E2E: data-editor-upload-* configures the picker in markup; Insert with no
+    // caret in the text lands at the end; a picked file that gave no URL names
+    // the upload (pending/failed), not the link field.
+    const markupOut = await page.evaluate(async () => {
+        const host = document.createElement('div');
+        host.innerHTML = `
+          <div class="nds-form-container nds-textarea nds-editor" data-editor-upload-url="/api/images" data-editor-upload-max-file-size="1048576">
+            <div class="nds-form-header"><label for="markupcfg"><span class="nds-label">حقل</span></label></div>
+            <div class="nds-form-control"><textarea class="nds-textarea" id="markupcfg"><p>نص</p></textarea></div>
+          </div>`;
+        document.body.appendChild(host);
+        const root = host.querySelector('.nds-editor');
+        NDS.Editor.create(root);
+        const editable = root.querySelector('.nds-editor-editable');
+        const menu = root.querySelector('[data-editor-image-dropmenu] .nds-dropmenu-menu');
+        const up = menu.querySelector('[data-editor-image-upload]');
+        const attrsRead = up.dataset.uploadUrl === '/api/images' && up.dataset.maxFileSize === '1048576'
+            && up.style.display !== 'none';
+        document.activeElement?.blur();
+        getSelection().removeAllRanges();
+        const open = async () => {
+            const btn = root.querySelector('[data-cmd="image"]');
+            btn.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+            btn.click();
+            await new Promise(requestAnimationFrame);
+        };
+        await open();
+        const urlInput = menu.querySelector('[data-editor-image-url]');
+        urlInput.value = 'https://example.com/end.png';
+        menu.querySelector('[data-editor-image-confirm]').click();
+        // After the existing text (a trailing empty <p> may follow the image).
+        const img = editable.querySelector('img[src="https://example.com/end.png"]');
+        const noCaretInserts = !!img && !!(editable.querySelector('p').compareDocumentPosition(img) & Node.DOCUMENT_POSITION_FOLLOWING);        await new Promise(r => setTimeout(r, 250));
+        const messageOf = async (status) => {
+            await open();
+            const id = up.ndsUpload.addFile(new File([new Uint8Array([71, 73, 70])], 'a.gif', { type: 'image/gif' }), { validate: false, status });
+            urlInput.value = 'https://';
+            menu.querySelector('[data-editor-image-confirm]').click();
+            const text = urlInput.closest('.nds-form-container').querySelector('[data-feedback-target]')?.textContent || '';
+            up.ndsUpload.removeFile(id);
+            NDS.Forms?.clearStatus?.(urlInput.closest('.nds-form-container'));
+            menu.querySelector('[data-editor-image-cancel]').click();
+            await new Promise(r => setTimeout(r, 250));
+            return text;
+        };
+        const ar = NDS.lang === 'ar';
+        const pendingNamed = (await messageOf('uploading')).includes(ar ? 'انتظر' : 'Wait');
+        const failedNamed = (await messageOf('error')).includes(ar ? 'لم يتم رفع' : 'not uploaded');
+        NDS.Editor.destroy(root);
+        host.remove();
+        return { attrsRead, noCaretInserts, pendingNamed, failedNamed };
+    });
+    const markupProblems = Object.entries(markupOut).filter(([, v]) => !v).map(([k]) => `FAILED: ${k}`);
+    if (markupProblems.length) {
+        failures++;
+        console.log('FAIL image-markup-config-e2e');
+        markupProblems.forEach(pr => console.log(`  ${pr}`));
+    } else {
+        console.log('PASS image-markup-config-e2e');
     }
 
     console.log(failures ? `\n${failures} fixture(s) failed` : '\nAll fixtures passed');

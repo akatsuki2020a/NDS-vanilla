@@ -13,20 +13,15 @@
 //   examples/manage-records.html  eight components over one <tbody> — where the
 //                                 finding came from. Rows are CLONED from the page's
 //                                 own and mutated, so the harness cannot drift from canon.
-//   components/pagination.html    live data-driven navs (data-total-pages) — the
+//   components/pagination.html    the data-driven nav (data-total-pages) from its
+//                                 #pg-data canon block, mounted live — the
 //                                 server-pagination shape.
 //
 //   node scripts/check-refresh.mjs [baseUrl]
 // Defaults to the dev server. Start it with `bundle exec jekyll serve` if it is down.
-import puppeteer from 'puppeteer-core';
-import { existsSync } from 'node:fs';
+import { launch } from './lib/browser.mjs';
 
 const BASE = (process.argv[2] || 'http://localhost:4002/NDS-vanilla').replace(/\/$/, '');
-const CHROME = [
-    process.env.CHROME_PATH,
-    'C:/Program Files/Google/Chrome/Application/chrome.exe',
-    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-].find((p) => p && existsSync(p));
 
 const probe = await fetch(`${BASE}/examples/manage-records.html`).catch(() => null);
 if (!probe?.ok) {
@@ -34,18 +29,18 @@ if (!probe?.ok) {
     process.exit(2);
 }
 
-const browser = await puppeteer.launch({ executablePath: CHROME, headless: 'new' });
+const browser = await launch();
 const report = [];
 const pageErrors = [];
 
 async function open(path) {
     const page = await browser.newPage();
-    await page.setViewport({ width: 1400, height: 1000 });
+    await page.setViewportSize({ width: 1400, height: 1000 });
     page.on('pageerror', (e) => pageErrors.push(`${path}: ${e.message}`));
-    await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle0' });
+    await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle' });
     await page.evaluate(() => Promise.all([
         window.NDS.loadBundle('delegated').catch(() => {}),
-        window.NDS.loadBundle('extras').catch(() => {}),
+        ...['extras', 'editor', 'chart', 'code'].map((b) => window.NDS.loadBundle(b).catch(() => {})),
     ]));
     await new Promise((r) => setTimeout(r, 1200));
     return page;
@@ -62,17 +57,17 @@ report.push(...await recordsPage.evaluate(async () => {
     const ok = (name, pass, detail = '') => out.push({ name, pass, detail: String(detail) });
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-    const tbody = document.getElementById('requestsTableBody');
-    const table = document.getElementById('requestsTable');
+    const tbody = document.getElementById('requests-table-body');
+    const table = document.getElementById('requests-table');
     if (!tbody || !table) return [{ name: 'fixture present', pass: false, detail: 'manage-records markup not found' }];
 
     const rows = () => [...tbody.querySelectorAll('tr.nds-page-item')];
     const order = () => rows().map((r) => r.cells[1].textContent.trim()).join(',');
-    const filter = () => NDS.Filter.getByTarget('requestsTableBody');
+    const filter = () => NDS.Filter.getByTarget('requests-table-body');
     const slot = (sel) => document.querySelector(sel)?.textContent?.trim() ?? null;
     // rows() ignores the `hidden` attribute pagination sets, so row order alone cannot
     // see a page change. Read the nav directly, or every paging assertion is blind.
-    const nav = () => document.querySelector('[data-auto-pagination="requestsTableBody"]');
+    const nav = () => document.querySelector('[data-auto-pagination="requests-table-body"]');
     const activePage = () => nav()?.querySelector('button[data-state~="active"]')?.getAttribute('aria-label') ?? null;
     const firstVisible = () => rows().filter((r) => !r.hidden)[0]?.cells[1].textContent.trim() ?? null;
     const gotoPage = async (n) => {
@@ -93,7 +88,7 @@ report.push(...await recordsPage.evaluate(async () => {
     });
 
     const EVENTS = ['nds:filter:change', 'nds:sort:change', 'nds:table:sort',
-        'nds:table:selection', 'nds:pagination:change'];
+        'nds:selection:change', 'nds:pagination:change'];
     const events = {};
     EVENTS.forEach((e) => { events[e] = 0; document.addEventListener(e, () => { events[e]++; }, true); });
     const reset = () => {
@@ -155,15 +150,15 @@ report.push(...await recordsPage.evaluate(async () => {
     ok('no gaps — every component with an element inside the container was reached',
         gaps.length === 0, gaps.length ? `missed: ${gaps.join(', ')}` : `reached: ${shouldScan.join(', ')}`);
 
-    // `universal` components (selector: null — Link, FontLoading) have no selector to
+    // Universal components (selector: null — Link) have no selector to
     // test and are meant to run on every pass, exactly as the init partition treats
     // them. They are not strays.
-    const outside = live.filter((c) => !c.refresh && !c.universal && !tbody.querySelector(c.selector)).map((c) => c.name);
+    const outside = live.filter((c) => !c.refresh && c.selector && !tbody.querySelector(c.selector)).map((c) => c.name);
     const strays = got.filter((n) => outside.includes(n));
     ok('no strays — components with nothing in the container were left alone',
         strays.length === 0, strays.length ? `touched: ${strays.join(', ')}` : `${outside.length} skipped`);
 
-    const universals = live.filter((c) => c.universal).map((c) => c.name);
+    const universals = live.filter((c) => !c.selector).map((c) => c.name);
     ok('universal components (no selector) still run under a scoped refresh',
         universals.every((n) => got.includes(n)),
         universals.length ? `${universals.join(', ')} reached` : 'none registered');
@@ -305,7 +300,7 @@ report.push(...await recordsPage.evaluate(async () => {
     await wait(500);
     ok('idempotent — refreshing twice leaves identical state', snap() === s1, snap() === s1 ? 'stable' : `${s1} → ${snap()}`);
     // A settled refresh re-announces the filter result once. That is documented on
-    // core/refresh.md; anything MORE than once is the overlap this suite hunts.
+    // core/init.md; anything MORE than once is the overlap this suite hunts.
     const noisy = Object.entries(events).filter(([e, n]) => n > (e === 'nds:filter:change' ? 1 : 0))
         .map(([e, n]) => `${e}x${n}`);
     ok('no unexpected events on a settled refresh (one documented filter:change allowed)',
@@ -335,7 +330,7 @@ report.push(...await recordsPage.evaluate(async () => {
     NDS.Numbers.reinit();
     NDS.Pagination.refresh(tbody, { keepPage: true });
     NDS.Selection.reinit();
-    NDS.Filter.getByTarget('requestsTableBody')?.refresh();
+    NDS.Filter.getByTarget('requests-table-body')?.refresh();
     await wait(600);
     const viaManual = fullState();
 
@@ -363,7 +358,7 @@ report.push(...await recordsPage.evaluate(async () => {
 
 // ── 9. the stub guard: refreshing must never force a bundle to load ────────
 const beforeScripts = scriptRequests.length;
-await recordsPage.evaluate(() => NDS.Init.refresh(document.getElementById('requestsTableBody')));
+await recordsPage.evaluate(() => NDS.Init.refresh(document.getElementById('requests-table-body')));
 await new Promise((r) => setTimeout(r, 800));
 report.push({
     name: 'no bundle loads — a stubbed namespace is skipped, never probed',
@@ -379,8 +374,18 @@ report.push(...await pagPage.evaluate(async () => {
     const ok = (name, pass, detail = '') => out.push({ name, pass, detail: String(detail) });
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
-    const navs = [...document.querySelectorAll('.nds-pagination[data-total-pages]')];
-    if (!navs.length) return [{ name: 'data-driven navs present', pass: false, detail: 'none found' }];
+    // The page's canon block (#pg-data) holds the data-driven nav as markup text; mount it live.
+    const tpl = document.createElement('template');
+    tpl.innerHTML = document.getElementById('pg-data')?.textContent || '';
+    const host = document.createElement('div');
+    host.append(tpl.content);
+    document.body.appendChild(host);
+    await NDS.Init.mount(host);
+    await wait(300);
+    const navs = [...host.querySelectorAll('.nds-pagination[data-total-pages]')];
+    if (!navs.length || !navs.every((n) => n.querySelector('.nds-pagination-item'))) {
+        return [{ name: 'data-driven navs present', pass: false, detail: navs.length ? 'mounted but not rendered' : '#pg-data canon block not found' }];
+    }
 
     let changes = 0;
     document.addEventListener('nds:pagination:change', () => { changes++; }, true);

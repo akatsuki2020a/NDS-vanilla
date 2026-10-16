@@ -81,7 +81,7 @@
 // Variant class lives on `.nds-dropmenu-menu` directly so a single
 // selector matches whether the menu is nested in the wrapper (closed)
 // or portaled to <body> (open).
-.nds-dropmenu-menu.nds-rating-dropmenu {
+.nds-dropmenu-menu.nds-rating-menu {
   --menu-padding: var(--spacing-2xl);
 
   // Stack label and stars inside the rating dropmenu's prompt item.
@@ -185,9 +185,10 @@
 // PROCESSING SKELETON
 // ==============================================
 
-/* Star shapes pulse as skeleton placeholders while loading; spinner + child dim suppressed in _loading.scss. */
+/* Star shapes pulse as skeleton placeholders while loading; loading-skeleton-host drops the spinner + child dim. */
 .nds-rating.nds-loading {
   @include skeleton-pulse;
+  @include loading-skeleton-host;
 }
 
 .nds-rating.nds-loading .nds-rating-star {

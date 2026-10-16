@@ -3,12 +3,11 @@ layout: minimal
 title: Create your account
 lang: en
 direction: ltr
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
 layout_class: nds-middle
 page_bg: assets/img/riyadhcenter.webp
 bg_opacity_top: 60%
 bg_opacity_bottom: 90%
-exclude_showcase: true
 breadcrumb: [["Examples", "/examples"]]
 ---
 {% assign brand_logo = page.brandLogo | default: site.brandLogo %}
@@ -22,7 +21,7 @@ breadcrumb: [["Examples", "/examples"]]
       <div class="nds-block nds-flex nds-col" style="--align: center;">
         <!-- Step 1: Account Details -->
         <div class="nds-card nds-shadow nds-stroke" id="registration-step-1">
-          <div class="nds-card-header nds-rowView">
+          <div class="nds-card-header nds-horizontal">
             <!-- The logo is the way home: the minimal layout ships no site chrome -->
             <a href="{{ '/' | relative_url }}" class="nds-brand">
               <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
@@ -51,7 +50,7 @@ breadcrumb: [["Examples", "/examples"]]
                 <div class="nds-form-control">
                   <input type="text" id="full-name" class="nds-input" placeholder="Your full name" autocomplete="name" required>
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -69,7 +68,7 @@ breadcrumb: [["Examples", "/examples"]]
                   <i class="nds-icon nds-hgi-mail-01" aria-hidden="true"></i>
                   <input type="email" id="email-address" class="nds-input" placeholder="name@example.gov.sa" autocomplete="email" required>
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -87,10 +86,10 @@ breadcrumb: [["Examples", "/examples"]]
                   <i class="nds-icon nds-hgi-lock-password" aria-hidden="true"></i>
                   <input type="password" id="password" class="nds-input" placeholder="Create a password" autocomplete="new-password" minlength="8" required aria-describedby="password-rules">
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
-                    <button class="nds-btn nds-subtle nds-toggle-password" type="button" aria-label="Show password">
+                    <button class="nds-btn nds-subtle nds-toggle-password nds-icon-only" type="button" aria-label="Show password" data-i18n-aria-label="forms.show_password">
                       <i class="nds-icon nds-hgi-view-off" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -119,10 +118,10 @@ breadcrumb: [["Examples", "/examples"]]
                   <i class="nds-icon nds-hgi-lock-password" aria-hidden="true"></i>
                   <input type="password" id="confirm-password" class="nds-input" placeholder="Re-enter your password" autocomplete="new-password" required aria-describedby="confirm-password-rules">
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
-                    <button class="nds-btn nds-subtle nds-toggle-password" type="button" aria-label="Show password">
+                    <button class="nds-btn nds-subtle nds-toggle-password nds-icon-only" type="button" aria-label="Show password" data-i18n-aria-label="forms.show_password">
                       <i class="nds-icon nds-hgi-view-off" aria-hidden="true"></i>
                     </button>
                   </div>

@@ -14,9 +14,9 @@ main {
 .nds-content-layout {
     --_layout-min-height: var(--layout-min-height, 400px);
     --_layout-gap: var(--layout-gap, 0);
-    --_main-padding-block: var(--main-padding-block, 0);
-    --_main-padding-inline: var(--main-padding-inline, 0);
-    --_main-gap: var(--main-gap, 0);
+    --_content-padding-block: var(--content-padding-block, 0);
+    --_content-padding-inline: var(--content-padding-inline, 0);
+    --_content-gap: var(--content-gap, 0);
 
     position: relative;
     flex: 1; // fills the leftover space in main's column; siblings stay auto
@@ -27,21 +27,38 @@ main {
     width: 100%;
 
     @include desktop(min) {
-        &.nds-wSideMenu {
+        &.nds-has-sidemenu {
             grid-template-columns: var(--nds-sidemenu-width) 1fr;
         }
     }
 
-    .nds-main-content {
+    // Row 1 holds a top bar side menu at its own height (empty for the fixed slide-in
+    // one); stretched auto rows would grow the bar on a short page.
+    @include tablet(max) {
+        &.nds-has-sidemenu {
+            grid-template-rows: auto 1fr;
+            row-gap: 0;
+
+            >.nds-content {
+                grid-row: 2;
+            }
+        }
+    }
+
+    .nds-content {
         display: flex;
         flex-direction: column;
         flex-wrap: wrap;
-        align-content: flex-start;
+        // Stretch, not flex-start: the column fills the page, so a max-width card
+        // (card view, no side menu) has room to center on its auto margins.
+        align-content: stretch;
         position: relative;
-        padding-block: var(--_main-padding-block);
-        padding-inline: var(--_main-padding-inline);
-        gap: var(--_main-gap);
+        padding-block: var(--_content-padding-block);
+        padding-inline: var(--_content-padding-inline);
+        gap: var(--_content-gap);
         min-width: 0;
+        // The skip link's target: land below the sticky main nav, not under it.
+        scroll-margin-block-start: var(--nds-nav-height);
 
         // Basis auto, not 0: with a 0 basis the pre-stamp layout (cv holds, definite
         // column) gave every section the same height, so a restored scroll landed
@@ -61,7 +78,7 @@ main {
             padding: var(--nds-viewport-padding);
         }
 
-        .nds-main-content {
+        .nds-content {
             justify-content: center;
             align-content: center;
         }
@@ -69,48 +86,34 @@ main {
 
     /* ── Edge-to-edge ──
        body.nds-full-width (_reset.scss) is the single switch: it sets
-       --nds-content-MaxWidth: 100% page-wide, which widens the chrome. These
+       --nds-content-max-width: 100% page-wide, which widens the chrome. These
        rules take the layout's own gutters off to match, so the content area
        goes edge-to-edge from the same class — no per-layout modifier. */
 
     // cardView is exempt: its gutters and card gaps ARE the presentation, so
     // full-width widens the page around it without flattening the cards.
-    body.nds-full-width &:not(.nds-cardView) {
+    body.nds-full-width &:not(.nds-card-view) {
         padding: 0;
 
-        // The knobs sit on .nds-main-content, so they beat cardView's
+        // The knobs sit on .nds-content, so they beat cardView's
         // root-level values by inheritance proximity — hence the exemption
         // has to repeat here, not just on the padding above.
-        &:is(.nds-wSideMenu, .nds-wSideInfo) .nds-main-content {
-            --main-padding-block: 0;
-            --main-padding-inline: 0;
-            --main-gap: 0;
+        &:is(.nds-has-sidemenu, .nds-has-sideinfo) .nds-content {
+            --content-padding-block: 0;
+            --content-padding-inline: 0;
+            --content-gap: 0;
         }
     }
 
     /* ── No sidebar ── */
 
-    &:not(.nds-wSideMenu, .nds-wSideInfo) {
+    &:not(.nds-has-sidemenu, .nds-has-sideinfo) {
         @include desktop(min) {
             --section-padding-block: var(--spacing-7xl);
         }
 
-        &:not(.nds-cardView) .nds-user-feedback-section {
+        &:not(.nds-card-view) .nds-user-feedback-section {
             --section-padding-block: var(--spacing-5xl);
-        }
-
-        .nds-main-content {
-            section.nds-noBg {
-                --_section-margin-block-start-base: var(--spacing-5xl);
-            }
-
-            section.nds-noBg:first-of-type {
-                --_section-margin-block-start-base: 0;
-            }
-
-            section.nds-noBg:not(:has(+ .nds-noBg)) {
-                --_section-margin-block-end-base: var(--spacing-5xl);
-            }
         }
 
         >aside {
@@ -121,29 +124,29 @@ main {
 
     /* ── Post layout ── */
 
-    &.nds-post .nds-main-content section:first-of-type {
+    &.nds-post .nds-content section:first-of-type {
         --_section-padding-block-start-base: 0;
     }
 
     /* ── Card view ── */
 
-    &.nds-cardView {
+    &.nds-card-view {
         --section-padding-block: var(--nds-viewport-padding);
         --layout-gap: var(--spacing-xl);
-        --main-padding-block: var(--spacing-xl);
-        --main-gap: var(--spacing-4xl);
+        --content-padding-block: var(--spacing-xl);
+        --content-gap: var(--spacing-4xl);
 
         @include desktop(min) {
-            --main-padding-block: 0;
+            --content-padding-block: 0;
             padding-inline: var(--nds-viewport-padding);
             padding-block: var(--spacing-xl);
         }
 
-        .nds-main-content {
+        .nds-content {
             section:not(.nds-hero-section, .nds-ghost) {
                 --_section-shadow-base: var(--shadow-md);
                 --_section-border-radius-base: var(--radius-md);
-                max-width: var(--nds-content-MaxWidth);
+                max-width: var(--nds-content-max-width);
                 margin-inline: auto;
                 padding-inline: var(--nds-viewport-padding);
 
@@ -166,12 +169,14 @@ main {
 
             @include desktop(min) {
                 --_wrapper-padding: 0;
+                // Insets to the cards' column.
+                padding-inline: max(0px, calc((100% - var(--nds-content-max-width)) / 2));
             }
 
             @include tablet(max) {
                 --_wrapper-padding: 0;
 
-                .nds-section-body:has(>.nds-card) {
+                .nds-section-body:has(> :is(.nds-card, .nds-grid, .nds-swiper)) {
                     padding-inline: var(--nds-viewport-padding);
                 }
 
@@ -184,7 +189,7 @@ main {
 
     /* ── Side menu layout ── */
 
-    &.nds-wSideMenu {
+    &.nds-has-sidemenu {
         .nds-content-section {
             @include desktop(min) {
                 --_section-shadow-base: var(--shadow-md);
@@ -203,15 +208,15 @@ main {
     }
 
     @include desktop(min) {
-        &.nds-wSideMenu {
+        &.nds-has-sidemenu {
             margin-inline: auto;
-            padding-inline: max(var(--nds-viewport-padding), calc((100% - var(--nds-content-MaxWidth)) / 2));
+            padding-inline: max(var(--nds-viewport-padding), calc((100% - var(--nds-content-max-width)) / 2));
         }
 
         // Edge-to-edge wins over the centring gutter above — higher specificity
         // (0,3,1), so it holds regardless of source order. cardView keeps its
         // own gutter, same exemption as the padding reset.
-        body.nds-full-width &.nds-wSideMenu:not(.nds-cardView) {
+        body.nds-full-width &.nds-has-sidemenu:not(.nds-card-view) {
             margin-inline: 0;
             padding-inline: 0;
         }
@@ -223,7 +228,7 @@ main {
     // takes the INVERSE parity: its predecessor always has the other parity, so
     // inverse-strip + excluded-from-the-list = always matching the section above.
     @mixin _section-striping($sections, $last-edit) {
-        .nds-content-section:not(.nds-user-feedback-section, .nds-primary, .nds-green, .nds-gradient-primary, .nds-gradient-green, .nds-neutral, .nds-brand, .nds-last-edit):nth-of-type(#{$sections}) {
+        .nds-content-section:not(.nds-user-feedback-section, .nds-primary, .nds-gradient-primary, .nds-neutral, .nds-brand, .nds-last-edit):nth-of-type(#{$sections}) {
             --_section-bg-base: var(--background-stripe);
         }
 
@@ -232,10 +237,10 @@ main {
         }
     }
 
-    // Opt-in: .nds-stripe on .nds-main-content, at every width and with or
+    // Opt-in: .nds-stripe on .nds-content, at every width and with or
     // without a side menu. The :not() list is the per-section opt-out.
     // .nds-odd flips the parity, for pages whose first section should be tinted.
-    &:not(.nds-cardView) .nds-main-content.nds-stripe {
+    &:not(.nds-card-view) .nds-content.nds-stripe {
         &:not(.nds-odd) {
             @include _section-striping(even, odd);
         }

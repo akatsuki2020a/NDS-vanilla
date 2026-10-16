@@ -1,104 +1,137 @@
 # nds-iq-eval scenarios — index
 
-One row per scenario; the full record (rules, setup, prompt, rubric, floor, leak, baseline) lives in `scenarios/S<n>-<slug>.md`. Scoping reads THIS file only, then opens just the scoped files. Records follow SKILL.md's no-records rule: a scenario file holds its durable fields, a one-line verdict log, and at most ONE current story while something is open — stories are replaced, never appended; git is the archive (the pre-split monolith is at commit `6490326a`). `node scripts/check-scenarios.mjs` audits that shape — appended-instead-of-replaced passages, index/file mismatches, stale pre-run markers, and pointers into the release-cleared `TODO.md`. Run it whenever convenient (a sitting, a week); it is not per-commit and nothing schedules it.
+One row per scenario; the full record (rules, setup, prompt, rubric, floor, leak, baseline) lives in `scenarios/S<n>-<slug>.md`. Scoping reads THIS file only, then opens just the scoped files. Records follow SKILL.md's no-records rule: a scenario file holds its durable fields, a one-line verdict log, and at most ONE current story while something is open — stories are replaced, never appended; git is the archive (the pre-split monolith is at commit `6490326a`).
 
-**Numbering:** S1–S90 are written. S43 was never used — a numbering skip, not a retirement. **Next free is S91.** Update this line whenever a scenario lands.
+**Numbering:** S1–S100 are written. S43 was never used. Retired 2026-10-09: S59 and S64 (netted out), S80 (closed), S26 (its v6 pasted-block rule was cut in v4); their files are in git. S92–S100 added 2026-10-09 for v4 (authored blind, before their sentences). Retired 2026-10-09 (v4 take 2): S16 (old-format twin of S93) and S81 (1.x root: now the `IQv3.2` redirect, S101). S101–S105 added 2026-10-09 for take 2; S106 added 2026-10-09 (review: the empty-root Setup path); S107 added 2026-10-09 (a library outside the index table). S108 added 2026-10-10 (rig 5: rows moved without their own reference comparison). **Next free is S129.** Update this line whenever a scenario lands. S109–S114 added 2026-10-10 from the rig 5 run 2 rule gaps (authored blind, after their sentences: the field FAIL on v4.0 stands in for the floor). S115 (whole plan stops after each shape's first page) retired the same day: owner, "whole plan" never stops; verifying every state (S113) is the fix. S116 added 2026-10-10 (owner: one stop, the review). S117–S118 added 2026-10-10 (the Edit work mode). S119 added 2026-10-10 (rig 5 run 3). S120–S121 added 2026-10-10 (rig 5 run 4). S122 added 2026-10-10 (rig 5 run 6). S123 added 2026-10-10 (rig 5 run 7). S124 added 2026-10-10 (rig 5 runs 6–7). S125 added 2026-10-11 (rig 5 run 8). S126 added 2026-10-11 (rig 5 runs 3, 7, 9: findings filed only when asked). S127 added 2026-10-12 (rigs 2 and 4: by-design and app-owned work filed as findings). S128 added 2026-10-13 (owner: agents keep default canon; a template ships as is, a component or example may take a variant). S126 retired 2026-10-13: owner, the report holds real NDS findings only, not every workaround, so its "unasked" sentence was cut.
 
 **Standing harness rules** (method lives in SKILL.md; these are the file-level ones):
 - Catalog-routing prompts stay in the dev's words — never words a `use_when` uses verbatim; worked examples that name an entry stay OUT of the rules file or the runner quotes the answer instead of finding it (S28's first run, 2026-08-08).
 - The "never a web-fetch tool" MUST NOTs (S3, S26, S47) rest on a live demonstration (2026-08-09): the same raw URL byte-exact via curl, ZERO content via a web-fetch tool — a refusal or digest saved as `NDS-IQ.md` fails silently and totally.
+- Reads-forced harness line (2026-10-09): runners described routed reads without making them (3–4 tool calls), so S101 never met its missing index. The harness now says to do every read the answer depends on and quote it; S101 then passed.
+- Floor run 2026-10-09 (v4 stub = paths + index pointer; index and docs mapped): 48 PASS / 17 SOFT / 30 FAIL of 95, Sonnet 5.5, 4–17 tool calls per runner. A floor PASS means the docs, index or audit carry the behavior: the test guards those, not the rules. Leak fixes before it: S45, S58, S65 setups no longer state the answer.
 - Floor run 2026-08-14: 24/75 PASS with a stub rulebook — a LOWER bound, two ways: tool effort varied wildly (a lazy runner under-passes), and the stub then announced itself (runners answered UNDEFINED knowing the rulebook was empty; both tells stripped since). The harness is not zero-knowledge (it supplies the `_source/` map, "banners exist", built twins, and a "say UNDEFINED" instruction that is already report-and-stop) but is CONSTANT, so floor-vs-file deltas stay clean.
 - **Evidence classes** (stamped 2026-08-20, `ev:` in flags): `field` = anchored in an observed failure (field report, rig, or measured run) — its failures are regressions; `protocol` = file-defined convention with no other possible home — failures mean the protocol isn't followable, not that the model lacks judgment; `policy` = maintainer preference with no field anchor — **non-gating**: its scenario informs, never mandates a rules edit (S24, S61). A comprehension FAIL alone never mandates an edit in any class — it triggers a rig or field check first. A candidate run grades the CANDIDATE, not the live file: its verdicts never touch these rows' baselines before adoption, and the rebuilt suite's pre-adoption run supersedes any earlier candidate sweep.
 - Leak classes (harness-fidelity audit 2026-08-17; canonical here — SKILL.md's harness principle points at this line): (1) seeded artifact carrying the graded answer (S84's plan row — the proven case), (2) setup fact foregrounding the graded capability (S86's old headless line), (3) prompt naming the graded surface (the S72/S79 tell), (4) fresh-context runs cannot measure long-session decay — a limit, not a leak: a rule whose field failure lived deep in a long session needs a long-context variant and a `baseline:` caveat naming it. Labels live in each file's `leak:` line; no line = audited clean. A question-posed prompt or a temptation trap is not a leak — a leak hands the PASS.
 
 | ID | slug | mode | rules (gist) | last verdict | flags |
 |---|---|---|---|---|---|
-| S1 | prior-work-first-session | both | step-1 prior-NDS split, plan gate, report both versions | PASS 2026-08-15 full | floor:FAIL · WATCH upgrade-verb � ev:protocol |
-| S2 | mature-install-new-page | c | plan retirement, archetype tier, step-4 passes | PASS 2026-08-15 full | floor:FAIL (MUST-NOT half floor-exempt) � ev:protocol |
-| S3 | block-refresh-runtime-current | c | standalone refresh: raw download, first-line check, whole replace | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S4 | refresh-with-runtime-behind | c | rules refresh unconditional when runtime behind | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S5 | keep-old-pages-serving | c | parallel-files exception, render-worse cost named | PASS 2026-08-15 solo | floor:FAIL · WATCH weak-tier � ev:field |
-| S6 | form-region-swap | c | forms banner: initializeContainer/syncState, no form.reset | PASS 2026-08-15 full | floor:FAIL · leak:C3-mild � ev:field |
-| S7 | layout-coupled-copy-source | both | layout-coupled: copy from a full page, doc explains | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S8 | update-check | c | banner-lines-only check, content compare, dev's go | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S9 | re-audit-request | c | dev-requested re-audit recreates the plan | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S10 | greenfield-first-session | c | greenfield: plan from intent | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S11 | no-project-hard-stop | c | no project → say so and stop | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S12 | greenfield-brief-fabrication | c | brief fills template, trim don't pad, two-step floor | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S13 | cold-spike-ask | c | spike = full ceremony: one parallel page, whole head unit | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S14 | server-driven-listing-wiring | c | filter/pagination banner-first composite wiring | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S15 | menu-clipping-in-modal | c | dropmenu portal via banner Rides | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S16 | modifier-composition | c | verbatim copy + Modifier Classes composition | PASS 2026-08-15 full | floor:PASS � ev:protocol |
-| S17 | banner-first-install | c | banner-first restore, -dev report, flattened layout | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S18 | old-template-not-a-blocker | c | older template proceeds on the matching tag; _source population | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S19 | verification-channel-hunt | c | step 4: project's own harness before the checklist | PASS 2026-08-15 full | floor:FAIL · leak:C2-mild � ev:field |
-| S20 | stray-runtime-discovery | c | empty NDS_ASSETS proves nothing; stray-runtime sweep | PASS 2026-08-15 full | floor:PASS (leak-weakened) · leak:C2 � ev:field |
-| S21 | legacy-globals | c | rule #6 globals: CSS never carried, JS = legacy library | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S22 | inherited-plan-clean-start | c | inherited plan never resumed; clean-start footprint | PASS 2026-08-15 full | floor:PASS � ev:field |
-| S23 | image-geometry-swap | c | swapped image width/height reset to real pixels | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S24 | stale-agent-file-rules | c | one rule source; stale agent-file NDS text proposed out | PASS 2026-08-15 full | floor:PASS � ev:policy�non-gating |
-| S25 | banner-first-wiring | both | banner-first wiring; bannerless fallback via doc + file | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S26 | pasted-block-migration | c | pasted-block migration + step-1 handoff | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S27 | read-obedience | b | anchor read trigger; missing-file stop | behavior 4/4 PASS 2026-08-10 | floor:n/a � ev:protocol |
-| S28 | catalog-routing-composed-pattern | c | use_when routing to the composed example | PASS 2026-08-15 full | floor:PASS � ev:field |
-| S29 | catalog-routing-uncatalogued-component | c | Custom Select entry + canon copy | PASS 2026-08-14 scoped | floor:PASS � ev:field |
-| S30 | script-canon-edit-not-rewrite | c | script block is canon; edit point by point | PASS 2026-08-14 wide | floor:PASS+trim � ev:field |
-| S31 | catalog-check-is-a-precondition | c | "NDS has no X" needs the use_when search first | PASS 2026-08-14 scoped | floor:PASS · WATCH copy-canon cap ×3 � ev:field |
-| S32 | required-field-type-verification | c | each required TYPE tested empty, one by one | PASS 2026-08-15 solo | floor:PASS+trim � ev:field |
-| S33 | parts-inventory-before-markup | c | parts inventory; LEGACY shape wins on one control's surface | PASS 2026-08-14 scoped | floor:PASS · WATCH read-depth � ev:field |
-| S34 | request-wiring-and-failure-path | c | NDS.request via core banner + visible failure path | PASS 2026-08-15 full | floor:FAIL · leak:C3-mild � ev:field |
-| S35 | validation-without-a-form-tag | c | form-tags-only gate; validateForm(container) | PASS 2026-08-15 full | floor:PASS � ev:field |
-| S36 | built-twin-is-the-visual-spec | c | twin over HTTP, never file://, chosen-vs-bug split | PASS 2026-08-12 full | floor:PASS (T3-gated) · WATCH file:// rationale ×2 � ev:field |
-| S37 | core-refresh-after-dom-mutation | c | NDS.Init.refresh(container) via the core doc | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S38 | rendered-markup-not-in-source | c | copy markup that exists; layout-key → built twin | PASS 2026-08-15 full | floor:PASS (clause RESTORED — T3) � ev:field |
-| S39 | doc-folder-routing-utilities | c | folder from the catalog url; utilities route | PASS 2026-08-15 full | floor:PASS � ev:protocol |
-| S40 | theme-rebind-dark-mirror | c | rule #5 token tier + dark mirror | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S41 | agent-file-rule-copy | c | never copy rules into the agent file | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S42 | setup-prompt-first-install | b | guide setup prompt → install → plan handoff | behavior 2/2 PASS 2026-08-15; probe PASS 2026-08-17 | floor:n/a · standing-rule � ev:field |
-| S44 | install-strict-csp | c | step-1 CSP sweep + nonce-first grant | PASS 2026-08-17 scoped | floor:FAIL · leak:C2 (sweep half) � ev:field |
-| S45 | upgrade-Added-sweep | c | upgrade step 3: Migrating + Added/Changed/Fixed report | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S46 | list-with-controls-toolbar | c | control bar routes to Toolbar via use_when | PASS 2026-08-14 scoped | floor:FAIL � ev:field |
-| S47 | refresh-corrupt-download | c | first-line check rejects a corrupt download | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S48 | upgrade-reread-after-swap | c | re-read the swapped rulebook mid-upgrade | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S49 | rules-update-reaches-raw-main | c | update compares raw main, never two local copies | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S50 | stale-reference-present-on-disk | c | present NDS_ROOT ≠ current; re-download the runtime's release | PASS 2026-08-15 full | floor:FAIL · leak:C2-mild � ev:field |
-| S51 | first-install-flatten-and-declare | c | wrapper contents move up; NDS_ROOT stays unversioned | PASS 2026-08-15 full | floor:PASS � ev:protocol |
-| S52 | csp-answer-comes-from-the-source | c | source-before-the-dev: head.md §CSP answers | PASS 2026-08-15 solo | floor:FAIL |
-| S53 | sso-app-minimal-chrome | c | chrome-shape mapping; minimal ships without asking | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S54 | plan-waived-single-page | c | plan waiver: rules stay, mix ban stays | PASS 2026-08-15 full | floor:FAIL · WATCH cost-line ×1 � ev:protocol |
-| S55 | runtime-banner-cross-check | c | JS/CSS banners must agree; legacy-ignore course | PASS 2026-08-15 full | floor:FAIL · leak:C2-mild � ev:field |
-| S56 | no-harness-smoke-before-checklist | c | curl smoke check before the dev checklist | PASS 2026-08-15 full | floor:PASS · leak:C2-mild � ev:field |
-| S57 | host-framework-validation-additions | c | framework-expanded elements banned beside canon | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S58 | fix-proposals-read-the-source-first | c | fix proposals read the source's own section first | PASS 2026-08-15 full | floor:PASS+trim � ev:field |
-| S59 | no-version-banner-bounded-check | c | bounded Version: check; absence conclusive | netted out (floor-passing) | floor:PASS � ev:protocol |
-| S60 | make-your-own-browser-channel | c | headless default; "cannot see" only after the attempt | PASS 2026-08-15 full | floor:FAIL · leak:C2 · WATCH checklist-after-success ×1 � ev:field |
-| S61 | asset-url-prefix-confirm | c | derive the served URL, confirm before the first tag | PASS 2026-08-15 full | floor:FAIL · leak:C3-deliberate � ev:policy�non-gating |
-| S62 | section-structure-and-gaps | c | rule #4 sections, nds-grid, --gap | PASS 2026-08-14 scoped | floor:FAIL � ev:protocol |
-| S63 | page-js-defer-order | c | page JS after chrome tags; inline-defer trap | PASS 2026-08-14 scoped | floor:FAIL � ev:field |
-| S64 | docs-assets-ban | c | never copy docs-assets; re-point demo refs | netted out (floor-passing) | floor:PASS+trim � ev:protocol |
-| S65 | icon-token-extraction-sweep | c | nds-hgi-* sweep incl. page JS | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S66 | inherited-wrapper-children | c | keep a wrapper, keep its children | PASS 2026-08-15 full | floor:FAIL � ev:protocol |
-| S67 | two-canonical-flows-one-page | c | both flows through the catalog; [hidden] card swap | PASS 2026-08-14 scoped | floor:PASS · read-dep � ev:field |
-| S68 | trimmed-copy-keeps-units | c | trim steps, keep class+SVG units | PASS 2026-08-14 scoped | floor:FAIL � ev:field |
-| S69 | custom-scaffold-anchors-on-canon | c | custom scaffolds pull structure from canon usage | PASS 2026-08-14 solo | floor:FAIL · read-dep � ev:field |
-| S70 | knob-verified-by-effect | c | verify a knob by its effect, not coincidence | PASS 2026-08-14 scoped | floor:PASS (leak-caveated) · leak:C2 � ev:field |
-| S71 | fallback-mode-before-substitute | c | missing asset ≠ substitute; the component's own fallback mode | PASS 2026-08-14 scoped | floor:FAIL · read-dep � ev:field |
-| S72 | mobile-width-ladder-resize-blocked | c | headless default over a width-locked attached browser | PASS 2026-08-15 solo | floor:void (class untestable) · leak:C2 � ev:field |
-| S73 | custom-select-default-vs-native-shortcut | c | in-form selects default Custom Select; offer first | PASS 2026-08-14 solo | floor:FAIL · read-dep � ev:field |
-| S74 | plan-review-decisions-are-asked | c | review = ONE stop: numbered decisions in chat | PASS 2026-08-17 solo | floor:FAIL � ev:field |
-| S75 | csp-inline-knob-sweep | c | style=" before-done sweep under a locked style-src | PASS 2026-08-15 full | floor:FAIL � ev:field |
-| S76 | mechanism-vs-filler-split | c | split a copied unit: keep mechanism, cut filler | PASS 2026-08-14 wide | floor:PASS+trim � ev:field |
-| S77 | chrome-ships-as-is | c | topbar/stamp/dark-mode ship as-is, boxed subtract-later | PASS ×2 2026-08-17 solo | floor:PASS (superseded variant) · WATCH stamp-flag � ev:field |
-| S78 | host-framework-attribute-retention | c | asp-for stays attribute-side on canon inputs | PASS 2026-08-14 solo | floor:FAIL � ev:protocol |
-| S79 | mobile-width-limit-is-not-an-exemption | c | a width limit is not an exemption; headless same-run | PASS 2026-08-15 solo | floor:untestable-class · leak:C2 � ev:field |
-| S80 | legacy-globals-client-rendered | c | entry-import globals noticed while building | CLOSED 2026-08-16 (runs 5–6 PASS) | floor:pair-lesson · withheld-sentence � ev:field |
-| S81 | rules-name-doc-the-template-lacks | c | predates clause: pick the built page by inspection | PASS 2026-08-16 solo + hole probe | floor:PASS (not a trim license) � ev:field |
-| S82 | legacy-sheet-vs-project-nds-layer | c | classify by CONTENT: legacy sheet vs project NDS layer | PASS pair 2026-08-16 | floor:PASS (latent; standing guard) � ev:field |
-| S83 | legacy-globals-caught-at-inventory | c | step-1 stylesheet sweep names bare-element reach | PASS 2026-08-17 confirm (v2.1) | floor:FAIL � ev:field |
-| S84 | composition-source-members-shipped | c | shipped page carries every cited-source member | PASS 2026-08-18 (behavior, edited rule) | leak:C1-fixed · 7/7 members · R5 closed � ev:field |
-| S85 | framework-view-lifecycle | c | refresh on mount + destroy on unmount; no poll | PASS 2026-08-17 solo | floor:n/a (doc gate) · WATCH mechanism-naming � ev:field |
-| S86 | verify-headless-entry-gate | c | ladder entry needs a named failed headless attempt | PASS 2026-08-17 (de-leaked) | floor:not run · leak:C2-fixed · OPEN → R1 field half � ev:field |
-| S87 | mount-root-layout-chain | c | mount element takes display:contents; footer stays pinned | FIELD FAIL 2026-08-22 (rig 7); synthetic PASS 2026-08-18 | floor:FAIL ×3 · leak:C2-fixed · behavior confirmed via S84 run � ev:field |
-| S88 | route-modifier-before-mount | c | route-dependent console modifier set before mount, not in an effect | authored 2026-08-20, not yet run | floor:not run · guard for the 2026-08-18 layout-modifier clause � ev:field |
-| S89 | unmet-check-blocks-status | c | unmet required check keeps the plan row In Progress; never waived | PASS 2026-08-21 candidate-only; rigs R3 PASS / R4 FAIL 2026-08-22 | floor:void (class untestable) · leak:C2-residual · WATCH exit-gate-to-chat ×1 · adopted 2026-08-22 · ev:field |
-| S90 | backend-contract-conflict | c | legacy UI vs backend contract = dev decision, report and do not guess | PASS 2026-08-21 candidate-only | floor:FAIL · both-conditions clean · adopted 2026-08-22 · ev:field |
+| S1 | prior-work-first-session | both | step-1 prior-NDS split, plan gate, report both versions | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · WATCH upgrade-verb · ev:protocol |
+| S2 | mature-install-new-page | c | plan retirement, archetype tier, step-4 passes | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:protocol |
+| S3 | block-refresh-runtime-current | c | standalone refresh: raw download, first-line check, whole replace | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S4 | refresh-with-runtime-behind | c | rules refresh unconditional when runtime behind | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S5 | keep-old-pages-serving | c | parallel-files exception, render-worse cost named | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): names the second runtime and assets folder, not the NDS-on-NDS collision | floor:FAIL v4 2026-10-09 · WATCH weak-tier · ev:field |
+| S6 | form-region-swap | c | forms banner: initializeContainer/syncState, no form.reset | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · leak:C3-mild · ev:field |
+| S7 | layout-coupled-copy-source | both | layout-coupled parts: copy the doc canon with its wrapper chain, never a built page | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S8 | update-check | c | banner-lines-only check, content compare, dev's go | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S9 | re-audit-request | c | dev-requested re-audit recreates the plan | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S10 | greenfield-first-session | c | greenfield: plan from intent | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S11 | no-project-hard-stop | c | no project → say so and stop | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S12 | greenfield-brief-fabrication | c | brief fills template, trim don't pad, review step only for a form that needs confirmation | PASS 2026-10-13 scoped v4 form-kinds (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S13 | cold-spike-ask | c | spike = full ceremony: one parallel page, whole head unit | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field · WATCH spike-vs-plan ×1 (2026-10-09, v1.12.0 root) |
+| S14 | server-driven-listing-wiring | c | filter/pagination banner-first composite wiring | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:field |
+| S15 | menu-clipping-in-modal | c | dropmenu portal via banner Rides | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S17 | banner-first-install | c | banner-first restore, -dev report, flattened layout | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field |
+| S18 | old-template-not-a-blocker | c | older template proceeds on the matching tag; _source population | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): 2.3.0 restore right; the missing-banner gap and _source population unnamed | floor:FAIL v4 2026-10-09 · ev:field |
+| S19 | verification-channel-hunt | c | step 4: headless first (own browser or the project's harness), never the checklist while one is drivable | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · leak:C2-mild · ev:field |
+| S20 | stray-runtime-discovery | c | empty NDS_ASSETS proves nothing; stray-runtime sweep | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · leak:C2 · ev:field |
+| S21 | legacy-globals | c | rule #6 globals: CSS never carried, JS = legacy library | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S22 | inherited-plan-clean-start | c | inherited plan never resumed; clean-start footprint | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S23 | image-geometry-swap | c | brand text dropped for a wordmark; the img-size audit finding fixed, never silenced | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:not run (reframed) · ev:field |
+| S24 | stale-agent-file-rules | c | one rule source; stale agent-file NDS text proposed out | SOFT 2026-10-10 full v4 (Sonnet 5.5): asks "which rules win" instead of proposing removal of the hand-written section | floor:PASS v4 2026-10-09 · ev:policy·non-gating · no rule needed (v4 floor PASS); safety net |
+| S25 | banner-first-wiring | both | banner-first wiring; bannerless fallback via doc + file | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:field |
+| S27 | read-obedience | b | anchor read trigger; missing-file stop | PASS 2026-10-10 behavior 4/4 (Sonnet 5.5); (c) styling half ungradable: default primary is green | floor:n/a · ev:protocol |
+| S28 | catalog-routing-composed-pattern | c | use_when routing to the composed example | SOFT 2026-10-10 scoped v4 rig5-gaps (Sonnet 5.5) — WATCH client-scale | floor:SOFT v4 2026-10-09 · ev:field |
+| S29 | catalog-routing-uncatalogued-component | c | Custom Select entry + canon copy | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S30 | script-canon-edit-not-rewrite | c | script block is canon; edit point by point | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S31 | catalog-check-is-a-precondition | c | "NDS has no X" needs the use_when search first | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · WATCH copy-canon cap ×3 · ev:field |
+| S32 | required-field-type-verification | c | each required TYPE tested empty, one by one | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:field |
+| S33 | parts-inventory-before-markup | c | parts inventory; LEGACY shape wins on one control's surface | PASS 2026-10-10 scoped v4 rig5-gaps (Sonnet 5.5) | floor:PASS v4 2026-10-09 · WATCH read-depth · ev:field |
+| S34 | request-wiring-and-failure-path | c | NDS.request via core banner + visible failure path | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · leak:C3-mild · ev:field |
+| S35 | validation-without-a-form-tag | c | form-tags-only gate; validateForm(container) | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S36 | built-twin-is-the-visual-spec | c | twin over HTTP, never file://, chosen-vs-bug split | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): (b) never says to view the twin BEFORE a new composition | floor:PASS v4 2026-10-09 · WATCH file:// rationale ×2 · ev:field |
+| S37 | core-refresh-after-dom-mutation | c | NDS.Init.refresh(container) via the core doc | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S38 | rendered-markup-not-in-source | c | front matter → Front Matter table; Liquid loop body; never the built twin | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S39 | doc-folder-routing-utilities | c | folder from the catalog url; utilities route | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): value-based copy canon, not the target-based one (data-copy-target) | floor:SOFT v4 2026-10-09 · ev:protocol |
+| S40 | theme-rebind-dark-mirror | c | rule #5 token tier + dark mirror | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S41 | agent-file-rule-copy | c | never copy rules into the agent file | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol · no rule needed (v4 floor PASS, called a guess; Aug floor FAIL); WATCH rule-copy ×0 |
+| S42 | setup-prompt-first-install | b | guide setup prompt → install → plan handoff | (a) SOFT, (b) PASS 2026-10-10 behavior (Sonnet 5.5): (a) runtime copied before the URL confirm; (b) passed after the First install fix | floor:n/a · standing-rule · ev:field |
+| S44 | install-strict-csp | c | step-1 CSP sweep + nonce-first grant | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): names the blocked inline script, not its consequence (deferred stylesheets never load) | floor:PASS v4 2026-10-09 · leak:C2 (sweep half) · ev:field |
+| S45 | upgrade-Added-sweep | c | upgrade step 3: Migrating + Added/Changed/Fixed report | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field |
+| S46 | list-with-controls-toolbar | c | control bar routes to Toolbar via use_when | PASS 2026-10-10 scoped v4 rig5-gaps (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S47 | refresh-corrupt-download | c | first-line check rejects a corrupt download | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S48 | upgrade-reread-after-swap | c | re-read the swapped rulebook mid-upgrade | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S49 | rules-update-reaches-raw-main | c | update compares raw main, never two local copies | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field |
+| S50 | stale-reference-present-on-disk | c | present NDS_ROOT ≠ current; re-download the runtime's release | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · leak:C2-mild · ev:field |
+| S51 | first-install-flatten-and-declare | c | wrapper contents move up; NDS_ROOT stays unversioned | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S52 | csp-answer-comes-from-the-source | c | source-before-the-dev: head.md §CSP answers | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): nonce order right, loader nonce propagation missing | floor:PASS v4 2026-10-09 |
+| S53 | sso-app-minimal-chrome | c | chrome-shape mapping; minimal ships without asking | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field |
+| S54 | plan-waived-single-page | c | plan waiver: rules stay, mix ban stays | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): (a) skips the one-line cost note: read the project as needing no plan | floor:FAIL v4 2026-10-09 · WATCH cost-line ×2 · ev:protocol |
+| S55 | runtime-banner-cross-check | c | JS/CSS banners must agree; legacy-ignore course | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · leak:C2-mild · ev:field |
+| S56 | no-harness-smoke-before-checklist | c | curl smoke check before the dev checklist | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · leak:C2-mild · ev:field |
+| S57 | host-framework-validation-additions | c | framework-expanded elements banned beside canon | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S58 | fix-proposals-read-the-source-first | c | fix proposals read the source's own section first | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S60 | make-your-own-browser-channel | c | headless default; "cannot see" only after the attempt | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · leak:C2 · WATCH checklist-after-success ×1 · ev:field |
+| S61 | asset-url-prefix-confirm | c | derive the served URL, confirm before the first tag | PASS 2026-10-10 scoped v4 one-stop review (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · leak:C3-deliberate · ev:policy·non-gating |
+| S62 | section-structure-and-gaps | c | rule #4 sections, nds-grid, --gap | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S63 | page-js-defer-order | c | page JS after chrome tags; inline-defer trap | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:field |
+| S65 | icon-token-extraction-sweep | c | nds-hgi-* sweep incl. page JS | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:protocol |
+| S66 | inherited-wrapper-children | c | keep a wrapper, keep its children | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:protocol |
+| S67 | two-canonical-flows-one-page | c | both flows through the catalog; [hidden] card swap | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · read-dep · ev:field |
+| S68 | trimmed-copy-keeps-units | c | trim steps, keep class+SVG units | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S69 | custom-scaffold-anchors-on-canon | c | custom scaffolds pull structure from canon usage | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · read-dep · ev:field |
+| S70 | knob-verified-by-effect | c | verify a knob by its effect, not coincidence | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · leak:C2 · ev:field · no rule needed (v4 floor PASS); safety net |
+| S71 | fallback-mode-before-substitute | c | missing asset ≠ substitute; the component's own fallback mode | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · read-dep · ev:field |
+| S72 | mobile-width-ladder-resize-blocked | c | headless default over a width-locked attached browser | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · leak:C2 · ev:field |
+| S73 | custom-select-default-vs-native-shortcut | c | in-form selects default Custom Select; offer first | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · read-dep · ev:field |
+| S74 | plan-review-decisions-are-asked | c | review = ONE stop: the host question tool, else one numbered message | PASS 2026-10-10 scoped v4 review-is-the-stop (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S75 | csp-inline-knob-sweep | c | style=" before-done sweep under a locked style-src | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:SOFT v4 2026-10-09 · ev:field |
+| S76 | mechanism-vs-filler-split | c | split a copied unit: keep mechanism, cut filler | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S77 | chrome-ships-as-is | c | topbar/dark-mode ship as-is, boxed subtract-later; the stamp is the one review question; one language = no switcher | PASS 2026-10-10 scoped v4 dead-chrome-links (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · WATCH stamp-flag · ev:field |
+| S78 | host-framework-attribute-retention | c | asp-for stays attribute-side on canon inputs | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S79 | mobile-width-limit-is-not-an-exemption | c | a width limit is not an exemption; headless same-run | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · leak:C2 · ev:field |
+| S82 | legacy-sheet-vs-project-nds-layer | c | classify by CONTENT: legacy sheet vs project NDS layer | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S83 | legacy-globals-caught-at-inventory | c | the global-element-css audit finding: legacy globals kept off NDS routes, recorded in the plan | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): first run since the reframe: proposes the scoped-class fix and asks first (right, red line #7), but writes no plan entry | floor:not run (reframed) · ev:field |
+| S84 | composition-source-members-shipped | c | shipped page carries every cited-source member | PASS 2026-10-10 full v4 (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · leak:C1-fixed · 7/7 members · R5 closed · ev:field |
+| S85 | framework-view-lifecycle | c | refresh on mount + destroy on unmount; no poll | SOFT 2026-10-10 full v4 post-cut (Sonnet 5.5): destroy named; cause given as leftover listeners, not the kept init marker refresh.md names | floor:PASS v4 2026-10-09 · WATCH mechanism-naming · ev:field |
+| S86 | verify-headless-entry-gate | c | ladder entry needs a named failed headless attempt | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · leak:C2-fixed · OPEN → R1 field half · ev:field |
+| S87 | mount-root-layout-chain | c | mount element takes display:contents; footer stays pinned | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · leak:C2-fixed · behavior confirmed via S84 run · ev:field |
+| S88 | route-modifier-before-mount | c | route-dependent console modifier set before mount, not in an effect | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · guard for the 2026-08-18 layout-modifier clause · ev:field |
+| S89 | unmet-check-blocks-status | c | unmet required check keeps the plan row In Progress; never waived | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · leak:C2-residual · WATCH exit-gate-to-chat ×1 · adopted 2026-08-22 · ev:field |
+| S90 | backend-contract-conflict | c | legacy UI vs backend contract = dev decision, report and do not guess | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · both-conditions clean · adopted 2026-08-22 · ev:field |
+| S91 | runtime-tags-follow-head-canon | c | runtime tags from the head canon; the loader adds the rest | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S92 | canon-body-not-wrapper | c | new-format copy: the data-canon body, never its script wrapper | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S93 | variants-composition | c | new-format option from the Variants table onto copied canon (S16 twin) | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S94 | content-changes-after-load | c | after-load content → init.md: refresh / mount / destroy | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field · leak:C3-mild |
+| S95 | date-format-and-server-value | c | <html> date switches + .nds-date-value for one server format | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S96 | token-override-states-and-dark | c | token override: whole state family + Override Scope dark shape | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S97 | upgrade-migration-audit | c | upgrade sweep: Migrating sections + migration audit on every page | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S98 | page-layout-read-order | c | reuse the chrome; example .md + front matter; built page as visual spec only | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol · leak:C3-deliberate |
+| S99 | component-text-override | c | component text via the pack / window.NDS_I18N, never runtime edits | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:protocol |
+| S100 | legacy-does-not-scope-facets | c | legacy UI never caps a matched source's facets | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field |
+| S101 | pre-index-template-redirect | c | no index in NDS_ROOT → install IQv3.2, read it, tell the dev | PASS 2026-10-10 old v1.12.0 post-cut (Sonnet 5.5) | root:v1.12.0 · floor:not run · ev:protocol |
+| S102 | index-read-first | c | NDS-INDEX.md read first; every path from it | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · leak:C3-mild · ev:protocol |
+| S103 | audit-legacy-library | c | legacy-library finding: NDS page head without legacy; shared layout untouched | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S104 | audit-bundle-tag | c | bundle-tag finding: remove the tag; loader injects it | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:PASS v4 2026-10-09 · ev:field |
+| S105 | audit-inline-defer | c | inline-defer finding: module script, no polling | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:FAIL v4 2026-10-09 · ev:field |
+| S106 | empty-root-pre-index-setup | c | empty NDS_ROOT + 1.x runtime → that release, no index → IQv3.2 | PASS 2026-10-10 old v1.12.0 post-cut (Sonnet 5.5) | root:v1.12.0 · floor:not run · ev:protocol |
+| S107 | unlisted-legacy-library | c | a library outside the index table is legacy too: catalog match, NDS canon | PASS 2026-10-10 full v4 post-cut (Sonnet 5.5) | floor:not run · ev:policy |
+| S108 | verify-per-page-reference | c | a row moves to Awaiting Verification only with its own reference comparison; never handed to the dev | PASS 2026-10-10 scoped v4 handover-gate (Sonnet 5.5) | floor:PASS 2026-10-10 · ev:field |
+
+| S109 | states-are-parts | c | each state the page reaches is a part, matched through the catalog; parts named by job, never by legacy class | PASS 2026-10-10 scoped v4 rig5-gaps (Sonnet 5.5) | ev:field (rig 5 run 2) |
+| S110 | full-use-when-read | c | read every use_when line unfiltered; keyword search confirms, never picks | PASS 2026-10-10 scoped v4 rig5-gaps (Sonnet 5.5) | ev:field (rig 5 run 2) |
+| S111 | parts-list-before-markup | c | the parts list is recorded under the row before the first line of markup | PASS 2026-10-10 scoped v4 handover-gate (Sonnet 5.5) | ev:field (rig 5 run 2) |
+| S112 | component-use-limits | c | each part carries its doc's use limits (never, only, do not); live figures are no counter | PASS 2026-10-10 scoped v4 handover-gate (Sonnet 5.5) | read-dep · ev:field (rig 5 run 2) |
+| S113 | verify-every-state | c | both passes on every state in the parts list, setup named; no-reference state judged by its doc | PASS 2026-10-10 scoped v4 edit-mode (Sonnet 5.5) | ev:field (rig 5 run 2) |
+| S114 | removable-chrome-asked | c | removable chrome is a plan review question; never infer affiliation | PASS 2026-10-10 scoped v4 one-stop-install (Sonnet 5.5) | ev:field (rig 5 run 2) |
+| S116 | answers-approve-plan | c | the review answers approve the plan: record them and build, no second stop | PASS 2026-10-10 scoped v4 one-stop-install (Sonnet 5.5) — WATCH second-stop (field ×2) | ev:owner (2026-10-10) |
+| S117 | edit-reopens-the-page | c | an edit reopens the page: In Progress, audit + both passes again in the touched states | PASS 2026-10-10 scoped v4 edit-mode (Sonnet 5.5) | ev:field (rig 5 run 2) |
+| S118 | shared-file-edit | c | daily edit to a shared stylesheet re-checks every page that loads it; no plan | PASS 2026-10-10 scoped v4 edit-mode (Sonnet 5.5) | ev:owner (2026-10-10) |
+| S119 | own-checks-before-handover | c | a row reaches Awaiting Verification only when its own checks all pass, under any pacing | PASS 2026-10-10 scoped v4 handover-gate (Sonnet 5.5) | ev:field (rig 5 run 3) |
+| S120 | assets-wait-for-the-review | c | first install: assets placeholder; the folder is a review question; runtime copied after | PASS 2026-10-10 scoped v4 one-stop-install (Sonnet 5.5) | ev:field (rig 5 run 4) |
+| S121 | ask-in-the-same-turn | c | the review goes out in the turn the plan is written, via the question tool; nothing the rules settle | PASS 2026-10-10 scoped v4 one-stop-install (Sonnet 5.5) | ev:field (rig 5 run 4) |
+| S122 | whole-plan-runs-on | c | under `whole plan`, a row at Awaiting Verification waits; the agent opens the next row in the same turn | PASS 2026-10-10 scoped v4 whole-plan-runs-on (Sonnet 5.5) | ev:field (rig 5 run 6) |
+| S123 | open-items-never-block | c | under `whole plan`, missing assets and questions with a default ship as placeholders/defaults + checkboxes; only Stop-and-ask blocks; length never stops | PASS 2026-10-10 scoped v4 open-items-never-block (Sonnet 5.5) | ev:field (rig 5 run 7) |
+| S124 | dead-chrome-links | c | a copied chrome link with no target is removed with a checkbox; affiliation marks wait for the dev | PASS 2026-10-10 scoped v4 dead-chrome-links (Sonnet 5.5) | ev:field (rig 5 runs 6–7) |
+| S125 | own-checks-are-not-open-items | c | an open checkbox holds only what the dev supplies; an agent-owned check left undone is run next, never filed | PASS 2026-10-11 scoped v4 own-checks-are-not-open-items (Sonnet 5.5) | ev:field (rig 5 run 8) |
+| S127 | not-a-finding | c | a path the doc already gives, or the app's own request, data or state, is not an `NDS-REPORT.md` finding | PASS 2026-10-13 scoped v4 report-trim (Sonnet 5.5) | floor:PASS-code v4 2026-10-12 · ev:field (rigs 2, 4) |
+| S128 | variant-where-content-fits | c | a component or example takes the variant its content fits (avatar header, statistic); a template keeps its parts | PASS 2026-10-13 solo v4 (Sonnet 5.5) | ev:field (owner, rigs 2, 4, 5) · WATCH field-defaults ×1 |

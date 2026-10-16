@@ -165,9 +165,10 @@
 
             this.valid = true;
             // Registered here, not in the sweep, so every construction path —
-            // sweep, reinit() and programmatic create() — reaches destroy().
+            // sweep, reinit() and programmatic create() — reaches destroy() and is stamped.
             paginationNav.ndsPagination = this;
             this.init();
+            paginationNav.setAttribute('data-nds-pagination-initialized', 'true');
         }
 
         init() {
@@ -184,11 +185,8 @@
     // attributes and any consumer-attached listener survive collapse intact.
     // Only what the collapse owns is re-stamped: the dropdown marker class,
     // aria-current, and data-state (NDS.State-managed, never a literal attribute).
-    // Local fork of NDS.escapeHtml — also escapes quotes for the attribute
-    // context (a data-page-url href); core's version doesn't. Do not swap.
-    const _escAttr = v => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
     // data-page-url template ("?page={page}") → page-to-href function, or null.
-    const _urlFn = pageUrl => pageUrl ? (p => _escAttr(pageUrl.replace('{page}', p))) : null;
+    const _urlFn = pageUrl => pageUrl ? (p => NDS.escapeHtml(pageUrl.replace('{page}', p))) : null;
 
     // Capture the ordered page-control set from a manual nav's list, whether it
     // is currently flat or already collapsed (visible buttons + ellipsis
@@ -237,7 +235,7 @@
     // open. reconcileCollapse parses it and reparents the author's controls
     // into the scroll container, which stays eager.
     function _ellipsisShell() {
-        return `<li class="nds-pagination-item nds-pagination-ellipsis"><div class="nds-dropmenu"><button type="button" class="nds-btn nds-subtle nds-ellipsis nds-indicator nds-dropmenu-trigger" aria-label="${_t('more')}"><span class="nds-label"></span></button><div class="nds-dropmenu-menu nds-pagination-menu" aria-hidden="true"><div class="nds-dropmenu-scroll"></div></div></div></li>`;
+        return `<li class="nds-pagination-item nds-pagination-ellipsis"><div class="nds-dropmenu"><button type="button" class="nds-btn nds-subtle nds-ellipsis nds-indicator nds-dropmenu-trigger" aria-label="${html('more')}" data-i18n-aria-label="pagination.more"><span class="nds-label"></span></button><div class="nds-dropmenu-menu nds-pagination-menu" aria-hidden="true"><div class="nds-dropmenu-scroll"></div></div></div></li>`;
     }
 
     // Ellipsis <li> whose dropdown holds the collapsed range — reparents each
@@ -278,9 +276,8 @@
 
         // Committed to rebuilding — tear the old ellipsis menu down, as both other
         // rebuild paths do (_rebuildAutoNav, setTotalPages). Runs AFTER the capture
-        // above, which needs the live menu items: destroy() unportals the menu, so
-        // an open one is back in place before replaceChildren discards its shell
-        // instead of being stranded at <body> with its listeners orphaned.
+        // above, which needs the live menu items: destroy() takes an open menu out of
+        // the top layer before replaceChildren discards its shell.
         _destroyEllipsisMenu(nav);
 
         const activeNum = (model.find(e => e.active) || {}).num;
@@ -389,7 +386,7 @@
 
         paginationContainers.forEach(container => {
             // Skip elements inside code examples
-            if (container.closest('code, .code-example')) {
+            if (container.closest('code')) {
                 return;
             }
 
@@ -399,67 +396,64 @@
                 return;
             }
 
-            if (!container.hasAttribute('data-nds-pagination-initialized')) {
-                // Check if auto-generation is requested via data-total-pages
-                const totalPages = parseInt(container.dataset.totalPages);
-                const activePage = parseInt(container.dataset.activePage) || 1;
-
-                // Only auto-generate if data-total-pages is set AND container doesn't already have .nds-pagination-list
-                const hasPaginationList = container.classList.contains('nds-pagination-list') ||
-                                         container.querySelector('.nds-pagination-list');
-
-                if (totalPages && totalPages > 0 && !hasPaginationList) {
-                    // Auto-generate pagination HTML, collapsed directly (no
-                    // build-all-then-collapse round trip). data-page-url (a
-                    // "?page={page}" template) makes the controls navigable links
-                    // for no-JS, server-reload pagination; without it they're buttons.
-                    container.innerHTML = generatePaginationHTML(totalPages, activePage, container.getAttribute('data-page-url'));
-                    wireGeneratedPagination(container, activePage, totalPages);
-                }
-
-                const paginationInstance = new NDSPagination(container);
-                // Stamp only successful constructions — a bailed (empty) nav stays
-                // eligible for the next reinit() instead of being skipped forever.
-                if (paginationInstance.valid) {
-                    container.setAttribute('data-nds-pagination-initialized', 'true');
-                }
-
-                initializePaginationStates(container);
-
-                // Wire the per-nav click handler. Auto-paginations are wired
-                // separately by _wireAutoNav (with a live items getter) and skip
-                // this path. Listener is scoped to the nav — DOM removal GCs it
-                // automatically; the AbortController stash on the element is the
-                // explicit handle a future destroy() can abort.
-                if (!container.hasAttribute('data-auto-pagination')) {
-                    _wireManualNavClicks(container);
-                    _wireCollapseWatch(); // live ellipsis re-collapse on dynamic <li> changes
-
-                    _restoreUrlPage(container);
-                }
-
-                // Universal reveal: a non-auto pagination releases its paged-content's
-                // skeleton hold at init. Auto navs are skipped here — setupAutoContainer
-                // stamps after it collapses, so pre-collapse content stays held.
-                // No .nds-pagination class gate: a standalone .nds-pagination-list root
-                // owns paged content the same way, and gating on the class left its
-                // items past --per-page hidden by the crit skeleton forever.
-                if (!container.hasAttribute('data-auto-pagination')) {
-                    const content = contentForNav(container);
-                    if (content) content.setAttribute('data-paged-initialized', '');
-                }
-            }
+            if (!container.hasAttribute('data-nds-pagination-initialized')) _initNav(container);
         });
     }
 
-    // Collect the dropmenu items inside a pagination's ellipsis menus. Queried
-    // portal-aware: the ellipsis menu sets no data-portal, but a pagination
-    // inside a modal or a scrolling wrapper portals on open anyway, which parks
-    // the menu at <body> and out of a plain descendant walk. On a lazy menu this
-    // is the rendered window only — callers needing the true page span use
-    // _lazyRange / the always-visible 1,2,3,N strip buttons.
+    // One nav's full init path, shared by the init sweep and create().
+    function _initNav(container) {
+        // Check if auto-generation is requested via data-total-pages
+        const totalPages = parseInt(container.dataset.totalPages);
+        const activePage = parseInt(container.dataset.activePage) || 1;
+
+        // Only auto-generate if data-total-pages is set AND container doesn't already have .nds-pagination-list
+        const hasPaginationList = container.classList.contains('nds-pagination-list') ||
+                                 container.querySelector('.nds-pagination-list');
+
+        if (totalPages && totalPages > 0 && !hasPaginationList) {
+            // Auto-generate pagination HTML, collapsed directly (no
+            // build-all-then-collapse round trip). data-page-url (a
+            // "?page={page}" template) makes the controls navigable links
+            // for no-JS, server-reload pagination; without it they're buttons.
+            container.innerHTML = generatePaginationHTML(totalPages, activePage, container.getAttribute('data-page-url'));
+            wireGeneratedPagination(container, activePage, totalPages);
+        }
+
+        // Only a valid construction stamps, so a bailed (empty) nav stays eligible.
+        const inst = new NDSPagination(container);
+
+        initializePaginationStates(container);
+
+        // Wire the per-nav click handler. Auto-paginations are wired
+        // separately by _wireAutoNav (with a live items getter) and skip
+        // this path. Listener is scoped to the nav — DOM removal GCs it
+        // automatically; the AbortController stash on the element is the
+        // explicit handle a future destroy() can abort.
+        if (!container.hasAttribute('data-auto-pagination')) {
+            _wireManualNavClicks(container);
+            _wireCollapseWatch(); // live ellipsis re-collapse on dynamic <li> changes
+
+            _restoreUrlPage(container);
+        }
+
+        // Universal reveal: a non-auto pagination releases its paged-content's
+        // skeleton hold at init. Auto navs are skipped here — setupAutoContainer
+        // stamps after it collapses, so pre-collapse content stays held.
+        // No .nds-pagination class gate: a standalone .nds-pagination-list root
+        // owns paged content the same way, and gating on the class left its
+        // items past --per-page hidden by the crit skeleton forever.
+        if (!container.hasAttribute('data-auto-pagination')) {
+            const content = contentForNav(container);
+            if (content) content.setAttribute('data-paged-initialized', '');
+        }
+        return inst;
+    }
+
+    // Collect the dropmenu items inside a pagination's ellipsis menus. On a lazy
+    // menu this is the rendered window only — callers needing the true page span
+    // use _lazyRange / the always-visible 1,2,3,N strip buttons.
     function getPaginationDropmenuItems(pagination) {
-        return NDS.queryAll(pagination, '.nds-dropmenu-menu .nds-dropmenu-item');
+        return Array.from(pagination.querySelectorAll('.nds-dropmenu-menu .nds-dropmenu-item'));
     }
 
     // All clickable page elements (in-list buttons + dropmenu items).
@@ -511,11 +505,9 @@
         NDS.State.set(target, 'active');
         NDS.aria.current(target, 'page');
         if (target.classList.contains('nds-dropmenu-item')) {
-            // NDS.closest, not closest: a portaled menu's row sits under <body>
-            // with no .nds-dropmenu ancestor — core hops back via the owner backref.
             // Without it the trigger never carries the active page, and once the
             // menu closes and drops its rows nothing holds it at all.
-            const ellipsisTrigger = NDS.closest(target, '.nds-dropmenu')?.querySelector('.nds-dropmenu-trigger');
+            const ellipsisTrigger = target.closest('.nds-dropmenu')?.querySelector('.nds-dropmenu-trigger');
             if (ellipsisTrigger) {
                 NDS.State.set(ellipsisTrigger, 'active');
                 const ellipsisLabel = ellipsisTrigger.querySelector('.nds-label');
@@ -663,11 +655,11 @@
 
     // Wire one auto-pagination container: paginate to final state now, then
     // call _wireAutoNav for click handlers + the --per-page resize observer.
-    // Skips already-initialized navs and code-example fixtures; the content
+    // Skips already-initialized navs and navs inside <code>; the content
     // container is the previous sibling.
     function setupAutoContainer(paginationNav) {
         if (paginationNav.hasAttribute('data-nds-auto-pagination-initialized') ||
-            paginationNav.closest('code, .code-example')) {
+            paginationNav.closest('code')) {
             return;
         }
 
@@ -769,36 +761,46 @@
     // inside NDS.State.set (activateGeneratedPage / _layoutLazy) so the State
     // vocab never leaks into a literal attribute. aria-current IS emitted; it's
     // semantic and valid pre-JS.
-    // Generated strings are ar/en pairs picked by page language (the
-    // tables/editor convention) — full component localization is a later pass.
-    const _T = {
-        prev: { en: 'Previous page', ar: 'الصفحة السابقة' },
-        next: { en: 'Next page', ar: 'الصفحة التالية' },
-        page: { en: 'Page', ar: 'صفحة' },
-        more: { en: 'More pages', ar: 'المزيد من الصفحات' },
-        jump: { en: 'Jump to page', ar: 'الانتقال إلى صفحة' },
-    };
-    const _t = k => (NDS.isArabic ? _T[k].ar : _T[k].en);
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('pagination', {
+        prev: 'Previous page',
+        next: 'Next page',
+        page: 'Page {n}',
+        more: 'More pages',
+        jump: 'Jump to page',
+    });
+    // Escaped: the pack is site-editable, and these land in innerHTML.
+    const html = (k, vars) => NDS.escapeHtml(strings.text(k, vars));
+    // Prev, next, more and jump carry markers. A page label holds its number, so it cannot:
+    // the ones generated before the pack landed are re-labelled once it does.
+    let _relabelArmed = false;
+    function _relabel() {
+        const d = strings.defaults;
+        document.querySelectorAll('.nds-pagination-item .nds-btn[aria-label]').forEach(b => {
+            const n = b.textContent.trim();
+            if (b.getAttribute('aria-label') === NDS.i18n.format(d.page, { n })) b.setAttribute('aria-label', strings.text('page', { n }));
+        });
+    }
     // url (when set) is a page→href function — the controls become navigable
     // anchors for no-JS, server-reload pagination (data-page-url). A disabled
     // prev/next anchor drops its href; CSS pointer-events handles the rest.
     const _prevLi = (disabled, url, prevPage) => {
         const inner = url
-            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('prev')}"${disabled ? ' aria-disabled="true"' : ` href="${url(prevPage)}"`}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></a>`
-            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('prev')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></button>`;
+            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${html('prev')}" data-i18n-aria-label="pagination.prev"${disabled ? ' aria-disabled="true"' : ` href="${url(prevPage)}"`}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${html('prev')}" data-i18n-aria-label="pagination.prev"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i></button>`;
         return `<li class="nds-pagination-item nds-pagination-prev">${inner}</li>`;
     };
     const _nextLi = (disabled, url, nextPage) => {
         const inner = url
-            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('next')}"${disabled ? ' aria-disabled="true"' : ` href="${url(nextPage)}"`}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></a>`
-            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${_t('next')}"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></button>`;
+            ? `<a class="nds-btn nds-subtle nds-icon-only" aria-label="${html('next')}" data-i18n-aria-label="pagination.next"${disabled ? ' aria-disabled="true"' : ` href="${url(nextPage)}"`}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-icon-only" aria-label="${html('next')}" data-i18n-aria-label="pagination.next"${disabled ? ' disabled' : ''}><i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i></button>`;
         return `<li class="nds-pagination-item nds-pagination-next">${inner}</li>`;
     };
     const _pageLi = (i, activePage, url) => {
         const cur = i === activePage ? ' aria-current="page"' : '';
         const inner = url
-            ? `<a class="nds-btn nds-subtle nds-indicator" href="${url(i)}"${cur} aria-label="${_t('page')} ${i}"><span class="nds-label">${i}</span></a>`
-            : `<button type="button" class="nds-btn nds-subtle nds-indicator"${cur} aria-label="${_t('page')} ${i}"><span class="nds-label">${i}</span></button>`;
+            ? `<a class="nds-btn nds-subtle nds-indicator" href="${url(i)}"${cur} aria-label="${html('page', { n: i })}"><span class="nds-label">${i}</span></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-indicator"${cur} aria-label="${html('page', { n: i })}"><span class="nds-label">${i}</span></button>`;
         return `<li class="nds-pagination-item page_${i}">${inner}</li>`;
     };
 
@@ -808,8 +810,8 @@
     function _menuItem(i, activePage, url) {
         const cur = i === activePage ? ' aria-current="page"' : '';
         return url
-            ? `<a class="nds-btn nds-subtle nds-indicator nds-dropmenu-item" role="menuitem" href="${url(i)}"${cur} aria-label="${_t('page')} ${i}"><span class="nds-label">${i}</span></a>`
-            : `<button type="button" class="nds-btn nds-subtle nds-indicator nds-dropmenu-item" role="menuitem" aria-label="${_t('page')} ${i}"${cur}><span class="nds-label">${i}</span></button>`;
+            ? `<a class="nds-btn nds-subtle nds-indicator nds-dropmenu-item" role="menuitem" href="${url(i)}"${cur} aria-label="${html('page', { n: i })}"><span class="nds-label">${i}</span></a>`
+            : `<button type="button" class="nds-btn nds-subtle nds-indicator nds-dropmenu-item" role="menuitem" aria-label="${html('page', { n: i })}"${cur}><span class="nds-label">${i}</span></button>`;
     }
 
     // Build a pagination list. Above 5 pages, emits the collapsed shape directly
@@ -819,6 +821,7 @@
     // preserves the href/label markup this data-driven builder doesn't carry.
     // pageUrl (a "?page={page}" template) makes every control a navigable <a href>.
     function generatePaginationHTML(totalPages, activePage = 1, pageUrl = null) {
+        if (!_relabelArmed) { _relabelArmed = true; strings.load().then(_relabel); }
         activePage = Math.max(1, Math.min(activePage, totalPages));
         const url = _urlFn(pageUrl);
         let html = '<ul class="nds-pagination-list">' + _prevLi(activePage === 1, url, activePage - 1);
@@ -886,12 +889,7 @@
     // The lazily-windowed page range stamped on a generated ellipsis menu's
     // scroll container, or null for an eager (author-markup) menu.
     function _lazyRange(host) {
-        // Resolve the menu, then scope into it. A wrapper→menu selector matches
-        // nothing once the menu portals to <body>, and NDS.queryAll can't carry a
-        // spanning selector either — the menu is the search root, not its own
-        // ancestor. Returning null while open let reconcileCollapse's
-        // builder-owned guard fail open and rebuild a live lazy nav.
-        const menu = NDS.querySelector(host, '.nds-pagination-menu');
+        const menu = host.querySelector('.nds-pagination-menu');
         const scroll = menu && menu.querySelector('.nds-dropmenu-scroll');
         return (scroll && scroll._ndsRange) || null;
     }
@@ -1068,7 +1066,7 @@
         if (!menu || menu.querySelector('.nds-pagination-jump')) return;
         menu.insertAdjacentHTML('afterbegin', `<div class="nds-form-container nds-dropmenu-search nds-pagination-jump">
             <div class="nds-form-control">
-                <input type="text" inputmode="numeric" dir="ltr" aria-label="${_t('jump')}" placeholder="${scroll._ndsRange.to + 1}">
+                <input type="text" inputmode="numeric" dir="ltr" aria-label="${html('jump')}" data-i18n-aria-label="pagination.jump" placeholder="${scroll._ndsRange.to + 1}">
             </div>
         </div>`);
         const box = menu.firstElementChild;
@@ -1291,8 +1289,7 @@
     // Per-nav click handler for an auto-pagination's <ul>. getItems() returns
     // the current page-item set live (each call); totalPages is derived from it
     // per click so a post-init filter change is reflected in the next/prev
-    // bounds without re-wiring. Portaled dropmenu items reach this via the
-    // wrapper's re-dispatched click (see nds-dropmenu.js).
+    // bounds without re-wiring.
     //
     // Idempotent on the pagination element: Filter (registered before Pagination)
     // calls refresh on interaction; refresh re-wires the nav. The flag stops a
@@ -1302,18 +1299,13 @@
         if (newPagination._ndsAutoClickWired) return;
         newPagination._ndsAutoClickWired = true;
         newPagination.addEventListener('click', (e) => {
-            // The re-dispatch fires on the WRAPPER, so e.target is the wrapper, not
-            // the row — dropmenu hands the row over as ndsDropmenuItem. Resolving
-            // from e.target alone matched nothing and the click died silently.
-            const src = e.ndsDropmenuItem || e.target;
-            // Strip control, or an own-ellipsis row. The ownership test is on the
-            // row's wrapper, not a selector ancestor, so it survives the portal —
-            // same guard as _wireManualNavClicks. The two are mutually exclusive:
+            // Strip control, or an own-ellipsis row — same guard as
+            // _wireManualNavClicks. The two are mutually exclusive:
             // _PAGE_ITEM_SEL excludes .nds-pagination-ellipsis.
-            const strip = src.closest(_PAGE_CTRL_SEL);
-            const row = src.closest('.nds-dropmenu-item');
+            const strip = e.target.closest(_PAGE_CTRL_SEL);
+            const row = e.target.closest('.nds-dropmenu-item');
             const pageElement = strip ||
-                (row && newPagination.contains(NDS.closest(row, '.nds-dropmenu')) ? row : null);
+                (row && newPagination.contains(row.closest('.nds-dropmenu')) ? row : null);
 
             if (pageElement) {
                 if (pageElement.tagName.toLowerCase() === 'a') e.preventDefault();
@@ -1536,16 +1528,10 @@
             // the list element).
             const pagination = _listOf(paginationNav);
 
-            // Portaled ellipsis: the re-dispatch fires on the WRAPPER, so e.target
-            // is the wrapper — dropmenu hands the row over as ndsDropmenuItem.
-            const src = e.ndsDropmenuItem || e.target;
-            const pageElement = src.closest(_PAGE_CTRL_SEL);
-            // Own-ellipsis scoping moves from the selector onto the row's owning
-            // wrapper: a '.nds-pagination-list …' ancestor can't match a portaled
-            // menu, but NDS.closest hops back to the wrapper via the owner backref.
-            const row = src.closest('.nds-dropmenu-item');
-            const dropdownItem = row && pagination.contains(NDS.closest(row, '.nds-dropmenu')) ? row : null;
-            // e.target, not src: prev/next never live in the menu.
+            const pageElement = e.target.closest(_PAGE_CTRL_SEL);
+            // Own ellipsis only: the row's wrapper must sit in this list.
+            const row = e.target.closest('.nds-dropmenu-item');
+            const dropdownItem = row && pagination.contains(row.closest('.nds-dropmenu')) ? row : null;
             const prevElement = e.target.closest('.nds-pagination-prev button, .nds-pagination-prev a');
             const nextElement = e.target.closest('.nds-pagination-next button, .nds-pagination-next a');
 
@@ -1615,14 +1601,14 @@
             // A live nav is returned as-is — re-wiring its click handler would
             // stack a second listener on the same element.
             if (container.ndsPagination) return container.ndsPagination;
-            const inst = new NDSPagination(container);
-            // Match initializePagination: wire the per-nav click handler for
-            // manual navs; auto-paginations are wired by _wireAutoNav.
-            if (!container.hasAttribute('data-auto-pagination')) {
-                _wireManualNavClicks(container);
-                _wireCollapseWatch();
-            }
-            return inst;
+            // A page with no pagination at load never runs init(), so create() wires the cleanup too.
+            _wireNavCleanup();
+            // Manual navs take init's full path (URL page, states, reveal); auto-paginations
+            // are wired by _wireAutoNav.
+            const inst = container.hasAttribute('data-auto-pagination')
+                ? new NDSPagination(container)
+                : _initNav(container);
+            return inst.valid ? inst : null;
         },
         refresh: refreshAutoPagination,
         destroy: _destroyPaginationNav,

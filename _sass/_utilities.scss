@@ -20,9 +20,6 @@
     width: var(--_number-icon-size);
     height: var(--_number-icon-size);
     align-self: center;
-    @include dark {
-      filter: invert(1);
-    }
   }
   &[data-currency]::after {
     align-self: center;
@@ -71,11 +68,6 @@
   &[data-unit]:not([data-currency]) {
     @include ltr { flex-direction: row; }
   }
-  // Zero-price display: render the label as-is (e.g. "Free") and suppress
-  // the currency icon. Pairs with data-currency for consistent typography.
-  &[data-free]::after {
-    display: none;
-  }
 }
 
 :where(.nds-truncate) {
@@ -109,6 +101,15 @@
   border-radius: 0 !important;
 }
 
+// One axis of padding only.
+.nds-flush-inline {
+  padding-inline: 0 !important;
+}
+
+.nds-flush-block {
+  padding-block: 0 !important;
+}
+
 
 .nds-expandable {
   position: relative;
@@ -129,7 +130,8 @@
     overflow: hidden;
   }
   .nds-expandable-content {
-    mask-image: linear-gradient(180deg, black calc(100% - var(--mask-fade-percentage)), transparent 100%);
+    // Clear by the button's top (40px, nds-md), so no line peeks out under it.
+    mask-image: linear-gradient(180deg, black calc(100% - var(--mask-fade-percentage) - 40px), transparent calc(100% - 40px));
   }
   .nds-expand-btn {
     position: absolute;
@@ -180,52 +182,41 @@
 // a footnote under a table, or a hint beside a label. Status tints the text.
 // For a note that needs an icon or a box, use Feedback or Alert instead.
 // Plain class specificity, not :where() — a note carries meaning, so it should
-// not lose to any class that happens to land on the same element. Legacy
-// .nds-required-notice rides along as the error case.
-:is(.nds-note, .nds-required-notice) {
+// not lose to any class that happens to land on the same element.
+.nds-note {
   color: var(--text-secondary-paragraph);
   font-size: var(--typo-text-sm-FS);
   line-height: var(--typo-text-sm-LH);
-}
 
-.nds-note {
   &[data-status="error"] { color: var(--text-error); }
   &[data-status="warning"] { color: var(--text-warning); }
   &[data-status="success"] { color: var(--text-success); }
   &[data-status="info"] { color: var(--text-info); }
 }
 
-// The alias is the error note plus the block spacing it shipped with. .nds-note
-// carries none, so it stays safe beside a label, where a flex parent would
-// blockify a span.
-.nds-required-notice {
-  color: var(--text-error);
-  margin-block-end: var(--spacing-md);
-}
-
 // ==============================================
 // VISIBILITY UTILITIES
 // ==============================================
 
-// Band-exact responsive hiding: data-hidden="sm|md|lg" hides an element ONLY
-// inside that range (sm ≤600, md 601-960, lg 961-1280). The original
-// mobile/tablet/desktop names stay accepted as aliases for shipped markup.
+// Responsive hiding: data-hidden="sm|md|lg" hides an element ONLY inside that
+// range (sm <600, md 600-959, lg 960 and up).
 // Combine tokens to span ranges: data-hidden="sm md" hides up to 960px.
 // Add the sr token to keep the element in the accessibility tree while hidden
 // (visually-hidden instead of display:none) — e.g. data-hidden="sm sr" on a
 // button label that collapses to icon-only without losing its accessible name.
 // Deliberately unanchored — a global utility.
 @include mobile {
-  :is([data-hidden~="sm"], [data-hidden~="mobile"]):not([data-hidden~="sr"]) { display: none !important; }
-  :is([data-hidden~="sm"], [data-hidden~="mobile"])[data-hidden~="sr"] { @include label-hidden; }
+  [data-hidden~="sm"]:not([data-hidden~="sr"]) { display: none !important; }
+  [data-hidden~="sm"][data-hidden~="sr"] { @include label-hidden; }
 }
 @include tablet {
-  :is([data-hidden~="md"], [data-hidden~="tablet"]):not([data-hidden~="sr"]) { display: none !important; }
-  :is([data-hidden~="md"], [data-hidden~="tablet"])[data-hidden~="sr"] { @include label-hidden; }
+  [data-hidden~="md"]:not([data-hidden~="sr"]) { display: none !important; }
+  [data-hidden~="md"][data-hidden~="sr"] { @include label-hidden; }
 }
-@include desktop {
-  :is([data-hidden~="lg"], [data-hidden~="desktop"]):not([data-hidden~="sr"]) { display: none !important; }
-  :is([data-hidden~="lg"], [data-hidden~="desktop"])[data-hidden~="sr"] { @include label-hidden; }
+// lg has no upper edge: stopping at 1279px showed "hidden on desktop" content on most desktops.
+@include desktop('min') {
+  [data-hidden~="lg"]:not([data-hidden~="sr"]) { display: none !important; }
+  [data-hidden~="lg"][data-hidden~="sr"] { @include label-hidden; }
 }
 
 // ==============================================
@@ -241,6 +232,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  align-self: stretch;   // fills a centering flex parent's width, like a block does
   gap: var(--spacing-xs);
   min-height: max(120px, 100%);
   padding: var(--spacing-3xl) var(--spacing-xl);
@@ -260,9 +252,31 @@
 .nds-content-placeholder.nds-sm {
   --placeholder-FS: var(--typo-text-2xs-FS);
   --placeholder-LH: var(--typo-text-2xs-LH);
+  // One control tall (a default button), so it can stand in for a toolbar slot.
+  min-height: max(40px, 100%);
+  padding: var(--spacing-md) var(--spacing-lg);
 }
 
 .nds-content-placeholder.nds-lg {
   --placeholder-FS: var(--typo-text-sm-FS);
   --placeholder-LH: var(--typo-text-sm-LH);
+}
+
+// ==============================================
+// SKIP LINK
+// ==============================================
+
+// First tab stop on the page, before the topbar. Crit hides it until focused
+// (_fold.scss); focus pins it to the top start corner, above the chrome.
+.nds-skip-link:focus {
+  position: fixed;
+  inset-block-start: var(--spacing-md);
+  inset-inline-start: var(--spacing-md);
+  z-index: 10000;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--background-primary);
+  color: var(--text-oncolor-primary);
+  text-decoration: none;
+  @include btn-focus;
 }

@@ -1,6 +1,6 @@
 {%- assign hero_bg = page.hero_image | default: site.hero_image_sub %}
 
-{%- comment %} Hero tags / actions / float actions come from page front matter — no data-file indirection. The share button floats inline-end by default (icon-only on mobile via nds-minimal); a page overrides with `hero_float_actions` or suppresses it with `hide_share_page: true`. {%- endcomment %}
+{%- comment %} Hero tags / actions / float actions come from page front matter — no data-file indirection. The share button floats inline-end by default (icon-only on mobile via nds-minimal); a page overrides with `hero_float_actions` (an item is "share", a link, or raw `html`) or suppresses it with `hide_share_page: true`. {%- endcomment %}
 {%- assign hero_tags = page.hero_tags %}
 {%- assign hero_actions = page.hero_actions %}
 
@@ -38,27 +38,27 @@
 {%- unless share_placement == "hidden" %}
 {%- capture share_html %}
             <div class="nds-share nds-dropmenu">
-                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger" aria-label="Share Page" data-i18n-aria-label="share.share_page">
                     <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
-                    <span class="nds-label">Share Page</span>
+                    <span class="nds-label" data-i18n="share.share_page">Share Page</span>
                 </button>
                 <div class="nds-dropmenu-menu" hidden>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X" data-i18n-aria-label="share.share_on_x">
                         <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
                         <span class="nds-label">X</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn">
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button" aria-label="Share on LinkedIn" data-i18n-aria-label="share.share_on_linkedin">
                         <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
                         <span class="nds-label">LinkedIn</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp">
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button" aria-label="Share on WhatsApp" data-i18n-aria-label="share.share_on_whatsapp">
                         <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
                         <span class="nds-label">WhatsApp</span>
                     </button>
-                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
-                        data-label="Link Copied!" data-message="Page link copied to clipboard" data-no-auto-close>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link" data-i18n-aria-label="share.copy_link"
+                        data-copy-label data-no-auto-close>
                         <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
-                        <span class="nds-label">Copy Link</span>
+                        <span class="nds-label" data-i18n="share.copy_link">Copy Link</span>
                     </button>
                 </div>
             </div>
@@ -79,8 +79,8 @@
 {%- endfor %}
 {%- if share_placement == "action" -%}{%- assign _has_action = true -%}{%- endif %}
 <section class="nds-hero-section nds-sub{%- if page.hero_style and page.hero_style != "" %} {{ page.hero_style }}{%- endif %}"
-    {%- if hero_bg %} style="--hero_image: url('{{ hero_bg | relative_url }}');"{%- endif %}>
-    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb">
+    {%- if hero_bg %} style="--hero-image: url('{{ hero_bg | relative_url }}');{%- if page.hero_image_pos %} --hero-image-position: {{ page.hero_image_pos }};{%- endif %}"{%- endif %}>
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" data-i18n-aria-label="breadcrumb.breadcrumb">
         <ol class="nds-breadcrumb">
             {%- assign home_text = 'الرئيسية' -%}{%- if page.lang == 'en' -%}{%- assign home_text = 'Home' -%}{%- endif %}
             <li><a href="{{ page.breadcrumb_root_url | default: '/' | relative_url }}">{{ page.breadcrumb_root | default: home_text }}</a></li>
@@ -108,6 +108,8 @@
             <div class="nds-section-action{%- if hero_float_actions_class %} {{ hero_float_actions_class }}{%- endif %}">
                 {%- for item in hero_float_actions %}
                 {%- if item == "share" -%}{%- unless share_placement == "hidden" %}{{ share_html }}{%- endunless %}
+                {%- elsif item.html %}
+                {{ item.html }}
                 {%- else %}
                 <a class="nds-btn {{ item.style | default: 'nds-secondary-outline' }}" href="{{ item.url | relative_url }}"
                     aria-label="{{ item.aria_label | default: item.label }}"
@@ -164,7 +166,7 @@
                 {%- comment %} Rating is opt-in per page: set `rating: true` in the page front matter. Deliberately NOT tied to `hero_tags`, so a page's status tags never trigger it. {%- endcomment %}
                 {%- if page.rating %}
                 <div class="nds-dropmenu">
-                    <button class="nds-section-rating nds-btn nds-subtle nds-menu-btn nds-dropmenu-trigger nds-md" type="button">
+                    <button class="nds-section-rating nds-btn nds-subtle nds-menu-btn nds-dropmenu-trigger nds-sm" type="button">
                         <div class="nds-rating nds-xs " data-rating="4.5">
                             <span class="nds-rating-star" aria-hidden="true"></span>
                             <span class="nds-rating-star" aria-hidden="true"></span>
@@ -174,7 +176,7 @@
                         </div>
                         <span class="nds-label"><span class="nds-total-rate">4.5</span> - (<span class="nds-total-votes">18</span>) Votes</span>
                     </button>
-                    <div class="nds-dropmenu-menu nds-rating-dropmenu" hidden>
+                    <div class="nds-dropmenu-menu nds-rating-menu" hidden>
                         <div class="nds-dropmenu-item" data-no-auto-close>
                             <span class="nds-label">Rate this service</span>
                             <div class="nds-rating" data-rating="0">
@@ -189,7 +191,7 @@
                             <hr class="nds-divider nds-lg">
                             <div class="nds-dropmenu-action">
                                 <button class="nds-btn nds-primary nds-dropmenu-item" data-no-auto-close>
-                                    <span class="nds-label">Vote</span>
+                                    <span class="nds-label" data-i18n="rating.vote">Vote</span>
                                 </button>
                             </div>
                         </div>

@@ -1,0 +1,150 @@
+@use '../mixins' as *;
+
+// Countdown — _js/nds-countdown.js fills the values; the markup owns the units, labels and boxes.
+// A <span> root is inline text; any other root lays its units out in one row of cards.
+.nds-countdown {
+  // Same advance width for every digit, so 09 → 08 does not twitch.
+  font-variant-numeric: tabular-nums;
+  // Isolated: the script's dir="auto" sets the direction from the content (digits alone read left to right).
+  unicode-bidi: isolate;
+
+  // A filled label holds the width of its widest word form, and the largest value the width of its
+  // start: the script lists them, so a card or a sentence never resizes on "seconds" → "second" or
+  // 10 → 9 days. Same pattern as the cooldown button label.
+  [data-countdown-sizes] {
+    display: inline-grid;
+    justify-items: center;
+
+    &::after {
+      content: attr(data-countdown-sizes);
+      white-space: pre;
+      height: 0;
+      overflow: hidden;
+      visibility: hidden;
+    }
+  }
+
+  // Shown at zero only, when the script makes it the root's only content.
+  .nds-countdown-ended { display: none; }
+  &[data-state~="ended"] .nds-countdown-ended { display: revert; }
+
+  // The value carries its own color so it wins over a card number's.
+  &[data-state~="warning"] { color: var(--text-error); }
+  &[data-state~="warning"] .nds-countdown-value { color: var(--text-error); }
+}
+
+// The language's direction, from the dir attribute, so a forced-LTR host (.nds-card-number) cannot flip
+// Arabic. Zero specificity: dir="ltr" on the root, or any CSS direction, still fixes it.
+:where(.nds-countdown:dir(rtl)) { direction: rtl; }
+:where(.nds-countdown:dir(ltr)) { direction: ltr; }
+
+// Number sizes: the row's values and a card number's run. Sizes retune the -base values, so a public
+// knob always wins. LG alone clamps, so its large numbers still fit a phone row.
+.nds-countdown {
+  --_countdown-value-fs-base: var(--typo-display-sm-FS);
+  --_countdown-value-lh-base: var(--typo-display-sm-LH);
+  --_countdown-value-fs: var(--countdown-value-size, var(--_countdown-value-fs-base));
+  --_countdown-value-lh: var(--countdown-value-line-height, var(--_countdown-value-lh-base));
+
+  &.nds-lg {
+    --_countdown-value-fs-base: var(--typo-display-clamp-lg-FS);
+    --_countdown-value-lh-base: var(--typo-display-clamp-lg-LH);
+  }
+
+  &.nds-sm {
+    --_countdown-value-fs-base: var(--typo-display-xs-FS);
+    --_countdown-value-lh-base: var(--typo-display-xs-LH);
+  }
+}
+
+// Card row: one equal column per unit.
+.nds-countdown:not(span) {
+  --_countdown-gap: var(--countdown-gap, var(--spacing-md));
+
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--_countdown-gap);
+
+  // Tighter corners for a row of small tiles. It retunes the card's -base, so --card-radius still wins.
+  > .nds-card { --_card-radius-base: var(--radius-md); }
+
+  // Four cards in a phone row: a smaller card padding, retuning the card's -base so --card-padding
+  // still wins. The words drop to xs too: "seconds" at the card's 16px spills a quarter of a 360px phone.
+  @include mobile {
+    > .nds-card { --_card-padding-base: var(--spacing-lg); }
+
+    .nds-countdown-label {
+      font-size: var(--typo-text-xs-FS);
+      line-height: var(--typo-text-xs-LH);
+    }
+  }
+
+  // Block-level, so the card number's own line box does not set the height; grid, so the hidden
+  // sizes row reserves its width. Card numbers only: an inline run's values stay inline.
+  .nds-card-number > .nds-countdown-value {
+    display: grid;
+    font-size: var(--_countdown-value-fs);
+    line-height: var(--_countdown-value-lh);
+  }
+}
+
+// Plain units (no card): the number over its word.
+.nds-countdown:not(span) > [data-unit]:not(.nds-card) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--_card-number, currentColor);
+
+  > .nds-countdown-value {
+    display: grid;
+    font-size: var(--_countdown-value-fs);
+    line-height: var(--_countdown-value-lh);
+  }
+
+  > .nds-countdown-label {
+    font-size: var(--typo-text-sm-FS);
+    line-height: var(--typo-text-sm-LH);
+  }
+}
+
+// Banner: units as wide as their content, at the start or centered with the card.
+.nds-card > .nds-countdown {
+  --_countdown-gap: var(--countdown-gap, var(--spacing-3xl));
+
+  grid-auto-columns: max-content;
+  justify-content: start;
+}
+
+.nds-card.nds-center > .nds-countdown { justify-content: center; }
+
+// A row banner: the countdown and the button sit beside the text while the card is wide enough.
+.nds-card.nds-horizontal {
+  > .nds-countdown {
+    flex: 0 0 auto;
+    align-self: center;
+  }
+
+  // The card's actions take the full width and sink to the bottom: in the row they size and center instead.
+  > .nds-countdown ~ .nds-card-actions {
+    flex-basis: auto;
+    width: auto;
+    margin-top: 0;
+    align-self: center;
+  }
+
+  // On their own lines, the countdown and the actions center in the space they get.
+  @container (width < 720px) {
+    > .nds-countdown,
+    > .nds-countdown ~ .nds-card-actions {
+      flex-basis: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// A card number holding the whole run (the session timeout): the size takes the day word too.
+.nds-card-number > .nds-countdown {
+  font-size: var(--_countdown-value-fs);
+  line-height: var(--_countdown-value-lh);
+}

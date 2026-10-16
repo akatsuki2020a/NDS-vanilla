@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Guard on the shared attribute invalidation sets (nds-css-audit PERF-06).
+"""Guard on the shared attribute invalidation sets (AGENTS.md "data-state styles its host").
 
     python scripts/check-data-state-tails.py            # check the built CSS
     python scripts/check-data-state-tails.py --report   # every tail, with the selectors that feed it
@@ -40,9 +40,9 @@ SHARED = {
 
 # Selector substring → why it may keep its tail: a value the host cannot supply.
 ACCEPTED = {
-    '.nds-share .nds-dropmenu-menu [data-status=success] i::before': "success glyph; a host cannot supply each item's own glyph as the fallback",
     ':root[data-theme~=dark] .nds-feedback:is([data-status=neutral],[data-status=help])': 'dark neutral/help tweak on the feedback\'s own icon',
     ':root[data-theme~=dark] :is([data-status=neutral],[data-status=help]) .nds-feedback': 'dark neutral/help tweak on the feedback\'s own icon',
+    '.nds-feedback-icon:is([data-theme~=dark]:not(:root),[data-theme~=dark]:not(:root) *)': 'the same tweaks in a dark area',
 }
 
 
@@ -188,11 +188,11 @@ def verdict(key, sel):
         return None
     kind = key.split(':')[0]
     if kind == 'universal':
-        return 'universal tail — every write restyles the whole subtree (PERF-05)'
+        return 'universal tail — every write restyles the whole subtree'
     if kind in ('tag', 'attr'):
-        return f'{kind} tail {key.split(":", 1)[1]} — matches under every host; style the host, or mirror the token to a class (PERF-06)'
+        return f'{kind} tail {key.split(":", 1)[1]} — matches under every host; style the host, or mirror the token to a class'
     if kind == 'class' and key.split(':', 1)[1] in SHARED:
-        return f'shared class tail {key.split(":", 1)[1]} — lives inside every component; style the host, or mirror the token to a class (PERF-06)'
+        return f'shared class tail {key.split(":", 1)[1]} — lives inside every component; style the host, or mirror the token to a class'
     return None
 
 

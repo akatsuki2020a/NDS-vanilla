@@ -4,7 +4,7 @@
  * Methods:
  *   NDS.Breadcrumb.init() / .reinit()   scan + initialize .nds-breadcrumb-nav
  *   NDS.Breadcrumb.create(nav)          instance one breadcrumb
- *   instance.destroy()                  drop the overflow menu
+ *   instance.destroy()                  drop the overflow menu, restore every level
  * Events:
  *   (none)
  * Hooks:
@@ -25,6 +25,11 @@
 (function() {
     'use strict';
 
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('breadcrumb', {
+        more: 'More',
+    });
+
     class NDSBreadcrumb {
         constructor(breadcrumbNav) {
             this.breadcrumbNav = breadcrumbNav;
@@ -38,7 +43,10 @@
             }
 
             this.valid = true;
+            // Here, not in the sweep, so create() also ends the skeleton and stops a second sweep.
+            breadcrumbNav.ndsBreadcrumb = this;
             this.init();
+            breadcrumbNav.setAttribute('data-nds-breadcrumb-initialized', 'true');
         }
 
         init() {
@@ -77,7 +85,7 @@
 
             const button = document.createElement('button');
             button.className = 'nds-btn nds-subtle nds-ellipsis nds-dropmenu-trigger';
-            NDS.aria.label(button, 'More');
+            strings.set(button, 'aria-label', 'more');
 
             const menu = document.createElement('div');
             menu.className = 'nds-dropmenu-menu nds-breadcrumb-menu';
@@ -107,15 +115,15 @@
         }
 
         destroy() {
-            // Remove nds-dropmenu and restore original breadcrumb
-            const dropdownContainer = this.breadcrumb.querySelector('.nds-dropmenu');
-            if (dropdownContainer) {
-                dropdownContainer.closest('li')?.remove();
-            }
+            // Put back the original items: collapse detached the middle ones.
+            const menu = this.breadcrumb.querySelector('.nds-breadcrumb-ellipsis .nds-dropmenu');
+            menu?.ndsDropmenu?.destroy?.();
+            this.breadcrumb.replaceChildren(...this.items);
             // Releasing the stamp is what keeps destroy two-way: without it the same
             // markup stays marked as claimed, so no later init() or NDS.Init.refresh()
             // can ever collapse it again.
             this.breadcrumbNav.removeAttribute('data-nds-breadcrumb-initialized');
+            delete this.breadcrumbNav.ndsBreadcrumb;
         }
     }
 
@@ -125,27 +133,20 @@
 
         breadcrumbNavs.forEach(nav => {
             // Skip elements inside code examples
-            if (nav.closest('code, .code-example')) {
+            if (nav.closest('code')) {
                 return;
             }
 
-            if (!nav.hasAttribute('data-nds-breadcrumb-initialized')) {
-                const breadcrumbInstance = new NDSBreadcrumb(nav);
-                // Stamp only successful constructions — an empty breadcrumb rendered
-                // late stays eligible for the next reinit().
-                if (breadcrumbInstance.valid) {
-                    nav.ndsBreadcrumb = breadcrumbInstance;
-                    nav.setAttribute('data-nds-breadcrumb-initialized', 'true');
-                }
-            }
+            // Only a valid construction stamps, so an empty breadcrumb rendered late stays eligible.
+            if (!nav.hasAttribute('data-nds-breadcrumb-initialized')) new NDSBreadcrumb(nav);
         });
     }
 
-    // CRITICAL: Expose global API immediately (called by unified init system)
+    // Assigned at module eval so the loader's lazy stub resolves.
     NDS.Breadcrumb = {
         init: initializeBreadcrumbs,
         reinit: initializeBreadcrumbs,
-        create: (nav) => new NDSBreadcrumb(nav)
+        create: (nav) => nav.ndsBreadcrumb || new NDSBreadcrumb(nav)
     };
 
     // Note: Initialization now handled by nds-loader.js unified system

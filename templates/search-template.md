@@ -8,92 +8,101 @@ breadcrumb:
 hero_title: "Search Results"
 hero_description: "Find services matching your query"
 sidemenu_mode: false
-exclude_showcase: false
 ---
 
-<section id="searchResults" class="nds-content-section">
+<section id="search-results" class="nds-content-section">
     <div class="nds-section-wrapper">
-        <div class="nds-form-container nds-search-box" data-filter-target="search_results_content">
-            <div class="nds-search-content">
-                <div class="nds-form-control">
-                    <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                    <input id="searchResultsInput" type="text" class="nds-search-input" name="q" autocomplete="on"
-                        placeholder="Search...">
-                    <div class="nds-form-action">
-                        <button type="button" class="nds-btn nds-subtle nds-clear" hidden aria-label="Clear">
-                            <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
-                        </button>
-                        <button type="button" class="nds-btn nds-subtle nds-voice-input" aria-label="Voice input">
-                            <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
-                        </button>
-                    </div>
-                </div>
-                <button type="button" class="nds-btn nds-primary nds-search-btn">
-                    <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                    <span class="nds-label" data-hidden="sm sr">Search</span>
-                </button>
-            </div>
-        </div>
-
         <div class="nds-section-head">
             <h2 class="nds-section-title">Search results <span data-filter-query data-filter-target="search_results_content"></span></h2>
-            <p class="nds-section-description nds-bar-text" data-paged-target="search_results_content">Showing <b data-paged-from>0</b>&ndash;<b data-paged-to>0</b> of <b data-paged-count>0</b> result(s)</p>
         </div>
-        <div class="nds-section-action">
-            <div class="nds-dropmenu">
-                <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" type="button">
-                    <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
-                    <span class="nds-label">Sort</span>
-                </button>
-                <div class="nds-dropmenu-menu" hidden>
-                    <div class="nds-dropmenu-scroll">
-                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort data-filter-target="search_results_content">
-                            <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
-                            <span class="nds-label">Most Relevant</span>
-                        </button>
-                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-dir="asc" data-filter-target="search_results_content">
-                            <i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i>
-                            <span class="nds-label">A–Z</span>
-                        </button>
-                        <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-dir="desc" data-filter-target="search_results_content">
-                            <i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i>
-                            <span class="nds-label">Z–A</span>
-                        </button>
+        <div class="nds-section-body">
+            <div class="nds-toolbar">
+                <div class="nds-toolbar-row">
+                    <div class="nds-toolbar-start">
+                        <span class="nds-toolbar-text" data-paged-target="search_results_content">Showing <b data-paged-from>0</b>&ndash;<b data-paged-to>0</b> of <b data-paged-count>0</b> result(s)</span>
+                    </div>
+                    <div class="nds-toolbar-end">
+                        <div class="nds-dropmenu">
+                            <button class="nds-btn nds-secondary-outline nds-menu-btn nds-dropmenu-trigger" type="button">
+                                <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
+                                <span class="nds-label" data-i18n="sort.sort">Sort</span>
+                            </button>
+                            <div class="nds-dropmenu-menu" hidden>
+                                <div class="nds-dropmenu-scroll">
+                                    <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort data-filter-target="search_results_content">
+                                        <i class="nds-icon nds-hgi-sorting-05" aria-hidden="true"></i>
+                                        <span class="nds-label">Most Relevant</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-order="asc" data-filter-target="search_results_content">
+                                        <i class="nds-icon nds-hgi-sort-by-up-02" aria-hidden="true"></i>
+                                        <span class="nds-label">A–Z</span>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-dropmenu-item" data-sort="title" data-sort-order="desc" data-filter-target="search_results_content">
+                                        <i class="nds-icon nds-hgi-sort-by-down-02" aria-hidden="true"></i>
+                                        <span class="nds-label">Z–A</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="nds-dropmenu nds-filter" data-filter-target="search_results_content">
-                <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger" type="button">
-                    <i class="hgi hgi-stroke hgi-filter"></i>
-                    <span class="nds-label" data-hidden="sm sr">Filter</span>
-                </button>
-                <div class="nds-dropmenu-menu" style="min-width: 260px;" hidden>
-                    <div class="nds-dropmenu-scroll">
-                        <div data-filter="category" data-filter-legend="Category"
-                            data-filter-type="checkbox" data-no-auto-close></div>
+                <div class="nds-toolbar-row">
+                    <div class="nds-form-container nds-search-box" data-filter-target="search_results_content">
+                        <div class="nds-search-content">
+                            <div class="nds-form-control">
+                                <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
+                                <input id="search-results-input" type="text" class="nds-search-input" name="q" autocomplete="on"
+                                    placeholder="Search...">
+                                <div class="nds-form-action">
+                                    <button type="button" class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear" data-i18n-aria-label="forms.clear">
+                                        <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                    </button>
+                                    <button type="button" class="nds-btn nds-subtle nds-voice-input nds-icon-only" aria-label="Voice input" data-i18n-aria-label="voice-input.voice_input">
+                                        <i class="nds-icon nds-hgi-mic-01" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" class="nds-btn nds-primary nds-search-btn">
+                                <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
+                                <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
+                            </button>
+                        </div>
                     </div>
-                    <div class="nds-dropmenu-footer">
-                        <hr class="nds-divider">
-                        <div class="nds-dropmenu-action">
-                            <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
-                                data-filter-action="clear" data-no-auto-close>
-                                <span class="nds-label">Reset</span>
-                            </button>
-                            <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
-                                data-filter-action="apply">
-                                <span class="nds-label">Filter</span>
-                            </button>
+                    <div class="nds-dropmenu nds-filter" data-filter-target="search_results_content">
+                        <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger" type="button">
+                            <i class="hgi hgi-stroke hgi-filter"></i>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
+                        </button>
+                        <div class="nds-dropmenu-menu" style="min-width: 260px;" hidden>
+                            <div class="nds-dropmenu-scroll">
+                                <div data-filter="category" data-filter-legend="Category"
+                                    data-filter-type="checkbox" data-no-auto-close></div>
+                            </div>
+                            <div class="nds-dropmenu-footer">
+                                <hr class="nds-divider">
+                                <div class="nds-dropmenu-action">
+                                    <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
+                                        data-filter-action="clear" data-no-auto-close>
+                                        <span class="nds-label" data-i18n="filter.reset">Reset</span>
+                                    </button>
+                                    <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
+                                        data-filter-action="apply">
+                                        <span class="nds-label" data-i18n="filter.filter">Filter</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-toolbar-row">
+                    <div class="nds-toolbar-start">
+                        <div class="nds-filter-applied" data-filter-target="search_results_content" hidden>
+                            <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
+                            <div class="nds-chips"></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="nds-filter-applied" data-filter-target="search_results_content" hidden>
-            <span class="nds-label">Applied Filters:</span>
-            <div class="nds-chips"></div>
-        </div>
-        <div class="nds-section-body">
             <div id="search_results_content" class="nds-paged-content nds-grid"
                 style="--per-page: 10; --max-col: 1; --mid-col: 1; --min-col: 1;">
                 {% for item in site.data.content["search-results"] %}
@@ -119,7 +128,7 @@ exclude_showcase: false
                 </div>
                 {% endfor %}
             </div>
-            <nav class="nds-pagination" data-auto-pagination="search_results_content" aria-label="Pagination"></nav>
+            <nav class="nds-pagination" data-auto-pagination="search_results_content" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
         </div>
     </div>
 </section>

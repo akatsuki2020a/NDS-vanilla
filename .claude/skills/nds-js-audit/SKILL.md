@@ -52,7 +52,7 @@ Default to advancing, not asking. Run the obvious next step automatically and re
 
 Read-only / reversible steps (running the audit, emitting the report) take the recommended action without an extra confirmation round-trip. When nothing is ambiguous, do it and say so — don't stop to ask permission for the step you already recommended.
 
-**Live behavior verification (Puppeteer) is NEVER auto-run.** The static review is the automatic Phase 6 gate; the live browser drive is always the user's choice — the skill offers `verify in browser` (skill drives it) vs a manual review the user performs, states a risk-based recommendation, and drives the browser ONLY on an explicit `verify in browser`. Auto-advance through a clean fix batch still applies (static review + rebundle are the gate); behavior verification rides alongside as an offered option, not a blocker.
+**Live behavior verification (browser) is NEVER auto-run.** The static review is the automatic Phase 6 gate; the live browser drive is always the user's choice — the skill offers `verify in browser` (skill drives it) vs a manual review the user performs, states a risk-based recommendation, and drives the browser ONLY on an explicit `verify in browser`. Auto-advance through a clean fix batch still applies (static review + rebundle are the gate); behavior verification rides alongside as an offered option, not a blocker.
 
 ---
 
@@ -90,12 +90,12 @@ Do not begin Phase 2 or any file reads until the user responds.
 
 | `$1` | Files in scope | Rule groups run |
 |---|---|---|
-| `js` | All `_js/nds-*.js` except `nds-core.js`, `nds-loader.js`, `nds-showcase.js` | Always paired with a rule-group filter (`performance` / `dry` / `security` / `architecture`); see below. In `architecture` mode, deep-read JSA rules are **skipped with a banner** — see "JSA deep-read rules in full-tree mode" below |
+| `js` | All `_js/nds-*.js` except `nds-core.js`, `nds-loader.js`, `nds-docs.js` | Always paired with a rule-group filter (`performance` / `dry` / `security` / `architecture`); see below. In `architecture` mode, deep-read JSA rules are **skipped with a banner** — see "JSA deep-read rules in full-tree mode" below |
 | **filename** (e.g. `nds-accessibility.js`, `_js/nds-accessibility.js`, `nds-accessibility`, `accessibility`) | One file: the resolved target | A rule-group filter (`performance` / `dry` / `security` / `architecture`), or `all`. **When the rule-group is omitted, default to `all`** — single-file `all` is cheap, so run it instead of prompting. In `dry` (and the dry portion of `all`), JSD-05 is **skipped with a banner**. `architecture` (and the architecture portion of `all`) runs every JSA rule, greppable AND deep-read. |
 
 **File resolution.** When `$1` doesn't match a known mode token (`js`), treat it as a filename and try these in order: (1) literal `_js/$1` if `$1` already starts with `nds-` and ends in `.js`; (2) `_js/$1` if it ends in `.js`; (3) `_js/$1.js` if it starts with `nds-`; (4) `_js/nds-$1.js` for the bare-name form. Stop at the first existing file. If none exist, reply: *"Couldn't resolve `<filename>` to a file in `_js/`. Tried: `_js/<X>.js`, `_js/nds-<X>.js`. Pass the filename as it appears in `_js/`."* and stop.
 
-**Excluded-file rejection.** If the resolved file is `nds-showcase.js` or any `.min.js`, reply: *"`<file>` is excluded from audits — see the 'Excluded files' section below for why."* and stop. Don't attempt a partial audit on a hard-excluded file.
+**Excluded-file rejection.** If the resolved file is `nds-docs.js` or any `.min.js`, reply: *"`<file>` is excluded from audits — see the 'Excluded files' section below for why."* and stop. Don't attempt a partial audit on a hard-excluded file.
 
 **Direct-named core/loader advisory.** If the resolved file is `nds-core.js` or `nds-loader.js`, proceed with the single-file audit but print this one-line advisory at the top of the Phase 4 report (above the Summary block): *"Auditing `<file>` directly — note: the rule catalog is derived from core's patterns, so findings should be read as 'is this pattern still right for this file' rather than as automatic regressions."* These two files are excluded from full-tree `js` mode (the bulk run would treat the catalog's source-of-truth as a violation target), but single-file mode IS supported for deliberate review. For `architecture` single-file runs on these two files, **JSA's deep-read rules are the primary value** — the catalog's pattern rules typically pass cleanly on core/loader, but JSA surfaces design-tradeoff observations (scheduling choice, polyfill fidelity, unbounded caches) that the per-pattern catalog can't generalize.
 
@@ -129,7 +129,7 @@ Single-file `dry` runs every JSD rule **except JSD-05** — JSD-05 compares help
 
 ### JSA deep-read rules in full-tree mode
 
-Full-tree `architecture` runs only the greppable JSA rules (JSA-01, -02, -04, -05, -06, -13, -18, -19, -21, -22); the deep-read rules (JSA-03, -07 through -12, -14 through -17, -20) are skipped and the report shows the JSA deep-read banner (Phase 4). Single-file `architecture` runs every JSA rule — the per-file deep reads (complexity, in-file duplication, mixed-concern structure, INP cost, CSS-subsumption) are where deep-reads earn their keep, and the single-file budget allows them. Full-tree `architecture` also computes the **deep-read triage** (Phase 3) so the skipped coverage converts into ranked single-file targets instead of a bare disclaimer.
+Full-tree `architecture` runs only the greppable JSA rules (JSA-01, -02, -04, -05, -06, -13, -18, -19, -21, -22, -23 (a)(b)); the deep-read rules (JSA-03, -07 through -12, -14 through -17, -20, -23 (c)) are skipped and the report shows the JSA deep-read banner (Phase 4). Single-file `architecture` runs every JSA rule — the per-file deep reads (complexity, in-file duplication, mixed-concern structure, INP cost, CSS-subsumption) are where deep-reads earn their keep, and the single-file budget allows them. Full-tree `architecture` also computes the **deep-read triage** (Phase 3) so the skipped coverage converts into ranked single-file targets instead of a bare disclaimer.
 
 ### Excluded files
 
@@ -142,7 +142,7 @@ Two tiers — direct-named single-file audits behave differently from full-tree 
 
 **Excluded always (no direct-named carve-out):**
 
-- `_js/nds-showcase.js` — demo-page wiring, not a shipped component (its SCSS counterpart `_sass/_showcase.scss` is likewise Tier-1-excluded in `nds-css-audit`).
+- `_js/nds-docs.js` — docs-site builder wiring, not a shipped component.
 - Any `.min.js` file.
 
 ---
@@ -156,7 +156,7 @@ Source files are the single source of truth. Read them fully, not by skimming.
 - **The rule catalog for THIS run's scope** — the detection rules live in per-group sibling files (Phase 3 → "Rule catalog"). Read the one(s) matching the run's rule-group filter: `RULES-JSP.md` (`performance`), `RULES-JSD.md` (`dry`), `RULES-JSS.md` (`security`), `RULES-JSA.md` (`architecture`). A run with no rule-group filter reads all four. JSD-15's canonicals are in `PERSONA.md` (read it whenever JSD applies). Read only what the scope needs — loading the unused groups is the token waste the rule-group filter exists to avoid.
 - **`PONYTAIL.md`** — the ponytail over-engineering overlay (Phase 3). Read it on every analyze pass UNLESS the run carries a `no-pony` token. It runs after the catalog, within this run's scope, and carries its own carve-outs (reuses the PERSONA.md + deliberate-architecture guardrails).
 - **`_js/nds-core.js`** — the full shared-utility surface. Re-read every run so the rule catalog reflects the current `NDS.*` API (names, arities, return values). Rules JSP-01 through JSP-08, JSD-01 through JSD-04, and JSS fixes that cite helpers (e.g., `NDS.escapeHtml` if/when promoted) all reference specific functions here; if core gains a utility, the skill's recommendation should route to it instead of flagging the pattern as unresolved.
-- **At least one JS good-pattern exemplar** — `_js/nds-scroll-more.js` for RAF-throttled scroll + pooled ResizeObserver, `_js/nds-drawer.js` for NDS.State destructuring (`const { add: addState, … } = NDS.State`, ~L77), `_js/nds-modal.js` for NDS.State and backdrop API usage. Recommendations cite these with `file:line` so the user can copy a working pattern rather than invent one. JSA rules reuse the same exemplar set (plus `_js/nds-autocomplete.js:290-312` for size-capped fetch + abort, and `_js/nds-loader.js` `yieldToBrowser` (~L486) for `MessageChannel`-based microtask yielding).
+- **At least one JS good-pattern exemplar** — `_js/nds-scroll-more.js` for RAF-throttled scroll + pooled ResizeObserver, `_js/nds-drawer.js` for NDS.State destructuring (`const { add: addState, … } = NDS.State`, ~L77), `_js/nds-modal.js` for NDS.State and backdrop API usage. Recommendations cite these with `file:line` so the user can copy a working pattern rather than invent one. JSA rules reuse the same exemplar set (plus `_js/nds-autocomplete.js:290-312` for size-capped fetch + abort, and `_js/nds-loader.js` `yieldToBrowser` (~L396) for `MessageChannel`-based microtask yielding).
 
 ### MUST read every target file
 
@@ -174,7 +174,7 @@ Run the rule catalog (the per-group `RULES-*.md` file(s) read in Phase 2) file-b
 
 ### Ponytail overlay (final lens — every run unless `no-pony`)
 
-After the catalog pass completes, apply `PONYTAIL.md` (read in Phase 2) **within this run's resolved scope** — it asks "should this exist at all?", which the perf/DRY/security/architecture rules never ask head-on. Two steps, per that file: (1) **re-tag** each finding already produced with `delete/stdlib/native/yagni/shrink` (a label on the existing row — no new finding, no double-report); (2) **gap-hunt** the small net-new `PONY-STD/-NAT/-YAG/-DEL` set the catalog doesn't cover, scoped to this run (single-file → the target + repo cross-ref for readers; full-tree → the greppable shapes). Honor `PONYTAIL.md`'s carve-outs verbatim — never flag the 3-bundle architecture, pooled core helpers, lifecycle canon, deliberate fidelity shims, the markup contract, or marginal changes to `forms`/`core`/`loader`. **Before any `delete`/`PONY-DEL`/zero-reader `PONY-YAG`, grep the whole repo (incl. `nds-showcase.js` and the component's `.md`) for readers** — the `getFallback` lesson. The single-file deep-read agent runs this lens too: paste `PONYTAIL.md`'s carve-outs into its brief and tag returned rows `PONY-*` + `(deep-read agent)`. PONY findings fold into the Phase 4 report under their severity; print one `Ponytail: <N> cuts (…)` / `Ponytail: none` line below the Summary block. Phase 5 FIX, auto-advance, and Phase 7 EVOLVE treat them like any rule.
+After the catalog pass completes, apply `PONYTAIL.md` (read in Phase 2) **within this run's resolved scope** — it asks "should this exist at all?", which the perf/DRY/security/architecture rules never ask head-on. Two steps, per that file: (1) **re-tag** each finding already produced with `delete/stdlib/native/yagni/shrink` (a label on the existing row — no new finding, no double-report); (2) **gap-hunt** the small net-new `PONY-STD/-NAT/-YAG/-DEL` set the catalog doesn't cover, scoped to this run (single-file → the target + repo cross-ref for readers; full-tree → the greppable shapes). Honor `PONYTAIL.md`'s carve-outs verbatim — never flag the 3-bundle architecture, pooled core helpers, lifecycle canon, deliberate fidelity shims, the markup contract, or marginal changes to `forms`/`core`/`loader`. **Before any `delete`/`PONY-DEL`/zero-reader `PONY-YAG`, grep the whole repo (incl. `nds-docs.js` and the component's `.md`) for readers** — locally-unused is not unused. The single-file deep-read agent runs this lens too: paste `PONYTAIL.md`'s carve-outs into its brief and tag returned rows `PONY-*` + `(deep-read agent)`. PONY findings fold into the Phase 4 report under their severity; print one `Ponytail: <N> cuts (…)` / `Ponytail: none` line below the Summary block. Phase 5 FIX, auto-advance, and Phase 7 EVOLVE treat them like any rule.
 
 ### Track observations for Phase 7
 
@@ -194,7 +194,7 @@ The detection rules live in sibling files, one per rule group. Read the file(s) 
 | JSP | `RULES-JSP.md` | performance — listener/observer pooling, scroll/resize throttling, forced-layout-at-init, one-shot handle re-arm | 12 |
 | JSD | `RULES-JSD.md` | DRY/KISS — cross-file dedup, core promotion (JSD-05), persona conformance (JSD-15 → `PERSONA.md`), init-sentinel ordering | 19 |
 | JSS | `RULES-JSS.md` | client-side security sinks — innerHTML XSS, eval, tabnabbing, postMessage origin, untrusted URLs | 6 |
-| JSA | `RULES-JSA.md` | architecture — unbounded caches, scheduling choice, complexity, in-file DRY, INP cost, CSS-subsumption, comment hygiene, index-space / nested-instance / portal-scope correctness, fast-path aliasing, unledgered compat shims | 22 |
+| JSA | `RULES-JSA.md` | architecture — unbounded caches, scheduling choice, complexity, in-file DRY, INP cost, CSS-subsumption, comment hygiene, index-space / nested-instance / portal-scope correctness, fast-path aliasing, unledgered compat shims, framework-host lifecycle | 23 |
 
 Severity (HIGH / MEDIUM / LOW) drives the order fixes are applied in Phase 5: HIGH (correctness and performance) first, then MEDIUM, then LOW.
 
@@ -202,8 +202,9 @@ Severity (HIGH / MEDIUM / LOW) drives the order fixes are applied in Phase 5: HI
 
 - **Annotation exemption (global).** A match is NOT a finding when an inline comment within 3 lines above it names the SPECIFIC reason the pattern is intentional — the constraint or principle it answers to and, where the rule asks, the trusted source or re-activation path. Vague gestures (`// safe`, `// defensive`, `// needed`, `// just in case`) never qualify; the bar is a rationale a future reader can verify. Rule rows state only what THEIR comment must name (e.g. JSS-01: the value's source and why it's safe) and reference this convention as "annotation exemption (global)". Deleting such a comment re-arms the rule it exempts (JSA-16 protects them for exactly this reason).
 - **Gap discipline (global).** When a match is plausible but the recommended fix doesn't clearly apply in context — or a deep-read rule can't concretely prove its bar (JSA-12's three invariants, JSA-16's would-a-competent-reader-miss-this test) — record a Gap/SKIP observation, not a finding. Precision over recall: the catalog sharpens by recording uncertainty, not by padding reports.
+- **Observable-change gate (global).** NDS is plain HTML, CSS and JS that a consumer can integrate into any stack (a plain page, a server-rendered app, a framework such as React, Vue or Angular), and this repo shows none of those integrations, so repo usage never proves a change safe. A fix that changes a value a consumer can observe — an event detail field, a return value, a public getter, a `data-*` the script writes, a documented default — is breaking even when every page here still works. Such a finding is `Type: tradeoff` (never applied by `fix all`); it names each changed value for the release's Migration section, and it cites the commit that made the current behavior (`git log -S '<code>' -- <file>`) with its stated reason, or says none is recorded. Additive changes are not breaking: a call that was refused or did nothing now does something documented.
 
-Agent briefs (Phase 3 / Phase 6) must paste both conventions verbatim — subagents don't read this file.
+Agent briefs (Phase 3 / Phase 6) must paste all three conventions verbatim — subagents don't read this file.
 
 **JSA `Type:` field.** Every JSA finding carries `Type: actionable` (concrete change, bounded risk — has a `Fix:` line) or `Type: tradeoff` (deliberate design choice no mechanical fix resolves). `fix all` / `fix JSA` apply actionable findings only; tradeoffs are acknowledged, never auto-fixed. A tradeoff with a real high-leverage lever is marked `Type: tradeoff → recommend solving` with `Proposed solution:` + `Benefit vs cost:` lines. Full framing in `RULES-JSA.md`.
 
@@ -213,19 +214,19 @@ Agent briefs (Phase 3 / Phase 6) must paste both conventions verbatim — subage
 
 **Single-file mode only.** After the inline catalog pass completes, spawn ONE dedicated deep-read agent (`Agent` tool, `general-purpose` subagent) whose sole job is to re-read the target file end-to-end with fresh context and hunt the rules that reward undivided attention. This is what makes single-file the deepest mode — the inline pass owns the fast greppable rules, the agent owns the architectural deep reads. Full-tree mode does NOT spawn this agent: its budget is committed to breadth, and deep-read rules are banner-skipped there.
 
-**Deep-read scope for the agent:** JSA-03, JSA-07 through JSA-12, JSA-14 through JSA-17, JSA-20; JSD-14 sub-shapes (a) deep nesting, (b) redundant guards, (d) dead code, (e) unused locals; JSD-16 (frozen disabled-flag dead code); and the context-dependent confirmations for JSS-01 (innerHTML XSS vector) and JSS-04 (postMessage origin allowlist). Restrict the agent to the rule group(s) in scope for this run — on a single-group run with no deep-read rules (e.g. `performance`), skip the agent entirely; on `architecture`, `dry`, `security`, or `all`, run the in-scope deep-read subset.
+**Deep-read scope for the agent:** JSA-03, JSA-07 through JSA-12, JSA-14 through JSA-17, JSA-20, JSA-23 (c); JSD-14 sub-shapes (a) deep nesting, (b) redundant guards, (d) dead code, (e) unused locals; JSD-16 (frozen disabled-flag dead code); and the context-dependent confirmations for JSS-01 (innerHTML XSS vector) and JSS-04 (postMessage origin allowlist). Restrict the agent to the rule group(s) in scope for this run — on a single-group run with no deep-read rules (e.g. `performance`), skip the agent entirely; on `architecture`, `dry`, `security`, or `all`, run the in-scope deep-read subset.
 
 **Brief template** (self-contained — the agent has no audit context):
 1. **Target** — the resolved `_js/nds-<file>.js` path. "Read it top-to-bottom before judging; pattern-matching without the full read misses context."
-2. **Rules to apply** — name the in-scope rule IDs from the deep-read scope above and direct the agent to **Read the matching rule file(s) itself** (`.claude/skills/nds-js-audit/RULES-JSA.md` / `RULES-JSD.md` / `RULES-JSS.md`, as scoped), applying ONLY the named IDs. Do NOT paste the rule rows into the brief — the rows are multi-KB each, pasting re-emits them as expensive output, and compressing them to one-liners drops the carve-outs that prevent false positives; the file is the full-fidelity source (the JSA-12 three-invariant bar included). Paste verbatim ONLY the Shared rule conventions (annotation exemption + gap discipline) — those live in this file, which the agent does not read.
-3. **Reference anchors** — the Phase 2 good-pattern exemplars (`_js/nds-scroll-more.js`, `_js/nds-drawer.js`, `_js/nds-loader.js` `yieldToBrowser` (~L486), `_js/nds-autocomplete.js:290-312`) so fixes cite a real pattern.
+2. **Rules to apply** — name the in-scope rule IDs from the deep-read scope above and direct the agent to **Read the matching rule file(s) itself** (`.claude/skills/nds-js-audit/RULES-JSA.md` / `RULES-JSD.md` / `RULES-JSS.md`, as scoped), applying ONLY the named IDs. Do NOT paste the rule rows into the brief — the rows are multi-KB each, pasting re-emits them as expensive output, and compressing them to one-liners drops the carve-outs that prevent false positives; the file is the full-fidelity source (the JSA-12 three-invariant bar included). Paste verbatim ONLY the Shared rule conventions (annotation exemption + gap discipline + observable-change gate) — those live in this file, which the agent does not read.
+3. **Reference anchors** — the Phase 2 good-pattern exemplars (`_js/nds-scroll-more.js`, `_js/nds-drawer.js`, `_js/nds-loader.js` `yieldToBrowser` (~L396), `_js/nds-autocomplete.js:290-312`) so fixes cite a real pattern.
 4. **Output contract** — return ONLY a findings table: `| Sev | Rule | Location (file:line) | Finding → one-line fix | Type (JSA: actionable/tradeoff) |`, plus a short "Gaps observed" list for shapes no rule covers. No prose, no fabricated findings; two-to-five JSA observations is typical, ten+ signals padding.
 
 **Merge.** Fold the agent's findings into the Phase 4 report, deduped against the inline pass (inline keeps greppable hits; the agent owns the deep-read rows). Tag agent-sourced rows so the merge is auditable (a trailing `(deep-read agent)` marker on the location cell). Apply the same Type/tradeoff and Gap-vs-finding discipline as the inline pass. If the agent returns nothing, say so — a clean deep-read pass is a real result.
 
 ### Full-tree deep-read triage (`js architecture` only)
 
-Full-tree runs skip the 12 deep-read JSA rules (banner-disclosed in Phase 4). To keep that coverage gap actionable instead of inert, the full-tree `architecture` pass ALSO collects cheap per-file proxies while scanning for the greppable rules — no extra file reads beyond what the run already performs:
+Full-tree runs skip the 12 deep-read JSA rules and JSA-23 (c) (banner-disclosed in Phase 4). To keep that coverage gap actionable instead of inert, the full-tree `architecture` pass ALSO collects cheap per-file proxies while scanning for the greppable rules — no extra file reads beyond what the run already performs:
 
 - file length, and the approximate span of the longest function — JSA-11 exposure
 - interaction-listener attach count (`click` / `input` / `keydown` / `submit` handlers, incl. delegated) — JSA-14 exposure
@@ -264,7 +265,7 @@ Use this structure verbatim:
 
 > Skipped: JSD-16 frozen-flag dead code (full-tree mode — needs whole-file scope analysis) — run `/nds-js-audit nds-<file>.js dry` for a specific component.
 
-> Skipped: JSA deep-read rules JSA-03, -07–-12, -14–-17, -20 (full-tree mode — per-file analysis exceeds the full-tree budget) — run `/nds-js-audit nds-<file>.js architecture` for a specific component.
+> Skipped: JSA deep-read rules JSA-03, -07–-12, -14–-17, -20, -23 (c) (full-tree mode — per-file analysis exceeds the full-tree budget) — run `/nds-js-audit nds-<file>.js architecture` for a specific component.
 > Deep-read triage (full-tree `architecture` only): 1. `_js/nds-<a>.js` — {driving signals, e.g. "1.9k lines, 31 interaction listeners, ~120-line validateForm"}; 2. `_js/nds-<b>.js` — {…}; 3. `_js/nds-<c>.js` — {…}. Start with `/nds-js-audit nds-<a>.js architecture`.
 
 ## HIGH
@@ -286,7 +287,7 @@ Use this structure verbatim:
 - L120 [JSA-08] `requestIdleCallback` polyfill runs idle work as a near-immediate macrotask on Safari <18
   Type: tradeoff
   Why it matters: Idle-tier components don't actually defer on older Safari; they run via `setTimeout(1)` with a fake 50ms deadline.
-  Proposed solution: replace the `setTimeout(1)` fallback with a `MessageChannel`-based idle shim that estimates a real deadline (pattern at `_js/nds-loader.js` `yieldToBrowser` (~L486)).
+  Proposed solution: replace the `setTimeout(1)` fallback with a `MessageChannel`-based idle shim that estimates a real deadline (pattern at `_js/nds-loader.js` `yieldToBrowser` (~L396)).
   Benefit vs cost: [INP + maintainability] LOW benefit — Safari 18 (Sept 2024) ships native rIC, so this only touches shrinking older-Safari traffic, vs [maintainability] the shim adds maintenance surface. Cost > benefit → stay put.
   Rationale for accepting: older-Safari degradation is the documented constraint; the polyfill degrades quietly there.
 
@@ -394,5 +395,5 @@ This skill deliberately does not cover:
 - Replacing eslint. No lint config is authored; the rules are NDS-specific conventions enforced through an agent loop.
 - Profiler-driven *detection*. The JSP/JSA catalogs are static-read heuristics — they surface candidates, not hotspots, and don't replace a DevTools Performance / Lighthouse pass. (The Phase 6 perf *verification* is different: a bounded before/after measurement of one applied fix, not a profiler sweep.)
 - Including `_js/nds-core.js` or `_js/nds-loader.js` in full-tree `js` runs. Single-file audits on either ARE supported — see the "Excluded files" carve-out in Phase 1.
-- Running `bundle exec jekyll build` unless the user explicitly asks. `ruby _plugins/js_processor.rb` runs automatically per-file in Phase 5/6, and the Phase 6 Puppeteer test MAY start/reuse `bundle exec jekyll serve` (port 4002) — see `PUPPETEER.md`.
+- Running `bundle exec jekyll build` unless the user explicitly asks. `ruby _plugins/js_processor.rb` runs automatically per-file in Phase 5/6, and the Phase 6 browser test MAY start/reuse `bundle exec jekyll serve` (port 4002) — see `BROWSER.md`.
 - Editing files outside the Phase 5 / Phase 7 paths. Phase 5 edits `_js/nds-*.js`, plus `_js/nds-loader.js` / `_js/nds-core.js` only when a finding's `Fix:` routes there (JSA-05 registry edits; `promote <api-name>` candidates), plus `_sass/**/*.scss` only when a JSA finding's `Fix:` routes there (JSA-15 CSS-subsume migrations — see `FIX.md` → "Out-of-scope modifications" for the bounds). Phase 7 edits this `SKILL.md`, the `RULES-*.md` group files, and `PERSONA.md` only on an explicit `evolve` go. Nothing else.

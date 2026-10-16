@@ -21,7 +21,7 @@
   @include oklch.brand-alpha-static('primary', #946124);
   @include oklch.neutral-ramp-static(#946124, 0);   // 0 = true gray (no warmth)
   --background-primary-light:  var(--background-primary-faint); // event themes collapse light to the faint step
-  --img-overlay-color:       var(--colors-neutral-950);
+  --background-image-overlay:  var(--colors-neutral-950);
 }
 
 // ── Hero slide — a normal-section layout (centred column, start-aligned) with
@@ -55,7 +55,7 @@
 // ── Section decorations (DGA-coloured) — a bottom separator on every content
 //    section and a services graphic on even sections. SVGs resolve against this
 //    stylesheet's folder (docs-assets/events/Hajj/). ──
-.nds-content-layout:not(.nds-wSideMenu, .nds-cardView) .nds-main-content .nds-content-section:not(.nds-user-feedback-section, .nds-primary, .nds-green, .nds-gradient-primary, .nds-gradient-green, .nds-neutral, .nds-brand, .nds-last-edit):nth-of-type(even) {
+.nds-content-layout:not(.nds-has-sidemenu, .nds-card-view) .nds-content .nds-content-section:not(.nds-user-feedback-section, .nds-primary, .nds-gradient-primary, .nds-neutral, .nds-brand, .nds-last-edit):nth-of-type(even) {
   &::before {
     content: "";
     position: absolute;
@@ -68,7 +68,7 @@
     background-repeat: no-repeat;
     background-position: bottom left;
     background-size: cover;
-    background-color: var(--background-stripe);   // DGA: neutral-50 (light) / neutral-850 (dark)
+    background-color: var(--background-stripe);   // neutral-50 (light) / neutral-850 (dark, NDS-added step)
   }
 
   &::after {

@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-// The single source of truth for which files carry a banner: 54 components + core, loader,
+// The single source of truth for which files carry a banner: 55 components + core, loader,
 // accessibility, theme. ns = the NDS.<Name> namespace Methods verify against; null =
 // multi-namespace file (core) — its banner Methods verify existence-only.
 // Exclusions live in EXCLUDED below, not in this comment: --all asserts SCOPE ∪ EXCLUDED
@@ -33,15 +33,17 @@ const SCOPE = [
     ['nds-backdrop.js', 'Backdrop'],
     ['nds-breadcrumb.js', 'Breadcrumb'],
     ['nds-chart.js', 'Chart'],
-    ['nds-cityWeather.js', 'CityWeather'],
+    ['nds-city-weather.js', 'CityWeather'],
     ['nds-code.js', 'Code'],
+    ['nds-cookie-consent.js', 'CookieConsent'],
     ['nds-cookies.js', 'Cookies'],
     ['nds-cooldown-button.js', 'CooldownButton'],
     ['nds-copy.js', 'Copy'],
+    ['nds-countdown.js', 'Countdown'],
     ['nds-core.js', null],
     ['nds-customselect.js', 'CustomSelect'],
     ['nds-date-picker.js', 'DatePicker'],
-    ['nds-digitalStamp.js', 'DigitalStamp'],
+    ['nds-digital-stamp.js', 'DigitalStamp'],
     ['nds-drawer.js', 'Drawer'],
     ['nds-dropmenu.js', 'Dropmenu'],
     ['nds-editor.js', 'Editor'],
@@ -67,6 +69,7 @@ const SCOPE = [
     ['nds-rating.js', 'Rating'],
     ['nds-scroll-more.js', 'ScrollMore'],
     ['nds-selection.js', 'Selection'],
+    ['nds-session-timeout.js', 'SessionTimeout'],
     ['nds-share.js', 'Share'],
     ['nds-sideinfo.js', 'Sideinfo'],
     ['nds-sidemenu.js', 'Sidemenu'],
@@ -78,7 +81,8 @@ const SCOPE = [
     ['nds-tabs.js', 'Tabs'],
     ['nds-taginput.js', 'TagInput'],
     ['nds-theme.js', 'Theme'],
-    ['nds-timeDate.js', 'TimeDate'],
+    ['nds-time-picker.js', 'TimePicker'],
+    ['nds-time-date.js', 'TimeDate'],
     ['nds-toc.js', 'Toc'],
     ['nds-tooltip.js', 'Tooltip'],
     ['nds-upload.js', 'Upload'],
@@ -86,18 +90,19 @@ const SCOPE = [
     ['nds-voice-input.js', 'VoiceInput'],
 ];
 
-// Deliberately bannerless: two seasonal themes and a showcase file (docs-site only, no
-// public surface), and fontLoading (internal to the reveal gate, nothing wires to it).
+// Deliberately bannerless: two seasonal themes and the docs builder (no public surface).
 const EXCLUDED = new Set([
-    'nds-fontLoading.js',
-    'nds-showcase.js',
+    'nds-docs.js',
     'nds-theme-foundation-day.js',
     'nds-theme-hajj.js',
 ]);
 
-// Event literals a file dispatches that its banner deliberately omits, keyed by file name.
+// Event literals the scan counts as dispatched that the banner rightly omits, keyed by file name.
 // Every shipped event now carries the nds: prefix, so verifyFile's gate covers them all.
-const EVENT_EXCEPTIONS = {};
+const EVENT_EXCEPTIONS = {
+    // Listened for through a name array, so clause 1 of extractEvents can't see the listener.
+    'nds-forms.js': ['nds:upload:selected', 'nds:upload:success', 'nds:upload:error'],
+};
 
 // A dispatched literal ending in ':' is a concatenation prefix, not an event name —
 // tables builds its sub-row events as 'nds:table:' + verb. It stands in for every banner
@@ -105,6 +110,8 @@ const EVENT_EXCEPTIONS = {};
 const isPrefix = (name) => name.endsWith(':');
 
 const SECTIONS = ['Rides', 'Methods', 'Events', 'Hooks', 'Gotchas'];
+// Optional, after Rides: the markup the script needs to work, baked into the audit's required-part rule.
+const ORDER = ['Rides', 'Requires', 'Methods', 'Events', 'Hooks', 'Gotchas'];
 const RESERVED = new Set(['null', 'true', 'false', 'undefined', 'return']);
 
 // ── source parsing ──────────────────────────────────────────────────────────
@@ -172,17 +179,12 @@ function keysFromBlock(lines, start) {
         }
         if (depth <= 0) break;
         if (depthAtStart !== 1) continue;
-        const m = line.match(/^\s*(?:async\s+)?(?:get\s+|set\s+)?([A-Za-z_$][\w$]*)\s*[:(]/);
-        if (m) {
-            if (!RESERVED.has(m[1])) keys.add(m[1]);
-            continue;
-        }
-        // Shorthand keys, one or several to a line: `reset,` or `open, close, toggle,`.
-        const shorthand = line.match(/^\s*([A-Za-z_$][\w$]*(?:\s*,\s*[A-Za-z_$][\w$]*)*)\s*,?\s*$/);
-        if (!shorthand) continue;
-        for (const name of shorthand[1].split(',')) {
-            const key = name.trim();
-            if (key && !RESERVED.has(key)) keys.add(key);
+        // Every key on the line, one or several: `reset,` · `init, reinit: x, refresh: () => {…},`.
+        // Inner (…) and {…} are blanked first so their commas don't split a value.
+        const flat = line.replace(/\([^()]*\)/g, '()').replace(/\{[^{}]*\}/g, '{}');
+        for (const part of flat.split(',')) {
+            const m = part.match(/^\s*(?:async\s+)?(?:get\s+|set\s+)?([A-Za-z_$][\w$]*)\s*(?:[:(]|$)/);
+            if (m && !RESERVED.has(m[1])) keys.add(m[1]);
         }
     }
     return keys;
@@ -269,7 +271,7 @@ function parseBanner(source) {
     const sections = [];
     let current = null;
     for (const line of banner) {
-        const m = line.match(/^\s*\*\s*(Rides|Methods|Events|Hooks|Gotchas)\s*(\([^)]*\))?\s*:(.*)$/);
+        const m = line.match(/^\s*\*\s*(Rides|Requires|Methods|Events|Hooks|Gotchas)\s*(\([^)]*\))?\s*:(.*)$/);
         if (m) {
             current = { label: m[1], text: m[3] };
             sections.push(current);
@@ -300,8 +302,8 @@ function verifyFile(file, ns, source) {
     for (const want of SECTIONS) {
         if (!labels.includes(want)) issues.push(`missing section: ${want}`);
     }
-    const order = labels.filter((l) => SECTIONS.includes(l));
-    if (order.join() !== SECTIONS.filter((s) => labels.includes(s)).join()) {
+    const order = labels.filter((l) => ORDER.includes(l));
+    if (order.join() !== ORDER.filter((s) => labels.includes(s)).join()) {
         issues.push(`sections out of order (${labels.join(' → ')})`);
     }
 

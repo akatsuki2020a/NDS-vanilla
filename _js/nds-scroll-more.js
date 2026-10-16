@@ -1,5 +1,7 @@
 /* NDS.ScrollMore — public surface
  * Rides: (none — base component)
+ * Requires:
+ *   .nds-scroll-more needs .nds-scroll-more-content — no overflow state
  * Methods:
  *   NDS.ScrollMore.init() / .reinit()      scan + initialize .nds-scroll-more
  *   NDS.ScrollMore.create(wrapper)         initialize one wrapper
@@ -81,10 +83,10 @@
         const content = wrapper._content || wrapper.querySelector(CONFIG.selectors.content);
         if (!content) return;
         const axis = detectAxis(content);
-        if (!axis) return () => {
+        if (!axis) return wrapper.hasAttribute('data-axis') ? Object.assign(() => {
             wrapper.removeAttribute('data-axis');
             removeState(wrapper, CONFIG.overflow.hasMore, CONFIG.overflow.atStart, CONFIG.overflow.atEnd);
-        };
+        }, { clears: true }) : undefined;
         const pos = scrollPos(content, axis), maxScroll = maxScrollOf(content, axis);
         return () => {
             wrapper.setAttribute('data-axis', axis);
@@ -156,7 +158,8 @@
         if (!content) return;
 
         wrapper._content = content;
-        const btn = wrapper.querySelector(CONFIG.selectors.btn);
+        // The content can hold a nested scroll-more, whose button comes first in document order.
+        const btn = [...wrapper.querySelectorAll(CONFIG.selectors.btn)].find(b => b.closest(CONFIG.selectors.wrapper) === wrapper);
 
         // Auto-inject a separator between the content and the show-more button
         // so authors opting in via .nds-divided don't have to. Always inject —
@@ -180,13 +183,19 @@
         // Cold init: no synchronous checkOverflow() here — this observer's
         // initial callback runs the first measure, so init stays free of
         // forced layout and hidden (display:none) instances measure on reveal.
-        wrapper._offResizeObs = NDS.onElementResize(content, () => measure(wrapper));
+        // Watch the wrapper: the button and padding measure() stamps shrink the content, a self-resize (RO loop error).
+        // Clearing them shrinks a wrapper its content sizes, so that write lands next frame, re-checked.
+        wrapper._offResizeObs = NDS.onElementResize(wrapper, () => {
+            const write = measure(wrapper);
+            if (!write?.clears) return write;
+            requestAnimationFrame(() => { if (wrapper._offResizeObs) checkOverflow(wrapper); });
+        });
         wrapper.setAttribute('data-nds-scroll-more-initialized', 'true');
     }
 
     function initAll() {
         document.querySelectorAll(CONFIG.selectors.wrapper).forEach(wrapper => {
-            if (wrapper.closest('code, .code-example')) return;
+            if (wrapper.closest('code')) return;
             initElement(wrapper);
         });
     }

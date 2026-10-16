@@ -1,0 +1,175 @@
+{
+  "riyadh-malqa": {
+    "branch": "Riyadh – Al-Malqa",
+    "now_serving": [
+      {
+        "ticket": "A-105",
+        "clinic": "Family Medicine Clinic – Al-Malqa",
+        "room": "Room 2"
+      },
+      {
+        "ticket": "B-113",
+        "clinic": "Little Palms Pediatrics – Al-Malqa",
+        "room": "Room 3"
+      },
+      {
+        "ticket": "C-121",
+        "clinic": "Skin & Laser Clinic – Al-Malqa",
+        "room": "Room 5"
+      },
+      {
+        "ticket": "D-102",
+        "clinic": "Smile Dental Clinic – Al-Malqa",
+        "room": "Room 1"
+      }
+    ],
+    "next": [
+      {
+        "ticket": "F-118",
+        "clinic": "Bone & Joint Clinic – Al-Malqa"
+      },
+      {
+        "ticket": "A-106",
+        "clinic": "Family Medicine Clinic – Al-Malqa"
+      },
+      {
+        "ticket": "B-114",
+        "clinic": "Little Palms Pediatrics – Al-Malqa"
+      },
+      {
+        "ticket": "C-122",
+        "clinic": "Skin & Laser Clinic – Al-Malqa"
+      },
+      {
+        "ticket": "D-103",
+        "clinic": "Smile Dental Clinic – Al-Malqa"
+      }
+    ]
+  },
+  "riyadh-nakheel": {
+    "branch": "Riyadh – Al-Nakheel",
+    "now_serving": [
+      {
+        "ticket": "A-103",
+        "clinic": "Family Medicine Clinic – Al-Nakheel",
+        "room": "Room 7"
+      },
+      {
+        "ticket": "B-114",
+        "clinic": "Little Palms Pediatrics – Al-Nakheel",
+        "room": "Room 1"
+      },
+      {
+        "ticket": "D-103",
+        "clinic": "Smile Dental Clinic – Al-Nakheel",
+        "room": "Room 5"
+      }
+    ],
+    "next": [
+      {
+        "ticket": "E-108",
+        "clinic": "Heart Care Clinic – Al-Nakheel"
+      },
+      {
+        "ticket": "F-103",
+        "clinic": "Sports Medicine & Orthopedics – Al-Nakheel"
+      },
+      {
+        "ticket": "A-104",
+        "clinic": "Family Medicine Clinic – Al-Nakheel"
+      },
+      {
+        "ticket": "B-115",
+        "clinic": "Little Palms Pediatrics – Al-Nakheel"
+      },
+      {
+        "ticket": "D-104",
+        "clinic": "Smile Dental Clinic – Al-Nakheel"
+      }
+    ]
+  },
+  "jeddah-rawdah": {
+    "branch": "Jeddah – Al-Rawdah",
+    "now_serving": [
+      {
+        "ticket": "A-121",
+        "clinic": "Family Medicine Clinic – Al-Rawdah",
+        "room": "Room 7"
+      },
+      {
+        "ticket": "B-121",
+        "clinic": "Little Palms Pediatrics – Al-Rawdah",
+        "room": "Room 1"
+      },
+      {
+        "ticket": "C-119",
+        "clinic": "Skin & Laser Clinic – Al-Rawdah",
+        "room": "Room 2"
+      }
+    ],
+    "next": [
+      {
+        "ticket": "E-119",
+        "clinic": "Heart Care Clinic – Al-Rawdah"
+      },
+      {
+        "ticket": "A-122",
+        "clinic": "Family Medicine Clinic – Al-Rawdah"
+      },
+      {
+        "ticket": "B-122",
+        "clinic": "Little Palms Pediatrics – Al-Rawdah"
+      },
+      {
+        "ticket": "C-120",
+        "clinic": "Skin & Laser Clinic – Al-Rawdah"
+      },
+      {
+        "ticket": "E-120",
+        "clinic": "Heart Care Clinic – Al-Rawdah"
+      }
+    ]
+  },
+  "dammam-faisaliyah": {
+    "branch": "Dammam – Al-Faisaliyah",
+    "now_serving": [
+      {
+        "ticket": "A-110",
+        "clinic": "Family Medicine Clinic – Al-Faisaliyah",
+        "room": "Room 5"
+      },
+      {
+        "ticket": "C-105",
+        "clinic": "Dermatology Center – Al-Faisaliyah",
+        "room": "Room 8"
+      },
+      {
+        "ticket": "D-118",
+        "clinic": "Smile Dental Clinic – Al-Faisaliyah",
+        "room": "Room 6"
+      }
+    ],
+    "next": [
+      {
+        "ticket": "F-119",
+        "clinic": "Bone & Joint Clinic – Al-Faisaliyah"
+      },
+      {
+        "ticket": "A-111",
+        "clinic": "Family Medicine Clinic – Al-Faisaliyah"
+      },
+      {
+        "ticket": "C-106",
+        "clinic": "Dermatology Center – Al-Faisaliyah"
+      },
+      {
+        "ticket": "D-119",
+        "clinic": "Smile Dental Clinic – Al-Faisaliyah"
+      },
+      {
+        "ticket": "F-120",
+        "clinic": "Bone & Joint Clinic – Al-Faisaliyah"
+      }
+    ]
+  }
+}

@@ -13,7 +13,7 @@
  *   title                                       fallback message when data-tooltip-message
  *                                               is absent; stripped at init, balloon built
  *                                               on first open
- *   data-tooltip-status                         chip status, default "help"
+ *   data-tooltip-status                         chip status; none = the help look (CSS)
  *   data-tooltip-hover                          opt in to hover; the value is the open
  *                                               delay in ms (bare attribute = 120). A tap
  *                                               toggles a text term only; on a link/button
@@ -26,28 +26,33 @@
  *     or give the root data-tooltip-title / data-tooltip-message and let the component
  *     build the missing parts. Markup you wrote always wins.
  *   - Only ONE tooltip is open at a time; opening one closes the other.
- *   - While open the balloon is portaled to <body>, so a closest() walk from inside it
- *     does not reach the tooltip root. It is put back on close.
+ *   - While open the balloon is a [popover] in the top layer: nothing clips it, and it
+ *     stays inside the tooltip root in the DOM.
  *   - The instance lives on the root as el.ndsTooltip.
  *   - A title-sourced balloon does not exist until the first open — query
  *     .nds-tooltip-balloon after nds:tooltip:opened, not at init.
  */
 /**
  * NDS Tooltip Component
- * Viewport-aware fixed-position tooltip. Click the trigger to toggle;
+ * Viewport-aware tooltip in the top layer. Click the trigger to toggle;
  * click outside, scroll, or Escape to dismiss.
  *
  * Markup modes:
  *   - Explicit: author writes out `.nds-tooltip-trigger` + `.nds-tooltip-balloon`.
  *   - Declarative: author adds `data-tooltip-title` and/or `data-tooltip-message`
  *     to `.nds-tooltip`; JS generates the trigger chip and balloon contents.
- *     Optional `data-tooltip-status` (default "help") sets the chip status.
+ *     Optional `data-tooltip-status` sets the chip status; none = the help look.
  *     Any existing `.nds-tooltip-trigger` or `.nds-tooltip-balloon` child is
  *     kept as-is; only missing parts are generated.
  */
 
 (function() {
     'use strict';
+
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('tooltip', {
+        more_info: 'More info',
+    });
 
     const { add: addState, remove: removeState } = NDS.State;
 
@@ -59,7 +64,7 @@
     function buildChip(status) {
         const wrap = document.createElement('span');
         wrap.className = 'nds-feedback nds-sm';
-        NDS.Status.set(wrap, status);
+        if (status) NDS.Status.set(wrap, status);
         const icon = document.createElement('span');
         icon.className = 'nds-feedback-icon';
         const i = document.createElement('i');
@@ -122,9 +127,14 @@
             if (fromTitle) {
                 this.root.dataset.tooltipMessage = nativeTitle;
                 this.root.removeAttribute('title');
+                // A marked title may still be English (pack past its cap): its marker follows the words.
+                this._messageRef = this.root.getAttribute('data-i18n-title');
                 // The title was the control's only name — keep it as one.
                 if (!this.root.hasAttribute('aria-label') && !this.root.hasAttribute('aria-labelledby')
-                    && !this.root.textContent.trim()) NDS.aria.label(this.root, nativeTitle);
+                    && !this.root.textContent.trim()) {
+                    NDS.aria.label(this.root, nativeTitle);
+                    if (this._messageRef) this.root.setAttribute('data-i18n-aria-label', this._messageRef);
+                }
             }
 
             const { tooltipTitle: title, tooltipMessage: message } = this.root.dataset;
@@ -147,8 +157,8 @@
                 const trigger = document.createElement('button');
                 trigger.type = 'button';
                 trigger.className = 'nds-tooltip-trigger';
-                NDS.aria.label(trigger, title || 'More info');
-                trigger.appendChild(buildChip(this.root.dataset.tooltipStatus || 'help'));
+                if (title) NDS.aria.label(trigger, title); else strings.set(trigger, 'aria-label', 'more_info');
+                trigger.appendChild(buildChip(this.root.dataset.tooltipStatus));
                 this.root.prepend(trigger);
             }
 
@@ -165,7 +175,7 @@
 
             // Leading icon chip only when there's also a title — a pure
             // message-only tooltip stays clean (just the text).
-            if (title) balloon.appendChild(buildChip(tooltipStatus || 'help'));
+            if (title) balloon.appendChild(buildChip(tooltipStatus));
 
             const body = document.createElement('span');
             body.className = 'nds-tooltip-body';
@@ -179,6 +189,7 @@
                 const p = document.createElement('p');
                 p.className = 'nds-tooltip-message';
                 p.textContent = message;
+                if (this._messageRef) p.setAttribute('data-i18n', this._messageRef);
                 body.appendChild(p);
             }
             balloon.appendChild(body);
@@ -191,6 +202,7 @@
         adoptBalloon(balloon) {
             this.balloon = balloon;
             balloon.setAttribute('role', 'tooltip');
+            balloon.setAttribute('popover', 'manual');
             balloon.id = this._balloonId;
             if (!this._hoverMode) return;
             const { signal } = this.abortController;
@@ -243,7 +255,7 @@
 
             if (this._hoverMode) {
                 // Mouse: hover owns the balloon. The grace timer lets the pointer
-                // travel from trigger into the (portaled, adjacent) balloon.
+                // travel from trigger into the adjacent balloon.
                 // One timer serves both directions — a pending delayed open and a
                 // pending grace close are mutually exclusive.
                 const hoverOpen = (e) => {
@@ -315,26 +327,20 @@
             if (_openTooltip && _openTooltip !== this) _openTooltip.close();
             _openTooltip = this;
 
-            // Portal first so subsequent measurement happens in <body>'s
-            // containing block, free of any container-type/transform ancestor.
-            NDS.portal(this.balloon);
-
             if (!this._rootIsControl) addState(this.root, 'open');
             this.balloon.hidden = false;
+            // Top layer before measuring: nothing around the trigger clips or traps it there.
+            NDS.topLayer(this.balloon, true);
             this.applyPosition();
 
-            // Close on click outside — portal-aware: while open the balloon
-            // lives at <body> level, so events from inside it don't bubble
-            // through `this.root`. Treat clicks inside the balloon as inside.
+            // The balloon is inside the root, so one containment check covers both.
             this._onDocClick = (e) => {
                 if (this.root.contains(e.target)) return;
-                if (this.balloon.contains(e.target)) return;
                 this.close();
             };
             document.addEventListener('click', this._onDocClick);
 
-            // Close on outer scroll — the balloon is position: fixed, so
-            // scrolling would leave it detached from the trigger.
+            // Close on scroll: a scroll box around the trigger would leave it detached.
             // NDS.onOutsideScroll ignores scrolls inside the balloon itself.
             this._offScroll = NDS.onOutsideScroll(this.balloon, () => this.close());
 
@@ -357,10 +363,7 @@
             }
             if (this._offScroll) { this._offScroll(); this._offScroll = null; }
 
-            // Restore the balloon to its original location so author markup
-            // queries (e.g. `tooltip.querySelector('.nds-tooltip-balloon')`)
-            // still resolve while closed.
-            NDS.unportal(this.balloon);
+            NDS.topLayer(this.balloon, false);
 
             this.emitEvent('nds:tooltip:closed');
         }
@@ -400,7 +403,7 @@
             let left = p.triggerRect.left + (p.triggerRect.width / 2) - (bW / 2);
             left = Math.max(pad, Math.min(left, p.viewportWidth - bW - pad));
 
-            NDS.placeFixed(this.balloon, top, left);
+            NDS.place(this.balloon, top, left);
 
             // Arrow points at the trigger center, clamped inside balloon edges
             const triggerCenterX = p.triggerRect.left + p.triggerRect.width / 2;
@@ -426,8 +429,8 @@
 
         // Drain open-lifecycle subscriptions before tearing the instance
         // down. close() releases this._onDocClick (document click listener)
-        // and this._offScroll (NDS.onOutsideScroll) and unportals the
-        // balloon. Without the close() drain, destroy-while-open would
+        // and this._offScroll (NDS.onOutsideScroll) and takes the balloon
+        // out of the top layer. Without the close() drain, destroy-while-open would
         // strand the document listener and the pooled scroll subscriber for
         // the page lifetime.
         destroy() {
@@ -441,7 +444,7 @@
 
     function initializeTooltips() {
         document.querySelectorAll('.nds-tooltip').forEach(el => {
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
             if (el.hasAttribute('data-nds-tooltip-initialized')) return;
             new NDSTooltip(el);
         });
@@ -450,6 +453,10 @@
     NDS.Tooltip = {
         init: initializeTooltips,
         reinit: initializeTooltips,
-        create: (el) => new NDSTooltip(el)
+        // The constructor publishes el.ndsTooltip only on success → null on a bail.
+        create: (el) => {
+            if (!el.ndsTooltip) new NDSTooltip(el);
+            return el.ndsTooltip || null;
+        }
     };
 })();

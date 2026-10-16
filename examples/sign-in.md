@@ -3,12 +3,11 @@ layout: minimal
 title: Sign in
 lang: en
 direction: ltr
-# layout + layout_class render the page-level wrapper — it exists only in the built twin under _site/. Copy the full <body> structure from the twin; this file's body is only the inner content.
+# layout + layout_class name the page shape: the Front Matter table in layout/page-layout.md maps each key to its markup. This file's body is only the inner content.
 layout_class: nds-middle
 page_bg: assets/img/riyadhcenter.webp
 bg_opacity_top: 60%
 bg_opacity_bottom: 90%
-exclude_showcase: true
 breadcrumb: [["Examples", "/examples"]]
 ---
 {% assign brand_logo = page.brandLogo | default: site.brandLogo %}
@@ -22,7 +21,7 @@ breadcrumb: [["Examples", "/examples"]]
       <div class="nds-block nds-flex nds-col" style="--align: center;">
         <!-- Sign in: national SSO first, credentials as the fallback -->
         <div class="nds-card nds-shadow nds-stroke" id="signin-start">
-          <div class="nds-card-header nds-rowView">
+          <div class="nds-card-header nds-horizontal">
             <!-- The logo is the way home: the minimal layout ships no site chrome -->
             <a href="{{ '/' | relative_url }}" class="nds-brand">
               <img class="nds-brand-logo" src="{{ brand_logo | relative_url }}" width="{{ brand_width }}"
@@ -83,11 +82,10 @@ breadcrumb: [["Examples", "/examples"]]
                 </div>
                 <div class="nds-form-control">
                   <i class="nds-icon nds-hgi-identity-card" aria-hidden="true"></i>
-                  <input type="text" id="national-id" name="national-id" class="nds-input" inputmode="numeric" pattern="[0-9]{10}"
-                    maxlength="10" placeholder="10 digits" autocomplete="username" required
-                    data-error-message="Enter the 10 digits of your National ID">
+                  <input type="text" id="national-id" name="national-id" class="nds-input nds-national-id" inputmode="numeric"
+                    maxlength="10" placeholder="10 digits" autocomplete="username" required>
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -106,10 +104,10 @@ breadcrumb: [["Examples", "/examples"]]
                   <input type="password" id="signin-password" name="password" class="nds-input" placeholder="Enter your password"
                     autocomplete="current-password" required>
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear password">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear password" data-i18n-aria-label="password.clear_password">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
-                    <button class="nds-btn nds-subtle nds-toggle-password" type="button" aria-label="Show password">
+                    <button class="nds-btn nds-subtle nds-toggle-password nds-icon-only" type="button" aria-label="Show password" data-i18n-aria-label="forms.show_password">
                       <i class="nds-icon nds-hgi-view-off" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -139,7 +137,7 @@ breadcrumb: [["Examples", "/examples"]]
                     maxlength="5" placeholder="Type the code shown below" autocomplete="off" required
                     data-error-message="Enter the 5 digits shown below">
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -187,7 +185,7 @@ breadcrumb: [["Examples", "/examples"]]
             </div>
 
             <!-- The three choices are the page's content, not its actions -->
-            <div class="nds-grid" style="--max-col: 1; --gap: var(--spacing-md);">
+            <div class="nds-grid" style="--max-col: 1; --gap: var(--spacing-md); --btn-width: 100%;">
               <button type="button" class="nds-btn nds-secondary-outline nds-col delivery-btn" data-delivery="your mobile app">
                 <i class="nds-icon nds-hgi-smart-phone-01" aria-hidden="true"></i>
                 <span class="nds-label">Mobile app</span>
@@ -353,10 +351,10 @@ breadcrumb: [["Examples", "/examples"]]
                   <input type="password" id="current-password" name="current-password" class="nds-input"
                     autocomplete="current-password" required>
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear password">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear password" data-i18n-aria-label="password.clear_password">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
-                    <button class="nds-btn nds-subtle nds-toggle-password" type="button" aria-label="Show password">
+                    <button class="nds-btn nds-subtle nds-toggle-password nds-icon-only" type="button" aria-label="Show password" data-i18n-aria-label="forms.show_password">
                       <i class="nds-icon nds-hgi-view-off" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -375,10 +373,10 @@ breadcrumb: [["Examples", "/examples"]]
                   <input type="password" id="new-password" name="new-password" class="nds-input" autocomplete="new-password"
                     minlength="10" required aria-describedby="new-password-rules">
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear password">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear password" data-i18n-aria-label="password.clear_password">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
-                    <button class="nds-btn nds-subtle nds-toggle-password" type="button" aria-label="Show password">
+                    <button class="nds-btn nds-subtle nds-toggle-password nds-icon-only" type="button" aria-label="Show password" data-i18n-aria-label="forms.show_password">
                       <i class="nds-icon nds-hgi-view-off" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -432,10 +430,10 @@ breadcrumb: [["Examples", "/examples"]]
                   <input type="password" id="retype-password" name="retype-password" class="nds-input"
                     autocomplete="new-password" required aria-describedby="retype-password-rules">
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear password">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear password" data-i18n-aria-label="password.clear_password">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
-                    <button class="nds-btn nds-subtle nds-toggle-password" type="button" aria-label="Show password">
+                    <button class="nds-btn nds-subtle nds-toggle-password nds-icon-only" type="button" aria-label="Show password" data-i18n-aria-label="forms.show_password">
                       <i class="nds-icon nds-hgi-view-off" aria-hidden="true"></i>
                     </button>
                   </div>
@@ -493,7 +491,7 @@ breadcrumb: [["Examples", "/examples"]]
                     pattern="05[0-9]{8}" maxlength="10" placeholder="05XXXXXXXX" value="0501234419" autocomplete="tel" required
                     data-error-message="Enter a 10-digit number that starts with 05">
                   <div class="nds-form-action">
-                    <button class="nds-btn nds-subtle nds-clear" hidden type="button" aria-label="Clear input">
+                    <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden type="button" aria-label="Clear input" data-i18n-aria-label="forms.clear_input">
                       <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                     </button>
                   </div>

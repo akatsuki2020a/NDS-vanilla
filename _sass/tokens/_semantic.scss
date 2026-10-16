@@ -6,19 +6,12 @@
 // The light block is plain :root, so themes/_register.scss ([data-theme~=]) always
 // outranks it — but the dark block matches register's specificity, which is why the
 // critical bundle @use's this file AFTER register.
+// data-theme="dark" on any element makes a dark area: both blocks re-list it, because
+// an alias token resolves where it is declared and would keep its light value.
 // ════════════════════════════════════════════════════════════════════════════
 
-:root {
-    // ── Status alpha ramp — palette extension (DGA ships none; NDS-authored, so it lives here, not in the vendored mirror) ──
-    --colors-yellow-alpha-10: #dc680319;
-    --colors-yellow-alpha-20: #dc680333;
-    --colors-red-alpha-10: #d92c2019;
-    --colors-red-alpha-20: #d92c2033;
-    --colors-blue-alpha-10: #156fee19;
-    --colors-blue-alpha-20: #156fee33;
-    --colors-green-alpha-10: #06945419;
-    --colors-green-alpha-20: #06945433;
-
+:root,
+[data-theme~="dark"]:not(:root) {
     // ── Shadows ──
     --shadow-xs: 0px 1px 2px 0px rgba(16, 24, 40, 0.05);
     --shadow-sm: 0px 1px 2px 0px rgba(16, 24, 40, 0.06), 0px 1px 3px 0px rgba(16, 24, 40, 0.10);
@@ -47,7 +40,7 @@
     --background-surface-oncolor: var(--colors-base-white);
     --background-overlay: var(--colors-alpha-black-50);
     --background-mark: var(--colors-primary-100);
-    --img-overlay-color: var(--colors-primary-950); // hero/card image overlay — DGA green (mode-invariant); runtime brands switch to neutral (see themes/_register.scss)
+    --background-image-overlay: var(--colors-primary-950); // hero/card image overlay — DGA green (mode-invariant); runtime brands switch to neutral (see themes/_register.scss)
 
     // ── Background — brand & neutral scales ──
     --background-primary-light: var(--colors-primary-50);
@@ -87,7 +80,7 @@
     // lavender) — for text hierarchy use --text-default / --text-display /
     // --text-{primary,secondary}-paragraph instead.
     --text-primary: var(--colors-primary-600);
-    --text-secondary: var(--colors-secondary-600);
+    --text-secondary: var(--colors-secondary-800); // DGA's 600 is 2.3:1 on white; 800/400 pass AA on every theme, like --text-primary
     --text-tertiary: var(--colors-tertiary-500);
     --text-primary-light: var(--colors-primary-300);
     --text-secondary-light: var(--colors-secondary-300);
@@ -183,10 +176,11 @@
 /* ── Dark Mode — the same layer's dark half ──
    Sections run in the SAME ORDER as the light block above, so a token and its
    dark rebind sit at the same relative position in both halves.
-   Activated via: <html data-theme="dark">
+   Activated via: <html data-theme="dark">, or data-theme="dark" on a dark surface
    ── */
 
-:root[data-theme~="dark"] {
+:root[data-theme~="dark"],
+[data-theme~="dark"]:not(:root) {
     // ── Shadows (~2x light opacity for dark surfaces) ──
     --shadow-xs: 0px 1px 2px 0px rgba(0, 0, 0, .10);
     --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, .12), 0px 1px 3px 0px rgba(0, 0, 0, .2);
@@ -209,11 +203,12 @@
     --background-card: var(--background-default);
     --background-card-hovered: var(--colors-alpha-white-10);
     // Directional surfaces around the base (neutral-800): elevated lifts
-    // one step lighter, sunken drops to page-body depth. oncolor stays
+    // one step lighter, sunken drops below page-body depth. oncolor stays
     // white in both modes — it sits on colored fills that remain branded.
     --background-surface-elevated: var(--colors-neutral-750);
     --background-surface-sunken: var(--colors-neutral-950);
     --background-overlay: var(--colors-alpha-black-70);
+    --background-mark: var(--colors-primary-alpha-50);
 
     // ── Background — brand & neutral ──
     // Brand surface knob — dark value. sub-hero + brand sections read this in both
@@ -249,6 +244,7 @@
     --text-secondary-paragraph: var(--colors-neutral-400);
     --text-primary-strong: var(--colors-primary-400);
     --text-primary: var(--colors-primary-400);
+    --text-secondary: var(--colors-secondary-400);
     --text-success: var(--colors-green-400);
     --text-info: var(--colors-blue-400);
     --text-warning: var(--colors-yellow-400);
@@ -296,4 +292,11 @@
     --controls-disabled: var(--colors-alpha-white-30);
     --controls-icon-disabled: var(--colors-neutral-400);
     --controls-text-error: var(--colors-red-400);
+}
+
+// A dark area inherits its text as a resolved light-mode color: set it again.
+// Zero specificity, so a component that carries data-theme keeps its own color.
+:where([data-theme~="dark"]:not(:root)) {
+    color: var(--text-default);
+    color-scheme: dark;
 }

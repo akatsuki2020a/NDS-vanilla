@@ -6,39 +6,38 @@
  *   NDS.Swiper.destroy(el)          tear one down — the NDS.Init.destroy entry point
  *   instance.next() / .prev()       move by one page
  *   instance.goTo(index)            move to a slide index
+ *   instance.slideTo(index, animate = true)  move to a slide index, clamped to the
+ *                                   last page (a loop has none); false = instant
  *   instance.destroy()
  * Events:
  *   nds:swiper:change (bubbles)     detail.index = the real slide now at rest, after every move
- * Hooks (knobs set inline on the swiper container's style attribute):
- *   .nds-deck                                    deck mode: a .nds-swiper-deck of .nds-swiper-card
- *                                                buttons (one per slide, same order) beside the
- *                                                track; the active card is at the front, the rest
- *                                                fan behind it; a tap on a card goes to its slide,
- *                                                and below the desktop breakpoint a drag across
- *                                                the deck follows the pointer and pages on release
- *                                                (the desktop layout has the arrows). Loops by default (same
- *                                                slide-count rule as the attribute)
- *   --deck-card · --deck-strip                   open card size · folded strip width
+ * Hooks (knobs set on the swiper container, inline or in a class; never inherited):
+ *   .nds-spotlight                               the open slide rests in the middle at full size,
+ *                                                the ones beside it shrink toward it. Loops,
+ *                                                one slide at a time; a wide row shows three
+ *                                                whole slides, a narrow one trims the sides.
+ *                                                Wider content grows its slide and still
+ *                                                centres. Per-view knobs and --peek are not read
  *   --max-slides · --mid-slides · --min-slides   slides per view at desktop / tablet /
  *                                                mobile, default 1 each; CSS sizes the row
  *                                                from them before any JS runs
  *   --peek                                       length of the next slide left showing
- *   slides-max · slides-mid · slides-min · peek  deprecated bare-attribute spellings of the
- *                                                same knobs — JS-only, so the row waits for
- *                                                the loader preset (DEPRECATIONS.md)
  *   --gap                                        gap between slides
  *   data-swiper-loop                             endless row: clones at both ends, a silent
  *                                                jump when the scroll rests on one. Needs
  *                                                more slides than the largest tier's count,
  *                                                else ignored. goTo/slideTo indices stay real
  *   on a slide's <img>: data-src · data-srcset   lazy sources, written to src/srcset when
- *                                                the slide nears the viewport
+ *                                                the slide nears the viewport; once the
+ *                                                images on screen finish, the page either
+ *                                                side loads ahead at low priority
  *   written by the component: --slides on the container, data-swiper-peek while peeking,
- *                             .nds-swiper-clone slides (aria-hidden, inert, data-swiper-clone =
- *                             the real twin's index) when looping,
- *                             on each deck card --rel (wrapping distance from the active card),
- *                             --srel (the same signed the short way), data-status active|near;
- *                             --drag + .nds-dragging on the deck while a finger holds it
+ *                             .nds-swiper-clone slides (aria-hidden, focusables dropped from
+ *                             the tab order, data-swiper-clone = the real twin's index) when
+ *                             looping; data-status on each spotlight slide: "active" on the
+ *                             open one and every loop clone of it, "after" on those after it;
+ *                             data-swiper-moving on the wrapper while it scrolls, inside
+ *                             .nds-max-width (lifts the shadow clip)
  *   written by the loader pre-reveal: the same --slides and peek state, plus
  *                                     data-swiper-preset (skeleton row = final row) and
  *                                     data-swiper-single when the slides fit one page
@@ -47,20 +46,20 @@
  *   - Positioning is CSS scroll-snap. JS only syncs the navigation, the pagination dots
  *     and lazy loading — a swiper still scrolls with JS disabled. A move animates per
  *     the wrapper's scroll-behavior (smooth by default; set auto for an instant switch).
- *     Deck mode sets it to auto itself: there the cards are the move, and a track still
- *     crossing slides re-fans the deck at each one.
  *   - The markup is .nds-swiper-wrapper holding .nds-swiper-slide items, plus optional
  *     .nds-swiper-navigation (with .nds-prev / .nds-next) and .nds-swiper-pagination.
  *   - The instance lives on the element as el._ndsSwiper.
- *   - A looping deck sets its track's scrollLeft at init, which fires one scroll event
+ *   - A looping swiper sets its track's scrollLeft at init, which fires one scroll event
  *     on the wrapper. A "first interaction" gate that listens for scroll in capture
  *     mode counts it — listen without capture, or ignore element scrolls.
- *   - Deck cards map to slides by DOM order; the author stamps --rel / --srel on every
- *     card and data-status="active" on the first for first paint. A deck in a hero needs --hero-height: auto on the
- *     section below desktop, where the deck stacks above the text.
  */
 (function () {
     'use strict';
+
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('swiper', {
+        go_to_page: 'Go to page {n}',
+    });
 
     // ==============================================
     // UTILITIES
@@ -112,7 +111,9 @@
              el = el.parentElement && el.parentElement.closest('.nds-swiper')) {
             if (_activeSwipers.has(el._ndsSwiper)) return el._ndsSwiper;
         }
-        // Nothing focused inside a swiper — fall back to the innermost hovered one.
+        // Nothing focused inside a swiper — fall back to the innermost hovered one,
+        // but only when nothing else holds focus: a field elsewhere owns its arrows.
+        if (active && active !== document.body && active !== document.documentElement) return null;
         let best = null;
         for (const s of _activeSwipers) {
             if (s.container.matches(':hover') && (!best || best.container.contains(s.container))) best = s;
@@ -167,11 +168,9 @@
             this.navigation = own('.nds-swiper-navigation');
             this.prevBtn = own('.nds-prev');
             this.nextBtn = own('.nds-next');
-            this._isDeck = container.classList.contains('nds-deck');
-            this.deck = this._isDeck ? own('.nds-swiper-deck') : null;
-            this.cards = this.deck ? Array.from(this.deck.querySelectorAll('.nds-swiper-card')) : [];
 
             this.isHero = container.classList.contains('nds-hero');
+            this._spotlight = container.classList.contains('nds-spotlight');
             this._cachedGap = null;
             this.currentIndex = 0;
             // [hidden] snapshot — destroy() restores the as-served nav state.
@@ -182,25 +181,23 @@
                 return;
             }
 
-            // Static knobs — read once, reused on every breakpoint change. Inline
-            // custom property first (the canonical spelling, which CSS also reads),
-            // the deprecated bare attribute second.
-            const knob = (prop, attr) =>
-                parseInt(container.style.getPropertyValue(prop)) || parseInt(container.getAttribute(attr)) || 0;
-            this._slidesMax = knob('--max-slides', 'slides-max') || 1;
-            this._slidesMid = knob('--mid-slides', 'slides-mid') || 1;
-            this._slidesMin = knob('--min-slides', 'slides-min') || 1;
-            this._peek = knob('--peek', 'peek');
-            // An attribute-authored peek is invisible to CSS, so JS writes --peek for
-            // it and owns it; an author's inline --peek is never touched.
-            this._ownsPeek = container.hasAttribute('peek');
+            // Static knobs — read once, reused on every breakpoint change.
+            // Computed, not inline: a strict-CSP page sets them in a class.
+            const cs = getComputedStyle(container);
+            const knob = prop => parseInt(cs.getPropertyValue(prop)) || 0;
+            this._slidesMax = knob('--max-slides') || 1;
+            this._slidesMid = knob('--mid-slides') || 1;
+            this._slidesMin = knob('--min-slides') || 1;
+            if (this._spotlight) this._slidesMax = this._slidesMid = this._slidesMin = 1;
+            this._peek = knob('--peek');
 
             // Loop needs more slides than the largest page, or a page would show a
             // slide twice. Decided once, against the largest tier.
             // ponytail: per-tier loop (on at mobile, off at desktop) when a real deck asks.
-            // Deck mode loops by default: its fan wraps, so the track should too.
-            this._loop = (container.hasAttribute('data-swiper-loop') || this._isDeck) &&
-                this.slides.length > Math.max(this._slidesMax, this._slidesMid, this._slidesMin);
+            // A spotlight always loops; its peeks show one more slide at each end, so
+            // it needs one more.
+            this._loop = (container.hasAttribute('data-swiper-loop') || this._spotlight) &&
+                this.slides.length > Math.max(this._slidesMax, this._slidesMid, this._slidesMin) + (this._spotlight ? 1 : 0);
             this._real = this.slides.length; // real slides; clones extend this.slides at both ends
             this._head = 0;                  // clones before the first real slide
 
@@ -220,7 +217,7 @@
 
         getGap() {
             if (this._cachedGap === null) {
-                this._cachedGap = parseInt(getComputedStyle(this.container).getPropertyValue('--gap')) || 0;
+                this._cachedGap = parseInt(getComputedStyle(this.container).getPropertyValue('--swiper-gap')) || 0;
             }
             return this._cachedGap;
         }
@@ -231,7 +228,7 @@
 
         // Real-slide index of a full-list position — a rest on a clone maps to its
         // twin. One source for every site that must agree on it: where the loop jumps,
-        // which bullet reads active, which deck card opens, where destroy() lands the
+        // which bullet reads active, where destroy() lands the
         // row. _goToFull needs it for a target index, not the current one, hence the
         // parameter.
         _realOf(index) {
@@ -257,8 +254,14 @@
 
         init() {
             this.abortController = new AbortController();
+            // An unencoded space in a srcset URL breaks the candidate. Before setupLoop,
+            // so the clones copy the repaired value.
+            this.container.querySelectorAll('img[srcset], source[srcset]').forEach(el => {
+                const srcset = el.getAttribute('srcset');
+                const fixed = fixSrcsetSpaces(srcset);
+                if (fixed !== srcset) el.setAttribute('srcset', fixed);
+            });
             this.container.style.setProperty('--total', this._real);
-            if (this._ownsPeek && this._peek) this.container.style.setProperty('--peek', `${this._peek}px`);
             this.updateSlidesPerView();
 
             // Single-slide swipers can never navigate; bail before nav/observer/keyboard
@@ -296,7 +299,7 @@
             // set the active bullet; only buttons + boundary classes remain.
             this.updateButtons();
             this.updateBoundaryClasses();
-            this.updateDeck();
+            this.updateSpotlight();
             this.lastIndex = this.currentIndex;
 
             this.container.setAttribute('data-nds-swiper-initialized', 'true');
@@ -338,7 +341,13 @@
                     // maxIndex on the first scroll.
                     this._measuredStep = null;
                     // The loop's start position was measured off hidden clones too.
-                    if (this._loop) this._jumpTo(this._head);
+                    // This IS the landing when the reveal beats the resize callback to
+                    // it, so clear the flag here as well.
+                    if (this._loop) {
+                        this._loopPending = false;
+                        this._jumpTo(this._head);
+                        this.detectCurrentSlide();
+                    }
                 });
             }, { threshold: 0.01 });
         }
@@ -384,20 +393,33 @@
             // disable state, wrong active bullet, and no-op prev/next. Invalidate + re-sync
             // on every wrapper resize. Shared ResizeObserver via NDS.onElementResize; its
             // initial callback also covers the cold-init measurement (no forced layout at init).
-            this._offResize = NDS.onElementResize(this.wrapper, () => {
+            const remeasure = () => {
                 this._cachedGap = null;
                 this._measuredStep = null;
                 // Loop: land on the first real slide here, not at init — this initial
                 // callback runs after layout and before the first paint after init, so
                 // the head clones never show and init stays free of layout reads.
-                if (this._loopPending) { this._loopPending = false; this._jumpTo(this._head); }
+                // detectCurrentSlide first, because it is what measures the step, and
+                // the landing needs that measurement: _jumpTo takes its offset from
+                // offsetLeft, so a callback that fires before the slides have width
+                // computes a zero offset, scrolls nowhere, and still spends the
+                // landing. Wait for a real step.
                 this.detectCurrentSlide();
+                if (this._loopPending && this._measuredStep) {
+                    this._loopPending = false;
+                    this._jumpTo(this._head);
+                    this.detectCurrentSlide();
+                }
                 this.updatePagination();
                 this.updateButtons();
                 this.updateBoundaryClasses();
-                this.updateDeck();
+                this.updateSpotlight();
                 this.lastIndex = this.currentIndex;
-            });
+            };
+            this._offResize = NDS.onElementResize(this.wrapper, remeasure);
+            // A spotlight's content sets its slide's width, which can change while
+            // the row's does not (a late image, a font, a live style edit).
+            if (this._spotlight) this._offSlideResize = NDS.onElementResize(this.slides[this._head], remeasure);
         }
 
         _handleResize() {
@@ -443,69 +465,6 @@
         setupNavigation() {
             if (this.prevBtn) this._attachActivation(this.prevBtn, () => this.prev());
             if (this.nextBtn) this._attachActivation(this.nextBtn, () => this.next());
-            this.setupDeck();
-        }
-
-        // Deck: below the desktop breakpoint the cards follow the pointer (--drag
-        // on the deck, a translate in CSS), then release decides — past the threshold
-        // it pages, forward being towards the inline end so RTL mirrors, else it
-        // springs back. The desktop layout never drags (it has the arrows). A tap or
-        // click on a card goes to its slide in both.
-        setupDeck() {
-            if (!this.deck) return;
-            const { signal } = this.abortController;
-            const deck = this.deck;
-            let x0 = null, dx = 0, pressed = -1;
-            deck.addEventListener('pointerdown', (e) => {
-                if (e.pointerType === 'mouse' && e.button !== 0) return;
-                x0 = e.clientX; dx = 0;
-                // Read the card now: once captured, the release event targets the deck.
-                pressed = this.cards.indexOf(e.target.closest('.nds-swiper-card'));
-                try { deck.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointer: no capture */ }
-            }, { signal });
-            deck.addEventListener('pointermove', (e) => {
-                if (x0 === null || _mqDesktop.matches) return;   // the desktop layout has the arrows; only the stacked layout drags
-                dx = e.clientX - x0;
-                if (Math.abs(dx) > 4) {
-                    deck.classList.add('nds-dragging');
-                    deck.style.setProperty('--drag', `${dx}px`);
-                }
-            }, { signal });
-            const release = (e) => {
-                if (x0 === null) return;
-                x0 = null;
-                deck.classList.remove('nds-dragging');
-                deck.style.removeProperty('--drag');
-                if (Math.abs(dx) >= 40) { (NDS.isRTL ? dx > 0 : dx < 0) ? this.next() : this.prev(); return; }
-                if (e.type === 'pointerup' && pressed >= 0) this.goTo(pressed);
-            };
-            deck.addEventListener('pointerup', release, { signal });
-            deck.addEventListener('pointercancel', release, { signal });
-            this.cards.forEach((card, i) => card.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.goTo(i); }
-            }, { signal }));
-        }
-
-        // Each card learns its distance from the open one: --rel counts forward and
-        // wraps (the desktop fan), --srel is the shortest signed way (the mobile peek
-        // picks the two neighbours). Both inline, so CSS positions on them.
-        // `real` lets a move update the deck at once, before the track's smooth
-        // scroll reports the new index — otherwise the cards spring back to the
-        // old spot for a beat and then retarget.
-        updateDeck(real) {
-            const n = this.cards.length;
-            if (!n) return;
-            const active = real === undefined ? this._realIndex : real;
-            this.cards.forEach((card, k) => {
-                const rel = (k - active + n) % n;
-                const srel = rel > n / 2 ? rel - n : rel;
-                card.style.setProperty('--rel', rel);
-                card.style.setProperty('--srel', srel);
-                if (rel === 0) NDS.Status.set(card, 'active');
-                else if (Math.abs(srel) === 1) NDS.Status.set(card, 'near');
-                else NDS.Status.clear(card);
-                NDS.aria.current(card, rel === 0 ? 'true' : null);
-            });
         }
 
         // Always a full view. A loop whose count is not a multiple of the slides
@@ -517,6 +476,9 @@
         // Public: the index counts real slides. Internally the row may carry clones
         // at both ends, so every scroll target is a full-list index.
         goTo(index) {
+            // Clamp in real slides: a loop's full-list clamp spans the clones, so an
+            // out-of-range index would wrap onto an arbitrary slide.
+            index = Math.max(0, Math.min(index, this._real - 1));
             this._goToFull(this._full(index));
         }
 
@@ -547,6 +509,13 @@
         }
 
         _goToFull(index, instant = NDS.prefersReducedMotion) {
+            // A move before the first resize callback lands the loop now; landing after
+            // would cancel the move and strand _aim. No layout yet = leave it to remeasure.
+            if (this._loopPending && this.slides[1].offsetLeft !== this.slides[0].offsetLeft) {
+                this._loopPending = false;
+                this._jumpTo(this._head);
+                this.detectCurrentSlide();
+            }
             if (this._loop) {
                 // Keep the animation inside the clone budget and off the end-aligned
                 // last page (a loop has no end, so that alignment would shift at the
@@ -557,9 +526,6 @@
                 else if (index >= this.maxIndex) { if (this._shiftCycle(-1)) { this.currentIndex -= n; index -= n; } }
             }
             const clampedIndex = Math.max(0, Math.min(index, this.maxIndex));
-            // The deck aims at the target at once, ahead of the track's scroll.
-            if (this.cards.length) this.updateDeck(this._realOf(clampedIndex));
-
             const targetSlide = this.slides[clampedIndex];
             if (!targetSlide) return;
 
@@ -568,11 +534,16 @@
             // Last page: end-align instead — the start-aligned offset overshoots
             // max-scroll by the peek reserve (no next page left to peek), and
             // mandatory snap re-pulls the row short, clipping the last slide.
-            const offset = clampedIndex >= this.maxIndex
+            const offset = clampedIndex >= this.maxIndex && !this._spotlight
                 ? this.wrapper.scrollWidth - this.wrapper.clientWidth
-                : Math.abs(targetSlide.offsetLeft - this.slides[0].offsetLeft);
+                : this._offsetOf(targetSlide);
 
             const left = NDS.isRTL ? -offset : offset;
+            // Where a smooth move rests; the loop's settle waits for it (setupLoop).
+            this._aim = instant ? null : offset;
+            // The spotlight opens the target at the click, not as the row crosses halfway.
+            this._aimReal = this._realOf(clampedIndex);
+            this.updateSpotlight();
             // No keyword: the wrapper's own scroll-behavior decides (smooth by
             // default), so a consumer can set it to auto and get an instant switch.
             if (instant) this._instant(() => this.wrapper.scrollTo({ left }));
@@ -584,19 +555,24 @@
         // ==============================================
 
         setupLoop() {
-            // Two pages plus one clone on each side: a fling can pass two pages
-            // before it rests, and the rest is where the jump corrects. Fewer clones
-            // than that and a fling hits the row's real edge.
-            // ponytail: a fling of three or more pages still hits the edge; grow the
-            // budget (or reposition mid-scroll) if a real deck shows it.
+            // Two pages plus one clone on each side, and never fewer than six SLIDES.
+            // The floor is absolute because the relative formula strands a short row: a
+            // two-slide loop caps its budget at two, so the edge stays two swipes away
+            // and _recenter has no room to work in — it only shifts once the row is a
+            // whole cycle out. A row shorter than the budget repeats its own cycle to
+            // reach it; the wrap math is cycle-relative, so the clone index just wraps.
             const n = this._real;
-            const count = Math.min(n, 2 * Math.max(this._slidesMax, this._slidesMid, this._slidesMin) + 1);
+            const count = Math.max(2 * Math.max(this._slidesMax, this._slidesMid, this._slidesMin) + 1, 6);
             const clone = (i) => {
                 const c = this.slides[i].cloneNode(true);
                 c.classList.add('nds-swiper-clone');
                 c.setAttribute('data-swiper-clone', i);   // its real twin, for consumers that sync content
                 c.setAttribute('aria-hidden', 'true');
-                c.inert = true;
+                // aria-hidden keeps the duplicate out of the a11y tree, but inert also
+                // killed clicks — and a row showing more than one slide rests with
+                // clones on screen, so those were dead. Drop them from the tab order
+                // instead: pointer works, Tab still lands on the real twin only.
+                c.querySelectorAll(NDS.focusableSel).forEach(el => el.setAttribute('tabindex', '-1'));
                 // A duplicated id would steal anchors and label-for from the real slide.
                 c.removeAttribute('id');
                 c.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
@@ -604,8 +580,8 @@
             };
             const head = [], tail = [];
             for (let j = 0; j < count; j++) {
-                head.push(clone(n - count + j));
-                tail.push(clone(j));
+                head.push(clone((((j - count) % n) + n) % n));
+                tail.push(clone(j % n));
             }
             this.slides[0].before(...head);
             this.slides[n - 1].after(...tail);
@@ -618,9 +594,53 @@
             // nothing visibly moves. scrollend where it exists; elsewhere a rest is
             // 150 ms without a scroll event.
             const { signal } = this.abortController;
-            const settle = () => this._loopSettle();
+            // The instant cycle shift mid-move fires its own scrollend while the smooth
+            // move still runs — and a real window can hold that move still for two frames
+            // before it starts, so "stopped moving" is no test. Settle only once the row
+            // reaches the move's own target; the move's end fires another scrollend.
+            const settle = () => {
+                if (this._aim != null) {
+                    if (Math.abs(Math.abs(this.wrapper.scrollLeft) - this._aim) > 2) return;
+                    this._aim = null;
+                }
+                this._loopSettle();
+            };
             if ('onscrollend' in this.wrapper) this.wrapper.addEventListener('scrollend', settle, { signal });
             else this.wrapper.addEventListener('scroll', NDS.debounce(settle, 150), { passive: true, signal });
+            // A wheel or a touch cancels the move, so its target no longer holds the settle.
+            this.wrapper.addEventListener('wheel', () => { this._aim = null; }, { passive: true, signal });
+
+            // A rest needs a real pause and a run of swipes never gives one: measured
+            // SEVEN flicks passing before one scrollend landed, each spending a clone,
+            // so the row runs out of them and stops dead on its real edge. Take the
+            // other quiet moment instead — the touch that starts the next swipe.
+            this.wrapper.addEventListener('pointerdown', (e) => this._recenter(e), { passive: true, signal });
+        }
+
+        // Shift whole cycles from where the row ACTUALLY is — mid-flight currentIndex is
+        // a rounded read of a moving position.
+        _recenter(e) {
+            // Touch only: a mouse pointerdown is the start of a click, and moving the
+            // row under it hands pointerup to the twin, which loses the click.
+            if (e.pointerType === 'mouse') return;
+            this._aim = null;
+            if (this._loopPending || !this._measuredStep) return;
+            const pos = this._pos();
+            const dir = pos < this._head ? 1 : pos >= this._head + this._real ? -1 : 0;
+            if (!dir) return;
+
+            // The row is nearly always mid-snap here (measured ~0.1 of a slide short),
+            // and mandatory snap re-snaps after ANY programmatic write — that cut to the
+            // nearest slot is the flicker. So hold snap off until the finger leaves:
+            // during a drag it does nothing anyway, and the touch has already cancelled
+            // the animation the cut would have landed on.
+            const w = this.wrapper, snap = w.style.scrollSnapType;
+            w.style.scrollSnapType = 'none';
+            const restore = () => { w.style.scrollSnapType = snap; };
+            if (!this._shiftCycle(dir)) return restore();
+            const { signal } = this.abortController;
+            w.addEventListener('pointerup', restore, { once: true, signal });
+            w.addEventListener('pointercancel', restore, { once: true, signal });
         }
 
         _loopSettle() {
@@ -642,8 +662,7 @@
         // settle re-anchors at the next rest.
         _shiftCycle(dir) {
             const n = this._real;
-            const step = this._measuredStep || (this.slides[0].offsetWidth + this.getGap()) || 1;
-            const landing = Math.abs(this.wrapper.scrollLeft) / step + dir * n;
+            const landing = this._pos() + dir * n;
             if (landing < 0 || landing > this.maxIndex) return false;
             const cycle = Math.abs(this.slides[this._head + n].offsetLeft - this.slides[this._head].offsetLeft);
             this._instant(() => { this.wrapper.scrollLeft += NDS.isRTL ? -dir * cycle : dir * cycle; });
@@ -654,8 +673,16 @@
         _jumpTo(index) {
             const target = this.slides[index];
             if (!target) return;
-            const offset = Math.abs(target.offsetLeft - this.slides[0].offsetLeft);
+            const offset = this._offsetOf(target);
             this._instant(() => { this.wrapper.scrollLeft = NDS.isRTL ? -offset : offset; });
+        }
+
+        // Scroll distance from the start that rests this slide. A spotlight centres
+        // the slide where it really is: content can grow it past its planned width.
+        _offsetOf(el) {
+            if (!this._spotlight) return Math.abs(el.offsetLeft - this.slides[0].offsetLeft);
+            const r = el.getBoundingClientRect(), w = this.wrapper.getBoundingClientRect();
+            return Math.abs(this.wrapper.scrollLeft + (r.left + r.right - w.left - w.right) / 2);
         }
 
         // ==============================================
@@ -663,10 +690,21 @@
         // ==============================================
 
         setupScrollSync() {
-            this.wrapper.addEventListener('scroll', NDS.rafThrottle(() => {
+            const { signal } = this.abortController;
+            const w = this.wrapper;
+            w.addEventListener('scroll', NDS.rafThrottle(() => {
                 this.detectCurrentSlide();
                 this.updateState();
-            }), { passive: true, signal: this.abortController.signal });
+            }), { passive: true, signal });
+
+            // The shadow clip cuts cards short of the screen edge; CSS lifts it while the row moves.
+            if (this.isHero || this._spotlight || !this.container.closest('.nds-max-width')) return;
+            const rest = () => w.removeAttribute('data-swiper-moving');
+            w.addEventListener('scroll', () => {
+                if (!w.hasAttribute('data-swiper-moving')) w.setAttribute('data-swiper-moving', '');
+            }, { passive: true, signal });
+            if ('onscrollend' in w) w.addEventListener('scrollend', rest, { signal });
+            else w.addEventListener('scroll', NDS.debounce(rest, 150), { passive: true, signal });
         }
 
         detectCurrentSlide() {
@@ -677,13 +715,23 @@
                 this._measuredStep = Math.abs(this.slides[1].offsetLeft - this.slides[0].offsetLeft);
             }
 
-            const step = this._measuredStep || (this.slides[0].offsetWidth + this.getGap()) || 1;
-            const scrollPos = NDS.isRTL ? -this.wrapper.scrollLeft : this.wrapper.scrollLeft;
+            this.currentIndex = Math.max(0, Math.min(Math.round(this._pos()), this.maxIndex));
+        }
 
-            this.currentIndex = Math.max(0, Math.min(
-                Math.round(scrollPos / step),
-                this.maxIndex
-            ));
+        // Where the row is, in slides. A spotlight counts the slide nearest the
+        // middle instead: content can make one slide wider, and then no step fits.
+        _pos() {
+            if (this._spotlight) {
+                const w = this.wrapper.getBoundingClientRect(), mid = w.left + w.right;
+                let pos = 0, best = Infinity;
+                this.slides.forEach((s, j) => {
+                    const r = s.getBoundingClientRect(), d = Math.abs(r.left + r.right - mid);
+                    if (d < best) { best = d; pos = j; }
+                });
+                return pos;
+            }
+            const step = this._measuredStep || (this.slides[0].offsetWidth + this.getGap()) || 1;
+            return (NDS.isRTL ? -this.wrapper.scrollLeft : this.wrapper.scrollLeft) / step;
         }
 
         // ==============================================
@@ -691,8 +739,6 @@
         // ==============================================
 
         setupPagination() {
-            if (!this.pagination) return;
-
             const pageCount = this._pageCount;
 
             const hidden = pageCount <= 1;
@@ -723,7 +769,7 @@
                 bullet.className = 'nds-bullet';
                 bullet.type = 'button';
                 bullet.dataset.page = i;
-                NDS.aria.label(bullet, `Go to slide ${i + 1}`);
+                strings.set(bullet, 'aria-label', 'go_to_page', { n: i + 1 });
                 this.pagination.appendChild(bullet);
             }
 
@@ -799,25 +845,74 @@
         // ==============================================
 
         setupLazyLoading(lazySlides) {
-            const offs = [];
-            lazySlides.forEach(slide => {
+            const pending = new Set(lazySlides), offs = [];
+            const load = (slide, ahead) => {
+                if (!pending.delete(slide)) return;
+                // Activate <source> elements inside <picture> first.
+                this._lazyIn(slide, 'source[data-srcset]').forEach(source => {
+                    source.srcset = fixSrcsetSpaces(source.dataset.srcset);
+                    delete source.dataset.srcset;
+                });
+                this._lazyIn(slide, 'img[data-src], img[data-srcset]').forEach(img => {
+                    // Loaded ahead: yield the network to the slide on screen (and the LCP).
+                    if (ahead && !img.hasAttribute('fetchpriority')) img.fetchPriority = 'low';
+                    if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+                    if (img.dataset.srcset) { img.srcset = fixSrcsetSpaces(img.dataset.srcset); delete img.dataset.srcset; }
+                });
+            };
+            const loadReal = (r) => this.slides.forEach((s, j) => { if (this._realOf(j) === r) load(s, true); });
+            // Ahead loads wait until every image on screen has finished (or failed): low
+            // priority alone still starts them at once, sharing a slow link with the view.
+            // ponytail: a request that never settles holds them; they then load on arrival.
+            const { signal } = this.abortController;
+            const busy = new Set();
+            let queued = [];
+            const flush = () => {
+                if (busy.size) return;
+                const q = queued;
+                queued = [];
+                q.forEach(fn => fn());
+            };
+            const track = (img) => {
+                if (img.complete) return;
+                busy.add(img);
+                const done = () => { busy.delete(img); flush(); };
+                img.addEventListener('load', done, { once: true, signal });
+                img.addEventListener('error', done, { once: true, signal });
+            };
+            // The row clips its sides, so rootMargin never reaches the slide beside the view:
+            // it would load only as it slides in. A slide that shows also loads a page either
+            // side of it, loop twins included, so the next slide and the loop's silent jump
+            // land loaded. Every slide is watched, so a plain-src one triggers it too; a
+            // spotlight's or peek's side slides show, so they reach one further.
+            this.slides.forEach((slide, j) => {
                 const off = NDS.onIntersect(slide, (entry) => {
-                    if (entry.isIntersecting) {
-                        // Activate <source> elements inside <picture> first.
-                        entry.target.querySelectorAll('source[data-srcset]').forEach(source => {
-                            source.srcset = fixSrcsetSpaces(source.dataset.srcset);
-                            delete source.dataset.srcset;
-                        });
-                        entry.target.querySelectorAll('img[data-src], img[data-srcset]').forEach(img => {
-                            if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
-                            if (img.dataset.srcset) { img.srcset = fixSrcsetSpaces(img.dataset.srcset); delete img.dataset.srcset; }
-                        });
-                        off();
-                    }
+                    if (!entry.isIntersecting) return;
+                    off();
+                    load(slide, false);
+                    slide.querySelectorAll('img').forEach(track);
+                    queued.push(() => {
+                        const n = this._real, r = this._realOf(j);
+                        for (let k = r - this.slidesPerView; k <= r + this.slidesPerView; k++) {
+                            if (this._loop) loadReal((k % n + n) % n);
+                            else if (k >= 0 && k < n) loadReal(k);
+                        }
+                    });
+                    // After the batch, so every slide on screen is tracked first.
+                    queueMicrotask(flush);
                 }, { rootMargin: '200px' });
                 offs.push(off);
             });
             this._offLazyLoad = offs;
+        }
+
+        // A nested swiper that lazy-loads its own slides keeps its images; one that
+        // doesn't (a single slide, a loop clone's dead copy) leaves them to us.
+        _lazyIn(slide, sel) {
+            return Array.from(slide.querySelectorAll(sel)).filter(el => {
+                const owner = el.closest('.nds-swiper');
+                return !owner || owner === this.container || !owner._ndsSwiper?._offLazyLoad;
+            });
         }
 
         // ==============================================
@@ -831,10 +926,33 @@
             this.updatePagination();
             this.updateButtons();
             this.updateBoundaryClasses();
-            this.updateDeck();
+            this.updateSpotlight();
             this.container.dispatchEvent(new CustomEvent('nds:swiper:change', {
                 bubbles: true, detail: { index: this._realIndex }
             }));
+        }
+
+        // The slide in the middle is the open one. Every twin of it (real or clone)
+        // is marked, so the loop's silent jump onto a twin changes nothing visible.
+        updateSpotlight() {
+            if (!this._spotlight) return;
+            // Before the loop lands, the index still points into the head clones.
+            // While a move is under way the target stays open, so a jump over several
+            // slides does not open each one it crosses (the loop clears _aim on arrival).
+            const open = this._loopPending ? 0 : this._loop && this._aim != null ? this._aimReal : this._realIndex;
+            // Runs on every scroll frame; the marks change only when the open slide does.
+            if (open === this._open) return;
+            this._open = open;
+            const n = this._real;
+            this.slides.forEach((s, j) => {
+                // Side of the nearest twin of the open slide, so every twin has the
+                // same neighbours. Without a loop the row does not wrap.
+                let d = this._loop ? (((this._realOf(j) - open) % n) + n) % n : j - open;
+                if (this._loop && d > n / 2) d -= n;
+                if (d === 0) NDS.Status.set(s, 'active');
+                else if (d > 0) NDS.Status.set(s, 'after');
+                else NDS.Status.clear(s);
+            });
         }
 
         updateButtons() {
@@ -855,8 +973,9 @@
         // ==============================================
 
         slideTo(index, animate = true) {
-            // Real index in, clamped to the last real page.
-            index = Math.max(0, Math.min(index, this._real - this.slidesPerView));
+            // Real index in, clamped to the last real page. A loop has no last page, so
+            // any slide goes — the index nds:swiper:change reports must restore.
+            index = Math.max(0, Math.min(index, this._real - (this._loop ? 1 : this.slidesPerView)));
             this._goToFull(this._full(index), !animate || NDS.prefersReducedMotion);
         }
 
@@ -886,22 +1005,17 @@
             this.container.removeAttribute('data-swiper-single');
             NDS.State.clear(this.container); // at-start/at-end are a documented consumer hook
             ['--total', '--slides'].forEach(p => this.container.style.removeProperty(p));
-            if (this._ownsPeek) this.container.style.removeProperty('--peek');
-            if (this.wrapper) this.wrapper.style.removeProperty('overflow');
+            if (this._spotlight) this.slides.forEach(s => NDS.Status.clear(s));
+            this.wrapper.style.removeProperty('overflow');
+            this.wrapper.removeAttribute('data-swiper-moving');
             if (this.pagination) { this.pagination.style.removeProperty('display'); this.pagination.innerHTML = ''; }
             if (this.navigation) this.navigation.toggleAttribute('hidden', this._navHadHidden);
             if (this.prevBtn) this.prevBtn.style.removeProperty('display');
             if (this.nextBtn) this.nextBtn.style.removeProperty('display');
-            this.cards.forEach(card => {
-                card.style.removeProperty('--rel');
-                card.style.removeProperty('--srel');
-                NDS.Status.clear(card);
-                NDS.aria.current(card, null);
-            });
-
             _activeSwipers.delete(this);
             _resizeSwipers.delete(this);
             if (this._offResize) { this._offResize(); this._offResize = null; }
+            if (this._offSlideResize) { this._offSlideResize(); this._offSlideResize = null; }
             if (this._offVisibility) { this._offVisibility(); this._offVisibility = null; }
             if (this._offLazyLoad) { this._offLazyLoad.forEach(off => off()); this._offLazyLoad = null; }
             if (this.abortController) { this.abortController.abort(); this.abortController = null; }
@@ -915,24 +1029,10 @@
     // ==============================================
 
     function initializeComponents() {
-        // Defer the page-wide srcset-space normalization to idle: it only rewrites
-        // malformed srcsets (unencoded spaces), so it never needs to block the eager
-        // init task, and the sweep is unbounded (every srcset-bearing node on the page).
-        // Covers both img[srcset] and <picture> source[srcset] — the lazy path handles
-        // the data-srcset variants, this catches eager (non-lazy) srcsets.
-        NDS.onIdle(() => {
-            document.querySelectorAll('img[srcset], source[srcset]').forEach(el => {
-                const srcset = el.getAttribute('srcset');
-                if (srcset && srcset.includes(' ') && !srcset.includes('%20')) {
-                    const fixed = fixSrcsetSpaces(srcset);
-                    if (fixed !== srcset) el.setAttribute('srcset', fixed);
-                }
-            });
-        });
-
         const swipers = document.querySelectorAll('.nds-swiper');
         swipers.forEach(swiper => {
-            if (swiper.closest('code, .code-example')) return;
+            // A loop clone's nested swiper is a dead copy — reinit must not wire it.
+            if (swiper.closest('code, .nds-swiper-clone')) return;
             if (swiper.hasAttribute('data-nds-swiper-initialized')) return;
             const instance = new NDSSwiper(swiper);
             // Expando only on successful construction — retries must not inherit
@@ -945,8 +1045,10 @@
         init: initializeComponents,
         reinit: initializeComponents,
         create: (element) => {
+            if (element._ndsSwiper) return element._ndsSwiper;
             const instance = new NDSSwiper(element);
-            if (instance.valid) element._ndsSwiper = instance;
+            if (!instance.valid) return null;
+            element._ndsSwiper = instance;
             return instance;
         },
         // NDS.Init.destroy's second shape. The expando is underscore-prefixed and

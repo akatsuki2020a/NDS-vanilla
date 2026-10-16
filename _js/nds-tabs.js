@@ -1,6 +1,8 @@
 /* NDS.Tabs — public surface
  * Rides: nds-scroll-more (overflow detection, edge mask and the show-more button on the
  *        tab list) · nds-expandable (heights are rechecked when a panel becomes visible)
+ * Requires:
+ *   .nds-tabs needs one .nds-tab-panel per .nds-tab:not(.nds-show-more) — a tab without its panel switches nothing
  * Methods:
  *   NDS.Tabs.init() / .reinit()      scan + initialize .nds-tabs
  *   NDS.Tabs.create(container)       instance one tab set
@@ -80,9 +82,11 @@
             this.currentTabIndex = this.findActiveTabIndex();
             this.valid = true;
             // Registered here, not in the sweep, so every construction path —
-            // sweep, reinit() and programmatic create() — publishes el.ndsTabs.
+            // sweep, reinit() and programmatic create() — publishes el.ndsTabs and
+            // the stamp that ends the skeleton and stops a second sweep.
             tabsContainer.ndsTabs = this;
             this.init();
+            tabsContainer.setAttribute('data-nds-tabs-initialized', 'true');
         }
 
         get isVertical() {
@@ -241,12 +245,13 @@
                     targetIndex = next();
                     break;
 
+                // First and last in reading order, in RTL too (WAI-ARIA tabs pattern).
                 case 'Home':
-                    targetIndex = isRTL && !this.isVertical ? lastIndex : 0;
+                    targetIndex = 0;
                     break;
 
                 case 'End':
-                    targetIndex = isRTL && !this.isVertical ? 0 : lastIndex;
+                    targetIndex = lastIndex;
                     break;
 
                 case 'Enter':
@@ -349,21 +354,20 @@
 
     function initializeTabs() {
         document.querySelectorAll('.nds-tabs').forEach(container => {
-            if (container.closest('code, .code-example')) return;
+            if (container.closest('code')) return;
             if (container.hasAttribute('data-nds-tabs-initialized')) return;
-
-            const instance = new NDSTabs(container);
-            // Stamp only successful constructions — late-filled tab markup stays
-            // eligible for the next reinit().
-            if (instance.valid) {
-                container.setAttribute('data-nds-tabs-initialized', 'true');
-            }
+            // Only a valid construction stamps, so late-filled markup stays eligible.
+            new NDSTabs(container);
         });
     }
 
     NDS.Tabs = {
         init: initializeTabs,
         reinit: initializeTabs,
-        create: (container) => container.ndsTabs || new NDSTabs(container)
+        // The constructor publishes el.ndsTabs only on success → null on a bail.
+        create: (container) => {
+            if (!container.ndsTabs) new NDSTabs(container);
+            return container.ndsTabs || null;
+        }
     };
 })();

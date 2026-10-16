@@ -2,7 +2,7 @@
 
 The project's chosen conventions for `_js/nds-*.js` component files, documented as concrete canonical forms backed by principle reasoning. Consulted by `nds-js-audit` so JSD-15 ("cross-file pattern consistency") works in single-file mode and so the audit measures code against deliberate choices instead of against the loudest accidental majority.
 
-**Scope:** the component files under `_js/nds-*.js`. Excludes `nds-core.js` (publishes the shared utility surface, different conventions), `nds-loader.js` (orchestration shape), `nds-showcase.js` (demo-page wiring). Exception: entry 7 (public-surface banner) uses its own wider scope — the `SCOPE` array in `scripts/check-banners.mjs`, which includes `nds-core.js` and `nds-loader.js`.
+**Scope:** the component files under `_js/nds-*.js`. Excludes `nds-core.js` (publishes the shared utility surface, different conventions), `nds-loader.js` (orchestration shape), `nds-docs.js` (docs-site builder). Exception: entry 7 (public-surface banner) uses its own wider scope — the `SCOPE` array in `scripts/check-banners.mjs`, which includes `nds-core.js` and `nds-loader.js`.
 
 ---
 
@@ -42,7 +42,7 @@ Clarity beats brevity for fields read during teardown work and code review: a re
 
 **Carve-outs (NOT divergence)**
 
-- **Secondary controllers** that scope a sub-concern, named for what they scope: `this.fetchAbortController` (`_js/nds-filter.js`, `_js/nds-autocomplete.js` — each paired with the primary `this.abortController`, aborting one in-flight request without touching listeners), `this.renderAbortController` (`_js/nds-chart.js`, scopes one render cycle), `this.dragAbortController` (`_js/nds-upload.js`, re-armed per dropbox cycle).
+- **Secondary controllers** that scope a sub-concern, named for what they scope: `this.fetchAbortController` (`_js/nds-filter.js`, `_js/nds-autocomplete.js` — each paired with the primary `this.abortController`, aborting one in-flight request without touching listeners) and `this.renderAbortController` (`_js/nds-chart.js`, scopes one render cycle).
 - **Per-element AbortControllers stored on the element** (`el._ndsFilterAC` in `_js/nds-filter.js`) are scoped to the element's lifetime, not the instance's. Structurally different shape; the leading underscore IS correct here because the property is on a foreign element.
 
 **Audit behavior**
@@ -87,9 +87,9 @@ The verb pair encodes the concept, not the DOM mutation. Two components making a
 
 **Canonical:** `open()` / `close()` as the public lifecycle pair.
 
-**Concept:** the surface fully captures attention. Singleton-open. Focus-trapped (`NDS.trapFocus`) and typically backdrop-paired (`NDS.Backdrop.show`). Opening is a state transition for the whole page.
+**Concept:** the surface fully captures attention. Singleton-open. Focus-trapped and dimmed: a `<dialog>` opened with `showModal()`, or `NDS.trapFocus` with `NDS.Backdrop.show`. Opening is a state transition for the whole page.
 
-**Discriminator** (mechanically checkable): file invokes `NDS.trapFocus` OR `NDS.Backdrop.show`, OR enforces singleton-open another way — delegating its lifecycle to `NDS.Dropmenu` (`NDS.Dropmenu.create` + `open()`/`close()` passthrough: `_js/nds-tooltip.js`, `_js/nds-autocomplete.js`), closing every other open instance on open (`_js/nds-dropmenu.js` `_openDropmenus`), or a deliberate no-trap disclosure panel that still owns the page's attention (`_js/nds-accessibility.js`, `"No inert / no backdrop"` comment).
+**Discriminator** (mechanically checkable): file invokes `showModal()`, `NDS.trapFocus` OR `NDS.Backdrop.show`, OR enforces singleton-open another way — delegating its lifecycle to `NDS.Dropmenu` (`NDS.Dropmenu.create` + `open()`/`close()` passthrough: `_js/nds-tooltip.js`, `_js/nds-autocomplete.js`), closing every other open instance on open (`_js/nds-dropmenu.js` `_openDropmenus`), or a deliberate no-trap disclosure panel that still owns the page's attention (`_js/nds-accessibility.js`, `"No inert / no backdrop"` comment).
 
 **Examples:** `_js/nds-modal.js`, `_js/nds-ipv.js`, `_js/nds-dropmenu.js`, `_js/nds-tooltip.js`, `_js/nds-autocomplete.js`, `_js/nds-accessibility.js`.
 
@@ -99,7 +99,7 @@ The verb pair encodes the concept, not the DOM mutation. Two components making a
 
 **Concept:** multiple instances can be visible simultaneously (sections within a single component, submenus within a drawer). No focus trap; no backdrop; no attention capture. The mutation is a per-instance visibility flip, not a singleton state transition.
 
-**Discriminator:** multi-instance simultaneous visibility AND file does NOT invoke `NDS.trapFocus` / `NDS.Backdrop.show`. Then: does the method act on the instance's own surface (bare `show()`/`hide()`) or on an addressed child (suffixed pair, verb from the child's state vocabulary)?
+**Discriminator:** multi-instance simultaneous visibility AND file does NOT invoke `showModal()`, `NDS.trapFocus` / `NDS.Backdrop.show`. Then: does the method act on the instance's own surface (bare `show()`/`hide()`) or on an addressed child (suffixed pair, verb from the child's state vocabulary)?
 
 **Examples:** `_js/nds-accordion.js` — `openItem(i)` / `closeItem(i)` / `toggleItem(i)` on the container instance; the item's markup contract is `data-state="open"` plus `aria-expanded`, so `open`/`close` is the verb a reader can verify against the DOM. `_js/nds-drawer.js` `showSubmenu` / `hideSubmenu` — module-private functions, not a public instance pair; cited for the naming shape only.
 
@@ -123,7 +123,7 @@ The verb pair encodes the concept, not the DOM mutation. Two components making a
 
 **Discriminator:** component exposes `toggle()` AND does NOT expose distinct `open()` / `close()` / `show()` / `hide()` for the same state axis.
 
-**Examples:** `_js/nds-theme.js`, `_js/nds-expandable.js`, `_js/nds-mainnav.js` (`toggleDropdown`).
+**Examples:** `_js/nds-theme.js`, `_js/nds-expandable.js`.
 
 **Why (and rejected alternatives — whole entry)**
 
@@ -136,7 +136,7 @@ The pair reads as the concept reads. `open` evokes a doorway; `show` evokes reve
 **Audit behavior**
 
 For each component file:
-1. Apply the discriminators (`NDS.trapFocus` / `NDS.Backdrop.show` invocation → 3.1; multi-instance no-backdrop → 3.2; factory-create with finite lifetime → 3.3; `toggle()`-only → 3.4).
+1. Apply the discriminators (`showModal()` / `NDS.trapFocus` / `NDS.Backdrop.show` invocation → 3.1; multi-instance no-backdrop → 3.2; factory-create with finite lifetime → 3.3; `toggle()`-only → 3.4).
 2. Check the file's exposed lifecycle pair against the bucket's canonical.
 3. If the file's concept is ambiguous (multiple discriminators match, or none match), record it as an open question in the report rather than flagging a finding — ambiguity does not clear the evolve bar, so nothing auto-changes.
 
@@ -150,7 +150,7 @@ For each component file:
 
 ```js
 console.warn('NDS Filter: target container not found');
-console.error('NDS Modal: requires NDSBackdrop API. Please include nds-backdrop.js first.');
+console.error('NDS Modal: .nds-modal must be a <dialog>.', modal);
 ```
 
 **Why (and rejected alternatives)**
@@ -209,9 +209,9 @@ A factory creates per-element instances; the guard must distinguish "this specif
 Each shape below matches its form to what it actually guards, so none is divergence:
 
 - **Per-element scope, non-attribute form.** The marker lives on the element without being an attribute when the structure justifies it: a JS property on a document-sweeping controller (`_js/nds-forms.js` `_ndsInitialized` / `_ndsFormInitialized` / `_switchInitialized`) — per-element, just not CSS-selectable, so re-sweeps check inline; the instance expando where `create(el)` is idempotent through the back-ref (`_js/nds-date-picker.js` `_ndsDatePicker`) — the instance IS the init state and a parallel attribute channel could drift, so it must be gated on successful construction (JSD-18); or init's own DOM mutation as the marker (`_js/nds-customselect.js` `build()` checks the `.nds-dropmenu` class it stamps). A *registered* factory with a per-instance selector still prefers the attribute form so loader rescans can selector-filter — see Audit behavior step 7.
-- **Resource scope, no flag at all.** When init is idempotent or deliberately re-armable, the resource IS the guard: `_js/nds-selection.js` `_controller` (nulled by `destroy()` so `init()` re-arms by design — a one-way flag would break the cycle), `_js/nds-share.js` `init()` (documented abort-and-rebind of its own `_abortController`), `_js/nds-fontLoading.js` `fontStates` (per-item dedup).
-- **Cross-module scope, window flag.** A guard that must coordinate with sibling modules has no per-element target and belongs on `window`: `_js/nds-tables.js` `window.ndsTableClassObserverInitialized` (~L639), `window.ndsTabChangeHandlerInitialized` (~L652) and `window.ndsTableSubHandlerInitialized` (~L938), covering responsive-table class mutations, tab-change events, and the document-delegated sub-row toggle (independent of the sort/checkbox-gated `NDSTables` instance). Requires the inline comment named in Audit behavior step 4.
-- **Sub-concern latch, named for what it latches.** A guard gating one arm of init — narrower than the module's own guard, so it carries a descriptive name instead of `_initDone`. Three shapes: one-time page-level setup inside a factory (document delegation, singleton observers, a body-appended sentinel) — `runtimeSet` guarding `setupRuntime` (`_js/nds-fab.js` ~L154), `togglesBound` guarding `bindToggles` (`_js/nds-panels.js` ~L287), both files carrying the canonical attribute for their own init; and per-branch latches in a singleton wiring independently-present widgets — `_js/nds-timeDate.js` `_dateInitDone` / `_clockInitDone`, whose declaration documents the reasoning ("The date and clock topbar widgets can appear independently, so the latches are separate — a page that ships only one widget can still wire the other if it's injected later"). One shared `_initDone` would latch on the first widget and strand the second. And the attribute form of the same idea — a second `data-nds-<sub-mode>-initialized` on the SAME element beside the component's canonical guard, gating an init arm the canonical one doesn't cover: `_js/nds-pagination.js` `data-nds-auto-pagination-initialized` (guards `setupAutoContainer`, while `data-nds-pagination-initialized` guards the manual sweep) and `_js/nds-tables.js` `data-nds-columns-initialized` (guards the column-toggle arm beside `data-nds-tables-initialized`). Discriminator for the attribute shape: the component's canonical guard is present on the element, and the second attribute names an init path it does not cover. Step 5's name check governs a singleton module's OWN guard only, and step 6's `data-nds-<name>-initialized` check governs the component's OWN guard only — neither fires on these.
+- **Resource scope, no flag at all.** When init is idempotent or deliberately re-armable, the resource IS the guard: `_js/nds-selection.js` `_controller` (nulled by `destroy()` so `init()` re-arms by design — a one-way flag would break the cycle), `_js/nds-share.js` `init()` (documented abort-and-rebind of its own `_abortController`).
+- **Cross-module scope, window flag.** A guard that must coordinate with sibling modules has no per-element target and belongs on `window`: `_js/nds-tables.js` `window.ndsTabChangeHandlerInitialized` (~L582) and `window.ndsTableSubHandlerInitialized` (~L895), covering tab-change events and the document-delegated sub-row toggle (independent of the sort/checkbox-gated `NDSTables` instance). Requires the inline comment named in Audit behavior step 4.
+- **Sub-concern latch, named for what it latches.** A guard gating one arm of init — narrower than the module's own guard, so it carries a descriptive name instead of `_initDone`. Three shapes: one-time page-level setup inside a factory (document delegation, singleton observers, a body-appended sentinel) — `runtimeSet` guarding `setupRuntime` (`_js/nds-fab.js` ~L154), `togglesBound` guarding `bindToggles` (`_js/nds-panels.js` ~L287), both files carrying the canonical attribute for their own init; and per-branch latches in a singleton wiring independently-present widgets — `_js/nds-time-date.js` `_dateInitDone` / `_clockInitDone`, whose declaration documents the reasoning ("The date and clock topbar widgets can appear independently, so the latches are separate — a page that ships only one widget can still wire the other if it's injected later"). One shared `_initDone` would latch on the first widget and strand the second. And the attribute form of the same idea — a second `data-nds-<sub-mode>-initialized` on the SAME element beside the component's canonical guard, gating an init arm the canonical one doesn't cover: `_js/nds-pagination.js` `data-nds-auto-pagination-initialized` (guards `setupAutoContainer`, while `data-nds-pagination-initialized` guards the manual sweep) and `_js/nds-tables.js` `data-nds-columns-initialized` (guards the column-toggle arm beside `data-nds-tables-initialized`). Discriminator for the attribute shape: the component's canonical guard is present on the element, and the second attribute names an init path it does not cover. Step 5's name check governs a singleton module's OWN guard only, and step 6's `data-nds-<name>-initialized` check governs the component's OWN guard only — neither fires on these.
 - **CSS-contract reveal stamp on a foreign element.** An attribute a component writes on an element it does not own, consumed by critical CSS as a paint-release hook, is not that component's init guard — it names the region being revealed, so step 6's `data-nds-<name>-initialized` check must not fire on it. Cite: `_js/nds-pagination.js` `data-paged-initialized`, stamped on the paged CONTENT container (file header documents the crit-CSS hold it releases) while the component's own canonical `data-nds-pagination-initialized` stays on the nav. Discriminator: the attribute is written to a different element than the one the sweep guard reads.
 
 **Audit behavior**
@@ -266,7 +266,7 @@ Flag any of these signal-less shapes in a file WITHOUT the documented two-phase-
 
 Files with the documented two-phase shape pass.
 
-**Two-controller split, not a two-phase carve-out.** When a subset of listeners has a genuinely shorter lifetime than the instance, prefer a second domain-named controller over per-handler bookkeeping — both lifetimes stay atomic. Cite: `_js/nds-upload.js` `dragAbortController`, re-armed by `_initDragAndDrop` / aborted by `_removeDragAndDrop` on every `dropbox` state toggle, alongside the instance-lifetime `abortController`. The entry-2 `cleanup()`+`destroy()` carve-out remains for the case a split can't serve — `_js/nds-date-picker.js`, where the two phases share individual handlers rather than partitioning cleanly.
+**Two-controller split, not a two-phase carve-out.** When a subset of listeners has a genuinely shorter lifetime than the instance, prefer a second domain-named controller over per-handler bookkeeping — both lifetimes stay atomic. Cite: `_js/nds-modal.js` `trapAbortController`, re-armed on every open / aborted in `close()` and `destroy()`, alongside the init-lifetime `initAbortController`. The entry-2 `cleanup()`+`destroy()` carve-out remains for the case a split can't serve — `_js/nds-date-picker.js`, where the two phases share individual handlers rather than partitioning cleanly.
 
 ---
 
@@ -291,9 +291,10 @@ Every in-scope file opens with a banner comment — the first lines of the file,
 ```
 
 - **Rides** — edges point UP only: a rider names its base(s) plus the surface it inherits, in parentheses — `Rides: nds-dropmenu (portal, positioning, search, auto-close knobs) · nds-forms (validation)`; soft edges append `(soft — works without it)`; bases declare `Rides: (none — base component)`. A base never enumerates its riders.
+- **Requires** (optional, after Rides) — markup the script needs to work and skips with no warning, one per line: `<host> needs|needs one X per Y|sits in|is|with|points at X via <attr> <selector> — <what breaks>`. `js_processor.rb` bakes it into the audit's `required-part` rule and fails the build on a line it cannot parse. A part that warns when missing, an optional part, a design choice, or a value a JS method can supply instead stays out.
 - **Methods** — the `NDS.<Name>.*` surface, one per line with a short tail description; instance methods are labeled as such.
 - **Events** — full event name plus its `detail {…}` shape.
-- **Hooks** — consumer-facing `data-*` attributes and action roles, hand-enumerated. Excludes init sentinels (`data-nds-*-initialized`) and base-owned attributes — a rider restating a base's hooks (e.g. `data-portal` in a dropmenu-rider's Hooks) is a violation.
+- **Hooks** — consumer-facing `data-*` attributes and action roles, hand-enumerated. Excludes init sentinels (`data-nds-*-initialized`) and base-owned attributes — a rider restating a base's hooks (e.g. `data-anchor` in a dropmenu-rider's Hooks) is a violation.
 - **Gotchas** — one-liners, only what THIS file owns.
 
 No version stamps inside banners. Scaled-down banners (~6–10 lines) are the norm for tiny surfaces. Tooling: `node scripts/check-banners.mjs --generate <file>` prints a skeleton (Methods/Events pre-filled, Hooks grep candidates); `--verify <file>` / `--all` checks presence, section order, and Methods/Events drift. The `SCOPE` array in that script (57 files: 53 components + core, loader, accessibility, theme) is the single source of truth for which files carry a banner.
@@ -304,7 +305,7 @@ The banner is the knowledge surface a consumer agent (and human reader) greps be
 
 **Carve-outs (NOT divergence)**
 
-- Files outside the `SCOPE` array (`nds-showcase.js`, `nds-theme-foundation-day.js`, `nds-theme-hajj.js`, `nds-fontLoading.js`) carry no banner.
+- Files outside the `SCOPE` array (`nds-docs.js`, `nds-theme-foundation-day.js`, `nds-theme-hajj.js`) carry no banner.
 - `(none)` entries are information, not omission — `Hooks: (none)` tells the reader there is nothing to wire; a tiny banner is conformant, not lazy.
 - WHY-prose surviving BELOW the banner (bundle/crit headers, usage notes) is not part of the banner and is not judged by this entry — JSA-16 governs it as usual.
 - The banner itself is never comment noise: JSA-16 explicitly exempts it (see its carve-out list in `RULES-JSA.md`); JSD-20 owns its conformance.

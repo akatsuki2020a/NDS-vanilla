@@ -1,0 +1,449 @@
+<%- include('partials/head') %>
+<%- include('partials/header') %>
+    <main>
+        <section class="nds-hero-section nds-sub nds-flat nds-aside" aria-label="Page hero">
+    <nav class="nds-breadcrumb-nav" aria-label="Breadcrumb" hidden>
+        <ol class="nds-breadcrumb">
+            <li><a href="/">Home</a></li>
+            <li class="nds-truncate" aria-current="page">Book an Appointment</li>
+        </ol>
+    </nav>
+    <div class="nds-section-wrapper">
+        <div class="nds-section-head">
+            <div class="nds-section-action nds-minimal">
+            <div class="nds-share nds-dropmenu">
+                <button class="nds-btn nds-secondary-outline nds-dropmenu-trigger"
+                    aria-label="Share Page">
+                    <i class="nds-icon nds-hgi-share-01" aria-hidden="true"></i>
+                    <span class="nds-label">Share Page</span>
+                </button>
+                <div class="nds-dropmenu-menu" hidden>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-x" type="button" aria-label="Share on X">
+                        <i class="nds-icon nds-hgi-new-twitter" aria-hidden="true"></i>
+                        <span class="nds-label">X</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-linkedin" type="button"
+                        aria-label="Share on LinkedIn">
+                        <i class="nds-icon nds-hgi-linkedin-02" aria-hidden="true"></i>
+                        <span class="nds-label">LinkedIn</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-whatsapp" type="button"
+                        aria-label="Share on WhatsApp">
+                        <i class="nds-icon nds-hgi-whatsapp" aria-hidden="true"></i>
+                        <span class="nds-label">WhatsApp</span>
+                    </button>
+                    <button class="nds-btn nds-subtle nds-dropmenu-item nds-share-copy" type="button" aria-label="Copy Link"
+                        data-label="Link Copied!" data-message="Page link copied to clipboard" data-no-auto-close>
+                        <i class="nds-icon nds-hgi-link-04" aria-hidden="true"></i>
+                        <span class="nds-label">Copy Link</span>
+                    </button>
+                </div>
+            </div>
+            </div>
+            <h1 class="nds-section-title">Book an Appointment</h1>
+            <p class="nds-section-description">Choose a clinic and doctor, pick a date and time, and confirm your visit. Booking for <%= patient.name %> (<%= patient.mrn %>).</p>
+        </div>
+    </div>
+</section>
+<div class="nds-content-layout nds-wSideInfo">
+    <div class="nds-main-content">
+        <section id="bookForm" class="nds-content-section nds-sideinfo-section">
+    <div class="nds-section-body">
+        <div class="nds-info-content">
+            <p class="nds-required-notice"><span class="nds-label">*Required information</span></p>
+            <form id="book-form" class="nds-form" novalidate>
+                <!-- ============================================================
+                     STEP 1 - Visit details
+                     ============================================================ -->
+                <div class="nds-form" data-form-step="1">
+                    <div class="nds-grid nds-form-grid" style="--min-col: 1; --max-col: 2; --gap: var(--spacing-4xl);">
+                        <div class="nds-form-container nds-select" data-required>
+                            <div class="nds-form-header">
+                                <label for="bk-clinic">
+                                    <span class="nds-label">Clinic</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <input type="text" id="bk-clinic" class="nds-input nds-select-input" placeholder="Choose a clinic" readonly />
+                                <input type="hidden" name="clinic_id" class="nds-select-value" />
+                                <div class="nds-select-dropdown" hidden>
+                                    <div class="nds-select-options">
+<%_ clinics.forEach(function (c) { -%>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="<%= c.id %>" data-doctors="<%= c.doctor_ids.join(',') %>">
+                                            <span class="nds-option-text"><%= c.name %></span>
+                                        </button>
+<%_ }); -%>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                        <div class="nds-form-container nds-select" data-required>
+                            <div class="nds-form-header">
+                                <label for="bk-doctor">
+                                    <span class="nds-label">Doctor</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <input type="text" id="bk-doctor" class="nds-input nds-select-input" placeholder="Choose a clinic first" readonly />
+                                <input type="hidden" name="doctor_id" class="nds-select-value" />
+                                <div class="nds-select-dropdown" hidden>
+                                    <div class="nds-select-options">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                        <div class="nds-form-container nds-date-picker" data-required>
+                            <div class="nds-form-header">
+                                <label for="bk-date"><span class="nds-label">Date</span></label>
+                            </div>
+                            <div class="nds-form-control">
+                                <div class="nds-form-action">
+                                    <button type="button" class="nds-btn nds-subtle date-picker-toggle" aria-label="Calendar toggle">
+                                        <i class="nds-icon nds-hgi-calendar-03" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                <input type="text" id="bk-date" name="date" class="nds-input nds-date-input" placeholder="DD/MM/YYYY" data-year-before="0" data-year-after="1" required />
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                        <div class="nds-form-container nds-select" data-required>
+                            <div class="nds-form-header">
+                                <label for="bk-time">
+                                    <span class="nds-label">Time</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <input type="text" id="bk-time" class="nds-input nds-select-input" placeholder="Choose a time" readonly />
+                                <input type="hidden" name="time" class="nds-select-value" />
+                                <div class="nds-select-dropdown" hidden>
+                                    <div class="nds-select-options">
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="09:00">
+                                            <span class="nds-option-text">09:00</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="09:30">
+                                            <span class="nds-option-text">09:30</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="10:00">
+                                            <span class="nds-option-text">10:00</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="10:30">
+                                            <span class="nds-option-text">10:30</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="11:00">
+                                            <span class="nds-option-text">11:00</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="11:30">
+                                            <span class="nds-option-text">11:30</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="12:00">
+                                            <span class="nds-option-text">12:00</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="16:00">
+                                            <span class="nds-option-text">16:00</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="16:30">
+                                            <span class="nds-option-text">16:30</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="17:00">
+                                            <span class="nds-option-text">17:00</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="17:30">
+                                            <span class="nds-option-text">17:30</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="18:00">
+                                            <span class="nds-option-text">18:00</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                    </div>
+                    <div class="nds-form-actions">
+                        <button type="button" class="nds-btn nds-primary" data-stepper-control="next" data-stepper-target="bookStepper">
+                            <span class="nds-label">Continue</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- ============================================================
+                     STEP 2 - Your details
+                     ============================================================ -->
+                <div class="nds-form" data-form-step="2" hidden>
+                    <div class="nds-grid nds-form-grid" style="--min-col: 1; --max-col: 2;">
+                        <div class="nds-form-container" data-required>
+                            <div class="nds-form-header">
+                                <label for="bk-phone">
+                                    <span class="nds-label">Mobile Number</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <input type="tel" id="bk-phone" name="phone" class="nds-input" placeholder="05X XXX XXXX" autocomplete="tel-national" inputmode="numeric" maxlength="10" pattern="05[0-9]{8}" required />
+                                <div class="nds-form-action">
+                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                        <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target>
+                                <span class="nds-feedback nds-outline nds-sm" data-status="neutral" data-permanent>
+                                    <span class="nds-feedback-icon"><i class="nds-icon" aria-hidden="true"></i></span>
+                                    <span class="nds-feedback-message">We send the booking confirmation to this number</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="nds-form-container nds-textarea">
+                            <div class="nds-form-header">
+                                <label for="bk-reason">
+                                    <span class="nds-label">Reason for visit</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <textarea id="bk-reason" name="reason" class="nds-textarea" placeholder="Describe your symptoms or the purpose of the visit" rows="4" maxlength="300"></textarea>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                    </div>
+                    <div class="nds-form-actions">
+                        <button type="button" class="nds-btn nds-secondary-outline" data-stepper-control="previous" data-stepper-target="bookStepper">
+                            <span class="nds-label">Back</span>
+                        </button>
+                        <button type="button" class="nds-btn nds-primary" data-stepper-control="next" data-stepper-target="bookStepper">
+                            <span class="nds-label">Continue</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- ============================================================
+                     STEP 3 - Insurance
+                     ============================================================ -->
+                <div class="nds-form" data-form-step="3" hidden>
+                    <div class="nds-grid nds-form-grid" style="--min-col: 1; --max-col: 2;">
+                        <div class="nds-form-container nds-select" data-required>
+                            <div class="nds-form-header">
+                                <label for="bk-insurer">
+                                    <span class="nds-label">Insurance Provider</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <input type="text" id="bk-insurer" class="nds-input nds-select-input" placeholder="Choose a provider" readonly />
+                                <input type="hidden" name="insurer" class="nds-select-value" />
+                                <div class="nds-select-dropdown" hidden>
+                                    <div class="nds-select-options">
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="self-pay">
+                                            <span class="nds-option-text">No insurance (self-pay)</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="bupa">
+                                            <span class="nds-option-text">Bupa Arabia</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="tawuniya">
+                                            <span class="nds-option-text">Tawuniya</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="medgulf">
+                                            <span class="nds-option-text">MedGulf</span>
+                                        </button>
+                                        <button type="button" class="nds-btn nds-subtle nds-select-option" data-value="malath">
+                                            <span class="nds-option-text">Malath</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                        <div class="nds-form-container">
+                            <div class="nds-form-header">
+                                <label for="bk-policy">
+                                    <span class="nds-label">Policy Number</span>
+                                </label>
+                            </div>
+                            <div class="nds-form-control">
+                                <input type="text" id="bk-policy" name="policy" class="nds-input" placeholder="Optional for self-pay" autocomplete="off" />
+                                <div class="nds-form-action">
+                                    <button class="nds-btn nds-subtle nds-clear" type="button" aria-label="Clear input" hidden>
+                                        <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="nds-form-footer" data-feedback-target hidden></div>
+                        </div>
+                    </div>
+                    <div class="nds-form-actions">
+                        <button type="button" class="nds-btn nds-secondary-outline" data-stepper-control="previous" data-stepper-target="bookStepper">
+                            <span class="nds-label">Back</span>
+                        </button>
+                        <button type="button" class="nds-btn nds-primary" data-stepper-control="next" data-stepper-target="bookStepper">
+                            <span class="nds-label">Continue</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- ============================================================
+                     STEP 4 - Review & Submit
+                     ============================================================ -->
+                <div class="nds-form" data-form-step="4" hidden>
+                    <h2 class="nds-section-title">Review your booking</h2>
+                    <p class="nds-section-description">Check the details below before confirming. Use Back to make corrections.</p>
+                    <dl class="nds-definition-list nds-divided" style="--row-gap: var(--spacing-md);">
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Patient</span></dt>
+                            <dd data-review-static="<%= patient.name %> (<%= patient.mrn %>)">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Clinic</span></dt>
+                            <dd data-review-source="bk-clinic">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Doctor</span></dt>
+                            <dd data-review-source="bk-doctor">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Date</span></dt>
+                            <dd data-review-source="bk-date">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Time</span></dt>
+                            <dd data-review-source="bk-time">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Mobile Number</span></dt>
+                            <dd data-review-source="bk-phone">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Reason for visit</span></dt>
+                            <dd data-review-source="bk-reason">—</dd>
+                        </div>
+                        <div class="nds-definition-item">
+                            <dt><span class="nds-label">Insurance</span></dt>
+                            <dd data-review-compose="bk-insurer,bk-policy">—</dd>
+                        </div>
+                    </dl>
+                    <div class="nds-form-container nds-check-container" data-required>
+                        <div class="nds-form-header" data-feedback-target>
+                            <label for="bk-confirm">
+                                <span class="nds-label">I confirm the information above is accurate and complete.</span>
+                            </label>
+                        </div>
+                        <div class="nds-form-control">
+                            <input type="checkbox" id="bk-confirm" name="confirm" value="confirmed" class="nds-check" required />
+                        </div>
+                    </div>
+                    <div class="nds-form-actions">
+                        <button type="button" class="nds-btn nds-secondary-outline" data-stepper-control="previous" data-stepper-target="bookStepper">
+                            <span class="nds-label">Back</span>
+                        </button>
+                        <button type="submit" class="nds-btn nds-primary" id="bookSubmit">
+                            <span class="nds-label">Confirm Booking</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- ============================================================
+                     STEP 5 - Booked (success)
+                     ============================================================ -->
+                <div class="nds-form" data-form-step="5" hidden>
+                    <div class="nds-card nds-stroke nds-center" style="--card-width: 100%;">
+                        <div class="nds-card-header">
+                            <div class="nds-card-featured-icon">
+                                <span class="nds-featured-icon nds-circle nds-dark nds-xl nds-success">
+                                    <i class="hgi hgi-stroke hgi-checkmark-circle-02"></i>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="nds-card-content">
+                            <div class="nds-card-text">
+                                <h2 class="nds-card-title">Appointment booked</h2>
+                                <p class="nds-card-description">
+                                    Thank you. Your appointment is confirmed and you will receive an SMS shortly.
+                                </p>
+                                <p class="nds-card-description">
+                                    Reference number: <strong id="bk-reference">—</strong>
+                                </p>
+                            </div>
+                            <div class="nds-card-actions">
+                                <a href="/appointments" class="nds-btn nds-secondary-outline">
+                                    <span class="nds-label">View my appointments</span>
+                                </a>
+                                <button type="button" class="nds-btn nds-primary" data-stepper-control="goto" data-stepper-value="1" data-stepper-target="bookStepper">
+                                    <span class="nds-label">Book another</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <aside class="nds-sideinfo nds-sticky nds-top" aria-label="Booking progress" style="--nds-sideinfo-top-offset: var(--spacing-6xl);">
+            <div class="nds-stepper nds-radial nds-vertical-lg" id="bookStepper" data-current="1" data-total="5">
+                <div class="nds-progress-circle">
+                    <svg width="64" height="64" viewBox="0 0 24 24">
+                        <circle class="nds-progress-bg" cx="12" cy="12" r="10" fill="none" stroke-width="3" />
+                        <circle class="nds-progress-track" cx="12" cy="12" r="10" fill="none" stroke-width="3" stroke-dasharray="62.83" stroke-dashoffset="62.83" stroke-linecap="round" />
+                    </svg>
+                    <div class="nds-progress-info"><span class="nds-progress-steps"></span></div>
+                </div>
+                <div class="nds-stepper-step">
+                    <div class="nds-stepper-base">
+                        <div class="nds-stepper-circle" data-step-text="1"></div>
+                    </div>
+                    <div class="nds-stepper-content">
+                        <div class="nds-stepper-text">
+                            <span class="nds-stepper-title">Visit details</span>
+                            <span class="nds-stepper-description">Clinic, doctor, date and time</span>
+                            <span class="nds-stepper-next">Next: Your details</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-stepper-step">
+                    <div class="nds-stepper-base">
+                        <div class="nds-stepper-circle" data-step-text="2"></div>
+                    </div>
+                    <div class="nds-stepper-content">
+                        <div class="nds-stepper-text">
+                            <span class="nds-stepper-title">Your details</span>
+                            <span class="nds-stepper-description">Mobile number and reason</span>
+                            <span class="nds-stepper-next">Next: Insurance</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-stepper-step">
+                    <div class="nds-stepper-base">
+                        <div class="nds-stepper-circle" data-step-text="3"></div>
+                    </div>
+                    <div class="nds-stepper-content">
+                        <div class="nds-stepper-text">
+                            <span class="nds-stepper-title">Insurance</span>
+                            <span class="nds-stepper-description">Provider and policy number</span>
+                            <span class="nds-stepper-next">Next: Review &amp; Confirm</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-stepper-step">
+                    <div class="nds-stepper-base">
+                        <div class="nds-stepper-circle" data-step-text="4"></div>
+                    </div>
+                    <div class="nds-stepper-content">
+                        <div class="nds-stepper-text">
+                            <span class="nds-stepper-title">Review &amp; Confirm</span>
+                            <span class="nds-stepper-description">Check and confirm the booking</span>
+                            <span class="nds-stepper-next">Next: Booked</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="nds-stepper-step">
+                    <div class="nds-stepper-base">
+                        <div class="nds-stepper-circle" data-step-text="5"></div>
+                    </div>
+                    <div class="nds-stepper-content">
+                        <div class="nds-stepper-text">
+                            <span class="nds-stepper-title">Booked</span>
+                            <span class="nds-stepper-description">Receive your reference number</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</section>
+    </div>
+</div>
+    </main><!-- footer -->
+<%- include('partials/footer') %>
+<%- include('partials/scripts', { js: ['/js/book.js'] }) %>

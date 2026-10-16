@@ -5,9 +5,9 @@
 // chrome; it never styles what authors put inside it.
 //
 // `data-panel-side` picks the edge: start/end are LOGICAL (flip with dir),
-// left/right/top/bottom are PHYSICAL (fixed). Only one panel is ever open
-// (nds-panels.js enforces it), so every instance shares one --panel-z and
-// markup order is irrelevant.
+// left/right/top/bottom are PHYSICAL (fixed). Panels share one --panel-z;
+// nds-panels.js marks the ones under a modal `covered`, which sinks them
+// below its backdrop (panel z − 1).
 
 @use '../mixins' as *;
 
@@ -29,10 +29,12 @@
 // Root
 // ----------------------------------------------
 .nds-panel {
-    --_panel-width:   var(--panel-width, min(420px, 100vw));
+    // The knobs set the md size; data-panel-size scales from them.
+    --_panel-scale:   1;
+    --_panel-width:   min(calc(var(--panel-width, 420px) * var(--_panel-scale)), 100vw);
     // svh (not vh/dvh) so the sheet is sized for the smaller mobile viewport
     // and never gets cut off when the URL bar expands.
-    --_panel-height:  var(--panel-height, 60svh);
+    --_panel-height:  calc(var(--panel-height, 60svh) * var(--_panel-scale));
     // Sit below the sticky header by default — the nav paints at a higher
     // z-index (1000 > 999), so a panel pinned to top:0 would clip under it.
     // Priority: consumer knob --panel-top → JS live measurement --_header-offset
@@ -50,6 +52,10 @@
 
     position: fixed;
     z-index: var(--_panel-z);
+
+    &[data-state~="covered"] {
+        z-index: calc(var(--_panel-z) - 2);
+    }
     display: flex;
     flex-direction: column;
     gap: var(--_panel-gap);
@@ -69,8 +75,13 @@
 }
 
 .nds-panel:is([data-state~="open"], [data-state~="closing"]) {
-    transition: transform var(--nds-transition);
+    transition: transform var(--nds-transition), width var(--nds-transition), height var(--nds-transition), max-height var(--nds-transition);
 }
+
+// Size ladder stepped by [data-panel-resize] (md is the root).
+.nds-panel[data-panel-size="sm"] { --_panel-scale: 0.75; }
+.nds-panel[data-panel-size="lg"] { --_panel-scale: 1.3333; }
+.nds-panel[data-panel-size="xl"] { --_panel-scale: 1.75; }
 
 // ----------------------------------------------
 // Inline sides — start / end / left / right
@@ -142,9 +153,16 @@
 .nds-panel:is([data-panel-side="top"], [data-panel-side="bottom"]) {
     --_panel-radius: var(--panel-radius, var(--radius-lg));
 
+    --_panel-max-height: min(var(--_panel-height), calc(100svh - var(--_panel-top)));
+
     inset-inline: 0;
     width: auto;
-    max-height: min(var(--_panel-height), calc(100svh - var(--_panel-top)));
+    max-height: var(--_panel-max-height);
+
+    // A resizable sheet takes its rung's height, so a short one still visibly resizes.
+    &:is([data-panel-size], :has([data-panel-resize])) {
+        height: var(--_panel-max-height);
+    }
 }
 
 .nds-panel[data-panel-side="top"] {
@@ -176,7 +194,7 @@
 // page gutter (never edge-to-edge, which would crowd the viewport edge).
 .nds-panel:is([data-panel-side="top"], [data-panel-side="bottom"])
     :is(.nds-panel-header, .nds-panel-body, .nds-panel-footer) {
-    --_panel-content-width: var(--panel-content-width, var(--nds-content-MaxWidth));
+    --_panel-content-width: var(--panel-content-width, var(--nds-content-max-width));
     width: 100%;
     padding-inline: max(var(--nds-viewport-padding), calc((100% - var(--_panel-content-width)) / 2));
 }
@@ -197,10 +215,19 @@
     @include mobile {
         gap: var(--spacing-lg);
 
-        > .nds-btn[data-panel-close] {
+        > .nds-btn[data-panel-close],
+        > .nds-panel-action > .nds-btn {
             --btn-size: 32px;
         }
     }
+}
+
+// Several header buttons (a reset beside the close) sit together, closer than the header gap.
+.nds-panel-action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 // CANONICAL header structure, mirroring .nds-card-text: the title (and an
@@ -241,7 +268,7 @@
     font-size: var(--typo-text-sm-FS);
     line-height: var(--typo-text-sm-LH);
     font-weight: var(--font-weight-regular);
-    color: var(--text-secondary-paragraph);
+    color: var(--text-primary-paragraph);
 }
 
 // min-height:0 lets the flex child shrink below its intrinsic size so
@@ -251,6 +278,16 @@
     min-height: 0;
     overflow-y: auto;
     padding: var(--_panel-padding);
+
+    // With no footer below, the last content would sit on the panel's edge.
+    &:last-child {
+        padding-block-end: var(--spacing-4xl);
+    }
+
+    // The body padding already spaces the top; a leading divider keeps only a small gap.
+    > .nds-divider:first-child {
+        margin-block-start: var(--spacing-xl);
+    }
 }
 
 .nds-panel-footer {

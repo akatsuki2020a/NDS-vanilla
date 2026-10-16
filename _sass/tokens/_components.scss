@@ -3,12 +3,14 @@
 // --{component}-{property}-{variant}-{state}. Each consumes semantic/brand tokens.
 // The dark block at the bottom of this file is the same layer's dark half;
 // foundation tokens (+ their dark) live in tokens/_semantic.scss.
+// A dark area (data-theme="dark" on any element) re-lists both blocks, as there.
 // ════════════════════════════════════════════════════════════════════════════
 
-:root {
+:root,
+[data-theme~="dark"]:not(:root) {
 
     // ── autocomplete ──
-    --autocomplete-highlight: var(--colors-primary-100);
+    --autocomplete-highlight: var(--background-mark);
 
     // ── avatar ──
     --avatar-background: var(--colors-neutral-100);
@@ -179,6 +181,9 @@
     --link-oncolor-focused: var(--colors-base-white);
     --link-oncolor-visited: var(--colors-alpha-white-90);
 
+    // ── progress (the neutral fill; the stepper's neutral ring reads it too) ──
+    --progress-background-neutral: var(--colors-neutral-700);
+
     // ── radio ──
     --radio-primary-checked: var(--controls-primary-checked);
     --radio-primary-hovered: var(--controls-primary-hovered);
@@ -305,13 +310,11 @@
 /* ── Dark Mode — the same layer's dark half ──
    Components run in the SAME ORDER as the light block above, so a token and its
    dark rebind sit at the same relative position in both halves.
-   Activated via: <html data-theme="dark">
+   Activated via: <html data-theme="dark">, or data-theme="dark" on a dark surface
    ── */
 
-:root[data-theme~="dark"] {
-
-    // ── autocomplete ──
-    --autocomplete-highlight: var(--colors-primary-alpha-50);
+:root[data-theme~="dark"],
+[data-theme~="dark"]:not(:root) {
 
     // ── avatar ──
     --avatar-background: var(--colors-neutral-700);
@@ -379,6 +382,9 @@
     --link-neutral-focused: var(--colors-neutral-200);
     --link-neutral-visited: var(--colors-neutral-300);
 
+    // ── progress ──
+    --progress-background-neutral: var(--colors-neutral-200);
+
     // ── radio (brighter for dot-with-border style) ──
     --radio-neutral-checked: var(--colors-neutral-400);
     --radio-neutral-hovered: var(--colors-neutral-300);
@@ -395,7 +401,6 @@
     --stepper-button-current-hovered: var(--colors-primary-600);
     --stepper-button-upcoming: var(--colors-neutral-600);
     --stepper-button-upcoming-hovered: var(--colors-neutral-600);
-    --stepper-text-primary: var(--text-default);
     --stepper-line-current: var(--colors-neutral-600);
     --stepper-line-upcoming: var(--colors-neutral-600);
 

@@ -23,7 +23,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, 'scripts'))
 import mkrelease
 
-IQ = os.path.join(ROOT, '_includes', 'NDS-IQ.md')
+# The draft: the file people edit. publish-iq.py runs the same checks on it.
+IQ = os.path.join(ROOT, '_includes', 'NDS-IQ-draft.md')
 VERSION = '1.7.0'   # names the stub zip's root folder and CHANGELOG section
 
 # The _source/ anchors and refs verify() checks are NOT staged here: the zip
@@ -38,7 +39,9 @@ def collect_refs(block):
         with open(os.path.join(ROOT, 'guides', f'{name}.md'), encoding='utf8') as f:
             guides += f.read()
     refs = re.findall(r'NDS_ROOT/([^\s`)\]]+)', block + guides)
-    refs += re.findall(r'`((?:_site|_source)/[^`]*)`', block + 'see `_site/index.html`')
+    with open(os.path.join(ROOT, 'NDS-INDEX.md'), encoding='utf8') as f:
+        index = f.read()
+    refs += re.findall(r'`((?:_site|_source)/[^`]*)`', block + index + 'see `_site/index.html`')
     return {p for p in refs if '<' not in p and '*' not in p
             and not p.startswith('_source/')}
 
@@ -46,7 +49,7 @@ def collect_refs(block):
 # The doc copy groups its rules under comment headings and the served gate is
 # minified, so the guard has to strip comments before comparing. Keep one here
 # or that stripping goes unexercised.
-GATE_CSS = '/* colors */ html{background-color:#fff}i.hgi-stroke{opacity:0}'
+GATE_CSS = '/* colors */ html{background-color:#fff}html :where(.nds-topbar){height:40px}'
 
 
 def build_stub_zip(version, refs_from, iq_bytes=None, gate_doc=None):
@@ -77,13 +80,15 @@ def build_stub_zip(version, refs_from, iq_bytes=None, gate_doc=None):
         # head.md prints. Both must exist or the guard cannot run at all, so the
         # stub carries a matching pair; gate_doc stages a drifted doc side.
         put(pkg + '_site/index.html',
-            f'<a href="../index.html">ok</a><style>{GATE_CSS}</style>')
+            f'<a href="../index.html">ok</a><style>{GATE_CSS}</style><script>(function(){{}})()</script></head>')
         put(pkg + '_site/ui-shell/head.html',
-            '<div id="panel-setup-html">&lt;style&gt;'
+            '<script type="text/html" id="head-setup"></script><code class="lang-html code">&lt;style&gt;'
             + html.escape(gate_doc if gate_doc is not None else GATE_CSS, quote=False)
-            + '&lt;/style&gt;</div><div id="panel-setup-js"></div>')
+            + '&lt;/style&gt;&lt;script&gt;(function(){})()&lt;/script&gt;</code>')
         put(pkg + 'CHANGELOG.md', f'## [{version}]\n')
         put(pkg + 'README.md', 'see `_site/index.html`\n')
+        with open(os.path.join(ROOT, 'NDS-INDEX.md'), encoding='utf8') as f:
+            put(pkg + 'NDS-INDEX.md', f.read())
         put(pkg + 'NDS-IQ.md', iq_bytes if iq_bytes is not None else block)
         for name in ('get-started', 'integration-quality'):
             put(f'{pkg}_site/guides/{name}.html', guide_html)
@@ -97,22 +102,27 @@ def build_stub_zip(version, refs_from, iq_bytes=None, gate_doc=None):
     return path
 
 
-def run(mutate=None, version=VERSION):
-    """verify() against an optionally broken rules file. Returns its exit
-    message, or None when it passed."""
+INDEX = os.path.join(ROOT, 'NDS-INDEX.md')
+
+
+def run(mutate=None, version=VERSION, target=IQ):
+    """verify() against an optionally broken rules file (or index, via target).
+    Returns its exit message, or None when it passed."""
     with open(IQ, encoding='utf8') as f:
+        rules = f.read()
+    with open(target, encoding='utf8', newline='') as f:
         original = f.read()
     try:
         if mutate:
-            with open(IQ, 'w', encoding='utf8', newline='\n') as f:
+            with open(target, 'w', encoding='utf8', newline='') as f:
                 f.write(mutate(original))
         try:
-            mkrelease.verify(build_stub_zip(version, refs_from=original), version)
+            mkrelease.verify(build_stub_zip(version, refs_from=rules), version, IQ)
             return None
         except SystemExit as e:
             return str(e)
     finally:
-        with open(IQ, 'w', encoding='utf8', newline='\n') as f:
+        with open(target, 'w', encoding='utf8', newline='') as f:
             f.write(original)
 
 
@@ -137,17 +147,22 @@ CASES = [
      lambda t: t.replace('Never write `.nds-*` markup from memory', ''),
      VERSION, 'anchor canon'),
 
-    ('reference index points at a _source/ path not in the repo tree',
+    # The rules name no paths now; NDS-INDEX.md carries them, so its dead path is the case.
+    ('NDS-INDEX.md points at a _source/ path not in the repo tree',
      lambda t: t.replace('`_source/_sass/tokens/_semantic.scss`', '`_source/_sass/tokens/_gone.scss`'),
-     VERSION, 'missing from the repo tree'),
+     VERSION, 'missing from the repo tree', INDEX),
+
+    # A path, class or API in the rules goes stale on the next release.
+    ('a release fact creeps into the rules prose',
+     lambda t: t + 'Read `_source/layout/section.md` and use `nds-grid`.', VERSION, 'release facts'),
 ]
 
 
 def main():
     failures = []
 
-    for label, mutate, version, expect in CASES:
-        msg = run(mutate, version)
+    for label, mutate, version, expect, *target in CASES:
+        msg = run(mutate, version, *target)
         ok = (msg is None) if expect is None else (msg is not None and expect in msg)
         print(f'  {"pass" if ok else "FAIL"}  {label}')
         if not ok:
@@ -166,13 +181,13 @@ def main():
     # while its selector stayed put. The second is the one a selector-only
     # comparison waved through, so it gets its own case.
     for label, drifted in (
-        ('a rule goes missing', GATE_CSS.replace('i.hgi-stroke', 'i.hgi-gone')),
+        ('a rule goes missing', GATE_CSS.replace('.nds-topbar', '.nds-gone')),
         ('a rule keeps its selector but changes value',
-         GATE_CSS.replace('opacity:0', 'opacity:1')),
+         GATE_CSS.replace('height:40px', 'height:41px')),
     ):
         zip_path = build_stub_zip(VERSION, refs_from=source, gate_doc=drifted)
         try:
-            mkrelease.verify(zip_path, VERSION)
+            mkrelease.verify(zip_path, VERSION, IQ)
             ok, detail = False, 'accepted a drifted critical gate'
         except SystemExit as e:
             ok, detail = 'has drifted' in str(e), str(e)

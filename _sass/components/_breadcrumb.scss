@@ -9,6 +9,8 @@
    ======================================== */
 
 .nds-breadcrumb {
+    // Crumbs are neutral: the link default is primary.
+    @include link-colors(neutral);
     list-style: none;
     display: flex;
     padding: 0;
@@ -100,4 +102,9 @@
             content: none;
         }
     }
+}
+
+// Loading shows the skeleton above, not the spinner.
+.nds-breadcrumb-nav.nds-loading {
+    @include loading-skeleton-host;
 }

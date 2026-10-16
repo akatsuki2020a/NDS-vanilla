@@ -98,7 +98,7 @@
     }
 
     /* Suppress init-time transition for auto-expanded sections. JS stamps
-       data-nds-accordion-initialized two rAFs after setupInitialState so
+       data-nds-accordion-initialized one rAF after setupInitialState so
        the browser paints state="open" with this rule still applying — no
        0fr → 1fr animation on load. User-driven toggles after init animate
        normally via the .nds-accordion-collapse transition above. */
@@ -110,6 +110,54 @@
     .nds-accordion-body {
         padding: var(--spacing-xl) var(--spacing-xl);
         color: var(--text-default);
+    }
+
+    /* Minimal: no dividers, a flush fit-content toggle in neutral link colours at real button sizes */
+    &.nds-minimal {
+        .nds-accordion-item {
+            border-top: 0;
+        }
+
+        .nds-accordion-body {
+            padding: var(--_accordion-header-padding) 0;
+        }
+
+        .nds-accordion-btn {
+            --btn-bg-hover: transparent;
+            --btn-bg-active: transparent;
+            --btn-color: var(--link-neutral);
+            --btn-color-hover: var(--link-neutral-hovered);
+            --btn-height: var(--_btn-size);
+            --btn-icon-size: calc(var(--_btn-size) / 2);
+            --_btn-after-size: calc(var(--_btn-size) / 2); // chevron keeps its menu-btn size
+            width: fit-content;
+            padding: 0;
+            font-size: var(--_btn-FS);
+            line-height: var(--_btn-LH);
+
+            &:active {
+                color: var(--link-neutral-pressed);
+            }
+
+            .nds-accordion-title {
+                width: auto;
+            }
+        }
+
+        // Same values as .nds-btn.nds-md / .nds-sm
+        &.nds-md .nds-accordion-btn {
+            --btn-size: 32px;
+            --btn-gap: var(--spacing-sm);
+            --btn-FS: var(--typo-text-sm-FS);
+            --btn-LH: var(--typo-text-sm-LH);
+        }
+
+        &.nds-sm .nds-accordion-btn {
+            --btn-size: 24px;
+            --btn-gap: var(--spacing-xs);
+            --btn-FS: var(--typo-text-xs-FS);
+            --btn-LH: var(--typo-text-xs-LH);
+        }
     }
 
     /* Card View Styling */
@@ -179,7 +227,7 @@
 // ==============================================
 // While a filter pass runs on the accordion (e.g. faq-template targets it
 // with data-filter-items="nds-accordion-item"), items render as bars
-// instead of the spinner + dim (suppression in _loading.scss). The same
+// instead of the spinner + dim (turned off at the end of this file). The same
 // look serves the pre-init hold: a not-yet-initialized filter target shows
 // shimmer (crit exempts accordions from its visibility hold and shapes the
 // item count; bar text is transparent so URL-filtered loads can't flash).
@@ -194,11 +242,14 @@
 
     .nds-accordion-item {
 
+        // The bar is fit-content, so space-between would center it between a
+        // leading icon and the chevron — auto margin keeps it at the start.
         .nds-accordion-title {
+            margin-inline-end: auto;
             @include skeleton-bar;
         }
 
-        // Button icons (leading icon and chevron) skeleton too — mask:none so
+        // Leading icons skeleton too — mask:none so
         // masked icons paint their whole box as a block (a masked gradient
         // would reveal the icon's shape); font glyphs die via the transparent
         // color from skeleton-fill.
@@ -206,6 +257,15 @@
             mask: none;
             border-radius: var(--nds-skeleton-radius);
             @include skeleton-fill;
+        }
+
+        // The chevron is the button's ::after — skeleton-fill's fit-content
+        // would collapse the empty pseudo, so it gets the fill alone.
+        .nds-accordion-btn::after {
+            mask: none;
+            background: var(--nds-skeleton-fill);
+            border-radius: var(--nds-skeleton-radius);
+            opacity: 1;
         }
 
         // Open items: one bar block over the body, inset to its padding (the
@@ -222,4 +282,9 @@
             }
         }
     }
+}
+
+// Loading shows the skeleton above, not the spinner.
+.nds-accordion.nds-loading {
+    @include loading-skeleton-host;
 }

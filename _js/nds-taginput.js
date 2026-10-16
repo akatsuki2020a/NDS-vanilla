@@ -21,6 +21,7 @@
  *   - data-strict needs data-url: typed text never commits, only picked suggestions and
  *     addTag().
  *   - Backspace on an empty input pops the last tag BACK INTO the input for editing.
+ *   - data-state~="readonly" blocks chip removal and the Backspace pop; the methods still work.
  */
 /**
  * NDS TagInput — free-text tags committed as removable chips while typing.
@@ -43,11 +44,16 @@
 (function () {
     'use strict';
 
-    const STRINGS = {
-        en: { added: 'Added', removed: 'Removed', editing: 'Editing', duplicate: 'Already added', max: 'Maximum limit', cleared: 'All tags removed', strict: 'Choose from the suggestions' },
-        ar: { added: 'تمت إضافة', removed: 'تمت إزالة', editing: 'تعديل', duplicate: 'مضاف مسبقًا', max: 'الحد الأقصى', cleared: 'تمت إزالة جميع الوسوم', strict: 'اختر من الاقتراحات' }
-    };
-    const S = () => STRINGS[NDS.langKey];
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    const strings = NDS.i18n.strings('taginput', {
+        added: 'Added {value}',
+        removed: 'Removed {value}',
+        editing: 'Editing {value}',
+        duplicate: 'Already added',
+        max: 'Maximum limit {n}',
+        cleared: 'All tags removed',
+        strict: 'Choose from the suggestions',
+    });
 
     // Chips are buttons outside .nds-form-action, so the forms disabled hook
     // doesn't reach them (same rationale as the multiselect hook).
@@ -122,14 +128,14 @@
                     if (this.strict) { this._strictReject(); return; }
                     this.addTag(this.input.value);
                     this.input.value = '';
-                } else if (e.key === 'Backspace' && this.input.value === '' && this.tags.length) {
+                } else if (e.key === 'Backspace' && this.input.value === '' && this.tags.length && !this.isReadonly()) {
                     // Pop the last tag back into the input for editing
                     // (Gmail-recipient behavior) rather than deleting it.
                     e.preventDefault();
                     const last = this.tags.pop();
                     this.renderChips();
                     this.input.value = last;
-                    NDS.announce(S().editing + ' ' + last);
+                    NDS.announce(strings.text('editing', { value: last }));
                     this.emitChange();
                 }
             }, { signal });
@@ -190,10 +196,16 @@
             return this.tags.slice();
         }
 
+        // Readonly blocks the user only: chips are keyboard-reachable past the
+        // readonly CSS, while removeTag()/clear() stay callable from code.
+        isReadonly() {
+            return NDS.State.has(this.root, 'readonly');
+        }
+
         // Strict-mode rejection of typed commits — same feedback shape as the
         // duplicate/max rejections in addTag (incl. the macrotask deferral).
         _strictReject() {
-            const msg = S().strict;
+            const msg = strings.text('strict');
             setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: msg }), 0);
             NDS.announce(msg);
         }
@@ -212,19 +224,20 @@
             // run between the two listeners) — the status must land once the
             // whole event dispatch has finished.
             if (this.tags.length >= this.maxTags) {
-                const msg = S().max + ' ' + this.maxTags;
+                const msg = strings.text('max', { n: this.maxTags });
                 setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: msg }), 0);
                 NDS.announce(msg);
                 return;
             }
             if (this.tags.some(t => t.toLowerCase() === value.toLowerCase())) {
-                setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: S().duplicate }), 0);
-                NDS.announce(S().duplicate);
+                // Same macrotask deferral as the max rejection above.
+                setTimeout(() => NDS.Forms?.setStatus?.({ element: this.root, status: 'error', message: strings.text('duplicate') }), 0);
+                NDS.announce(strings.text('duplicate'));
                 return;
             }
             this.tags.push(value);
             this.renderChips();
-            NDS.announce(S().added + ' ' + value);
+            NDS.announce(strings.text('added', { value }));
             this.emitChange();
         }
 
@@ -241,7 +254,7 @@
                 const remaining = this.formControl.querySelectorAll('.nds-chip');
                 (remaining[Math.min(removedIdx, remaining.length - 1)] || this.input)?.focus();
             }
-            NDS.announce(S().removed + ' ' + value);
+            NDS.announce(strings.text('removed', { value }));
             this.emitChange();
         }
 
@@ -249,7 +262,7 @@
             if (!this.tags.length) return;
             this.tags = [];
             this.renderChips();
-            NDS.announce(S().cleared);
+            NDS.announce(strings.text('cleared'));
             this.emitChange();
         }
 
@@ -287,7 +300,7 @@
                 // consumer/e2e selectors — removal routes through the closure.
                 data: { taginputValue: value },
                 disabled: NDS.State.has(this.root, 'disabled'),
-                onRemove: () => this.removeTag(value),
+                onRemove: () => { if (!this.isReadonly()) this.removeTag(value); },
             });
         }
 
@@ -305,7 +318,7 @@
 
     function initializeTagInputs() {
         document.querySelectorAll('.nds-taginput').forEach(el => {
-            if (el.closest('code, .code-example')) return;
+            if (el.closest('code')) return;
             if (el.hasAttribute('data-nds-taginput-initialized')) return;
             new NDSTagInput(el);
         });

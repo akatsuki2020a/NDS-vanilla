@@ -1,10 +1,12 @@
 /* NDS.Ipv — public surface
  * Rides: nds-backdrop (dims the page behind the overlay; soft)
  * Methods:
- *   NDS.Ipv.init() / .reinit()   wire the thumbnails (the overlay builds on first open)
+ *   NDS.Ipv.init() / .reinit()   wire the thumbnails (the overlay builds on first open);
+ *                                a repeat call gives later thumbnails tabindex + role
  *   NDS.Ipv.create()             build it and return the instance (window.ndsIPV)
  *   instance.open(thumb)         open the viewer on a thumbnail element
  *   instance.close()
+ *   instance.destroy()           detach every listener and remove the overlay; init() builds anew
  * Events:
  *   (none)
  * Hooks:
@@ -14,7 +16,7 @@
  * Gotchas:
  *   - One viewer serves the whole page; the thumbnails form a single gallery you can page
  *     through with the arrow controls.
- *   - The overlay (#ndsIpvPopupOverlay) is built by the component on the FIRST open —
+ *   - The overlay (#nds-ipv-popup-overlay) is built by the component on the FIRST open —
  *     a page where no thumbnail is clicked carries zero overlay DOM and none of the
  *     document-level listeners.
  *   - The instance is a page singleton at window.ndsIPV.
@@ -26,6 +28,26 @@
 
 (function () {
     'use strict';
+
+    // English defaults; the assets/i18n/{lang}.json pack overrides them. The overlay markup carries
+    // the same words as data-i18n markers.
+    NDS.i18n.strings('ipv', {
+        viewerLabel: 'Image viewer',
+        zoomIn: 'Zoom in',
+        zoomOut: 'Zoom out',
+        resetZoom: 'Reset zoom',
+        toggleUI: 'Toggle controls',
+        close: 'Close',
+        prevImage: 'Previous image',
+        nextImage: 'Next image',
+        instructionsTitle: 'Controls:',
+        instructionsScroll: '• Scroll to zoom',
+        instructionsDrag: '• Drag to pan',
+        instructionsReset: '• Double-click to reset',
+        instructionsNav: '• Arrow keys to navigate',
+        instructionsToggle: '• H key to toggle UI',
+        instructionsClose: '• ESC to close',
+    });
 
     // Zoom limits and step factors — shared by buttons, keys, wheel, and pinch.
     const ZOOM = { min: 0.1, max: 10, step: 1.5, wheelIn: 1.1, wheelOut: 0.9 };
@@ -52,7 +74,6 @@
             // Overlay elements are cached by ensureOverlay() on the first open —
             // until then the page carries no overlay DOM at all.
             this.el = {};
-            this.uiEls = [];
 
             // The live full-size <img>, cached so the transform hot path never
             // re-queries the DOM. Set in loadImage(), cleared in removeImage().
@@ -93,42 +114,21 @@
             createOverlayMarkup();
 
             this.el = {
-                overlay: document.getElementById('ndsIpvPopupOverlay'),
+                overlay: document.getElementById('nds-ipv-popup-overlay'),
                 container: document.querySelector('.nds-ipv-popup-container'),
-                zoomInfo: document.getElementById('ndsIpvZoomInfo'),
+                zoomInfo: document.getElementById('nds-ipv-zoom-info'),
                 controls: document.querySelector('.nds-ipv-popup-controls'),
-                instructions: document.querySelector('.nds-ipv-instructions'),
                 navControls: document.querySelector('.nds-ipv-navigation-controls'),
-                imageCounter: document.getElementById('ndsIpvImageCounter'),
+                imageCounter: document.getElementById('nds-ipv-image-counter'),
                 closeBtn: document.querySelector('.nds-ipv-close-btn'),
                 prevBtn: document.querySelector('.nds-ipv-prev-btn'),
                 nextBtn: document.querySelector('.nds-ipv-next-btn')
             };
 
-            // UI chrome toggled together by setUIHidden().
-            this.uiEls = [
-                this.el.controls,
-                this.el.instructions,
-                this.el.zoomInfo,
-                this.el.navControls,
-                this.el.imageCounter
-            ];
-
             this.el.overlay.setAttribute('data-nds-ipv-initialized', 'true');
 
             this.attachControlEvents();
             this.attachGlobalEvents();
-
-            // Localize the injected overlay. English defaults are baked into the
-            // markup, so this is fire-and-forget (the first open may show English
-            // for a beat on a localized page — the same arm-time pattern the
-            // accessibility panel uses). The dialog's own aria-label can't be
-            // reached by apply()'s descendant walk, so set it from the returned data.
-            NDS.i18n.load('ipv', this.el.overlay).then((data) => {
-                if (data && data.viewerLabel) {
-                    this.el.overlay.setAttribute('aria-label', data.viewerLabel);
-                }
-            });
         }
 
         // ── Utilities ────────────────────────────────────────────────────
@@ -209,8 +209,7 @@
         // ── UI chrome ────────────────────────────────────────────────────
         setUIHidden(hidden) {
             this.state.isUIHidden = hidden;
-            const method = hidden ? 'add' : 'remove';
-            this.uiEls.forEach(el => el && el.classList[method]('nds-ipv-ui-hidden'));
+            this.el.overlay.classList.toggle('nds-ipv-ui-hidden', hidden);
         }
 
         toggleUI() {
@@ -240,12 +239,10 @@
             if (this.el.nextBtn) this.el.nextBtn.disabled = currentIndex === total - 1;
 
             // Hide nav + counter when there's only one image.
-            if (this.el.navControls) {
-                this.el.navControls.style.display = total <= 1 ? 'none' : 'flex';
-            }
+            if (this.el.navControls) this.el.navControls.hidden = total <= 1;
             if (this.el.imageCounter) {
                 this.el.imageCounter.textContent = `${currentIndex + 1} / ${total}`;
-                this.el.imageCounter.style.display = total <= 1 ? 'none' : 'block';
+                this.el.imageCounter.hidden = total <= 1;
             }
         }
 
@@ -255,7 +252,7 @@
             this.showSpinner();
 
             const img = document.createElement('img');
-            img.id = 'ndsIpvPopupImage';
+            img.id = 'nds-ipv-popup-image';
             img.className = 'nds-ipv-popup-image';
             img.alt = alt || '';
             img.src = src;
@@ -280,7 +277,6 @@
             img.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
             img.addEventListener('touchend', () => this.handleTouchEnd());
             img.addEventListener('dblclick', () => this.resetTransform());
-            img.addEventListener('contextmenu', (e) => e.preventDefault());
         }
 
         handleMouseDown(e) {
@@ -368,8 +364,9 @@
                 '0': () => this.resetTransform(),
                 'h': () => this.toggleUI(),
                 'H': () => this.toggleUI(),
-                'ArrowLeft': () => this.showPrev(),
-                'ArrowRight': () => this.showNext()
+                // Arrows follow the screen: prev sits at inline-start, which is right in RTL.
+                'ArrowLeft': () => (NDS.isRTL ? this.showNext() : this.showPrev()),
+                'ArrowRight': () => (NDS.isRTL ? this.showPrev() : this.showNext())
             };
 
             const action = actions[e.key];
@@ -384,7 +381,7 @@
             this.ensureOverlay();
 
             // Prefer the lazy-load / full-resolution source, fall back to the src.
-            const src = thumb.dataset.ipvFull || thumb.dataset.src || thumb.getAttribute('data-src') || thumb.src;
+            const src = thumb.dataset.ipvFull || thumb.dataset.src || thumb.src;
 
             if (this.el.overlay) {
                 this.el.overlay.classList.add('nds-ipv-active');
@@ -392,6 +389,7 @@
 
             // First open (not gallery prev/next): start a fresh modal session.
             if (!skipIndexUpdate) {
+                this.state.thumbnails = this.collectThumbnails();
                 this.state.currentIndex = this.state.thumbnails.indexOf(thumb);
                 this._containerRect = null; // recompute against the now-visible overlay
 
@@ -433,24 +431,31 @@
         }
 
         // ── Event attachment ─────────────────────────────────────────────
-        attachThumbnailEvents() {
-            // Known thumbnails drive prev/next; exclude any inside code examples.
-            this.state.thumbnails = Array.from(document.querySelectorAll('.nds-ipv-thumbnail'))
-                .filter(thumb => !thumb.closest('code, .code-example'));
+        // Thumbnails on the page now, minus any inside code examples. Read at open,
+        // so a thumbnail added after init joins the gallery with no reinit.
+        collectThumbnails() {
+            return Array.from(document.querySelectorAll('.nds-ipv-thumbnail'))
+                .filter(thumb => !thumb.closest('code'));
+        }
 
-            // Make each thumbnail keyboard-operable without changing authored markup.
-            // Deferred: thumbnails already paint correctly without JS (this is an
-            // a11y-only enhancement), so a gallery page with many images doesn't
-            // pay this as one blocking task.
+        // Make each thumbnail keyboard-operable without changing authored markup.
+        // Deferred: thumbnails already paint correctly without JS (this is an
+        // a11y-only enhancement), so a gallery page with many images doesn't
+        // pay this as one blocking task.
+        enhanceThumbnails() {
             NDS.onIdle(() => {
-                this.state.thumbnails.forEach(thumb => {
+                this.collectThumbnails().forEach(thumb => {
                     if (!thumb.hasAttribute('tabindex')) thumb.tabIndex = 0;
                     if (!thumb.hasAttribute('role')) thumb.setAttribute('role', 'button');
                 });
             });
+        }
+
+        attachThumbnailEvents() {
+            this.enhanceThumbnails();
 
             const { signal } = this.abortController;
-            const isKnownThumb = (el) => el && this.state.thumbnails.includes(el);
+            const isKnownThumb = (el) => el && !el.closest('code');
 
             // One delegated handler each for click and Enter/Space (O(1) wiring).
             document.addEventListener('click', (e) => {
@@ -502,9 +507,14 @@
         }
 
         destroy() {
-            if (this.abortController) this.abortController.abort();
-            if (this._offResize) this._offResize();
+            if (this.el.overlay && this.el.overlay.classList.contains('nds-ipv-active')) this.close();
+            this.abortController.abort();
+            this._offResize();
             document.removeEventListener('keydown', this.trapFocus);
+            if (this.el.overlay) this.el.overlay.remove();
+            this.el = {};
+            // Free the singleton slot so init() can build a fresh viewer.
+            if (window.ndsIPV === this) window.ndsIPV = null;
         }
 
         // Static factory method
@@ -513,55 +523,54 @@
         }
     }
 
-    // Inject the overlay markup once. English strings are baked in alongside
-    // data-i18n keys so it renders correctly with no JSON / before NDS.i18n
-    // resolves; NDS.i18n.load('ipv', overlay) swaps them per locale at init.
+    // Inject the overlay markup once. Its English sits beside data-i18n markers, which core
+    // translates when the overlay joins the page.
     function createOverlayMarkup() {
-        if (document.getElementById('ndsIpvPopupOverlay')) return;
+        if (document.getElementById('nds-ipv-popup-overlay')) return;
 
         const overlayHTML = `
-            <div class="nds-ipv-popup-overlay" id="ndsIpvPopupOverlay" role="dialog" aria-modal="true" aria-label="Image viewer">
+            <div class="nds-ipv-popup-overlay" id="nds-ipv-popup-overlay" data-theme="dark" role="dialog" aria-modal="true" aria-label="Image viewer" data-i18n-aria-label="ipv.viewerLabel">
                 <div class="nds-ipv-popup-container">
                     <div class="nds-ipv-popup-controls">
-                        <button class="nds-ipv-control-btn nds-ipv-zoom-in-btn" title="Zoom In" aria-label="Zoom in" data-i18n-attr="aria-label:zoomIn,title:zoomIn">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-zoom-in-btn" title="Zoom in" aria-label="Zoom in" data-i18n-aria-label="ipv.zoomIn" data-i18n-title="ipv.zoomIn">
                             <i class="nds-icon nds-hgi-zoom-in-area" aria-hidden="true"></i>
                         </button>
-                        <button class="nds-ipv-control-btn nds-ipv-zoom-out-btn" title="Zoom Out" aria-label="Zoom out" data-i18n-attr="aria-label:zoomOut,title:zoomOut">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-zoom-out-btn" title="Zoom out" aria-label="Zoom out" data-i18n-aria-label="ipv.zoomOut" data-i18n-title="ipv.zoomOut">
                             <i class="nds-icon nds-hgi-zoom-out-area" aria-hidden="true"></i>
                         </button>
-                        <button class="nds-ipv-control-btn nds-ipv-reset-zoom-btn" title="Reset Zoom" aria-label="Reset zoom" data-i18n-attr="aria-label:resetZoom,title:resetZoom">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-reset-zoom-btn" title="Reset zoom" aria-label="Reset zoom" data-i18n-aria-label="ipv.resetZoom" data-i18n-title="ipv.resetZoom">
                             <i class="nds-icon nds-hgi-square-arrow-shrink-01" aria-hidden="true"></i>
                         </button>
-                        <button class="nds-ipv-control-btn nds-ipv-ui-toggle-btn" title="Hide UI" aria-label="Toggle controls" data-i18n-attr="aria-label:toggleUI,title:toggleUI">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-ui-toggle-btn" title="Toggle controls" aria-label="Toggle controls" data-i18n-aria-label="ipv.toggleUI" data-i18n-title="ipv.toggleUI">
                             <i class="nds-icon nds-hgi-eye" aria-hidden="true"></i>
                         </button>
-                        <button class="nds-ipv-control-btn nds-ipv-close-btn" title="Close" aria-label="Close" data-i18n-attr="aria-label:close,title:close">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-close-btn" title="Close" aria-label="Close" data-i18n-aria-label="ipv.close" data-i18n-title="ipv.close">
                             <i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i>
                         </button>
                     </div>
 
                     <div class="nds-ipv-navigation-controls">
-                        <button class="nds-ipv-control-btn nds-ipv-prev-btn" title="Previous Image" aria-label="Previous image" data-i18n-attr="aria-label:prevImage,title:prevImage">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-prev-btn" title="Previous image" aria-label="Previous image" data-i18n-aria-label="ipv.prevImage" data-i18n-title="ipv.prevImage">
                             <i class="nds-icon nds-hgi-arrow-prev-01" aria-hidden="true"></i>
                         </button>
-                        <button class="nds-ipv-control-btn nds-ipv-next-btn" title="Next Image" aria-label="Next image" data-i18n-attr="aria-label:nextImage,title:nextImage">
+                        <button type="button" class="nds-btn nds-secondary nds-icon-only nds-circle nds-ipv-control-btn nds-ipv-next-btn" title="Next image" aria-label="Next image" data-i18n-aria-label="ipv.nextImage" data-i18n-title="ipv.nextImage">
                             <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
                         </button>
                     </div>
 
-                    <div class="nds-ipv-image-counter" id="ndsIpvImageCounter">1 / 1</div>
+                    <div class="nds-ipv-image-counter" id="nds-ipv-image-counter">1 / 1</div>
 
-                    <div class="nds-ipv-instructions">
-                        <strong data-i18n="instructionsTitle">Controls:</strong><br>
-                        <span data-i18n="instructionsScroll">• Scroll to zoom</span><br>
-                        <span data-i18n="instructionsDrag">• Drag to pan</span><br>
-                        <span data-i18n="instructionsReset">• Double-click to reset</span><br>
-                        <span data-i18n="instructionsNav">• Arrow keys to navigate</span><br>
-                        <span data-i18n="instructionsToggle">• H key to toggle UI</span><br>
-                        <span data-i18n="instructionsClose">• ESC to close</span>
+                    <div class="nds-ipv-instructions" data-hidden="sm">
+                        <strong data-i18n="ipv.instructionsTitle">Controls:</strong><br>
+                        <span data-i18n="ipv.instructionsScroll">• Scroll to zoom</span><br>
+                        <span data-i18n="ipv.instructionsDrag">• Drag to pan</span><br>
+                        <span data-i18n="ipv.instructionsReset">• Double-click to reset</span><br>
+                        <span data-i18n="ipv.instructionsNav">• Arrow keys to navigate</span><br>
+                        <span data-i18n="ipv.instructionsToggle">• H key to toggle UI</span><br>
+                        <span data-i18n="ipv.instructionsClose">• ESC to close</span>
                     </div>
 
-                    <div class="nds-ipv-zoom-info" id="ndsIpvZoomInfo">100%</div>
+                    <div class="nds-ipv-zoom-info" id="nds-ipv-zoom-info">100%</div>
                 </div>
             </div>
         `;
@@ -571,8 +580,10 @@
 
     // Initialization (called by nds-loader.js). The overlay builds lazily in
     // the instance's first open, so the singleton guard is the instance itself.
+    // A repeat call gives thumbnails added since then keyboard access.
     function initializeIPV() {
-        if (!window.ndsIPV) window.ndsIPV = new NDSImagePopupViewer();
+        if (window.ndsIPV) window.ndsIPV.enhanceThumbnails();
+        else window.ndsIPV = new NDSImagePopupViewer();
     }
 
     // Public API for the unified init system

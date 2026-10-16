@@ -1,5 +1,4 @@
 ---
-exclude_showcase: true
 layout: default
 title: "Page not found"
 lang: en
@@ -7,7 +6,7 @@ direction: ltr
 ---
 
 <div class="nds-content-layout">
-    <div class="nds-main-content">
+    <div class="nds-content" id="main-content">
         <section id="404" class="nds-content-section nds-status-section">
             <div class="nds-section-wrapper">
                 <div class="nds-section-image">

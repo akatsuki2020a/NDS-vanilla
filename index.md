@@ -3,17 +3,15 @@ layout: home
 
 lang: en
 direction: ltr
-exclude_showcase: true
 
 # Bundle sizes shown in the Architecture section (gzipped KB). Update when bundles change:
-# gzip -c assets/js/nds-main.min.js | wc -c (and delegated/extras, _site/.../nds.critical.min.css)
+# gzip -c <file> | wc -c, divided by 1024: nds-main.min.js, every other bundle but nds-audit, _site/.../nds.critical.min.css
 bundle_sizes:
   critical_css: 10 # nds.critical.min.css
-  core_js: 41 # nds-main.min.js (loads on every page)
-  total_js: 133 # main + delegated + extras (full library, demand-loaded)
+  core_js: 43 # nds-main.min.js (loads on every page)
+  total_js: 154 # every assets/js/*.min.js except nds-audit (full library, demand-loaded)
 ---
 
-<!-- Implementation Solution -->
 <section id="about" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
@@ -22,9 +20,10 @@ bundle_sizes:
         </div>
         <div class="nds-section-body">
             <div class="nds-block nds-prose">
-                <p>The Digital Government Authority (DGA) established a unified design language for Saudi Arabia's government websites and services. The specifications published on <a href="https://www.figma.com/@sdga" target="_blank">Figma</a> provide a clear reference; the challenge is turning that specification into maintainable, production-ready code.</p>
-                <p>The DGA's official implementation is a React and Storybook component library covering the core UI components. This project provides the design system in plain HTML, CSS, and JavaScript, together with the component library, layout system, page templates, documentation, and development environment. No frontend framework is required.</p>
-                <p>The system is also built for AI-assisted development. Every release ships <a href="{{ '/guides/integration-quality.html' | relative_url }}">NDS IQ</a>, a versioned instruction system that gives AI coding agents a consistent way to build with NDS.</p>
+                <p>The Digital Government Authority (DGA) sets one design language for Saudi Arabia's government websites and services. It publishes the specifications on <a href="https://www.figma.com/@sdga" target="_blank">Figma</a>, and its official code is a React and Storybook library of the core UI components.</p>
+                <p>This project builds the same design system in plain HTML, CSS, and JavaScript. Plain web code works in any stack: static sites, server-rendered pages, or apps built with React or another framework. It brings no framework or dependencies of its own.</p>
+                <p>It goes beyond the components, with a layout system, DGA page templates, documentation, and a development environment. A team can build complete pages, not just single parts.</p>
+                <p>It is also built for AI-assisted development. <a href="{{ '/guides/integration-quality.html' | relative_url }}">NDS IQ</a>, a versioned instruction system, gives AI coding agents a consistent way to build with NDS.</p>
             </div>
             <div class="nds-block">
                 <div class="nds-alert nds-card nds-inline" data-status="neutral" role="alert">
@@ -47,12 +46,11 @@ bundle_sizes:
     </div>
 </section>
 
-<!-- Who is this for? -->
 <section id="audience" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Who It's For</h2>
-            <p class="nds-section-description">Built for teams and individuals delivering, adapting, or learning government-grade web development.</p>
+            <p class="nds-section-description">For teams and people who build, adapt, or learn government web development.</p>
         </div>
         <div class="nds-section-body">
             <div class="nds-block">
@@ -63,21 +61,21 @@ bundle_sizes:
                             <i class="hgi hgi-stroke hgi-building-06"></i>
                             <span class="nds-label">Government teams &amp; agencies</span>
                         </span>
-                        <p class="nds-item-desc">Delivering DGA-aligned digital services on their existing technology stack.</p>
+                        <p class="nds-item-desc">Deliver DGA-aligned digital services on the stack you already run.</p>
                     </div>
                     <div class="nds-definition-item nds-card nds-shadow">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-briefcase-01"></i>
                             <span class="nds-label">Freelancers</span>
                         </span>
-                        <p class="nds-item-desc">Building client sites with a reusable component library and ready-to-use page templates.</p>
+                        <p class="nds-item-desc">Build client sites with a reusable component library and ready page templates.</p>
                     </div>
                     <div class="nds-definition-item nds-card nds-shadow">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-mortarboard-02"></i>
                             <span class="nds-label">Students &amp; fresh graduates</span>
                         </span>
-                        <p class="nds-item-desc">Learning core HTML, CSS, and vanilla JavaScript
+                        <p class="nds-item-desc">Learn core HTML, CSS, and plain JavaScript
                             from a readable, production-grade codebase.</p>
                     </div>
                     <div class="nds-definition-item nds-card nds-shadow">
@@ -85,7 +83,7 @@ bundle_sizes:
                             <i class="hgi hgi-stroke hgi-teaching"></i>
                             <span class="nds-label">Teachers &amp; trainers</span>
                         </span>
-                        <p class="nds-item-desc">Using real components, page templates, and patterns as practical material for web-development courses, bootcamps, or workshops.</p>
+                        <p class="nds-item-desc">Teach with real components, page templates, and patterns in web development courses, bootcamps, and workshops.</p>
                     </div>
                 </div>
             </div>
@@ -99,7 +97,7 @@ bundle_sizes:
                     <div class="nds-alert-content">
                         <div class="nds-alert-text">
                             <span class="nds-alert-title">Important</span>
-                            <p class="nds-alert-description">The default visual identity is exclusive to Saudi Arabia government entities. It covers design tokens, colors, logos, and the digital-stamp component. Non-government projects must replace these with the adopting organization's own identity before deployment.</p>
+                            <p class="nds-alert-description">The default visual identity is exclusive to Saudi Arabia government entities. It covers design tokens, colors, logos, and the digital-stamp component. Non-government projects must replace these with their own identity before they go live.</p>
                         </div>
                         <div class="nds-alert-actions">
                             <a href="{{ '/components/themes.html' | relative_url }}" class="nds-link">Theming guide</a>
@@ -111,216 +109,230 @@ bundle_sizes:
     </div>
 </section>
 
-<!-- Compliance Ready -->
 <section id="compliance" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
-            <h2 class="nds-section-title">Compliance Ready</h2>
-            <p class="nds-section-brief">DGA page templates implemented as working code and ready to be adapted for deployment.</p>
-            <p class="nds-section-description">Components follow the defined design tokens, typography, spacing, and interaction patterns. The templates below cover common government service screens and can be copied, populated with project content, and adapted for deployment.</p>
+            <div class="nds-section-action nds-wrap">
+                <a href="{{ '/templates/index.html' | relative_url }}" class="nds-btn nds-secondary-outline">
+                    <span class="nds-label">View all</span>
+                </a>
+            </div>
+            <h2 class="nds-section-title">DGA Page Templates</h2>
+            <p class="nds-section-brief">DGA page templates as working code.</p>
+            <p class="nds-section-description">Components follow the DGA design tokens, typography, spacing, and interaction patterns. The templates below cover common government service screens. Copy one, add your content, and adapt it to your project.</p>
         </div>
-        <div class="nds-section-body nds-max-width">
-            <div class="nds-block">
-                <div class="nds-swiper" data-swiper-loop style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:0px">
-                    <div class="nds-swiper-wrapper">
-                        {% for tpl in site.data.content.templates %}
-                        <div class="nds-swiper-slide">
-                            <div class="nds-card nds-stroke nds-shadow">
-                                <div class="nds-card-header">
-                                    <div class="nds-card-featured-icon">
-                                        <span class="nds-featured-icon nds-circle nds-xl">
-                                            {{ tpl.icon }}
-                                        </span>
-                                    </div>
+    </div>
+    <div class="nds-section-body nds-max-width">
+        <div class="nds-block">
+            <div class="nds-swiper" data-swiper-loop style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:0px">
+                <div class="nds-swiper-wrapper">
+                    {% for tpl in site.data.content.templates %}
+                    <div class="nds-swiper-slide">
+                        <div class="nds-card nds-stroke nds-shadow">
+                            <div class="nds-card-header">
+                                <div class="nds-card-featured-icon">
+                                    <span class="nds-featured-icon nds-circle nds-xl">
+                                        {{ tpl.icon }}
+                                    </span>
                                 </div>
-                                <div class="nds-card-content">
-                                    <div class="nds-card-text">
-                                        <span class="nds-card-title">{{ tpl.title }}</span>
-                                        <p class="nds-card-description">{{ tpl.description }}</p>
-                                    </div>
+                                {%- if tpl.new %}
+                                <div class="nds-card-status">
+                                    <span class="nds-tag nds-sm" data-status="info">
+                                        <span class="nds-label">New</span>
+                                    </span>
                                 </div>
-                                {% if tpl.url %}
-                                <div class="nds-card-actions">
-                                    <a href="{{ tpl.url | relative_url }}" class="nds-btn nds-primary">
-                                        <span class="nds-label">View Template</span>
-                                    </a>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                             </div>
+                            <div class="nds-card-content">
+                                <div class="nds-card-text">
+                                    <span class="nds-card-title">{{ tpl.title }}</span>
+                                    <p class="nds-card-description">{{ tpl.description }}</p>
+                                </div>
+                            </div>
+                            {% if tpl.url %}
+                            <div class="nds-card-actions">
+                                <a href="{{ tpl.url | relative_url }}" class="nds-btn nds-primary">
+                                    <span class="nds-label">View Template</span>
+                                </a>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
                     </div>
-                    <div class="nds-swiper-navigation" hidden>
-                        <div class="nds-swiper-buttons">
-                            <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button"
-                                aria-label="Previous template"></button>
-                            <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button"
-                                aria-label="Next template"></button>
-                        </div>
-                        <div class="nds-swiper-pagination"></div>
+                    {% endfor %}
+                </div>
+                <div class="nds-swiper-navigation" hidden>
+                    <div class="nds-swiper-buttons">
+                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button"
+                            aria-label="Previous template"></button>
+                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button"
+                            aria-label="Next template"></button>
                     </div>
+                    <div class="nds-swiper-pagination"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Real-World Examples -->
 <section id="examples" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Real-World Examples</h2>
-            <p class="nds-section-description">{{ site.data.content.examples | size }} composed pages demonstrating NDS components working together in government service contexts.</p>
+            <p class="nds-section-description">{{ site.data.content.examples | size }} full pages that show NDS components working together in government services.</p>
         </div>
-        <div class="nds-section-body  nds-max-width">
-            <div class="nds-block">
-                <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px">
-                    <div class="nds-swiper-wrapper">
-                        {% for ex in site.data.content.examples %}
-                        <div class="nds-swiper-slide">
-                            <div class="nds-card nds-stroke nds-shadow">
-                                <div class="nds-card-header">
-                                    <div class="nds-card-featured-icon">
-                                        <span class="nds-featured-icon nds-circle nds-xl">
-                                            {{ ex.icon }}
-                                        </span>
-                                    </div>
+    </div>
+    <div class="nds-section-body  nds-max-width">
+        <div class="nds-block">
+            <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:40px">
+                <div class="nds-swiper-wrapper">
+                    {% for ex in site.data.content.examples %}
+                    <div class="nds-swiper-slide">
+                        <div class="nds-card nds-stroke nds-shadow">
+                            <div class="nds-card-header">
+                                <div class="nds-card-featured-icon">
+                                    <span class="nds-featured-icon nds-circle nds-xl">
+                                        {{ ex.icon }}
+                                    </span>
                                 </div>
-                                <div class="nds-card-content">
-                                    <div class="nds-card-text">
-                                        <span class="nds-card-title">{{ ex.title }}</span>
-                                        <p class="nds-card-description nds-truncate" style="--truncate: 2;">{{ ex.description }}</p>
-                                    </div>
-                                    <div class="nds-card-tags">
-                                        <span class="nds-tag nds-blue nds-sm">
-                                            <span class="nds-label">{{ ex.category }}</span>
-                                        </span>
-                                        {% for tag in ex.tags %}
-                                        <span class="nds-tag nds-gray nds-sm">
-                                            <span class="nds-label">{{ tag }}</span>
-                                        </span>
-                                        {% endfor %}
-                                    </div>
+                                {%- if ex.new %}
+                                <div class="nds-card-status">
+                                    <span class="nds-tag nds-sm" data-status="info">
+                                        <span class="nds-label">New</span>
+                                    </span>
                                 </div>
-                                {% if ex.url %}
-                                <div class="nds-card-actions">
-                                    <a href="{{ ex.url | relative_url }}" class="nds-btn nds-primary">
-                                        <span class="nds-label">View Page</span>
-                                    </a>
-                                </div>
-                                {% endif %}
+                                {%- endif %}
                             </div>
+                            <div class="nds-card-content">
+                                <div class="nds-card-text">
+                                    <span class="nds-card-title">{{ ex.title }}</span>
+                                    <p class="nds-card-description nds-truncate" style="--truncate: 2;">{{ ex.description }}</p>
+                                </div>
+                                <div class="nds-card-tags">
+                                    <span class="nds-tag nds-blue nds-sm">
+                                        <span class="nds-label">{{ ex.category }}</span>
+                                    </span>
+                                    {% for tag in ex.tags %}
+                                    <span class="nds-tag nds-gray nds-sm">
+                                        <span class="nds-label">{{ tag }}</span>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if ex.url %}
+                            <div class="nds-card-actions">
+                                <a href="{{ ex.url | relative_url }}" class="nds-btn nds-primary">
+                                    <span class="nds-label">View Page</span>
+                                </a>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
                     </div>
-                    <div class="nds-swiper-navigation" hidden>
-                        <div class="nds-swiper-buttons">
-                            <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button"
-                                aria-label="Previous example"></button>
-                            <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button"
-                                aria-label="Next example"></button>
-                        </div>
-                        <div class="nds-swiper-pagination"></div>
+                    {% endfor %}
+                </div>
+                <div class="nds-swiper-navigation" hidden>
+                    <div class="nds-swiper-buttons">
+                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button"
+                            aria-label="Previous example"></button>
+                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button"
+                            aria-label="Next example"></button>
                     </div>
+                    <div class="nds-swiper-pagination"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Event Themes -->
 <section id="events" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Event Themes</h2>
-            <p class="nds-section-description">Theme packs for national occasions. Each theme can be applied site-wide through a single attribute and removed to restore the default theme.</p>
+            <p class="nds-section-description">Theme packs for national occasions. One script tag applies a theme to the whole site. Remove the tag to restore the default.</p>
         </div>
-        <div class="nds-section-body  nds-max-width">
-            <div class="nds-block">
-                <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:20px">
-                    <div class="nds-swiper-wrapper">
-                        {% for ev in site.data.content.events %}
-                        <div class="nds-swiper-slide">
-                            <div class="nds-card nds-stroke nds-shadow">
-                                <div class="nds-card-header">
-                                    {% if ev.thumbnail %}
-                                    <div class="nds-card-image">
-                                        <img data-src="{{ ev.thumbnail | relative_url }}" width="400" height="200"
-                                            alt="{{ ev.title }} theme preview" decoding="async">
-                                    </div>
-                                    {% else %}
-                                    <div class="nds-card-featured-icon">
-                                        <span class="nds-featured-icon nds-circle nds-xl">
-                                            {{ ev.icon }}
-                                        </span>
-                                    </div>
-                                    {% endif %}
+    </div>
+    <div class="nds-section-body  nds-max-width">
+        <div class="nds-block">
+            <div class="nds-swiper" style="--max-slides:3; --mid-slides:2; --min-slides:1; --peek:20px">
+                <div class="nds-swiper-wrapper">
+                    {% for ev in site.data.content.events %}
+                    <div class="nds-swiper-slide">
+                        <div class="nds-card nds-stroke nds-shadow">
+                            <div class="nds-card-header">
+                                {% if ev.thumbnail %}
+                                <div class="nds-card-image">
+                                    <img data-src="{{ ev.thumbnail | relative_url }}" width="400" height="200"
+                                        alt="{{ ev.title }} theme preview" decoding="async">
                                 </div>
-                                <div class="nds-card-content">
-                                    <div class="nds-card-text">
-                                        <span class="nds-card-title">{{ ev.title }}</span>
-                                        <p class="nds-card-description">{{ ev.description }}</p>
-                                    </div>
-                                    <div class="nds-card-tags">
-                                        <span class="nds-tag nds-blue nds-sm">
-                                            <span class="nds-label">{{ ev.category }}</span>
-                                        </span>
-                                        {% for tag in ev.tags %}
-                                        <span class="nds-tag nds-gray nds-sm">
-                                            <span class="nds-label">{{ tag }}</span>
-                                        </span>
-                                        {% endfor %}
-                                    </div>
-                                </div>
-                                {% if ev.theme or ev.url %}
-                                <div class="nds-card-actions">
-                                    {% if ev.theme %}
-                                    {%- assign _tflat = "" | split: "" -%}
-                                    {%- for _g in site.data.themes -%}{%- assign _tflat = _tflat | concat: _g.list -%}{%-
-                                    endfor -%}
-                                    {%- assign _t = _tflat | where: 'value', ev.theme | first -%}
-                                    {%- if _t %}
-                                    <button type="button" class="nds-btn nds-primary" data-theme-value="{{ _t.value }}"
-                                        data-theme-css="{{ _t.css | relative_url }}?ver={{ site.asset_ver }}"
-                                        {%- if _t.js %}
-                                        data-theme-js="{{ _t.js | relative_url }}?ver={{ site.asset_ver }}"
-                                        {% endif %}>
-                                        <span class="nds-label">Preview</span>
-                                    </button>
-                                    {%- endif %}
-                                    {% endif %}
-                                    {% if ev.url %}
-                                    <a href="{{ ev.url | relative_url }}" class="nds-btn nds-secondary-outline">
-                                        <span class="nds-label">Details</span>
-                                    </a>
-                                    {% endif %}
+                                {% else %}
+                                <div class="nds-card-featured-icon">
+                                    <span class="nds-featured-icon nds-circle nds-xl">
+                                        {{ ev.icon }}
+                                    </span>
                                 </div>
                                 {% endif %}
                             </div>
+                            <div class="nds-card-content">
+                                <div class="nds-card-text">
+                                    <span class="nds-card-title">{{ ev.title }}</span>
+                                    <p class="nds-card-description">{{ ev.description }}</p>
+                                </div>
+                                <div class="nds-card-tags">
+                                    <span class="nds-tag nds-blue nds-sm">
+                                        <span class="nds-label">{{ ev.category }}</span>
+                                    </span>
+                                    {% for tag in ev.tags %}
+                                    <span class="nds-tag nds-gray nds-sm">
+                                        <span class="nds-label">{{ tag }}</span>
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if ev.theme or ev.url %}
+                            <div class="nds-card-actions">
+                                {% if ev.theme %}
+                                {%- assign _tflat = "" | split: "" -%}
+                                {%- for _g in site.data.themes -%}{%- assign _tflat = _tflat | concat: _g.list -%}{%-
+                                endfor -%}
+                                {%- assign _t = _tflat | where: 'value', ev.theme | first -%}
+                                {%- if _t %}
+                                <button type="button" class="nds-btn nds-primary" data-theme-value="{{ _t.value }}"
+                                    {%- if _t.js %}
+                                    data-theme-js="{{ _t.js | relative_url }}?ver={{ site.asset_ver }}"
+                                    {% endif %}>
+                                    <span class="nds-label">Preview</span>
+                                </button>
+                                {%- endif %}
+                                {% endif %}
+                                {% if ev.url %}
+                                <a href="{{ ev.url | relative_url }}" class="nds-btn nds-secondary-outline">
+                                    <span class="nds-label">Details</span>
+                                </a>
+                                {% endif %}
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endfor %}
                     </div>
-                    <div class="nds-swiper-navigation" hidden>
-                        <div class="nds-swiper-buttons">
-                            <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button"
-                                aria-label="Previous event"></button>
-                            <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button"
-                                aria-label="Next event"></button>
-                        </div>
-                        <div class="nds-swiper-pagination"></div>
+                    {% endfor %}
+                </div>
+                <div class="nds-swiper-navigation" hidden>
+                    <div class="nds-swiper-buttons">
+                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-prev" type="button"
+                            aria-label="Previous event"></button>
+                        <button class="nds-btn nds-primary nds-icon-only nds-circle nds-md nds-next" type="button"
+                            aria-label="Next event"></button>
                     </div>
+                    <div class="nds-swiper-pagination"></div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Components -->
 <section id="components" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Components ({{ site.data.content.components | size }})</h2>
-            <p class="nds-section-description">Each with its markup, styling, and JavaScript behavior. All built from scratch.</p>
+            <p class="nds-section-description">Each has its markup, styles, and JavaScript. All are built from scratch.</p>
         </div>
         <div class="nds-section-body">
             <div class="nds-toolbar">
@@ -328,23 +340,23 @@ bundle_sizes:
                     <div class="nds-search-content">
                         <div class="nds-form-control">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <input id="componentSearch" type="text" class="nds-search-input" name="search" autocomplete="off"
+                            <input id="component-search" type="text" class="nds-search-input" name="search" autocomplete="off"
                                 placeholder="Search components...">
                             <div class="nds-form-action">
-                                <button class="nds-btn nds-subtle nds-clear" hidden aria-label="Clear search"><i
+                                <button class="nds-btn nds-subtle nds-clear nds-icon-only" hidden aria-label="Clear search" data-i18n-aria-label="forms.clear_search"><i
                                         class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button>
                             </div>
                         </div>
                         <button class="nds-btn nds-primary nds-search-btn" type="button">
                             <i class="nds-icon nds-hgi-search-01" aria-hidden="true"></i>
-                            <span class="nds-label" data-hidden="sm sr">Search</span>
+                            <span class="nds-label" data-hidden="sm sr" data-i18n="filter.search">Search</span>
                         </button>
                     </div>
                 </div>
                 <div class="nds-dropmenu nds-filter" data-filter-target="components_list">
                     <button class="nds-btn nds-neutral nds-menu-btn nds-filter-btn nds-dropmenu-trigger">
                         <i class="hgi hgi-stroke hgi-filter"></i>
-                        <span class="nds-label" data-hidden="sm sr">Filter</span>
+                        <span class="nds-label" data-hidden="sm sr" data-i18n="filter.filter">Filter</span>
                     </button>
                     <div class="nds-dropmenu-menu" style="min-width: 300px;" hidden>
                         <div class="nds-dropmenu-scroll">
@@ -362,18 +374,18 @@ bundle_sizes:
                             <div class="nds-dropmenu-action">
                                 <button class="nds-btn nds-secondary nds-dropmenu-item" type="button"
                                     data-filter-action="clear" data-no-auto-close>
-                                    <span class="nds-label">Reset</span>
+                                    <span class="nds-label" data-i18n="filter.reset">Reset</span>
                                 </button>
                                 <button class="nds-btn nds-primary nds-dropmenu-item" type="button"
                                     data-filter-action="apply">
-                                    <span class="nds-label">Filter</span>
+                                    <span class="nds-label" data-i18n="filter.filter">Filter</span>
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="nds-filter-applied" data-filter-target="components_list" hidden>
-                    <span class="nds-label">Applied Filters:</span>
+                    <span class="nds-label" data-i18n="filter.applied_filters">Applied Filters:</span>
                     <div class="nds-chips"></div>
                 </div>
             </div>
@@ -426,17 +438,16 @@ bundle_sizes:
                 {% endfor %}
 
             </div>
-            <nav class="nds-pagination" data-auto-pagination="components_list" aria-label="Pagination"></nav>
+            <nav class="nds-pagination" data-auto-pagination="components_list" aria-label="Pagination" data-i18n-aria-label="pagination.pagination"></nav>
         </div>
     </div>
 </section>
 
-<!-- Architecture & Performance -->
 <section id="architecture" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
-            <div class="nds-section-action">
-                <div class="nds-progress-circle nds-lg" data-num="100" data-max="100">
+            <div class="nds-section-action nds-wrap">
+                <div class="nds-progress-circle nds-lg" data-num="100" data-max="100" role="progressbar" aria-labelledby="home-performance-text">
                     <svg width="120" height="120" viewBox="0 0 24 24">
                         <circle class="nds-progress-bg" cx="12" cy="12" r="10" fill="none" stroke-width="2" />
                         <circle class="nds-progress-track" cx="12" cy="12" r="10" fill="none" stroke-width="2"
@@ -447,15 +458,15 @@ bundle_sizes:
                             <span class="nds-progress-number"></span>
                             <span class="nds-progress-of"></span>
                         </span>
-                        <span class="nds-progress-text">Performance</span>
+                        <span class="nds-progress-text" id="home-performance-text">Performance</span>
                     </div>
                 </div>
             </div>
             <div>
                 <h2 class="nds-section-title">Architecture & Performance</h2>
-                <p class="nds-section-description">Built with a performance-first and compatibility approach.</p>
+                <p class="nds-section-description">Built for speed and wide browser support.</p>
                 <p>
-                    <a href="https://pagespeed.web.dev/analysis/https-mazin-musleh-github-io-NDS-vanilla/v2nxjcxqob?form_factor=mobile"
+                    <a href="https://pagespeed.web.dev/analysis/https-mazin-musleh-github-io-NDS-vanilla/dcadcl0kfx?form_factor=mobile"
                         target="_blank" class="nds-color">View the PageSpeed Insights report</a>
                 </p>
             </div>
@@ -469,14 +480,14 @@ bundle_sizes:
                             <i class="hgi hgi-stroke hgi-plug-socket"></i>
                             <span class="nds-label">Zero Dependencies</span>
                         </span>
-                        <p class="nds-item-desc">No Bootstrap, Tailwind, jQuery, or framework runtime. The output is plain HTML, CSS, and JavaScript and can be integrated into existing stacks without introducing a framework dependency.</p>
+                        <p class="nds-item-desc">No Bootstrap, Tailwind, jQuery, or framework runtime. The output is plain HTML, CSS, and JavaScript, so it fits into an existing stack without a framework.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-cpu-charge"></i>
                             <span class="nds-label">Smart Component Loader</span>
                         </span>
-                        <p class="nds-item-desc">A single DOM sweep detects the components present on a page and initializes them in priority tiers: critical components first, followed by the rest during idle time. Deferred and page-specific bundles are loaded only when their components are present, limiting each page to the JavaScript it actually uses.</p>
+                        <p class="nds-item-desc">The loader scans the page once and starts the components it finds: critical ones first, the rest when the browser is idle. Extra bundles load only when their components are on the page, so each page runs only the JavaScript it uses.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -490,7 +501,7 @@ bundle_sizes:
                             <i class="hgi hgi-stroke hgi-paint-brush-01"></i>
                             <span class="nds-label">4-Tier Design Tokens</span>
                         </span>
-                        <p class="nds-item-desc">Palette, primitive, semantic, and component tokens are defined as CSS custom properties. Components expose public properties for customization while keeping internal implementation details private.</p>
+                        <p class="nds-item-desc">Palette, primitive, semantic, and component tokens are defined as CSS custom properties. Components expose public properties you can set, and keep their internals private.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
@@ -504,35 +515,35 @@ bundle_sizes:
                             <i class="hgi hgi-stroke hgi-zap"></i>
                             <span class="nds-label">~{{ page.bundle_sizes.critical_css }} KB Critical CSS (gzipped)</span>
                         </span>
-                        <p class="nds-item-desc">Critical styles load immediately, while non-critical styles are deferred and loaded asynchronously without blocking rendering. The build separates critical and non-critical CSS.</p>
+                        <p class="nds-item-desc">The build splits the CSS in two. Critical styles load first; the rest load later without blocking the page.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-layers-01"></i>
                             <span class="nds-label">5-Stage Reveal</span>
                         </span>
-                        <p class="nds-item-desc">First paint is divided into five render-safe stages: inline critical skeleton → critical stylesheet → main stylesheet → main JavaScript → icons and font. Each stage either renders correctly or remains hidden, preventing unstyled flashes; icons load last to stay outside the LCP window.</p>
+                        <p class="nds-item-desc">The first paint arrives in five stages: inline critical skeleton → critical stylesheet → main stylesheet → main JavaScript → icons and font. Each stage shows only when it renders correctly, so there is no unstyled flash. Icons load last, so they do not delay the largest paint (LCP).</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-code-circle"></i>
                             <span class="nds-label">~{{ page.bundle_sizes.core_js }} KB Core JS (gzipped)</span>
                         </span>
-                        <p class="nds-item-desc">The full library is ~{{ page.bundle_sizes.total_js }} KB gzipped, but it is not loaded as a single bundle. A lean ~{{ page.bundle_sizes.core_js }} KB core loads on every page, while late-safe and page-specific components are loaded only when their markup is present. A typical page therefore executes only a fraction of the library.</p>
+                        <p class="nds-item-desc">The full library is ~{{ page.bundle_sizes.total_js }} KB gzipped, but it is not loaded as a single bundle. A lean ~{{ page.bundle_sizes.core_js }} KB core loads on every page. Components that can wait, or that only some pages use, load only when their markup is present. A typical page runs a fraction of the library.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-chart-line-data-01"></i>
                             <span class="nds-label">Web Vitals Compliant</span>
                         </span>
-                        <p class="nds-item-desc">100% Google PageSpeed score, with LCP, CLS, and INP passing in the measured test. Performance is tested across desktop and mobile conditions, including fast and limited connections.</p>
+                        <p class="nds-item-desc">A Google PageSpeed score of 100, with LCP, CLS, and INP passing in the measured test. Performance is tested on desktop and mobile, over fast and slow connections.</p>
                     </div>
                     <div class="nds-definition-item">
                         <span class="nds-item-title">
                             <i class="hgi hgi-stroke hgi-dashboard-speed-01"></i>
-                            <span class="nds-label">Sleek Animations</span>
+                            <span class="nds-label">Animations</span>
                         </span>
-                        <p class="nds-item-desc">GPU-accelerated animations and scheduled rendering keep transitions responsive, including on lower-end devices. Off-screen elements are deferred until needed.</p>
+                        <p class="nds-item-desc">GPU-accelerated animations and scheduled rendering keep transitions smooth, even on low-end devices. Off-screen elements wait until they are needed.</p>
                     </div>
                 </div>
             </div>
@@ -540,7 +551,6 @@ bundle_sizes:
     </div>
 </section>
 
-<!-- Development Environment -->
 <section id="dev-environment" class="nds-content-section">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
@@ -605,12 +615,11 @@ bundle_sizes:
     </div>
 </section>
 
-<!-- Get Started -->
 <section id="opensource" class="nds-content-section nds-brand">
     <div class="nds-section-wrapper">
         <div class="nds-section-head">
             <h2 class="nds-section-title">Get Started</h2>
-            <p class="nds-section-description">Everything needed to adopt NDS: download the template, install the agent instructions, build the UI page by page, and stay current with upgrades.</p>
+            <p class="nds-section-description">Everything you need to adopt NDS: download the template, install the agent instructions, build the UI page by page, and upgrade to new releases.</p>
         </div>
         <div class="nds-section-body">
             <div class="nds-block">

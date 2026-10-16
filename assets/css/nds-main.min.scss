@@ -42,6 +42,9 @@
 // Import base styles (dividers, links, interactive elements)
 @use 'base';
 
+// Invisible placeholder face for content icons (hgi-blank); main lands before the reveal
+@use 'fonts-hgi-blank';
+
 // Import animations
 @use 'animations';
 
@@ -61,9 +64,12 @@
 @use 'components/filter';
 @use 'components/multiselect';
 @use 'components/taginput';
+@use 'components/time-picker';
 @use 'components/editor';
 @use 'components/last-edit';
 @use 'components/featured-icons';
+@use 'components/date-tile';
+@use 'components/meta';
 @use 'components/feedback-icons';
 @use 'components/stepper';
 @use 'components/swiper';
@@ -71,6 +77,7 @@
 @use 'components/tags';
 @use 'components/accordion';
 @use 'components/alert';
+@use 'components/sort';
 @use 'components/tables';
 @use 'components/toolbar';
 @use 'components/export';
@@ -78,7 +85,7 @@
 @use 'components/content-switcher';
 @use 'components/topbar';
 @use 'components/mainnav';
-@use 'components/DGAdigitalStamp';
+@use 'components/digital-stamp';
 @use 'components/forms';
 @use 'components/otp';
 @use 'components/ipv';
@@ -107,6 +114,7 @@
 @use 'components/definition-list';
 @use 'components/chart';
 @use 'components/cooldown-button';
+@use 'components/countdown';
 @use 'components/metric';
 @use 'components/panels';
 @use 'components/fab';

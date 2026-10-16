@@ -1,5 +1,12 @@
 /* NDS.Forms — public surface
  * Rides: (none — base component)
+ * Requires:
+ *   .nds-form-control:not(:has(> .nds-switch)):not(.nds-multiselect .nds-form-control) needs :scope > input, :scope > textarea, :scope > select, :scope > .nds-slider-track > input — the field gets no states, required mark or clear button
+ *   .nds-form-control sits in .nds-form-container — no state, status or error shows
+ *   .nds-form-control .nds-clear sits in .nds-form-action — the clear button is never wired
+ *   .nds-form-control .nds-toggle-password sits in .nds-form-action — the show-password button is never wired
+ *   .nds-auto-fill needs .nds-item — nothing is wired
+ *   .nds-form is form — submit validation runs only on a <form>
  * Methods:
  *   NDS.Forms.init()                       scan + initialize every .nds-form-container
  *   NDS.Forms.initializeContainer(el)      initialize one container
@@ -24,6 +31,7 @@
  *   NDS.Forms.validateOtpGroup(el, opts)
  *   NDS.Forms.initCheckboxGroupValidation(group) / .initRadioGroupValidation(group)
  *   NDS.Forms.initMultiselectValidation(el)      live-validation wiring for a group
+ *   NDS.Forms.isNationalId(str) / .isIban(str)   the checksum rules behind .nds-national-id / .nds-iban
  * Events:
  *   nds:statusChange         detail {status, message} — from the form container
  *   nds:formValidate         detail {valid, invalidFields, errors} — from the form, every
@@ -46,8 +54,22 @@
  *   - A required custom select is validated through its hidden .nds-select-value carrier:
  *     author data-required on the .nds-select container. The readonly display input is
  *     never constraint-validated, so required on it does nothing.
+ *   - A required .nds-file-upload counts its file rows (rows the checks rejected excluded):
+ *     the upload script empties the file input after each pick, so it never carries required.
+ *     A row still uploading blocks the submit on any upload, required or not.
+ *   - A dropmenu picker (data-select-name) with data-required is checked the same way,
+ *     through its hidden carrier; the error shows on the field that holds it.
  *   - An autocomplete with data-strict is checked at submit too: typed text must match a
  *     picked suggestion (mechanism and carve-outs in the autocomplete banner).
+ *   - .nds-national-id and .nds-iban stamp setCustomValidity on input (and at init), so the
+ *     checksum fails the field through checkValidity like any native rule. A pattern on the same
+ *     input is redundant.
+ *   - data-error-message on a field is the pattern's message only; on a group, the message
+ *     when nothing is picked. Every other failure keeps its own message.
+ *   - A blank setCustomValidity(' ') blocks the submit and outlines the field with no message:
+ *     for a component that shows the cause itself (password's red chips). It beats native messages.
+ *   - A readonly checkbox, radio or switch cannot change: Forms cancels the click that Space
+ *     or an arrow key sends, since the browser ignores readOnly on those inputs.
  *   - syncState() dispatches nothing, so it cannot re-enter your own input handler. Setting
  *     input.value from JS notifies nothing on its own: call syncState() or dispatch input/change.
  *   - Forms owns the submit listener on every real <form class="nds-form">. data-ajax makes it
@@ -68,106 +90,149 @@
 (function () {
     'use strict';
 
+    // English defaults; the assets/i18n/{lang}.json pack overrides them.
+    var strings = NDS.i18n.strings('forms', {
+        required:            'This field is required',
+        invalid:             'Invalid input',
+        invalid_email:       'Please enter a valid email address',
+        invalid_url:         'Please enter a valid URL',
+        pattern:             'Please match the requested format',
+        too_short:           'Input is too short (minimum {n} characters)',
+        too_long:            'Input is too long (maximum {n} characters)',
+        range_under:         'Value must be at least {n}',
+        range_over:          'Value must be no more than {n}',
+        min_value:           'Minimum value is {n}',
+        max_value:           'Maximum value is {n}',
+        invalid_national_id: 'Invalid national ID number',
+        invalid_iban:        'Invalid IBAN',
+        no_arabic:           'Arabic characters are not allowed',
+        select_option:       'Please select an option',
+        select_at_least:     { one: 'Please select at least 1 option', other: 'Please select at least {n} options' },
+        select_at_most:      { one: 'Please select no more than 1 option', other: 'Please select no more than {n} options' },
+        rating_required:     'Please choose a rating',
+        tag_required:        'Please add at least one tag',
+        file_required:       'Please add a file',
+        upload_pending:      'Please wait for the upload to finish',
+        pick_suggestion:     'Choose from the suggestions',
+        otp_incomplete:      'Please enter all {n} digits',
+        loading:             'Loading',
+        show_password:       'Show password',
+        hide_password:       'Hide password',
+    });
+
     // ==============================================
     // STATE PROPAGATION HOOKS
     // ==============================================
 
     var FORM_SCOPE = '.nds-form-container, .nds-form-group';
+    // Fields whose visible input never holds the value: required is checked on the wrapper, never stamped on the input.
+    var NO_REQUIRED_STAMP = '.nds-taginput, .nds-file-upload';
 
-    NDS.State.onAdd('disabled', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.disabled = true; });
+    function _setDisabled(el, on) {
+        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.disabled = on; });
         el.querySelectorAll('.nds-form-action .nds-btn').forEach(function(btn) {
-            NDS.aria.disabled(btn, true);
-            if (btn.tagName === 'BUTTON') btn.disabled = true;
+            NDS.aria.disabled(btn, on);
+            if (btn.tagName === 'BUTTON') btn.disabled = on;
         });
-    });
+    }
 
-    NDS.State.onRemove('disabled', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.disabled = false; });
-        el.querySelectorAll('.nds-form-action .nds-btn').forEach(function(btn) {
-            NDS.aria.disabled(btn, false);
-            if (btn.tagName === 'BUTTON') btn.disabled = false;
-        });
-    });
-
-    NDS.State.onAdd('readonly', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.readOnly = true; });
-    });
-
-    NDS.State.onRemove('readonly', FORM_SCOPE, function(el) {
-        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.readOnly = false; });
-    });
+    function _setReadonly(el, on) {
+        el.querySelectorAll('input, textarea, select').forEach(function(inp) { inp.readOnly = on; });
+    }
 
     // ── Loading state — form-scope opt-in ──────────────────────────────
     // Any consumer (autocomplete, remote-validate, custom fetch) can flip
-    // data-state="loading" on the form-container or form-control; forms
-    // owns the visual UX in one place: reuse [data-loading-slot] / legacy
-    // .nds-loading if authored, else auto-create a spinner shell in the
-    // .nds-form-action (creating that slot too if missing). While loading,
-    // hide every other action-slot child and stamp data-state="loading" on
-    // the shell — nds-btn's CSS renders the spinner from that state.
-    // On exit, restore siblings; the .nds-clear button's visibility is
-    // re-computed from the current input value (may have emptied mid-fetch).
+    // data-state="loading" on the form-container or form-group; forms
+    // owns the visual UX in one place. The spinner is an authored
+    // [data-loading-slot] (not .nds-loading: a loading button carries that class), else a shell forms creates in
+    // the field's last non-prefix .nds-form-action (a suffix on a stepper,
+    // which has no plain slot: a new slot would squeeze the input), creating a
+    // slot if there is none. Its own button, so no styled button is repurposed.
+    // nds-btn's CSS renders the spinner from data-state="loading". Every other
+    // button in those slots hides while loading; a prefix is never touched.
+    // On exit, restore them; the .nds-clear button's visibility is
+    // re-computed from the current input value.
+    var LOADING_SLOTS = '.nds-form-action:not(.nds-prefix)';
+
     function _ensureLoadingShell(fc) {
-        var action = fc.querySelector('.nds-form-action');
+        var shell = fc.querySelector(LOADING_SLOTS + ' [data-loading-slot]');
+        if (shell) return shell;
+        var slots = fc.querySelectorAll(LOADING_SLOTS);
+        var action = slots[slots.length - 1];
         if (!action) {
             action = document.createElement('div');
             action.className = 'nds-form-action';
             fc.appendChild(action);
         }
-        var shell = action.querySelector('[data-loading-slot], .nds-loading');
-        if (!shell) {
-            shell = document.createElement('button');
-            shell.type = 'button';
-            shell.className = 'nds-btn nds-subtle';
-            shell.hidden = true;
-            shell.disabled = true;  // inert affordance — keeps it out of the tab order while loading
-            shell.setAttribute('data-loading-slot', '');
-            shell.setAttribute('aria-label', 'Loading');
-            shell.innerHTML = '<i class="nds-icon" aria-hidden="true"></i>';
-            action.appendChild(shell);
-        }
-        return { action: action, shell: shell };
+        shell = document.createElement('button');
+        shell.type = 'button';
+        shell.className = 'nds-btn nds-subtle nds-icon-only';
+        shell.hidden = true;
+        shell.disabled = true;  // inert affordance — keeps it out of the tab order while loading
+        shell.setAttribute('data-loading-slot', '');
+        strings.set(shell, 'aria-label', 'loading');
+        shell.innerHTML = '<i class="nds-icon" aria-hidden="true"></i>';
+        action.appendChild(shell);
+        return shell;
     }
 
-    NDS.State.onAdd('loading', FORM_SCOPE, function(el) {
+    function _setLoading(el, on) {
         var fc = el.classList.contains('nds-form-control') ? el : el.querySelector('.nds-form-control');
-        if (!fc) return;
-        var refs = _ensureLoadingShell(fc);
+        if (on) _enterLoading(fc); else _exitLoading(fc);
+    }
 
-        // Snapshot resting hidden state on first enter — captures the
-        // baseline right before we swap it, so exit can restore accurately.
-        if (!fc._ndsLoadingRest) {
-            fc._ndsLoadingRest = new Map();
-            for (var i = 0; i < refs.action.children.length; i++) {
-                var child = refs.action.children[i];
-                if (child === refs.shell) continue;
-                fc._ndsLoadingRest.set(child, child.hidden);
-            }
-        }
-        fc._ndsLoadingRest.forEach(function(_, child) { child.hidden = true; });
+    function _enterLoading(fc) {
+        if (!fc || fc._ndsLoading) return;
+        var refs = fc._ndsLoading = { shell: _ensureLoadingShell(fc) };
+        // Snapshot each sibling's resting hidden state, so exit restores it.
+        refs.rest = new Map();
+        fc.querySelectorAll(LOADING_SLOTS).forEach(function(slot) {
+            Array.prototype.forEach.call(slot.children, function(child) {
+                if (child !== refs.shell) { refs.rest.set(child, child.hidden); child.hidden = true; }
+            });
+        });
         refs.shell.hidden = false;
         NDS.State.add(refs.shell, 'loading');
-    });
+    }
 
-    NDS.State.onRemove('loading', FORM_SCOPE, function(el) {
-        var fc = el.classList.contains('nds-form-control') ? el : el.querySelector('.nds-form-control');
-        if (!fc) return;
-        var action = fc.querySelector('.nds-form-action');
-        if (!action) return;
-        var shell = action.querySelector('[data-loading-slot], .nds-loading');
-        if (shell) {
-            NDS.State.remove(shell, 'loading');
-            shell.hidden = true;
-        }
-        if (!fc._ndsLoadingRest) return;
+    function _exitLoading(fc) {
+        var refs = fc && fc._ndsLoading;
+        if (!refs) return;
+        fc._ndsLoading = null;
+        NDS.State.remove(refs.shell, 'loading');
+        refs.shell.hidden = true;
         var input = fc.querySelector('input, textarea, select');
         var hasValue = !!(input && String(input.value || '').trim());
-        fc._ndsLoadingRest.forEach(function(wasHidden, child) {
-            if (child.classList.contains('nds-clear')) child.hidden = !hasValue;
-            else child.hidden = wasHidden;
+        refs.rest.forEach(function(wasHidden, child) {
+            child.hidden = child.classList.contains('nds-clear') ? !hasValue : wasHidden;
         });
+    }
+
+    // A field state changes inputs and buttons, so it needs script however it is written:
+    // the hooks keep every NDS.State write synchronous, the observer catches a bare attribute
+    // or the class. _applied holds what each field has entered, so an effect runs once and a
+    // native <input disabled> is never re-enabled by an unrelated token change.
+    var FIELD_STATES = { disabled: _setDisabled, readonly: _setReadonly, loading: _setLoading };
+    var _applied = new WeakMap();
+
+    function _syncStates(el) {
+        var cur = NDS.State.parse(el);
+        var on = _applied.get(el);
+        for (var token in FIELD_STATES) {
+            // nds-loading is the canon on every container; the token is mirrored onto it.
+            var has = cur.has(token) || (token === 'loading' && el.classList.contains('nds-loading'));
+            if (has === !!(on && on.has(token))) continue;
+            if (!on) _applied.set(el, on = new Set());
+            if (has) on.add(token); else on.delete(token);
+            FIELD_STATES[token](el, has);
+        }
+    }
+
+    Object.keys(FIELD_STATES).forEach(function(token) {
+        NDS.State.onAdd(token, FORM_SCOPE, _syncStates);
+        NDS.State.onRemove(token, FORM_SCOPE, _syncStates);
     });
+    NDS.onAttrChange(FORM_SCOPE, ['data-state', 'class'], function(els) { els.forEach(_syncStates); });
 
     // ==============================================
     // UTILITY FUNCTIONS
@@ -182,8 +247,6 @@
             if (val > max) return { clamped: max, message: Validator.getNumberRangeMessage('max', max) };
             return null;
         },
-
-        triggerEvents: NDS.triggerEvents,
     };
 
     // A form-container's OWN field — skips fields living inside a NESTED
@@ -191,8 +254,18 @@
     // textarea in DOM order; a multiselect option checkbox belongs to its
     // check-container, not the wrapper being validated). Groups/feedback keep
     // the legacy first-match behavior.
+    // dismissAll would also take a nested field's message and leave its error outline.
+    function dismissOwn(container) {
+        container.querySelectorAll('.nds-feedback').forEach(function(fb) {
+            if (fb.parentElement.closest('.nds-form-container, .nds-form-group') !== container || fb.closest('code')) return;
+            if (fb.hasAttribute('data-permanent')) fb.removeAttribute('hidden');
+            else NDS.Feedback.dismiss(fb);
+        });
+    }
+
     function ownField(container) {
-        var fields = container.querySelectorAll('input, textarea, select');
+        // Never a hidden carrier: a picker in the prefix slot puts one before the real input.
+        var fields = container.querySelectorAll('input:not([type="hidden"]), textarea, select');
         if (!container.classList.contains('nds-form-container')) return fields[0] || null;
         for (var i = 0; i < fields.length; i++) {
             if (fields[i].closest('.nds-form-container') === container) return fields[i];
@@ -274,8 +347,15 @@
                         }
                     }
 
+                    // No slot: right after the field's control row, not the container's end,
+                    // so a row the field carries below it (a search box's suggestions) stays below.
+                    var position = 'append';
+                    var row = target === container && container.classList.contains('nds-form-container') && ownControl(container);
+                    while (row && row.parentNode !== container) row = row.parentNode;
+                    if (row) { target = row; position = 'after'; }
+
                     var defaults = {
-                        position: 'append',
+                        position: position,
                         size: 'sm',
                         style: 'outline'
                     };
@@ -285,6 +365,11 @@
                     });
                     delete feedbackOptions.element;
                     feedback = NDS.Feedback.create(feedbackOptions);
+                } else if (message === '') {
+                    // A blank message (Validator's blank custom error) drops the old one: the
+                    // component shows the cause itself. An omitted message keeps it.
+                    container.removeAttribute('data-message');
+                    dismissOwn(container);
                 }
 
                 // Accessibility
@@ -295,6 +380,8 @@
                     if (feedback) {
                         if (!feedback.id) feedback.id = NDS.uniqueId('nds-fb-');
                         describeBy(input, feedback.id);
+                    } else if (message === '') {
+                        describeBy(input, null);
                     }
                 }
             } else {
@@ -323,7 +410,7 @@
             NDS.Status.clear(container);
             container.removeAttribute('data-message');
 
-            NDS.Feedback.dismissAll(container);
+            dismissOwn(container);
 
             var input = ownField(container);
             if (input) {
@@ -371,63 +458,100 @@
         return true;
     }
 
+    // Saudi national ID / iqama: 10 digits, first 1 or 2, Luhn check digit.
+    function isNationalId(v) {
+        if (!/^[12]\d{9}$/.test(v)) return false;
+        var sum = 0;
+        for (var i = 0; i < 10; i++) {
+            var d = +v[i];
+            if (i % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
+            sum += d;
+        }
+        return sum % 10 === 0;
+    }
+
+    // IBAN: country + check digits, then mod-97 of the rearranged, letters-to-numbers string === 1.
+    function isIban(v) {
+        if (!/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/.test(v)) return false;
+        var s = (v.slice(4) + v.slice(0, 4)).replace(/[A-Z]/g, function (c) { return c.charCodeAt(0) - 55; });
+        var rem = 0;
+        for (var i = 0; i < s.length; i++) rem = (rem * 10 + +s[i]) % 97;
+        return rem === 1;
+    }
+
+    // .nds-national-id / .nds-iban: normalize the typed value and stamp the checksum result,
+    // so checkValidity() (blur and submit) fails the field with a localized message. Empty = valid.
+    function stampIdentifier(input) {
+        var original = input.value, clean, ok, msg;
+        if (input.classList.contains('nds-national-id')) {
+            clean = original.replace(/[٠-٩]/g, function (c) { return c.charCodeAt(0) - 0x660; }).replace(/\D/g, '');
+            ok = isNationalId(clean);
+            msg = strings.text('invalid_national_id');
+        } else if (input.classList.contains('nds-iban')) {
+            clean = original.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            // Banking apps copy a Saudi IBAN without its SA: a value starting with a digit gets it back.
+            if (/^\d/.test(clean)) clean = 'SA' + clean;
+            ok = isIban(clean);
+            msg = strings.text('invalid_iban');
+        } else {
+            return;
+        }
+        if (clean !== original) {
+            var caret = Math.max(0, input.selectionStart - (original.length - clean.length));
+            NDS.setValue(input, clean, { change: false });
+            try { input.setSelectionRange(caret, caret); } catch (_) {}
+        }
+        input.setCustomValidity(clean && !ok ? msg : '');
+    }
+
     var Validator = {
         getMessage: function(input) {
-            if (input.hasAttribute('data-error-message')) {
-                return input.getAttribute('data-error-message');
-            }
-
             var validity = input.validity;
-            var isArabic = NDS.isArabic;
+
+            // A blank custom message: the component shows the cause itself (password's red chips).
+            if (validity.customError && !input.validationMessage.trim()) return '';
 
             if (validity.valueMissing) {
-                return isArabic ? 'هذا الحقل مطلوب' : 'This field is required';
+                return strings.text('required');
             } else if (validity.typeMismatch) {
                 if (input.type === 'email') {
-                    return isArabic ? 'يرجى إدخال عنوان بريد إلكتروني صحيح' : 'Please enter a valid email address';
+                    return strings.text('invalid_email');
                 } else if (input.type === 'url') {
-                    return isArabic ? 'يرجى إدخال رابط صحيح' : 'Please enter a valid URL';
+                    return strings.text('invalid_url');
                 }
             } else if (validity.tooShort) {
-                return isArabic
-                    ? 'المدخل قصير جداً (الحد الأدنى ' + input.minLength + ')'
-                    : 'Input is too short (minimum ' + input.minLength + ' characters)';
+                return strings.text('too_short', { n: input.minLength });
             } else if (validity.tooLong) {
-                return isArabic
-                    ? 'المدخل طويل جداً (الحد الأقصى ' + input.maxLength + ')'
-                    : 'Input is too long (maximum ' + input.maxLength + ' characters)';
+                return strings.text('too_long', { n: input.maxLength });
             } else if (validity.rangeUnderflow) {
-                return isArabic
-                    ? 'القيمة يجب أن تكون على الأقل ' + input.min
-                    : 'Value must be at least ' + input.min;
+                return strings.text('range_under', { n: input.min });
             } else if (validity.rangeOverflow) {
-                return isArabic
-                    ? 'القيمة يجب ألا تزيد عن ' + input.max
-                    : 'Value must be no more than ' + input.max;
+                return strings.text('range_over', { n: input.max });
             } else if (validity.patternMismatch) {
-                return isArabic ? 'يرجى مطابقة التنسيق المطلوب' : 'Please match the requested format';
+                // The one vague default: data-error-message says what the pattern asks for.
+                return input.getAttribute('data-error-message') || strings.text('pattern');
             } else if (validity.customError) {
                 // setCustomValidity stamp — already localized by the stamping
                 // component (e.g. date-picker format/bounds).
                 return input.validationMessage;
             }
 
-            return isArabic ? 'مدخل غير صحيح' : 'Invalid input';
+            return strings.text('invalid');
         },
 
         getNumberRangeMessage: function(type, value) {
-            var isArabic = NDS.isArabic;
-            if (type === 'min') return isArabic ? 'الحد الأدنى ' + value : 'Minimum value is ' + value;
-            return isArabic ? 'الحد الأقصى ' + value : 'Maximum value is ' + value;
+            return strings.text(type === 'min' ? 'min_value' : 'max_value', { n: value });
         },
 
         // Shared tail for group validators: apply the data-error-message
         // override, dispatch the showMessage status update, and return the
         // merged result. Each validator supplies its distinct validity/message
-        // computation, then hands off here.
-        _finishGroupValidation: function(group, options, isValid, message, extra) {
+        // computation, then hands off here. `empty`: nothing is picked. The
+        // override is the group's required wording, so a count limit or a
+        // pending upload keeps its own message.
+        _finishGroupValidation: function(group, options, isValid, message, extra, empty) {
             var customMessage = group.getAttribute('data-error-message');
-            if (!isValid && customMessage) message = customMessage;
+            if (!isValid && empty && customMessage) message = customMessage;
 
             if (options.showMessage) {
                 if (!isValid) StatusManager.set({ element: group, status: 'error', message: message });
@@ -450,19 +574,10 @@
             var message = '';
             if (!isValid) {
                 var below = checkedCount < minChecked;
-                var n = below ? minChecked : maxChecked;
-                if (NDS.isArabic) {
-                    var noun = n === 1 ? 'خيار واحد' : n === 2 ? 'خيارين' : n + ' خيارات';
-                    message = 'يرجى اختيار ' + noun + (below ? ' على الأقل' : ' كحد أقصى');
-                } else {
-                    var word = n === 1 ? '1 option' : n + ' options';
-                    message = below
-                        ? 'Please select at least ' + word
-                        : 'Please select no more than ' + word;
-                }
+                message = strings.text(below ? 'select_at_least' : 'select_at_most', { n: below ? minChecked : maxChecked });
             }
 
-            return this._finishGroupValidation(group, options, isValid, message, { checked: checkedCount, min: minChecked, max: maxChecked });
+            return this._finishGroupValidation(group, options, isValid, message, { checked: checkedCount, min: minChecked, max: maxChecked }, checkedCount === 0);
         },
 
         validateCheckboxGroup: function(groupElement, options) {
@@ -480,14 +595,28 @@
 
             var isRequired = group.hasAttribute('data-required') || group.classList.contains('nds-required');
             var isValid = !isRequired || isSelected;
-            var message = '';
-            var isArabic = NDS.isArabic;
+            var message = isValid ? '' : strings.text('select_option');
 
-            if (!isValid) {
-                message = isArabic ? 'يرجى اختيار خيار واحد' : 'Please select an option';
+            return this._finishGroupValidation(group, options, isValid, message, { selected: isSelected }, !isSelected);
+        },
+
+        // Rating: the stars are buttons, not form controls, so the score lives on
+        // the .nds-rating root. Zero means nothing was picked.
+        validateRatingGroup: function(groupElement, options) {
+            options = options || { showMessage: true };
+
+            var group = groupElement.closest('.nds-form-group') || groupElement;
+            var rating = group.querySelector('.nds-rating');
+            var value = 0;
+            if (rating) {
+                value = rating.ndsRating ? rating.ndsRating.getRating() : Number(rating.dataset.rating) || 0;
             }
 
-            return this._finishGroupValidation(group, options, isValid, message, { selected: isSelected });
+            var isRequired = group.hasAttribute('data-required') || group.classList.contains('nds-required');
+            var isValid = !isRequired || value > 0;
+            var message = isValid ? '' : strings.text('rating_required');
+
+            return this._finishGroupValidation(group, options, isValid, message, { rating: value }, value === 0);
         },
 
         // Multiselect: option checkboxes are the source of truth (no hidden
@@ -496,11 +625,7 @@
         validateMultiselect: function(msElement, options) {
             options = options || { showMessage: true };
             var ms = msElement.closest('.nds-multiselect') || msElement;
-            // Resolve the menu portal-aware, then scope to it: re-validation fires on
-            // the multiselect's change event — i.e. while the menu is open, and a multiselect
-            // in a modal/drawer/table cell has portaled it to <body> by then. A wrapper-
-            // rooted `.nds-dropmenu-menu ...` walk counts zero there and reports invalid.
-            var menu = NDS.querySelector(ms, '.nds-dropmenu-menu');
+            var menu = ms.querySelector('.nds-dropmenu-menu');
             return this._validateCheckedCount(ms, menu ? menu.querySelectorAll('input[type="checkbox"]') : [], options);
         },
 
@@ -514,8 +639,23 @@
             var hasRequired = ti.hasAttribute('data-required') || ti.classList.contains('nds-required');
             var count = ti.querySelectorAll('.nds-form-control > input[type="hidden"]').length;
             var isValid = !hasRequired || count > 0;
-            var message = isValid ? '' : (NDS.isArabic ? 'يرجى إضافة وسم واحد على الأقل' : 'Please add at least one tag');
-            return this._finishGroupValidation(ti, options, isValid, message, { count: count });
+            var message = isValid ? '' : strings.text('tag_required');
+            return this._finishGroupValidation(ti, options, isValid, message, { count: count }, count === 0);
+        },
+
+        // Upload: the script empties the file input after each pick, so required
+        // counts the staged rows instead. A row the checks rejected does not count.
+        // A row still uploading blocks every upload field, required or not: the
+        // submit would go without that file.
+        validateUpload: function(upElement, options) {
+            options = options || { showMessage: true };
+            var up = upElement.closest('.nds-file-upload') || upElement;
+            var hasRequired = up.hasAttribute('data-required') || up.classList.contains('nds-required');
+            var count = up.querySelectorAll('.nds-file-list .nds-file-item:not([data-status="error"])').length;
+            var pending = !!up.querySelector('.nds-file-list .nds-file-item:is([data-state~="uploading"], [data-state~="processing"])');
+            var isValid = !pending && (!hasRequired || count > 0);
+            var message = isValid ? '' : strings.text(pending ? 'upload_pending' : 'file_required');
+            return this._finishGroupValidation(up, options, isValid, message, { count: count, pending: pending }, !pending && count === 0);
         },
 
         // Custom select: the visible .nds-select-input is readonly — barred
@@ -528,15 +668,27 @@
             var carrier = container.querySelector('.nds-select-value');
             var hasRequired = container.hasAttribute('data-required') || container.classList.contains('nds-required');
             var isValid = !hasRequired || !!(carrier && carrier.value.trim());
-            var message = isValid ? '' : (NDS.isArabic ? 'يرجى اختيار خيار' : 'Please select an option');
-            return this._finishGroupValidation(container, options, isValid, message, { value: carrier ? carrier.value : '' });
+            var message = isValid ? '' : strings.text('select_option');
+            return this._finishGroupValidation(container, options, isValid, message, { value: carrier ? carrier.value : '' }, true);
+        },
+
+        // Dropmenu picker (data-select-name): the pick lives in a hidden carrier,
+        // which constraint validation skips. Internal — reached via validateForm.
+        validateDropmenuSelect: function(dm, options) {
+            options = options || { showMessage: true };
+            // Own carrier only: a picker nested in this menu holds its own.
+            var carrier = Array.prototype.find.call(dm.querySelectorAll('input[data-nds-select-value]'),
+                function(el) { return el.closest('.nds-dropmenu') === dm; });
+            var isValid = !!(carrier && carrier.value.trim());
+            var message = isValid ? '' : strings.text('select_option');
+            return this._finishGroupValidation(dm, options, isValid, message, { value: carrier ? carrier.value : '' }, true);
         },
 
         // Autocomplete strict: data-strict says typed text must match a picked
         // suggestion. The hidden .nds-autocomplete-value carrier (JS-created at
-        // build under data-strict) holds the last picked text; typing or clear
-        // empties it. No carrier = the field never built (e.g. server-prefilled
-        // and untouched) — sanctioned as-is. Empty text is the required rule's
+        // build under data-strict, seeded with any prefilled text) holds the last
+        // picked text; typing or clear empties it. No carrier = the field never
+        // built, so its text is the prefilled pick. Empty text is the required rule's
         // business, not strict's. Internal — reached via validateForm.
         validateAutocomplete: function(acElement, options) {
             options = options || { showMessage: true };
@@ -545,7 +697,7 @@
             var input = ownField(container);
             var text = input ? input.value.trim() : '';
             var isValid = !carrier || text === '' || carrier.value === text;
-            var message = isValid ? '' : (NDS.isArabic ? 'اختر من الاقتراحات' : 'Choose from the suggestions');
+            var message = isValid ? '' : strings.text('pick_suggestion');
             return this._finishGroupValidation(container, options, isValid, message, { picked: !!(carrier && carrier.value) });
         },
 
@@ -557,14 +709,10 @@
             var isAllFilled = inputs.length > 0 && inputs.every(function(i) { return i.value.length === 1; });
 
             var isValid = isAllFilled;
-            var message = '';
-            var isArabic = NDS.isArabic;
+            var message = isValid ? '' : strings.text('otp_incomplete', { n: inputs.length });
 
-            if (!isValid) {
-                message = isArabic ? 'يرجى إدخال جميع الأرقام' : 'Please enter all ' + inputs.length + ' digits';
-            }
-
-            return this._finishGroupValidation(group, options, isValid, message, { filled: isAllFilled });
+            return this._finishGroupValidation(group, options, isValid, message, { filled: isAllFilled },
+                inputs.every(function(i) { return !i.value; }));
         },
 
         // Validate plain field containers (text/email/number/select/textarea).
@@ -579,7 +727,7 @@
                 if (container.closest('.nds-form-group')) return;
                 // Composite wrappers own their own validators — taginput's
                 // typing field isn't the carrier, checkValidity would false-fail.
-                if (container.classList.contains('nds-taginput')) return;
+                if (container.matches(NO_REQUIRED_STAMP)) return;
                 // Custom selects too: the readonly display input false-PASSES
                 // checkValidity, so the carrier block in _validateGroups reads
                 // the hidden .nds-select-value instead. Keyed on the carrier —
@@ -617,7 +765,7 @@
         // Validate OTP / checkbox / radio groups; pushes each invalid group +
         // message onto the shared accumulator `acc`.
         _validateGroups: function(form, options, acc) {
-            form.querySelectorAll('.nds-form-group[data-min-checked], .nds-form-group[data-max-checked], .nds-form-group[data-required], .nds-form-group.nds-required').forEach(function(group) {
+            form.querySelectorAll('.nds-form-group[data-min-checked], .nds-form-group[data-max-checked], .nds-form-group[data-required], .nds-form-group.nds-required, .nds-form-group.nds-time-fields').forEach(function(group) {
                 if (!isFieldVisible(group, form)) return;
 
                 var hasCheckboxes = group.querySelector('input[type="checkbox"]');
@@ -634,6 +782,19 @@
                 } else if (hasRadios) {
                     result = Validator.validateRadioGroup(group, { showMessage: options.showMessages });
                     anchor = hasRadios;
+                } else if (group.querySelector('.nds-rating')) {
+                    result = Validator.validateRatingGroup(group, { showMessage: options.showMessages });
+                    // Anchor on the first star: the stars are buttons, so focusFirst lands on one.
+                    anchor = group.querySelector('.nds-rating-star');
+                } else if (group.classList.contains('nds-time-fields')) {
+                    // Time picker boxes: the picker stamps a typed error on the hour box.
+                    anchor = group.querySelector('.nds-time-hour');
+                    var carrier = group.querySelector('.nds-time-value');
+                    var typedError = anchor ? anchor.validationMessage : '';
+                    var empty = !typedError && !(carrier && carrier.value);
+                    var required = group.hasAttribute('data-required') || group.classList.contains('nds-required');
+                    var timeMsg = typedError || (empty && required ? strings.text('required') : '');
+                    result = Validator._finishGroupValidation(group, { showMessage: options.showMessages }, !timeMsg, timeMsg, {}, empty);
                 }
 
                 if (result && !result.valid) {
@@ -672,6 +833,19 @@
                 }
             });
 
+            // Uploads: same pattern, on every upload (a pending row blocks any of them).
+            // Anchor is the Browse button (the file input is invisible).
+            form.querySelectorAll('.nds-file-upload').forEach(function(up) {
+                if (!isFieldVisible(up, form)) return;
+                var result = Validator.validateUpload(up, { showMessage: options.showMessages });
+                if (!result.valid) {
+                    var anchor = up.querySelector('.nds-browse-btn') || up.querySelector('input[type="file"]');
+                    acc.invalidFields.push(up);
+                    acc.errors.push({ field: up, input: anchor, message: result.message });
+                    if (!acc.firstInvalidInput) acc.firstInvalidInput = anchor;
+                }
+            });
+
             // Custom selects: same pattern — the readonly display input is
             // barred from constraint validation, so required reads the hidden
             // .nds-select-value carrier. Keyed on the carrier: a native
@@ -689,6 +863,19 @@
                 }
             });
 
+            // Dropmenu pickers: same pattern, keyed on the wrapper's data-required.
+            // Anchor is the trigger (focusable).
+            form.querySelectorAll('.nds-dropmenu[data-select-name][data-required]').forEach(function(dm) {
+                if (!isFieldVisible(dm, form)) return;
+                var result = Validator.validateDropmenuSelect(dm, { showMessage: options.showMessages });
+                if (!result.valid) {
+                    var anchor = dm.querySelector('.nds-dropmenu-trigger') || dm;
+                    acc.invalidFields.push(dm);
+                    acc.errors.push({ field: dm, input: anchor, message: result.message });
+                    if (!acc.firstInvalidInput) acc.firstInvalidInput = anchor;
+                }
+            });
+
             // Autocomplete strict fields: typed-vs-picked check on the hidden
             // carrier. Skip taginput containers — assist mode makes one
             // container serve both components, and taginput owns its own
@@ -696,6 +883,8 @@
             form.querySelectorAll('.nds-form-container[data-strict]').forEach(function(ac) {
                 if (!isFieldVisible(ac, form)) return;
                 if (ac.classList.contains('nds-taginput')) return;
+                // Already failed required: strict passes empty text and would clear that message.
+                if (acc.invalidFields.indexOf(ac) !== -1) return;
                 var result = Validator.validateAutocomplete(ac, { showMessage: options.showMessages });
                 if (!result.valid) {
                     var anchor = ownField(ac);
@@ -761,11 +950,11 @@
                     input.readOnly ? NDS.State.add(formContainer, 'readonly') : NDS.State.remove(formContainer, 'readonly');
                 }
                 // Skip required propagation for radios/checkboxes — managed at group level.
-                // Skip for taginput too: the wrapper's data-required is authoritative,
-                // the typing input's required attr isn't (and mustn't be — see initializeInput).
+                // Skip for taginput and upload too: the wrapper's data-required is authoritative,
+                // the input's required attr isn't (and mustn't be — see NO_REQUIRED_STAMP).
                 // Same for custom selects: the readonly display input never carries
                 // required — syncing from it would strip the container's authored attr.
-                if (input.type !== 'radio' && input.type !== 'checkbox' && !formContainer.classList.contains('nds-taginput')
+                if (input.type !== 'radio' && input.type !== 'checkbox' && !formContainer.matches(NO_REQUIRED_STAMP)
                     && !input.classList.contains('nds-select-input')) {
                     formContainer.toggleAttribute('data-required', input.required);
                 }
@@ -824,7 +1013,7 @@
             var radioGroupContainer = changedRadio.closest('.nds-form-group');
             if (!radioGroupContainer) return;
 
-            var radioGroup = radioGroupContainer.querySelectorAll('input[type="radio"][name="' + changedRadio.name + '"]');
+            var radioGroup = radioGroupContainer.querySelectorAll('input[type="radio"][name="' + CSS.escape(changedRadio.name) + '"]');
             radioGroup.forEach(function(radio) {
                 if (radio !== changedRadio) {
                     var radioFormControl = radio.closest('.nds-form-control');
@@ -863,7 +1052,7 @@
         if (!target || !target.matches || !target.matches('input, textarea, select')) return null;
         var formControl = target.parentElement;
         if (!formControl || !formControl.classList || !formControl.classList.contains('nds-form-control')) return null;
-        if (formControl.closest('code, .code-example')) return null;
+        if (formControl.closest('code')) return null;
         return { input: target, formControl: formControl, formContainer: formControl.closest('.nds-form-container') };
     }
 
@@ -933,11 +1122,11 @@
             // Clamp number input value to min/max on blur
             if (formControl.querySelector('.nds-number-increment, .nds-number-decrement')) {
                 var val = parseInt(input.value);
-                if (isNaN(val)) { input.value = ''; }
+                if (isNaN(val)) { if (input.value || input.validity.badInput) NDS.setValue(input, ''); }
                 else {
                     var rangeError = Utils.validateNumberRange(input);
                     if (rangeError) {
-                        input.value = rangeError.clamped;
+                        NDS.setValue(input, rangeError.clamped);
                         StatusManager.set({ element: formContainer, status: 'error', message: rangeError.message });
                     }
                 }
@@ -952,36 +1141,58 @@
             var c = resolveControl(e.target);
             if (c && c.formContainer && statesActive(c.input)) NDS.State.add(c.formContainer, 'typing');
         });
+        // The browser ignores readOnly on a checkbox or a radio, and the readonly CSS blocks only
+        // the pointer: cancel the click that Space or an arrow key sends, so the value stays.
+        doc.addEventListener('click', function(e) {
+            var t = e.target;
+            if (t.readOnly && (t.type === 'checkbox' || t.type === 'radio')) e.preventDefault();
+        }, true);
         doc.addEventListener('paste', function(e) {
             var c = resolveControl(e.target);
             if (c && c.formContainer) NDS.State.add(c.formContainer, 'typing');
         });
 
-        // Numeric-only enforcement for inputmode="numeric"
+        // Numeric-only enforcement for inputmode="numeric". Arabic digits (an Arabic keyboard or
+        // keypad) go in as 0-9 instead of being blocked.
         doc.addEventListener('beforeinput', function(e) {
             var c = resolveControl(e.target);
-            if (c && c.input.getAttribute('inputmode') === 'numeric' && e.data && /\D/.test(e.data)) e.preventDefault();
+            if (!c || c.input.getAttribute('inputmode') !== 'numeric' || !e.data) return;
+            var latin = e.data.replace(/[٠-٩۰-۹]/g, function (d) { return d.charCodeAt(0) & 15; });
+            if (latin === e.data && !/\D/.test(latin)) return;
+            e.preventDefault();
+            if (/\D/.test(latin)) return;
+            var input = c.input;
+            // A script insert skips maxlength, so trim to it here.
+            if (input.maxLength >= 0) latin = latin.slice(0, Math.max(0, input.maxLength - input.value.length + (input.selectionEnd - input.selectionStart)));
+            if (!latin) return;
+            // A type="number" input has no selection API: the digit stays blocked there, as before.
+            try { input.setRangeText(latin, input.selectionStart, input.selectionEnd, 'end'); } catch (_) { return; }
+            input.dispatchEvent(new InputEvent('input', { inputType: e.inputType, data: latin, bubbles: true }));
         });
+
+        // Strip Arabic characters from password fields. Capture phase: runs before the field's own
+        // input listeners, so Password never counts a stripped letter as a symbol.
+        doc.addEventListener('input', function(e) {
+            var c = resolveControl(e.target);
+            if (!c || (c.input.type !== 'password' && c.input.dataset.type !== 'password')) return;
+            var input = c.input;
+            var cleaned = input.value.replace(/[\u0600-\u06FF]/g, '');
+            if (cleaned === input.value) return;
+            NDS.setValue(input, cleaned, { change: false });
+            e._ndsArabicStripped = true;
+            var fc = c.formControl.closest('.nds-form-container');
+            if (fc) {
+                var msg = strings.text('no_arabic');
+                StatusManager.set({ element: fc, status: 'error', message: msg });
+            }
+        }, true);
 
         // Input changes - clear errors but don't validate while typing
         doc.addEventListener('input', function(e) {
             var c = resolveControl(e.target);
-            if (!c) return;
+            // A stripped letter keeps its error message up.
+            if (!c || e._ndsArabicStripped) return;
             var input = c.input, formControl = c.formControl;
-
-            // Strip Arabic characters from password fields
-            if (input.type === 'password' || input.dataset.type === 'password') {
-                var cleaned = input.value.replace(/[\u0600-\u06FF]/g, '');
-                if (cleaned !== input.value) {
-                    input.value = cleaned;
-                    var fc = formControl.closest('.nds-form-container');
-                    if (fc) {
-                        var msg = NDS.isArabic ? 'الأحرف العربية غير مسموح بها' : 'Arabic characters are not allowed';
-                        StatusManager.set({ element: fc, status: 'error', message: msg });
-                    }
-                    return;
-                }
-            }
 
             // .nds-phone — local-format phone input paired with a separate
             // country-code prefix:
@@ -995,12 +1206,14 @@
                 var stripped = original.replace(/\D/g, '').replace(/^0+/, '');
                 if (stripped !== original) {
                     var diff = original.length - stripped.length;
-                    input.value = stripped;
+                    NDS.setValue(input, stripped, { change: false });
                     try {
                         input.setSelectionRange(Math.max(0, caret - diff), Math.max(0, caret - diff));
                     } catch (_) {}
                 }
             }
+
+            stampIdentifier(input);
 
             FieldSync.update(input, formControl, true);
 
@@ -1032,6 +1245,20 @@
                 FieldSync.setIndeterminate(input, false);
             }
         });
+
+        // A rating group has no input to fire `input`, so its own event stands in
+        // for the auto-clear above. Submit re-runs the rule, so clearing here is
+        // only about dropping a stale message.
+        doc.addEventListener('nds:rating:change', function(e) {
+            var group = e.target.closest && e.target.closest('.nds-form-group');
+            if (group && NDS.Status.get(group) !== '') StatusManager.clear(group);
+        });
+        // A pick answers "add a file"; a finished upload answers "wait".
+        ['nds:upload:selected', 'nds:upload:success', 'nds:upload:error'].forEach(function(name) {
+            doc.addEventListener(name, function(e) {
+                if (NDS.Status.get(e.target) !== '') StatusManager.clear(e.target);
+            });
+        });
     }
 
     // ==============================================
@@ -1051,7 +1278,7 @@
             // announces requiredness on the interactive input.
             var formContainer = formControl.closest('.nds-form-container');
             if (formContainer && (formContainer.hasAttribute('data-required') || formContainer.classList.contains('nds-required'))) {
-                if (!formContainer.classList.contains('nds-taginput') && !input.hasAttribute('required')) {
+                if (!formContainer.matches(NO_REQUIRED_STAMP) && !input.hasAttribute('required')) {
                     input.setAttribute('required', '');
                 }
                 input.setAttribute('aria-required', 'true');
@@ -1068,7 +1295,7 @@
         _syncInitialState: function(input, formControl, formContainer) {
             // Container → input: propagate pre-existing data-state
             if (formContainer) {
-                NDS.State.apply(formContainer, 'disabled', 'readonly');
+                _syncStates(formContainer);
             }
             // Input → container: sync current input state to data-state
             FieldSync.update(input, formControl, true);
@@ -1123,7 +1350,7 @@
                 var isPassword = passwordInput.type === 'password';
                 passwordInput.type = isPassword ? 'text' : 'password';
                 passwordToggle.classList.toggle('show', isPassword);
-                NDS.aria.label(passwordToggle, isPassword ? 'Hide password' : 'Show password');
+                NDS.aria.label(passwordToggle, strings.text(isPassword ? 'hide_password' : 'show_password'));
             });
         },
 
@@ -1142,9 +1369,8 @@
 
                 // Toggle + notify — shared by track-click, keyboard, and label-click.
                 function toggleSwitch() {
-                    if (switchInput.disabled || switchElement.classList.contains('disabled')) return;
-                    switchInput.checked = !switchInput.checked;
-                    Utils.triggerEvents(switchInput);
+                    if (switchInput.disabled || switchInput.readOnly || switchElement.classList.contains('disabled')) return;
+                    NDS.setValue(switchInput, !switchInput.checked);
                     FieldSync.update(switchInput, formControl);
                     switchElement.dispatchEvent(new CustomEvent('nds:switchChange', {
                         detail: { checked: switchInput.checked, value: switchInput.value, input: switchInput },
@@ -1181,7 +1407,7 @@
                     }
                 });
 
-                var label = formControl.querySelector('label[for="' + switchInput.id + '"]');
+                var label = formControl.querySelector('label[for="' + CSS.escape(switchInput.id) + '"]');
                 if (label && !switchElement.contains(label)) {
                     label.addEventListener('click', function(e) {
                         e.preventDefault();
@@ -1213,8 +1439,7 @@
                     if (formContainer && NDS.Status.get(formContainer) === 'error') {
                         StatusManager.clear(formContainer);
                     }
-                    input.value = next;
-                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    NDS.setValue(input, next, { change: false });
                     return true;
                 }
                 if (formContainer && NDS.Status.get(formContainer) !== 'error') {
@@ -1290,12 +1515,7 @@
                     // tags, restore seeds) — clear resets the visible field,
                     // never the committed values.
                     if (input.type === 'hidden') return;
-                    if (input.type === 'checkbox' || input.type === 'radio') {
-                        input.checked = false;
-                    } else {
-                        input.value = '';
-                    }
-                    Utils.triggerEvents(input);
+                    NDS.setValue(input, input.type === 'checkbox' || input.type === 'radio' ? false : '');
                     // Skip validation: clearing is an edit like typing, so it must
                     // not raise "required" on a field the user just emptied. The
                     // input event above already cleared any error being shown.
@@ -1371,8 +1591,7 @@
         // do NOT propagate data-required to individual inputs — that would make
         // HTML5 validation flag each input separately.
 
-        // Propagate initial data-state to inputs via hooks
-        NDS.State.apply(group, 'disabled', 'readonly');
+        _syncStates(group);
     }
 
     // ==============================================
@@ -1439,13 +1658,12 @@
                 var itemText = item.textContent.trim().replace(/\s+/g, ' ');
 
                 var targetInput = document.getElementById(targetId) ||
-                    document.querySelector('[name="' + targetId + '"]') ||
-                    document.querySelector('[data-name="' + targetId + '"]');
+                    document.querySelector('[name="' + CSS.escape(targetId) + '"]') ||
+                    document.querySelector('[data-name="' + CSS.escape(targetId) + '"]');
 
                 if (targetInput && itemText) {
-                    targetInput.value = itemText;
                     targetInput.focus();
-                    Utils.triggerEvents(targetInput);
+                    NDS.setValue(targetInput, itemText);
 
                     var formControl = targetInput.closest('.nds-form-control');
                     if (formControl) {
@@ -1468,7 +1686,22 @@
     function initDynamicContentObserver() {
         if (NDS.Forms._dynamicObserver) return;
 
-        NDS.onDOMAdd('.nds-form-control', function() { initFormControlClasses(); });
+        // Sweep only the outermost form, group or field around each added control:
+        // a page-wide sweep cost 63 ms per added row at 1,000 fields (6.6x CPU).
+        NDS.onDOMAdd('.nds-form-control', function(controls) {
+            var roots = new Set();
+            controls.forEach(function(control) {
+                var root = control;
+                for (var n = control; n; n = n.parentElement) {
+                    if (n.matches('.nds-form, .nds-form-group, .nds-form-container')) root = n;
+                }
+                roots.add(root);
+            });
+            roots.forEach(function(root) {
+                for (var other of roots) if (other !== root && other.contains(root)) return;
+                initializeContainer(root);
+            });
+        });
         NDS.onDOMAdd('.nds-auto-fill', function() { initInputAutoFill(); });
         NDS.Forms._dynamicObserver = true;
     }
@@ -1476,21 +1709,30 @@
     // ==============================================
     // CONTAINER INITIALIZATION
     // ==============================================
+    // Elements the init tail (autofocus, FOUC reveal) has already handled.
+    var _initTail = new WeakSet();
+
+    // The container itself counts: the sweep can start on a form, a group or a field.
+    function selfAndInner(container, sel) {
+        var inner = Array.from(container.querySelectorAll(sel));
+        return container.matches && container.matches(sel) ? [container].concat(inner) : inner;
+    }
+
     function initializeContainer(container) {
         if (!container) return;
 
         // Initialize form controls
-        var formControls = container.classList && container.classList.contains('nds-form-control')
-            ? [container]
-            : Array.from(container.querySelectorAll('.nds-form-control'));
+        var formControls = selfAndInner(container, '.nds-form-control');
 
         formControls.forEach(function(formControl) {
-            if (formControl.closest('code, .code-example')) return;
+            if (formControl.closest('code')) return;
 
-            var inputElements = formControl.querySelectorAll(':scope > input, :scope > textarea, :scope > select');
+            // A slider's inputs sit in its track, one level down.
+            var inputElements = formControl.querySelectorAll(':scope > input, :scope > textarea, :scope > select, :scope > .nds-slider-track > input');
 
             inputElements.forEach(function(input) {
                 FormControls.initializeInput(input, formControl);
+                stampIdentifier(input);
             });
 
             FormControls.initPasswordToggle(formControl);
@@ -1500,42 +1742,44 @@
         });
 
         // Initialize auto-fill containers
-        var autoFillContainers = container.classList && container.classList.contains('nds-auto-fill')
-            ? [container]
-            : Array.from(container.querySelectorAll('.nds-auto-fill'));
+        var autoFillContainers = selfAndInner(container, '.nds-auto-fill');
 
         autoFillContainers.forEach(initAutoFillContainer);
 
         // Initialize form groups
-        container.querySelectorAll('.nds-form-group').forEach(function(group) {
+        selfAndInner(container, '.nds-form-group').forEach(function(group) {
             initGroupState(group);
             if (group.querySelector('input[type="checkbox"]')) initCheckboxGroupValidation(group);
             if (group.querySelector('input[type="radio"]')) initRadioGroupValidation(group);
         });
 
-        container.querySelectorAll('.nds-multiselect').forEach(initMultiselectValidation);
+        selfAndInner(container, '.nds-multiselect').forEach(initMultiselectValidation);
 
         // Initialize forms
-        var forms = container.classList && container.classList.contains('nds-form')
-            ? [container]
-            : Array.from(container.querySelectorAll('.nds-form'));
+        var forms = selfAndInner(container, '.nds-form');
 
         forms.forEach(initForm);
 
         // Restore autofocus — browser native autofocus may be lost during init.
         // preventScroll: a plain focus() scrolls the element into view, which
         // forces a synchronous layout in the middle of the component-init burst.
+        // Once per element: the dynamic-content observer re-runs this sweep on every
+        // added control, and a re-run would pull focus from the field the user is in.
         var autofocusEl = container.querySelector('input[autofocus], textarea[autofocus], select[autofocus]');
-        if (autofocusEl) {
+        if (autofocusEl && !_initTail.has(autofocusEl)) {
+            _initTail.add(autofocusEl);
             autofocusEl.focus({ preventScroll: true });
             var fc = autofocusEl.closest('.nds-form-container');
             if (fc) NDS.State.add(fc, 'focus');
         }
 
-        // Reveal [hidden] FOUC-guard wrappers now their controls carry state.
-        container.querySelectorAll(
-            '.nds-form-group[hidden], .nds-form-container[hidden], .nds-form-action[hidden]'
-        ).forEach(function(el) { el.removeAttribute('hidden'); });
+        // Reveal [hidden] FOUC-guard wrappers now their controls carry state — on a
+        // wrapper's first sweep only, so one hidden later by the page or a component stays hidden.
+        selfAndInner(container, '.nds-form-group, .nds-form-container, .nds-form-action').forEach(function(el) {
+            if (_initTail.has(el)) return;
+            _initTail.add(el);
+            el.removeAttribute('hidden');
+        });
     }
 
     // ==============================================
@@ -1555,6 +1799,7 @@
         // re-init every auto-fill container at startup. The standalone pass stays
         // wired to the dynamic-content observer (initDynamicContentObserver) for
         // .nds-auto-fill nodes added after load.
+        strings.load();
         installFormDelegation();
         initFormControlClasses();
         initDynamicContentObserver();
@@ -1581,7 +1826,7 @@
                 if (add) container.setAttribute('data-required', '');
                 else container.removeAttribute('data-required');
                 // Propagate to inputs, skip radios (always in groups, validated at group level)
-                container.querySelectorAll('input, textarea, select').forEach(function(input) {
+                if (!container.matches(NO_REQUIRED_STAMP)) container.querySelectorAll('input, textarea, select').forEach(function(input) {
                     if (input.type !== 'radio') input.required = add;
                 });
             } else {
@@ -1626,7 +1871,11 @@
 
         // Form Validation
         validateForm: Validator.validateForm.bind(Validator),
-        initForm: initForm
+        initForm: initForm,
+
+        // Identifier checks (the .nds-national-id / .nds-iban rules, for your own code)
+        isNationalId: isNationalId,
+        isIban: isIban
     };
 
 })();
