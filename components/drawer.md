@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 04:46 AM"
 ---
 
 <section id="drawer-overview" class="nds-content-section nds-doc-overview">
@@ -164,7 +164,7 @@ Pick another component when:
         </span>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-sm" data-status="success">
+            <span class="nds-tag nds-xs" data-status="success">
               <span class="nds-label">Approved</span>
             </span>
             <span class="nds-label nds-truncate">License approved</span>
@@ -180,7 +180,7 @@ Pick another component when:
         </span>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-sm" data-status="warning">
+            <span class="nds-tag nds-xs" data-status="warning">
               <span class="nds-label">Due</span>
             </span>
             <span class="nds-label nds-truncate">Payment overdue</span>
@@ -196,7 +196,7 @@ Pick another component when:
         </span>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-tag nds-sm" data-status="info">
+            <span class="nds-tag nds-xs" data-status="info">
               <span class="nds-label">New</span>
             </span>
             <span class="nds-label nds-truncate">New message</span>

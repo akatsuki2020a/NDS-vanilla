@@ -259,7 +259,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="warning">
+                                                <span class="nds-tag nds-xs" data-status="warning">
                                                     <span class="nds-label">Now</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
@@ -279,7 +279,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="info">
+                                                <span class="nds-tag nds-xs" data-status="info">
                                                     <span class="nds-label">Next</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">FIN 320 · Corporate Finance</span>
@@ -299,7 +299,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="neutral">
+                                                <span class="nds-tag nds-xs" data-status="neutral">
                                                     <span class="nds-label">Later</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">MGT 310 · Organizational Behavior</span>
@@ -342,7 +342,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="warning">
+                                                <span class="nds-tag nds-xs" data-status="warning">
                                                     <span class="nds-label">In review</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">Exam absence excuse</span>
@@ -361,7 +361,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="info">
+                                                <span class="nds-tag nds-xs" data-status="info">
                                                     <span class="nds-label">Action needed</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">Change of section</span>
@@ -380,7 +380,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="success">
+                                                <span class="nds-tag nds-xs" data-status="success">
                                                     <span class="nds-label">Done</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">Enrollment letter</span>
@@ -399,7 +399,7 @@ hideFeedback: true
                                         </span>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="error">
+                                                <span class="nds-tag nds-xs" data-status="error">
                                                     <span class="nds-label">Rejected</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">Course withdrawal</span>
@@ -461,7 +461,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="warning">
+                                                <span class="nds-tag nds-xs" data-status="warning">
                                                     <span class="nds-label">First</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
@@ -502,7 +502,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="info">
+                                                <span class="nds-tag nds-xs" data-status="info">
                                                     <span class="nds-label">Online</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">MGT 310 · Organizational Behavior</span>
@@ -564,7 +564,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="neutral">
+                                                <span class="nds-tag nds-xs" data-status="neutral">
                                                     <span class="nds-label">Past</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">Classes start</span>
@@ -582,7 +582,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-tag nds-sm" data-status="warning">
+                                                <span class="nds-tag nds-xs" data-status="warning">
                                                     <span class="nds-label">Next week</span>
                                                 </span>
                                                 <span class="nds-label nds-truncate">Last day to withdraw from a course</span>
