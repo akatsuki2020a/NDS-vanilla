@@ -156,6 +156,11 @@
     padding-block: var(--spacing-md);
 }
 
+// A date tile is taller than the title beside it, so the text centers on the tile.
+.nds-drawer-list > li > .nds-btn:has(> .nds-date-tile) {
+    align-items: center;
+}
+
 .nds-drawer-list .nds-drawer-item {
     display: flex;
     flex-direction: column;
@@ -379,6 +384,13 @@
 
         >li {
              flex: 1;
+        }
+
+        // Fills the share a rich row's height: auto skips; the wrap lets align-content center icon and text as one group.
+        >li>.nds-btn:has(>.nds-drawer-item) {
+            height: 100%;
+            flex-wrap: wrap;
+            align-content: center;
         }
     }
 }
