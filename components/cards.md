@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 12:29 AM"
+last_edit: "16/10/2026 - 02:56 AM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -229,6 +229,14 @@ Pick another component when:
   </span>
 </div>
 </script>
+<script type="text/html" id="card-header-action" data-canon>
+<div class="nds-card-header-action">
+  <a href="#" class="nds-btn nds-subtle nds-sm">
+    <span class="nds-label">View all</span>
+    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
+  </a>
+</div>
+</script>
 <script type="text/html" id="card-actions" data-canon>
 <div class="nds-card-actions">
   <a href="#" class="nds-btn nds-primary nds-lg">
@@ -268,9 +276,14 @@ Pick another component when:
 | Value | Price | canon `#card-value-price` | `.nds-card-text` (after) | A price. `data-currency` shows the currency icon. See [Numbers](../utilities/numbers) |
 | Value | Sale price | canon `#card-value-sale` | `.nds-card-text` (after) | A price with the original crossed out in `<s>` |
 | Value | Unit price | canon `#card-value-unit` | `.nds-card-text` (after) | A price with a plain-text unit after it |
-| Checkbox | Checkbox | canon `#card-checkbox` | `div.nds-card` (start) | Lets the user select the card. Sits in the top end corner. Not on a link card, which holds no controls |
-| Status | Status (hint: A status tag at the top end of the card) | canon `#card-status` | `.nds-card-header` | A status tag, such as a person's availability. `data-status` sets its color. It sits at the top end, under the avatar in a row card, and over the corner of an image. It moves clear of a checkbox |
-| Status | Status (hint: A status tag at the top end of the card) | `.nds-inverted` | `.nds-card-image ~ * .nds-tag` | Over an image, the tag needs a solid background to stay readable, so give it `.nds-inverted` |
+| Corner | None (default) | — | — | Nothing in the top end corner |
+| Corner | Checkbox | canon `#card-checkbox` | `div.nds-card` (start) | Lets the user select the card. Sits in the top end corner. Not on a link card, which holds no controls. |
+| Corner | Status (hint: A status tag at the top end of the card) | canon `#card-status` | `.nds-card-header` | A status tag, such as a person's availability. `data-status` sets its color. It sits at the top end, under the avatar in a row card, and over the corner of an image. It moves clear of a checkbox. |
+| Corner | Status (hint: A status tag at the top end of the card) | `.nds-inverted` | `.nds-card-image ~ * .nds-tag` | Over an image, the tag needs a solid background to stay readable, so give it `.nds-inverted` |
+| Corner | Header action (hint: Buttons at the top end of the header) | canon `#card-header-action` | `.nds-card-header:not(a.nds-card > *)` | One or more small buttons at the end of the header, such as View all. They sit at the top end, like a status tag, and a long title never squeezes them. Not on a link card, which holds no links or buttons. |
+| Corner | Checkbox + Status | canon `#card-checkbox` | `div.nds-card` (start) | Both: the status tag moves clear of the checkbox. Header action takes the whole corner, so it never joins them |
+| Corner | Checkbox + Status | canon `#card-status` | `.nds-card-header` | The same |
+| Corner | Checkbox + Status | `.nds-inverted` | `.nds-card-image ~ * .nds-tag` | The same |
 | Actions | None (default) | — | — | No actions |
 | Actions | Start (hint: Aligned to the start of the row) | canon `#card-actions` | `div.nds-card` | Buttons after the content, never inside it. Not on a link card, which holds no links or buttons |
 | Actions | End (hint: Aligned to the end of the row) | canon `#card-actions` | `div.nds-card` | The same, aligned to the end of the row |
@@ -383,6 +396,8 @@ Pick another component when:
 - Do not put a card inside a card. Use `.nds-card-meta` or a [definition list](../components/definition-list) inside the content.
 - Use `data-status` only when the card really has that status. For a color without a status, use the color class.
 - Put a row of cards in a [grid](../layout/grid).
+- Put a button in the card header inside `.nds-card-header-action`. A bare button there shrinks when the title is long, and its label spills out.
+- In a disabled card, add `disabled` to its checkbox and buttons too, or `aria-disabled="true"` to a link button. They then show their own disabled look and the keyboard skips them. Without it, the card only fades them, and the keyboard can still reach them.
 
 </div>
   </div>

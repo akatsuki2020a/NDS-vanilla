@@ -264,6 +264,16 @@
     > :is(.nds-card-text, .nds-card-title) {
       padding-top: var(--spacing-md);
     }
+
+    // Top end, never squeezed by the title. flex-start: the header's stretch would center the buttons.
+    > .nds-card-header-action {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: var(--spacing-xs);
+      margin-inline-start: auto;
+    }
   }
 
   // A centred card centres its header too. Wins on source order over the
@@ -799,7 +809,13 @@
   box-shadow: none;
   pointer-events: none;
 
-  :is(.nds-card-image, .nds-card-meta, .nds-card-actions) {
+  :is(.nds-card-image, .nds-card-meta, .nds-card-status) {
+    opacity: 0.5;
+  }
+
+  // A control the page marked disabled shows its own disabled look; the fade only covers one it missed.
+  :is(.nds-card-actions, .nds-card-header-action) .nds-btn:not(:disabled, [aria-disabled="true"], [data-state~="disabled"]),
+  .nds-card-checkbox .nds-check:not(:disabled) {
     opacity: 0.5;
   }
 }
