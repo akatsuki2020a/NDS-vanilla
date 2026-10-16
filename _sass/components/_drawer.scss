@@ -48,6 +48,30 @@
 
 }
 
+// Broken out of a card (.nds-breakout, see _cards.scss): rows run edge to edge so dividers,
+// hover and status fills meet the border, and the card padding moves into the rows.
+.nds-card .nds-drawer.nds-breakout > .nds-drawer-list > li {
+    > .nds-btn {
+        --btn-radius: 0;
+        padding-inline: var(--_card-padding-inline);
+
+        // An indicator here would sit on the card border.
+        &.nds-indicator::before { display: none; }
+    }
+
+    &:first-child > .nds-btn {
+        padding-block-start: var(--_breakout-start, var(--_row-pad));
+        border-start-start-radius: var(--_breakout-radius-start, 0px);
+        border-start-end-radius: var(--_breakout-radius-start, 0px);
+    }
+
+    &:last-child > .nds-btn {
+        padding-block-end: var(--_breakout-end, var(--_row-pad));
+        border-end-start-radius: var(--_breakout-radius-end, 0px);
+        border-end-end-radius: var(--_breakout-radius-end, 0px);
+    }
+}
+
 // ==============================================
 // DRAWER LIST
 // ==============================================
@@ -83,7 +107,8 @@
         --btn-height-min: 36px;
         --btn-width: 100%;
         --btn-gap: var(--drawer-btn-gap, var(--spacing-md));
-        padding-block: calc(var(--_btn-padding)/2);
+        --_row-pad: calc(var(--_btn-padding)/2);
+        padding-block: var(--_row-pad);
         justify-content: flex-start;
         
 
@@ -153,7 +178,7 @@
     height: auto;
     min-height: 0;
     align-items: flex-start;
-    padding-block: var(--spacing-md);
+    --_row-pad: var(--spacing-md);
 }
 
 // A date tile is taller than the title beside it, so the text centers on the tile.
@@ -381,7 +406,8 @@
 
 .nds-grid .nds-drawer.nds-fit {
     --drawer-btn-height: 100%;
-    height: 100%;
+    // Plus any card padding a breakout drawer covers at its top and bottom edges.
+    height: calc(100% + var(--_breakout-start, 0px) + var(--_breakout-end, 0px));
 
     .nds-drawer-list {
         height: 100%;

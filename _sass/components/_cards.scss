@@ -245,6 +245,30 @@
     justify-content: center;
   }
 
+  // A part marked .nds-breakout runs to the nearest card's sides, and to its top or
+  // bottom edge when it sits there. The part re-pads its own content (drawer rows).
+  .nds-breakout {
+    --_breakout-start: initial;
+    --_breakout-end: initial;
+    --_breakout-radius-start: initial;
+    --_breakout-radius-end: initial;
+    width: calc(100% + 2 * var(--_card-padding-inline));
+    margin-inline: calc(-1 * var(--_card-padding-inline));
+    margin-block: calc(-1 * var(--_breakout-start, 0px)) calc(-1 * var(--_breakout-end, 0px));
+  }
+
+  > .nds-breakout:first-child,
+  > .nds-card-content:first-child > .nds-breakout:first-child {
+    --_breakout-start: var(--_card-padding-block);
+    --_breakout-radius-start: calc(var(--_card-radius) - 1px);
+  }
+
+  > .nds-breakout:last-child,
+  > .nds-card-content:last-child > .nds-breakout:last-child {
+    --_breakout-end: var(--_card-padding-block);
+    --_breakout-radius-end: calc(var(--_card-radius) - 1px);
+  }
+
 
   // ==============================================
   // CARD HEADER SECTION
@@ -261,8 +285,13 @@
       justify-content: space-between;
     }
 
+    // Title in the header (a variant): the text centers on the icon, whatever its size.
     > :is(.nds-card-text, .nds-card-title) {
-      padding-top: var(--spacing-md);
+      align-self: center;
+    }
+
+    > .nds-card-text {
+      gap: 0;
     }
 
     // Top end, never squeezed by the title. flex-start: the header's stretch would center the buttons.
@@ -376,6 +405,17 @@
     color: var(--_card-text);
     margin: 0;
     width: 100%;
+  }
+
+  // Text sizes, like .nds-card-number's: each step drops title, subtitle and description one rung.
+  .nds-card-text.nds-md {
+    .nds-card-title { font-size: var(--typo-text-md-FS); line-height: var(--typo-text-md-LH); }
+    :is(.nds-card-subtitle, .nds-card-description) { font-size: var(--typo-text-sm-FS); line-height: var(--typo-text-sm-LH); }
+  }
+
+  .nds-card-text.nds-sm {
+    .nds-card-title { font-size: var(--typo-text-sm-FS); line-height: var(--typo-text-sm-LH); }
+    :is(.nds-card-subtitle, .nds-card-description) { font-size: var(--typo-text-xs-FS); line-height: var(--typo-text-xs-LH); }
   }
 
   // ==============================================

@@ -248,6 +248,17 @@
     }
 }
 
+// Broken out of a card (.nds-breakout, see _cards.scss): dividers reach the card's sides
+// and the card padding moves into the items. Sideways only: items have no fill to meet an edge.
+// After the divided rules: it ties the table-view padding on specificity.
+.nds-card .nds-definition-list.nds-breakout {
+    margin-block: 0;
+
+    > .nds-definition-item:not(.nds-card) {
+        padding-inline: var(--_card-padding-inline);
+    }
+}
+
 // ==============================================
 // RESPONSIVE BEHAVIOR
 // ==============================================

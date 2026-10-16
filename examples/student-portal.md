@@ -110,7 +110,9 @@ hideFeedback: true
                                 <i class="hgi hgi-stroke hgi-mortarboard-01" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title">Cumulative GPA</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title">Cumulative GPA</span>
+                        </div>
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-metric">
@@ -140,7 +142,9 @@ hideFeedback: true
                                 <i class="hgi hgi-stroke hgi-chart-increase" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title">Last term GPA</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title">Last term GPA</span>
+                        </div>
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-metric">
@@ -171,7 +175,9 @@ hideFeedback: true
                                 <i class="hgi hgi-stroke hgi-graduation-scroll" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title" id="degree-progress-title">Degree progress</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title" id="degree-progress-title">Degree progress</span>
+                        </div>
                         <div class="nds-card-header-action">
                             <button type="button" class="nds-btn nds-subtle nds-sm" data-modal-target="plan-modal">
                                 <span class="nds-label">Study plan</span>
@@ -241,7 +247,10 @@ hideFeedback: true
                                 <i class="hgi hgi-stroke hgi-calendar-03" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title">Today's classes</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title">Today's classes</span>
+                            <p class="nds-card-description">Three classes, one online.</p>
+                        </div>
                         <div class="nds-card-header-action">
                             <a href="#" class="nds-btn nds-subtle nds-sm">
                                 <span class="nds-label">Full timetable</span>
@@ -250,10 +259,10 @@ hideFeedback: true
                         </div>
                     </div>
                     <div class="nds-card-content">
-                        <div class="nds-drawer nds-divided nds-fit">
+                        <div class="nds-drawer nds-divided nds-fit nds-breakout">
                             <ul class="nds-drawer-list" aria-label="Today's classes">
                                 <li data-status="warning">
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-laptop" aria-hidden="true"></i>
                                         </span>
@@ -273,7 +282,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-presentation-01" aria-hidden="true"></i>
                                         </span>
@@ -293,7 +302,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-presentation-01" aria-hidden="true"></i>
                                         </span>
@@ -324,7 +333,9 @@ hideFeedback: true
                                 <i class="hgi hgi-stroke hgi-task-01" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title">My requests</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title">My requests</span>
+                        </div>
                         <div class="nds-card-header-action">
                             <a href="#" class="nds-btn nds-subtle nds-sm">
                                 <span class="nds-label">All requests</span>
@@ -333,10 +344,10 @@ hideFeedback: true
                         </div>
                     </div>
                     <div class="nds-card-content">
-                        <div class="nds-drawer nds-divided nds-fit">
+                        <div class="nds-drawer nds-divided nds-fit nds-breakout">
                             <ul class="nds-drawer-list" aria-label="My requests">
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-file-validation" aria-hidden="true"></i>
                                         </span>
@@ -355,7 +366,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-task-edit-01" aria-hidden="true"></i>
                                         </span>
@@ -374,7 +385,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-mail-account-01" aria-hidden="true"></i>
                                         </span>
@@ -393,7 +404,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <span class="nds-featured-icon nds-sm">
                                             <i class="hgi hgi-stroke hgi-calendar-remove-01" aria-hidden="true"></i>
                                         </span>
@@ -436,7 +447,10 @@ hideFeedback: true
                         <i class="hgi hgi-stroke hgi-task-done-02" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title">Final exams</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title">Final exams</span>
+                            <p class="nds-card-description">Four exams over five days.</p>
+                        </div>
                         <div class="nds-card-header-action">
                             <a href="#" class="nds-btn nds-subtle nds-sm">
                                 <span class="nds-label">Exam timetable</span>
@@ -450,10 +464,10 @@ hideFeedback: true
                             <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-location-01" aria-hidden="true"></i>Riyadh, women's campus</span>
                             <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-identity-card" aria-hidden="true"></i>Bring your student ID card</span>
                         </span>
-                        <div class="nds-drawer nds-divided nds-fit">
+                        <div class="nds-drawer nds-divided nds-fit nds-breakout">
                             <ul class="nds-drawer-list" aria-label="Final exams">
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-12-13">
                                             <span class="nds-date-tile-weekday">Sun</span>
                                             <span class="nds-date-tile-day">13</span>
@@ -475,7 +489,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-12-14">
                                             <span class="nds-date-tile-weekday">Mon</span>
                                             <span class="nds-date-tile-day">14</span>
@@ -494,7 +508,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-12-16">
                                             <span class="nds-date-tile-weekday">Wed</span>
                                             <span class="nds-date-tile-day">16</span>
@@ -515,7 +529,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-12-17">
                                             <span class="nds-date-tile-weekday">Thu</span>
                                             <span class="nds-date-tile-day">17</span>
@@ -544,7 +558,9 @@ hideFeedback: true
                         <i class="hgi hgi-stroke hgi-calendar-01" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <span class="nds-card-title">Academic calendar</span>
+                        <div class="nds-card-text nds-md">
+                            <span class="nds-card-title">Academic calendar</span>
+                        </div>
                         <div class="nds-card-header-action">
                             <a href="#" class="nds-btn nds-subtle nds-sm">
                                 <span class="nds-label">Full calendar</span>
@@ -553,10 +569,10 @@ hideFeedback: true
                         </div>
                     </div>
                     <div class="nds-card-content">
-                        <div class="nds-drawer nds-divided nds-fit">
+                        <div class="nds-drawer nds-divided nds-fit nds-breakout">
                             <ul class="nds-drawer-list" aria-label="Academic calendar">
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-08-30">
                                             <span class="nds-date-tile-weekday">Sun</span>
                                             <span class="nds-date-tile-day">30</span>
@@ -574,7 +590,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-10-22">
                                             <span class="nds-date-tile-weekday">Thu</span>
                                             <span class="nds-date-tile-day">22</span>
@@ -592,7 +608,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-11-15">
                                             <span class="nds-date-tile-weekday">Sun</span>
                                             <span class="nds-date-tile-day">15</span>
@@ -607,7 +623,7 @@ hideFeedback: true
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" class="nds-btn nds-subtle nds-indicator">
+                                    <a href="#" class="nds-btn nds-subtle">
                                         <time class="nds-date-tile" datetime="2026-12-13">
                                             <span class="nds-date-tile-weekday">Sun</span>
                                             <span class="nds-date-tile-day">13</span>
