@@ -41,8 +41,8 @@
  *     paint then collapse (horizontal CLS).
  *   - Auto-pagination initial paint (setupAutoContainer → updateAutoPagination):
  *     generates the collapsed list from data-total-pages, hides items past
- *     --per-page via showPage, locks table column widths from one all-rows
- *     layout, stamps data-paged-initialized so the skeleton reveals.
+ *     --per-page via showPage, which pins table column widths grow-only,
+ *     stamps data-paged-initialized so the skeleton reveals.
  *   - Initial active-state stamping (setActivePage + updatePrevNextStates +
  *     initializePaginationStates) so the active page is highlighted and the
  *     prev/next disabled states are correct on first frame.
@@ -557,17 +557,13 @@
         updatePrevNextStates(pagination, currentPageNum, minPage, maxPage);
     }
 
-    // Lock a paged table's column widths before pagination hides its rows, so
-    // columns don't jump page to page. The pre-init hold display:nones rows
-    // past page one; the caller stamps data-paged-initialized first, so this
-    // read forces ONE full-table layout with every row's content in it — the
-    // only pre-init pass that pays for all rows. No-op for card paged content.
+    // Pin a paged table's columns to the widest the shown pages needed, so a
+    // column never narrows page to page; a later page with longer text widens
+    // it once. Measuring every row instead styled all of them at setup (~430 ms
+    // for 100 rich rows at CPU ×6.6). No-op for card paged content.
     function lockTableColumns(items) {
         const first = items[0];
         if (!first || first.tagName !== 'TR') return;
-        // The loader's pre-reveal split hid rows past page one; show them so
-        // the read below sees every row's content. showPage re-hides them.
-        for (const row of items) row.hidden = false;
         const table = first.closest('table');
         // Own header row only. A sub-row's nested <table> has its own thead whose
         // cells sit inside a hidden row and measure 0 — and since the outer
@@ -575,13 +571,20 @@
         // every nested column got pinned to 0px.
         const headers = table && table.querySelectorAll(':scope > thead th');
         if (!headers || !headers.length) return;
+        // Read at width:auto: the stretch to 100% would pin spare room into every
+        // column, and a wider page would then overflow instead of sharing it.
+        const authored = table.style.width;
+        table.style.width = 'auto';
         const widths = [];
         for (let i = 0; i < headers.length; i++) widths.push(headers[i].getBoundingClientRect().width);
+        table.style.width = authored;
         // Nothing laid out to read (unrendered container — collapsed accordion,
         // inactive tab panel, never-painted background tab): writing these would
         // pin every column to 0px. Skip the lock; pages just size themselves.
         if (!widths.some(w => w > 0)) return;
-        for (let i = 0; i < headers.length; i++) headers[i].style.width = widths[i] + 'px';
+        // min-width, not width: an overflowing table treats a cell's width as a
+        // preference and narrows it when another column grows.
+        for (let i = 0; i < headers.length; i++) headers[i].style.minWidth = widths[i] + 'px';
     }
 
     // The .nds-paged-content a nav controls. Explicit binding wins:
@@ -677,13 +680,11 @@
         const items = _pagedItems(contentContainer);
 
         // Build the paginated UI in final state — no all-items → paginated
-        // flash. Stamp FIRST: it releases the pre-init hold on rows past page
-        // one, so lockTableColumns measures every row's content. All of this
-        // runs in one task, so nothing paints between the release and showPage.
+        // flash. The stamp releases the pre-init hold; all of this runs in one
+        // task, so nothing paints between the release and showPage.
         const perPage = readPerPage(contentContainer);
         contentContainer._ndsPerPage = perPage;
         contentContainer.setAttribute('data-paged-initialized', '');
-        lockTableColumns(items);
         updateAutoPagination(paginationNav, items, perPage);
 
         // Opt-in URL restore: land on ?page=N before the skeleton reveal —
@@ -1213,6 +1214,7 @@
         items.forEach((item, index) => {
             item.hidden = index < start || index >= end;
         });
+        lockTableColumns(items);
 
         if (items[0]) updateRecordSlots(items[0].closest('.nds-paged-content'), items.length, pageNumber, perPage);
     }
@@ -1393,9 +1395,8 @@
         // load Filter (registered before Pagination) calls refresh during its
         // init, ahead of setupAutoContainer — but setupAutoContainer already
         // paints the same filter-aware (visible-only) nav from data-filtered, so
-        // the pre-setup refresh is redundant. Running it here would also hide
-        // off-page rows before lockTableColumns could measure the all-rows table.
-        // Once initialized, interaction-time refreshes run normally.
+        // the pre-setup refresh is redundant. Once initialized, interaction-time
+        // refreshes run normally.
         if (!paginationNav.hasAttribute('data-nds-auto-pagination-initialized')) return;
 
         // Get only visible (non-filtered) items

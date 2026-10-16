@@ -265,8 +265,8 @@
 
             // The RO's first delivery runs the initial overflow check
             // immediately — it fires post-layout so the scrollWidth read is free.
-            // Column-width locking is owned by pagination now (it locks before
-            // hiding rows; see lockTableColumns in nds-pagination.js). Later
+            // Column-width locking is owned by pagination (lockTableColumns in
+            // nds-pagination.js, grow-only per shown page). Later
             // deliveries are debounced to coalesce resize storms.
             let firstMeasure = true;
             const checkTable = NDS.debounce(() => this.checkTableWidth(), 100);
