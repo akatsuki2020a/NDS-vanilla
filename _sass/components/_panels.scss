@@ -5,23 +5,20 @@
 // chrome; it never styles what authors put inside it.
 //
 // `data-panel-side` picks the edge: start/end are LOGICAL (flip with dir),
-// left/right/top/bottom are PHYSICAL (fixed). Panels share one --panel-z;
-// nds-panels.js marks the ones under a modal `covered`, which sinks them
-// below its backdrop (panel z − 1).
+// left/right/top/bottom are PHYSICAL (fixed). The panel is a <dialog>: a plain
+// one opens with show() and keeps --panel-z (under the main nav); a modal one
+// opens with showModal(), so the top layer puts it over everything.
 
 @use '../mixins' as *;
 
-// Emits a side's closed offset + its closing offset. transform is physical,
-// so each side (and, for logical sides, each direction) needs its own value
-// written EXPLICITLY rather than through a var() — the engine interpolates
-// closed↔open reliably that way (same reason as _accessibility.scss).
-// `closing` carries !important to beat the shared open rule's !important;
-// it also outranks it on specificity, so source order doesn't matter.
+// Emits a side's closed offset and its open one. transform is physical, so each
+// side (and, for logical sides, each direction) writes its own. No !important:
+// Chrome runs an animation on an !important property on the main thread only.
 @mixin panel-slide($closed) {
     transform: $closed;
 
-    &[data-state~="closing"] {
-        transform: $closed !important;
+    &[data-state~="open"]:not([data-state~="closing"]) {
+        transform: translate(0, 0);
     }
 }
 
@@ -52,10 +49,13 @@
 
     position: fixed;
     z-index: var(--_panel-z);
-
-    &[data-state~="covered"] {
-        z-index: calc(var(--_panel-z) - 2);
-    }
+    // The <dialog>'s own box: the sides below set the size.
+    margin: 0;
+    padding: 0;
+    border: 0;
+    max-width: none;
+    max-height: none;
+    height: auto;
     display: flex;
     flex-direction: column;
     gap: var(--_panel-gap);
@@ -65,13 +65,32 @@
     border-radius: var(--_panel-radius);
     overflow: hidden;            // scroll belongs to .nds-panel-body
     overscroll-behavior: contain;
-}
 
-// Open offset and the transition are side-agnostic — declared once. Every
-// side's closed/closing transform is more specific, so only `open` needs
-// !important to win over the closed offset.
-.nds-panel[data-state~="open"] {
-    transform: translate(0, 0) !important;
+    // display: flex would show a closed dialog.
+    &:not([open]) {
+        display: none;
+    }
+
+    // A modal panel covers the main nav, so it runs full height.
+    &:modal {
+        --_panel-top: var(--panel-top, 0px);
+    }
+
+    &::backdrop {
+        background-color: var(--backdrop-bg, var(--background-overlay));
+        opacity: 0;
+        transition: opacity var(--nds-transition);
+    }
+
+    &[data-state~="open"]::backdrop {
+        opacity: 1;
+        backdrop-filter: var(--backdrop-blur, none);
+    }
+
+    // Closing, or under a newer modal dialog that dims the page itself.
+    &:is([data-state~="closing"], [data-nds-under])::backdrop {
+        opacity: 0;
+    }
 }
 
 .nds-panel:is([data-state~="open"], [data-state~="closing"]) {

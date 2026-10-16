@@ -239,7 +239,7 @@ direction: rtl
           {%- assign pg_panels = "pg-old-panel:Plain,pg-old-spanel:Static,pg-old-mpanel:Modal" | split: "," %}
           {%- for p in pg_panels %}
           {%- assign kv = p | split: ":" %}
-          <aside id="{{ kv[0] }}" class="nds-panel" aria-label="{{ kv[1] }} Panel"{% if kv[1] == "Static" %} data-panel-static{% endif %}{% if kv[1] == "Modal" %} data-panel-modal{% endif %} hidden>
+          <dialog id="{{ kv[0] }}" class="nds-panel" aria-label="{{ kv[1] }} Panel"{% if kv[1] == "Static" %} data-panel-static{% endif %}{% if kv[1] == "Modal" %} data-panel-modal{% endif %}>
             <div class="nds-panel-header">
               <div class="nds-panel-text"><span class="nds-panel-title">{{ kv[1] }} Panel (old)</span></div>
               <div class="nds-panel-action"><button type="button" class="nds-btn nds-subtle nds-icon-only" data-panel-close aria-label="Close panel"><i class="nds-icon nds-hgi-cancel-01" aria-hidden="true"></i></button></div>
@@ -247,7 +247,7 @@ direction: rtl
             <div class="nds-panel-body">
               <button type="button" class="nds-btn nds-primary" data-modal-target="pg-old-modal"><span class="nds-label">Open Modal</span></button>
             </div>
-          </aside>
+          </dialog>
           {%- endfor %}
           <p class="pg-out">Open the modal Panel, then Open Modal inside it: one dim layer.</p>
         </div>

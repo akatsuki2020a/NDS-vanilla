@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 02:34 PM"
 ---
 
 <section id="cookies-overview" class="nds-content-section nds-doc-overview">
@@ -46,7 +46,7 @@ Pick another component when:
 <script type="text/html" id="cookies-manual" data-canon>
 <!-- Your own panel. It replaces the built one -->
 <template class="nds-panel-template">
-  <aside id="nds-cookies-panel" class="nds-panel nds-cookies" data-panel-side="bottom" data-panel-static aria-label="Cookie settings" hidden>
+  <dialog id="nds-cookies-panel" class="nds-panel nds-cookies" data-panel-side="bottom" data-panel-static aria-label="Cookie settings">
     <div class="nds-cookies-view" data-cookies-view="notice">
       <div class="nds-panel-header">
         <span class="nds-featured-icon nds-circle"><i class="nds-icon nds-hgi-cookie" aria-hidden="true"></i></span>
@@ -160,7 +160,7 @@ Pick another component when:
         </button>
       </div>
     </div>
-  </aside>
+  </dialog>
 </template>
 <!-- Optional: opens the panel again -->
 <button type="button" class="nds-btn nds-secondary-outline" data-cookies-toggle>

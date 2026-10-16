@@ -89,7 +89,7 @@
           </div>`;
 
     function panelMarkup() {
-        return `<aside id="${PANEL_ID}" class="nds-panel nds-cookies" data-panel-side="bottom" data-panel-static aria-label="${html('panel_label')}" hidden>
+        return `<dialog id="${PANEL_ID}" class="nds-panel nds-cookies" data-panel-side="bottom" data-panel-static aria-label="${html('panel_label')}">
   <div class="nds-cookies-view" data-cookies-view="notice">
     <div class="nds-panel-header">
       <span class="nds-featured-icon nds-circle"><i class="nds-icon nds-hgi-cookie" aria-hidden="true"></i></span>
@@ -131,7 +131,7 @@
       <p role="status">${html('done')}</p>
       <button type="button" class="nds-btn nds-subtle nds-full" data-cookies-action="undo"><span class="nds-label">${html('undo')}</span></button>`)}
   </div>
-</aside>`;
+</dialog>`;
     }
 
     // A page's own panel wins; otherwise the built one joins the page as a template would.

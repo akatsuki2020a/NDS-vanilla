@@ -888,9 +888,9 @@ for (const v of REACT) {
     await loadReact(v)(page);
     await page.evaluate(() => {
         const h = React.createElement;
-        const PANEL = '<aside id="nds-cookies-panel" class="nds-panel nds-cookies" aria-label="Cookies" hidden>'
+        const PANEL = '<dialog id="nds-cookies-panel" class="nds-panel nds-cookies" aria-label="Cookies">'
             + '<div class="nds-cookies-view" data-cookies-view="notice"><p>Own panel</p>'
-            + '<button type="button" class="nds-btn nds-primary" data-cookies-action="accept"><span class="nds-label">Accept</span></button></div></aside>';
+            + '<button type="button" class="nds-btn nds-primary" data-cookies-action="accept"><span class="nds-label">Accept</span></button></div></dialog>';
         const MODAL = '<dialog id="rt-modal" class="nds-modal nds-card nds-stroke">'
             + '<div class="nds-card-content"><span class="nds-card-title">Title</span></div></dialog>';
         function App() {

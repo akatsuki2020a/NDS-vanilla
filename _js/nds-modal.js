@@ -1,5 +1,6 @@
 /* NDS.Modal — public surface
  * Rides: <dialog> showModal() (the top layer, the dim layer, an inert page, focus return)
+ *        through NDS.dialog, the core it shares with Panel
  * Requires:
  *   [data-modal-target] points at .nds-modal via data-modal-target — the click opens nothing
  * Methods:
@@ -26,7 +27,6 @@
  *   - Enter while the modal box itself has focus clicks the first .nds-primary button in .nds-card-actions.
  *   - open() focuses the first close control (or the modal itself); close() returns focus
  *     to whatever held it before the open.
- *   - <dialog> does not lock scroll: the modal calls NDS.scrollLock itself.
  */
 (function () {
   'use strict';
@@ -35,23 +35,7 @@
   let initAbortController = null;
   let openAbortController = null; // the open modal's own listeners; aborted when it closes
   let _initDone = false;
-  let opener = null; // element focused before open; close() returns focus to it
-  let locked = false; // this modal session holds a scroll lock, from the first open to the last close
-
-  // ponytail: a modal Panel and the nav still dim through NDS.Backdrop (soft dependency: a page with neither may not
-  // bundle it); the modal hides that layer so the page shows one. Goes when Panel moves to <dialog> (plans/top-layer.md step 3).
-  const dimUnder = (on) => document.querySelector('.nds-backdrop')
-    ?.toggleAttribute('data-nds-under', on && !!NDS.Backdrop?.isActive());
-
-  // A menu inside is a popover of its own: closing the dialog leaves it open in the top layer.
-  const hideMenus = (modal) => modal.querySelectorAll(':popover-open').forEach((p) => p.hidePopover());
-
-  // A click on the dim layer lands on the dialog itself, outside its box.
-  const outside = (modal, e) => {
-    if (e.target !== modal) return false;
-    const r = modal.getBoundingClientRect();
-    return e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom;
-  };
+  let opener = null; // element focused before the first open; the last close returns focus to it
 
   function open(target) {
     // A page with no modal at load never runs init(), so open() wires the close controls too.
@@ -71,14 +55,11 @@
     }
     if (activeModal) close();
 
-    if (!locked) {
-      opener = document.activeElement;
-      NDS.scrollLock.lock();
-      locked = true;
-    }
-    dimUnder(true);
-    // Re-opened during its fade, it is still modal: showModal() then does nothing.
-    modal.showModal();
+    // Kept across a swap: the first modal's opener gets focus back.
+    if (!opener) opener = document.activeElement;
+    openAbortController = new AbortController();
+    const { signal } = openAbortController;
+    NDS.dialog.show(modal, signal);
     activeModal = modal;
 
     // The from-state paints first, so the CSS transition runs.
@@ -89,8 +70,6 @@
       modal.dispatchEvent(new CustomEvent('nds:modal:opened', { bubbles: true }));
     });
 
-    openAbortController = new AbortController();
-    const { signal } = openAbortController;
     const isStatic = () => modal.hasAttribute('data-modal-static');
     // On the dialog, not document: a menu inside that handles Escape stops it first.
     modal.addEventListener('keydown', (e) => {
@@ -105,14 +84,7 @@
         if (primary) { e.preventDefault(); primary.click(); }
       }
     }, { signal });
-    // An Escape a control inside stopped short of the handler above.
-    modal.addEventListener('cancel', (e) => e.preventDefault(), { signal });
-    // Down and up both outside: a text selection dragged out of the box is not a dismiss.
-    let downOutside = false;
-    modal.addEventListener('pointerdown', (e) => { downOutside = outside(modal, e); }, { signal });
-    modal.addEventListener('click', (e) => {
-      if (downOutside && outside(modal, e) && !isStatic()) close();
-    }, { signal });
+    NDS.dialog.onOutside(modal, () => { if (!isStatic()) close(); }, signal);
 
     const focusTarget = modal.querySelector('[data-modal-close], .nds-modal-close') || modal;
     if (focusTarget === modal && !modal.hasAttribute('tabindex')) modal.tabIndex = -1;
@@ -122,15 +94,9 @@
 
   // Close the dialog and, after the last modal, give the page back.
   function finish(modal) {
-    hideMenus(modal);
-    modal.close();
+    NDS.dialog.close(modal);
     NDS.State.clear(modal);
     if (activeModal) return;
-    dimUnder(false);
-    if (locked) {
-      NDS.scrollLock.unlock();
-      locked = false;
-    }
     // The browser hands focus back on close(); after a swap it aims at the closed first modal.
     const focused = document.activeElement;
     if (opener?.isConnected && (!focused || focused === document.body || focused.closest('dialog:not([open])'))) {
@@ -144,7 +110,7 @@
     if (!modal) return;
     activeModal = null;
     openAbortController?.abort();
-    hideMenus(modal);
+    NDS.dialog.hideMenus(modal);
     NDS.State.set(modal, 'closing');
     // The dialog stays in the top layer for the fade; the unlock reflow stays out of the click frame.
     setTimeout(() => {

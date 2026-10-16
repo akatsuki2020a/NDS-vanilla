@@ -295,7 +295,7 @@ def verify(out, version, rules=None):
     def _canon(cid):
         m = re.search(r'<script type="text/html" id="' + cid + r'"[^>]*>(.*?)</script>', a11y_doc, re.S)
         return _markup(m.group(1)) if m else ''
-    built = re.search(r'return `(<aside.*?</aside>)`', _read('_js/nds-accessibility.js'), re.S).group(1)
+    built = re.search(r'return `(<dialog.*?</dialog>)`', _read('_js/nds-accessibility.js'), re.S).group(1)
     if _canon('a11y-panel') != _markup('<template class="nds-panel-template">' + built.replace('${side}', 'end') + '</template>'):
         sys.exit('Custom Panel in components/accessibility.md has drifted from panelMarkup() in '
                  '_js/nds-accessibility.js. Copy it from there.')

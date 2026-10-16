@@ -1,10 +1,11 @@
 /* NDS.Panel — public surface
- * Rides: nds-backdrop (only for a [data-panel-modal] panel — the dim layer, ESC and
- *        click-outside dismiss; soft — a plain panel raises nothing)
+ * Rides: <dialog> — show() for a plain or static panel (it stays under the main nav),
+ *        showModal() through NDS.dialog for a modal one (the top layer, the dim layer,
+ *        an inert page)
  * Methods:
  *   NDS.Panel.init() / .reinit()   bind the delegated toggles; prepare every .nds-panel
  *   NDS.Panel.create(panel)        prepare one panel
- *   NDS.Panel.destroy(panel)       tear one down (closes it and releases the backdrop)
+ *   NDS.Panel.destroy(panel)       tear one down (closes it and releases the scroll lock)
  *   NDS.Panel.open(idOrEl, opts?)  open it, by the stacking rules below. { focus: false }
  *                                  leaves focus where it is (a panel the page opens on its own)
  *   NDS.Panel.close(idOrEl)        close it
@@ -25,7 +26,8 @@
  *                       aria-disabled
  *   data-panel-size     sm | md | lg | xl on the panel (default md) — width of a side
  *                       panel, height cap of a sheet. Set it in markup to start there
- *   data-panel-modal    trap focus and raise the backdrop
+ *   data-panel-modal    open with showModal(): the page behind, main nav too, is dimmed
+ *                       and inert
  *   data-panel-static   no ESC, no click-outside — it closes only through your own call
  *                       or a [data-panel-close] control
  * Gotchas:
@@ -34,6 +36,10 @@
  *     open; one the user opens takes the screen like a plain one. A static panel another
  *     replaces hides (no closed/opened events) and comes back once the screen clears. A modal closes nothing and covers the rest with its backdrop.
  *     Only the top panel answers Escape and an outside click.
+ *   - A panel the user opens while a modal dialog (a Modal or a modal panel) is open opens
+ *     modal too, or it would sit under that dialog's inert page. One opened with
+ *     { focus: false } stays under it.
+ *   - The panel is a <dialog>. Any other element logs an error and does not open.
  *   - The panel needs an id or no toggle can target it (it warns at init).
  *   - Knobs on the panel: --panel-width, --panel-height, --panel-top, --panel-padding,
  *     --panel-gap, --panel-z, --panel-radius.
@@ -65,9 +71,8 @@
     // Open panels, bottom to top; a closing one stays until its slide ends.
     const stack = [];
     const top = () => stack[stack.length - 1];
-    // A Modal dialog sits over every panel, so none of them answers while it is open.
-    // A lazy stub's isOpen() returns a truthy Promise and loads the bundle: no Modal can be open yet.
-    const isTop = (panel) => top() === panel && !(NDS.Modal && !NDS.Modal.__ndsStub && NDS.Modal.isOpen());
+    // A modal dialog above (a Modal, or a newer modal panel) answers instead.
+    const isTop = (panel) => top() === panel && (!NDS.dialog.top() || NDS.dialog.top() === panel);
     // Static panels kept off the screen by another; the newest returns once none is open.
     const waiting = [];
     const drop = (list, panel) => {
@@ -97,21 +102,30 @@
     // OPEN / CLOSE
     // ==============================================
 
-    // Panels under the top modal sink beneath its backdrop.
-    function syncCover() {
-        let covered = false;
-        for (let i = stack.length - 1; i >= 0; i--) {
-            (covered ? addState : removeState)(stack[i], 'covered');
-            if (stack[i].hasAttribute('data-panel-modal')) covered = true;
-        }
-    }
-
     function _open(panel) {
         stack.push(panel);
-        syncCover();
-        panel.removeAttribute('hidden');
 
         const isStatic = panel.hasAttribute('data-panel-static');
+        // Recorded: data-panel-modal is consumer-mutable, and close() must undo the open it got.
+        // One the user opens over a modal dialog goes modal too; one the page opens stays under it.
+        panel._modal = panel.hasAttribute('data-panel-modal') || (!panel._noFocus && !!NDS.dialog.top());
+
+        // Listeners that only exist while open — zero cost when closed.
+        panel._openAC = new AbortController();
+        const { signal } = panel._openAC;
+
+        if (panel._modal) {
+            NDS.dialog.show(panel, signal);
+            if (!isStatic) NDS.dialog.onOutside(panel, () => close(panel), signal);
+        } else {
+            // show() moves focus into the dialog; a panel opened with { focus: false } gives it back.
+            const prev = document.activeElement;
+            panel.show();
+            if (panel._noFocus && document.activeElement !== prev) {
+                if (prev && prev !== document.body) prev.focus({ preventScroll: true });
+                else document.activeElement?.blur();
+            }
+        }
 
         // Track the sticky-header bottom for EVERY side: inline panels + top
         // sheets pin their block-start below it (the nav paints at a higher
@@ -119,10 +133,6 @@
         // sheet can't clip under the nav. Layout read before any style write,
         // refining the CSS nav-height baseline to the live header bottom.
         updateHeaderOffset(panel);
-
-        // Listeners that only exist while open — zero cost when closed.
-        panel._openAC = new AbortController();
-        const { signal } = panel._openAC;
 
         if (!isStatic) {
             document.addEventListener('keydown', (e) => {
@@ -135,6 +145,7 @@
             // Guards the opener explicitly: the DOM spec says a listener added
             // mid-dispatch isn't called for that same event, but relying on it
             // would make the opening click close the panel if that ever shifted.
+            // A click on a modal panel's dim layer lands on the panel: onOutside() above owns it.
             document.addEventListener('click', (e) => {
                 // A Modal closes before its click reaches here, so its parts are named too.
                 if (!isTop(panel) || panel.contains(e.target)
@@ -150,23 +161,6 @@
         window.addEventListener('scroll', onScroll, { passive: true, signal });
         const offResize = NDS.onResize(() => { updateHeaderOffset(panel); syncResize(panel); });
         signal.addEventListener('abort', offResize);
-
-        if (panel.hasAttribute('data-panel-modal')) {
-            const z = parseInt(getComputedStyle(panel).zIndex, 10);
-            NDS.Backdrop.show({
-                zIndex: isFinite(z) ? z - 1 : 998,
-                onClick: () => close(panel),
-                escapeClose: !isStatic,
-                clickToClose: !isStatic,
-            });
-            // Record that WE raised it. data-panel-modal is consumer-mutable, so
-            // re-reading it at close would skip the hide if it changed while open —
-            // and Backdrop refcounts, so one missed hide pins activeCount above zero
-            // and suppresses every later teardown (scroll lock included).
-            panel._backdrop = true;
-            document.addEventListener('keydown',
-                NDS.trapFocus(() => (isTop(panel) ? panel : null)), { signal });
-        }
 
         togglesFor(panel).forEach(btn => NDS.aria.expanded(btn, true));
 
@@ -262,18 +256,15 @@
             panel._openAC.abort();
             delete panel._openAC;
         }
-        if (panel._backdrop) {
-            NDS.Backdrop.hide();
-            delete panel._backdrop;
-        }
+        NDS.dialog.hideMenus(panel);
 
         togglesFor(panel).forEach(btn => NDS.aria.expanded(btn, false));
 
         armTransition(panel, () => {
             clearState(panel);
-            panel.setAttribute('hidden', '');
+            NDS.dialog.close(panel);
+            delete panel._modal;
             drop(stack, panel);
-            syncCover();
             const silent = panel._silent;
 
             // Return focus to the opener only when nothing is queued — the
@@ -324,7 +315,7 @@
     // Already as big as the screen allows: the full width for a side panel, header to floor for a sheet.
     // ponytail: reads --_panel-top as px; a consumer --panel-top in rem skews the sheet check.
     function atMax(panel) {
-        if (panel.hidden) return false;
+        if (!panel.open) return false;
         const side = panel.getAttribute('data-panel-side');
         if (side === 'top' || side === 'bottom') {
             const top = parseFloat(getComputedStyle(panel).getPropertyValue('--_panel-top')) || 0;
@@ -389,6 +380,10 @@
         // A page with no panel at load never runs init(), so create() wires the toggles too.
         bindToggles();
 
+        if (!(panel instanceof HTMLDialogElement)) {
+            console.error('NDS Panel: .nds-panel must be a <dialog>.', panel);
+            return;
+        }
         if (!panel.id) {
             console.warn('NDS Panel: panel has no id — toggles cannot target it', panel);
         }
@@ -396,8 +391,12 @@
         panel._panelAC = new AbortController();
         const { signal } = panel._panelAC;
 
-        // Closed panels stay out of the a11y tree and cost no layout.
-        if (!hasState(panel, 'open')) panel.setAttribute('hidden', '');
+        // Closed without close(): a <form method="dialog">, or Chrome's repeat Escape on a modal panel.
+        panel.addEventListener('close', () => {
+            if (!hasState(panel, 'open') || hasState(panel, 'closing')) return;
+            NDS.dialog.close(panel);
+            close(panel);
+        }, { signal });
 
         panel.addEventListener('click', (e) => {
             if (e.target.closest('[data-panel-close]')) {
@@ -437,19 +436,15 @@
             panel._openAC.abort();
             delete panel._openAC;
         }
-        if (panel._backdrop) {
-            NDS.Backdrop.hide();
-            delete panel._backdrop;
-        }
         // Mirrors close()'s toggle reset: destroy skips the close path, so without
         // this a destroyed-while-open panel leaves every toggle claiming
         // aria-expanded="true" for a surface that is now hidden and unwired.
         if (hasState(panel, 'open')) togglesFor(panel).forEach(btn => NDS.aria.expanded(btn, false));
         clearState(panel);
-        panel.setAttribute('hidden', '');
+        NDS.dialog.close(panel);
+        delete panel._modal;
         drop(stack, panel);
         drop(waiting, panel);
-        syncCover();
         delete panel._opener;
         delete panel._silent;
         panel.removeAttribute(INIT_ATTR);

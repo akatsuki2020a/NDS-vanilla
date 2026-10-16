@@ -6,7 +6,7 @@ hero_description: A panel is a surface that slides in from an edge of the screen
 breadcrumb: [["Components", "/components"]]
 since: "1.5.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 11:40 AM"
+last_edit: "16/10/2026 - 02:34 PM"
 lang: en
 direction: ltr
 ---
@@ -18,7 +18,7 @@ direction: ltr
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-A panel is an `nds-panel` element, usually an `<aside>`, and a button with `data-panel-toggle` that opens it. The panel holds three optional parts: a header (`nds-panel-header`), a body (`nds-panel-body`) and a footer (`nds-panel-footer`). The panel does not style the content you put in the body.
+A panel is a `<dialog class="nds-panel">` and a button with `data-panel-toggle` that opens it. The panel holds three optional parts: a header (`nds-panel-header`), a body (`nds-panel-body`) and a footer (`nds-panel-footer`). The panel does not style the content you put in the body.
 
 Pick another component when:
 
@@ -41,7 +41,7 @@ Pick another component when:
 <button type="button" class="nds-btn nds-primary nds-lg" data-panel-toggle="settings-panel">
   <span class="nds-label">Open Panel</span>
 </button>
-<aside id="settings-panel" class="nds-panel" aria-label="Settings" hidden>
+<dialog id="settings-panel" class="nds-panel" aria-label="Settings">
   <div class="nds-panel-header">
     <span class="nds-featured-icon nds-circle">
       <i class="hgi hgi-stroke hgi-settings-01"></i>
@@ -67,7 +67,7 @@ Pick another component when:
       <span class="nds-label">Done</span>
     </button>
   </div>
-</aside>
+</dialog>
 </script>
 <script type="text/html" id="panel-resize" data-canon>
 <div class="nds-btn-group nds-seamless">
@@ -87,7 +87,7 @@ Pick another component when:
   <span class="nds-label">Open Panel</span>
 </button>
 <template class="nds-panel-template">
-  <aside id="details-panel" class="nds-panel" aria-label="Details" hidden>
+  <dialog id="details-panel" class="nds-panel" aria-label="Details">
     <div class="nds-panel-header">
       <span class="nds-featured-icon nds-circle">
         <i class="hgi hgi-stroke hgi-settings-01"></i>
@@ -113,7 +113,7 @@ Pick another component when:
         <span class="nds-label">Done</span>
       </button>
     </div>
-  </aside>
+  </dialog>
 </template>
 </script>
     </div>
@@ -233,14 +233,14 @@ A lazy panel keeps its markup in a `<template class="nds-panel-template">`, so i
             <i class="hgi hgi-stroke hgi-transition-left"></i>
             <span class="nds-label">Panel Stacking</span>
           </span>
-          <p class="nds-item-desc">A plain panel replaces the open one after it slides out. A modal panel covers the others, and a static panel comes back when the screen is clear.</p>
+          <p class="nds-item-desc">A plain panel replaces the open one after it slides out. A modal panel covers the others and the main navigation, and a static panel comes back when the screen is clear. A panel you open from a modal opens over it.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
             <i class="hgi hgi-stroke hgi-anchor-point"></i>
             <span class="nds-label">Header-Aware Position</span>
           </span>
-          <p class="nds-item-desc">The panel starts below the sticky header, and moves with it as the top bar scrolls in and out. A tall sheet stops at the header.</p>
+          <p class="nds-item-desc">The panel starts below the sticky header, and moves with it as the top bar scrolls in and out. A tall sheet stops at the header. A modal panel covers the header and starts at the top of the screen.</p>
         </div>
         <div class="nds-definition-item">
           <span class="nds-item-title">
@@ -264,7 +264,7 @@ A lazy panel keeps its markup in a `<template class="nds-panel-template">`, so i
 - Use a panel for content that supports the main task without replacing it: settings, filters, the details of an item, a short form.
 - Give every panel an `id`, and give its toggle that `id` in `data-panel-toggle`. A panel without an `id` cannot be opened.
 - Give the panel an `aria-label` that names it, and each icon-only button an `aria-label`.
-- Ship the panel with `hidden`, so it never shows before the script loads.
+- Make the panel a `<dialog>`, with no `hidden` attribute. A closed dialog stays hidden before the script loads. Any other element does not open.
 - Give every button `type="button"`. In a form, a button without it submits the form.
 - Prefer the start and end sides, so the panel follows the reading direction. Use left or right only when the panel must stay on one edge in every language.
 - Use a bottom sheet for actions on a phone, and a side panel for settings or filters on a large screen.
@@ -287,7 +287,7 @@ A lazy panel keeps its markup in a `<template class="nds-panel-template">`, so i
 
 | Class | Element | Effect |
 |---|---|---|
-| `nds-panel` | the panel, usually an `<aside>` | The sliding surface |
+| `nds-panel` | the panel `<dialog>` | The sliding surface |
 | `nds-panel-header` | `div` in `.nds-panel` | The top row: an optional featured icon, the text and the header buttons, with a divider below |
 | `nds-panel-text` | `div` in `.nds-panel-header` | Holds the title and the description, and fills the free space in the row. A bare `nds-panel-title` also fills it |
 | `nds-panel-title` | `span` in `.nds-panel-text` | The panel's title |
@@ -311,9 +311,9 @@ On a phone, the header buttons shrink to 32px.
 | `data-panel-resize` | a button in the panel | `grow` makes the panel one size larger, `shrink` one size smaller |
 | `data-panel-size` | `.nds-panel` | The size: `sm`, `md` (the default), `lg` or `xl`. The script writes it when the user resizes the panel |
 | `data-panel-side` | `.nds-panel` | The edge: `end` (the default), `start`, `left`, `right`, `top` or `bottom` |
-| `data-panel-modal` | `.nds-panel` | Dims the page, stops it from scrolling and keeps focus in the panel |
+| `data-panel-modal` | `.nds-panel` | Opens the panel as a modal dialog. The page behind it, the main navigation too, is dimmed and does not respond, the page does not scroll, and focus stays in the panel |
 | `data-panel-static` | `.nds-panel` | Escape and a click outside do not close the panel |
-| `data-state` | `.nds-panel` | The script writes `open` while the panel is open, `opening` while it slides in and `closing` while it slides out, and `covered` while a modal panel is above it |
+| `data-state` | `.nds-panel` | The script writes `open` while the panel is open, `opening` while it slides in and `closing` while it slides out |
 {: .nds-table .nds-responsive}
 
 ### CSS Custom Properties
@@ -326,11 +326,11 @@ Set these on the `.nds-panel` element.
 | `--panel-width` | `420px` | Width of a start, end, left or right panel, at the `md` size. The panel is never wider than the screen |
 | `--panel-height` | `60svh` | Most height of a top or bottom sheet, at the `md` size. The sheet also stops at the header |
 | `--panel-content-width` | `var(--nds-content-max-width)` | Most width of a sheet's content. `100%` spans the full width, inside the page gutter |
-| `--panel-top` | the bottom of the sticky header | Where the panel starts. Any value turns off the header tracking. `0` covers the header too, and needs a `--panel-z` above the header's |
+| `--panel-top` | the bottom of the sticky header, `0` on a modal panel | Where the panel starts. Any value turns off the header tracking. `0` covers the header too, and needs a `--panel-z` above the header's |
 | `--panel-padding` | `var(--spacing-lg)` | Space inside the header, the body and the footer |
 | `--panel-gap` | `0` | Space between the header, the body and the footer |
 | `--panel-radius` | `0`, `var(--radius-lg)` on a sheet | Corner radius. A sheet rounds only the two corners that face the page |
-| `--panel-z` | `999` | Stack order. The main navigation is `1000` |
+| `--panel-z` | `999` | Stack order of a plain or static panel. The main navigation is `1000`. A modal panel is above everything |
 {: .nds-table .nds-responsive}
 
 ### JavaScript

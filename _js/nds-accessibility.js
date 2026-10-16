@@ -1063,13 +1063,12 @@
     // to reposition both itself (data-fab-pos="auto") and the panel it builds — no
     // JS edit needed for the common case.
     function panelMarkup(side) {
-        return `<aside id="nds-accessibility-panel"
+        return `<dialog id="nds-accessibility-panel"
        class="nds-panel nds-accessibility-panel"
        data-panel-side="${side}"
        aria-label="Accessibility settings"
        data-i18n-aria-label="accessibility.panel_label"
-       data-accessibility-panel
-       hidden>
+       data-accessibility-panel>
 
     <div class="nds-panel-header">
         <span class="nds-featured-icon nds-circle">
@@ -1389,12 +1388,12 @@
             </div>
         </button>
     </div>
-</aside>`;
+</dialog>`;
     }
 
     // Default: nothing ships in the page's HTML for this — panelMarkup() below
     // supplies the <template> content instead. Still honors a page-authored
-    // <template class="nds-panel-template"> or a bare <aside> already in the
+    // <template class="nds-panel-template"> or a bare panel already in the
     // document (pre-1.13 markup, or a consumer's own customized copy).
     function resolvePanel() {
         const live = document.querySelector('[data-accessibility-panel]');

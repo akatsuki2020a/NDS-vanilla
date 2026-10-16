@@ -6,7 +6,7 @@ hero_description: A floating action button (FAB) stays at an edge of the screen 
 breadcrumb: [["Components", "/components"]]
 since: "1.5.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 02:34 PM"
 lang: en
 direction: ltr
 ---
@@ -40,7 +40,7 @@ Pick another component when:
 <button type="button" class="nds-btn nds-fab nds-primary nds-circle nds-icon-only" data-panel-toggle="fab-panel" aria-label="Open panel" hidden>
   <i class="hgi hgi-stroke hgi-menu-01"></i>
 </button>
-<aside id="fab-panel" class="nds-panel" aria-label="Details" hidden>
+<dialog id="fab-panel" class="nds-panel" aria-label="Details">
   <div class="nds-panel-header">
     <div class="nds-panel-text">
       <span class="nds-panel-title">Details</span>
@@ -57,7 +57,7 @@ Pick another component when:
       <span>استبدل هذا العنصر بأي عنصر آخر</span>
     </div>
   </div>
-</aside>
+</dialog>
 </script>
 <script type="text/html" id="fab-group" data-canon>
 <div class="nds-btn-group nds-fab nds-vertical" hidden>
@@ -71,7 +71,7 @@ Pick another component when:
     <i class="hgi hgi-stroke hgi-mail-01"></i>
   </button>
 </div>
-<aside id="fab-group-panel" class="nds-panel" aria-label="Details" hidden>
+<dialog id="fab-group-panel" class="nds-panel" aria-label="Details">
   <div class="nds-panel-header">
     <div class="nds-panel-text">
       <span class="nds-panel-title">Details</span>
@@ -88,7 +88,7 @@ Pick another component when:
       <span>استبدل هذا العنصر بأي عنصر آخر</span>
     </div>
   </div>
-</aside>
+</dialog>
 </script>
     </div>
   </div>
