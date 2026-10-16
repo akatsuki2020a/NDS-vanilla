@@ -180,7 +180,7 @@
         line-height: var(--typo-text-md-LH);
     }
 
-    // XS whatever size class it carries: out-ranks .nds-tag.nds-sm, so the tag leaves the title its room.
+    // XS whatever size class it carries, so the tag leaves the title its room.
     .nds-tag {
         float: inline-end;
         --tag-height: 20px;

@@ -15,9 +15,10 @@
   --_text: var(--tag-text, var(--tag-text-neutral));
   --_border: var(--tag-border, var(--tag-border-neutral-light));
   --_icon: var(--tag-icon, var(--tag-icon-neutral));
-  --_tag-height: var(--tag-height, 32px);
-  --_tag-fs: var(--tag-fs, var(--typo-text-md-FS));
-  --_tag-padding-inline: var(--tag-padding-inline, var(--spacing-lg));
+  // The size classes set the -base values, so a public knob on the tag or a parent wins over them.
+  --_tag-height: var(--tag-height, var(--_tag-height-base, 32px));
+  --_tag-fs: var(--tag-fs, var(--_tag-fs-base, var(--typo-text-md-FS)));
+  --_tag-padding-inline: var(--tag-padding-inline, var(--_tag-padding-inline-base, var(--spacing-lg)));
   --_tag-dot-size: var(--tag-dot-size, 10px);
   --_tag-label-max: var(--tag-label-max, 160px);
 
@@ -61,15 +62,15 @@
   // ==============================================
 
   &.nds-sm {
-    --tag-height: 24px;
-    --tag-fs: var(--typo-text-sm-FS);
-    --tag-padding-inline: var(--spacing-md);
+    --_tag-height-base: 24px;
+    --_tag-fs-base: var(--typo-text-sm-FS);
+    --_tag-padding-inline-base: var(--spacing-md);
   }
 
   &.nds-xs {
-    --tag-height: 20px;
-    --tag-fs: var(--typo-text-xs-FS);
-    --tag-padding-inline: var(--spacing-md);
+    --_tag-height-base: 20px;
+    --_tag-fs-base: var(--typo-text-xs-FS);
+    --_tag-padding-inline-base: var(--spacing-md);
   }
 
   // ==============================================

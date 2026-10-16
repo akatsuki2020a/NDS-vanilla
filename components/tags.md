@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "10/10/2026 - 05:28 PM"
+last_edit: "16/10/2026 - 04:56 AM"
 ---
 
 <section id="tag-overview" class="nds-content-section nds-doc-overview">
@@ -200,7 +200,7 @@ A row on `.nds-tag:not([data-status])` applies to a standard tag only, and a row
 ### CSS Custom Properties
 {: .nds-block-title}
 
-Set these on the tag. The size classes set `--tag-height`, `--tag-fs` and `--tag-padding-inline`. The color classes, the statuses and the styles set `--tag-bg`, `--tag-text`, `--tag-border` and `--tag-icon`.
+Set the three size properties on the tag, or on a parent to reach every tag inside it. They win over the size classes. The color classes, the statuses and the styles set `--tag-bg`, `--tag-text`, `--tag-border` and `--tag-icon` on the tag itself, so set those four on the tag.
 
 | Property | Default | Controls |
 |---|---|---|
