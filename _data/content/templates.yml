@@ -7,6 +7,7 @@
 #   and the words developers actually use for it. These are DGA-official pages,
 #   so a match here outranks any hand-composed page or an examples.yml entry.
 #   description/icon/category/tags drive the index cards; use_when renders nowhere.
+#   new: true shows a "New" tag on the card.
 
 - title: "Life Journeys Template"
   description: "Life journeys hub: a first-visit intro modal and how-it-works alert, and tabs for current, available and completed journeys with progress rings."
@@ -15,6 +16,7 @@
   category: "Service"
   tags: ["DGA", "Alert", "Tabs", "Cards", "Grid"]
   url: "/templates/life-journey-template.html"
+  new: true
 
 - title: "Home Page Template"
   description: "Organization home page with a main hero slider, headline figures, a services card deck, a news row, and a partner logo strip."

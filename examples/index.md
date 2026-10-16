@@ -76,6 +76,13 @@ sidemenu_mode: false
                                 {{ ex.icon }}
                             </span>
                         </div>
+                        {%- if ex.new %}
+                        <div class="nds-card-status">
+                            <span class="nds-tag nds-sm" data-status="info">
+                                <span class="nds-label">New</span>
+                            </span>
+                        </div>
+                        {%- endif %}
                     </div>
                     <div class="nds-card-content">
                         <div class="nds-card-text">
