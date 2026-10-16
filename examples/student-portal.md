@@ -248,14 +248,14 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
+                            <div class="nds-card-header-action">
+                                <a href="#" class="nds-btn nds-subtle nds-sm">
+                                    <span class="nds-label">Full timetable</span>
+                                    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
+                                </a>
+                            </div>
                             <span class="nds-card-title">Today's classes</span>
                             <p class="nds-card-description">Three classes, one online.</p>
-                        </div>
-                        <div class="nds-card-header-action">
-                            <a href="#" class="nds-btn nds-subtle nds-sm">
-                                <span class="nds-label">Full timetable</span>
-                                <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
-                            </a>
                         </div>
                     </div>
                     <div class="nds-card-content">
@@ -448,14 +448,14 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
+                            <div class="nds-card-header-action">
+                                <a href="#" class="nds-btn nds-subtle nds-sm">
+                                    <span class="nds-label">Exam timetable</span>
+                                    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
+                                </a>
+                            </div>
                             <span class="nds-card-title">Final exams</span>
                             <p class="nds-card-description">Four exams over five days.</p>
-                        </div>
-                        <div class="nds-card-header-action">
-                            <a href="#" class="nds-btn nds-subtle nds-sm">
-                                <span class="nds-label">Exam timetable</span>
-                                <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
-                            </a>
                         </div>
                     </div>
                     <div class="nds-card-content">
@@ -559,13 +559,13 @@ hideFeedback: true
                             </span>
                         </div>
                         <div class="nds-card-text nds-md">
+                            <div class="nds-card-header-action">
+                                <a href="#" class="nds-btn nds-subtle nds-sm">
+                                    <span class="nds-label">Full calendar</span>
+                                    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
+                                </a>
+                            </div>
                             <span class="nds-card-title">Academic calendar</span>
-                        </div>
-                        <div class="nds-card-header-action">
-                            <a href="#" class="nds-btn nds-subtle nds-sm">
-                                <span class="nds-label">Full calendar</span>
-                                <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
-                            </a>
                         </div>
                     </div>
                     <div class="nds-card-content">

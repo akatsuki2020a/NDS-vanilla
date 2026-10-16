@@ -290,8 +290,23 @@
       align-self: center;
     }
 
+    // Block, not flex: a flex container ignores float, which the float action needs.
     > .nds-card-text {
-      gap: 0;
+      display: block;
+
+      > :is(.nds-card-title, .nds-card-subtitle) {
+        display: block;
+      }
+
+      // Float action, as on the section head: first in the text, at the end corner,
+      // and the title and description wrap around it.
+      > .nds-card-header-action:first-child {
+        float: inline-end;
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        margin-inline-start: var(--spacing-md);
+      }
     }
 
     // Top end, never squeezed by the title. flex-start: the header's stretch would center the buttons.
