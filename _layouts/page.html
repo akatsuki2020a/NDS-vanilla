@@ -6,7 +6,7 @@ layout: default
     {%- if page.sidemenu_mode != false %}
     {% include sidemenu.html %}
     {%- endif %}
-    <div class="nds-content" id="main-content">
+    <div class="nds-content{%- if page.content_class and page.content_class != '' %} {{ page.content_class }}{%- endif %}" id="main-content">
         {{ content }}
         {% include last-edit.html %}
     </div>

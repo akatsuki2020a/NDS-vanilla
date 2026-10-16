@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.8.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 11:23 AM"
+last_edit: "16/10/2026 - 01:05 AM"
 ---
 
 <section id="page-layout-overview" class="nds-content-section nds-doc-overview">
@@ -641,6 +641,7 @@ For AI agents. The `.md` source of a live page holds only its content. Its front
 | `layout` | `shell` | The page writes its whole body itself, as the [Home Page Template](../templates/home-template) does |
 | `layout_class` | Classes | Added to `.nds-content-layout`: `nds-has-sideinfo`, `nds-card-view`, `nds-middle` |
 | `body_class` | Classes | Added to `body`: `nds-full-width` |
+| `content_class` | Classes | Added to `.nds-content` on a `page` layout: `nds-stripe`, `nds-odd` |
 | `sidemenu_mode` | `false` | No side menu, and no `nds-has-sidemenu` |
 | `sidemenu_mode` | `top` | `nds-top` on the side menu `aside` |
 | `hero_style` | Classes | Added to the sub hero section: `nds-flat`, `nds-aside` |
