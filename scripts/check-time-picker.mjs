@@ -72,8 +72,7 @@ const build = (id, attrs = {}, seed = '', typed = '') => page.evaluate(([id, att
     return id;
 }, [id, attrs, seed, typed]);
 
-// The panel may PORTAL to <body> when dropmenu opens it, so nothing here may
-// reach it through `#id ...` — every lookup goes via the instance.
+// Every lookup goes via the instance, which holds the panel.
 await page.evaluate(() => {
     window.__tp = {
         inst: (id) => document.querySelector('#' + id + ' .nds-time-input')._ndsTimePicker,
@@ -82,7 +81,7 @@ await page.evaluate(() => {
             .querySelector('[data-time-picker-unit="' + u + '"] .nds-form-control'),
         options: (id, u) => {
             const fc = window.__tp.unitFc(id, u);
-            return Array.from((fc._customSelectDropdown || fc).querySelectorAll('.nds-select-option'));
+            return Array.from(fc.closest('[data-time-picker-unit]').querySelectorAll('.nds-select-option'));
         }
     };
 });
@@ -92,8 +91,7 @@ const openPanel = async (id) => {
     await page.waitForFunction((id) => !!window.__tp.panel(id), id, { timeout: 4000 });
 };
 
-// Pick by real click inside the panel. A unit's menu may portal too, so the
-// option is looked up through the back-reference custom-select stamps.
+// Pick by real click inside the panel: the unit's menu opens in the top layer, in place.
 const pick = async (id, unit, value) => {
     await openPanel(id);
     await page.evaluate(([id, unit]) => {
@@ -101,8 +99,8 @@ const pick = async (id, unit, value) => {
         fc.querySelector('.nds-select-input').focus();
         fc.querySelector('.nds-select-input').click();
     }, [id, unit]);
-    await page.waitForFunction(([id, unit]) => !!window.__tp.unitFc(id, unit)._customSelectDropdown,
-        [id, unit], { timeout: 4000 });
+    await page.waitForFunction(([id, unit]) => !!window.__tp.unitFc(id, unit)
+        .closest('[data-time-picker-unit]').querySelector(':popover-open'), [id, unit], { timeout: 4000 });
     return page.evaluate(([id, unit, value]) => {
         const opt = window.__tp.options(id, unit).find((o) => o.dataset.value === value);
         if (!opt || opt.disabled) return false;
@@ -112,7 +110,7 @@ const pick = async (id, unit, value) => {
 };
 
 // Type like a user. Deliberately focus() rather than click(): an earlier test's
-// panel may still be portaled over <body> and would swallow a real click, and
+// panel may still be open in the top layer and would swallow a real click, and
 // clicking the input also toggles the panel open, which is not what typing means.
 const type = async (id, text) => {
     const sel = '#' + id + ' .nds-time-input';
@@ -348,7 +346,7 @@ ok('a lang toggle re-renders the display and keeps the value', await (async () =
 
 // ---- SCROLLING ---------------------------------------------------------
 
-// The panel is a dropmenu, so flipping/portalling is dropmenu's job — but this
+// The panel is a dropmenu, so flipping and the top layer are dropmenu's job — but this
 // component uses the DEFAULT applyPosition (date-picker overrides it with its
 // own), so it has to be confirmed that the default path actually holds here.
 // A panel that detaches from its field on scroll is the classic failure.
@@ -386,7 +384,7 @@ const probeGeom = () => page.evaluate(() => {
              fieldTop: Math.round(f.top), vh: window.innerHeight,
              vertical: panel.getAttribute('data-position-vertical') || '-',
              position: getComputedStyle(panel).position,
-             portaled: panel.parentElement === document.body,
+             topLayer: panel.matches(':popover-open'),
              open: (panel.getAttribute('data-state') || '').includes('open') };
 });
 
@@ -422,26 +420,25 @@ ok('a field near the viewport bottom flips its panel above',
 ok('the flipped panel is fully in view', bottom.top >= -1 && bottom.bottom <= bottom.vh + 1,
     `${bottom.top}..${bottom.bottom} of ${bottom.vh}`);
 
-// 3. Field inside a clipping container — dropmenu must portal the panel out to
-//    <body>, or it would be cut off by the container's overflow.
+// 3. Field inside a clipping container — the panel opens in the top layer, or the
+//    container's overflow would cut it off.
 await buildProbe('position:fixed;top:200px;left:40px;width:360px;height:140px;overflow:auto;z-index:5');
 await new Promise((r) => setTimeout(r, 500));
 const clipped = await probeGeom();
-ok('a panel inside a clipping container portals out to <body>',
-    clipped.portaled && clipped.position === 'fixed',
-    `parent=body:${clipped.portaled} position:${clipped.position}`);
+ok('a panel inside a clipping container opens in the top layer', clipped.topLayer && clipped.open,
+    `topLayer:${clipped.topLayer} open:${clipped.open}`);
 
-// 4. …and once portaled it is position:fixed, so it only stays attached if
-//    dropmenu actively tracks it. This is the one that silently breaks.
-await page.evaluate(() => document.getElementById('probeBox').scrollBy(0, 60));
+// 4. …and it only stays attached if dropmenu tracks the container's scroll. This is the
+//    one that silently breaks. 20px keeps the field in view: once it leaves, the panel closes.
+await page.evaluate(() => document.getElementById('probeBox').scrollBy(0, 20));
 await new Promise((r) => setTimeout(r, 400));
 const afterBoxScroll = await probeGeom();
 await page.evaluate(() => window.scrollBy(0, 150));
 await new Promise((r) => setTimeout(r, 400));
 const afterPageScroll = await probeGeom();
-ok('a portaled panel tracks its field on container and page scroll',
-    afterBoxScroll.gap === clipped.gap && afterPageScroll.gap === clipped.gap,
-    `gap ${clipped.gap} → ${afterBoxScroll.gap} → ${afterPageScroll.gap}`);
+ok('the panel tracks its field on container and page scroll',
+    afterBoxScroll.open && afterPageScroll.open && afterBoxScroll.gap === clipped.gap && afterPageScroll.gap === clipped.gap,
+    `gap ${clipped.gap} → ${afterBoxScroll.gap} → ${afterPageScroll.gap}, open ${afterBoxScroll.open}/${afterPageScroll.open}`);
 
 await page.evaluate(() => {
     document.getElementById('probeBox')?.remove();
