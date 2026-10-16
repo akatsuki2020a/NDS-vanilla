@@ -27,6 +27,9 @@ node scripts/doc-check.mjs <page.md>            # clicks every builder option: f
 node scripts/check-menus-in-modal.mjs           # six menu components in a scrolling Modal: place, follow, close, pick; PHONE=1, ENGINE=webkit
 node scripts/check-dialogs.mjs                  # Modal + Panel on <dialog>: plain/static/modal, stacking, Escape, outside click, lazy panels; ENGINE=webkit
 node scripts/check-mainnav.mjs                  # Main Navigation: menu placement, swap, scroll, outside click, phone drawer; ENGINE=webkit, TIMING=1
+node scripts/trace-click.mjs [page] [runs]      # one plain tap traced: every listener on pointer/mouse/click with its cost, and the other main-thread work; TAP=1
+node scripts/trace-busy.mjs [page …]            # long frames from load to quiet, with their scripts (LoAF); INITS=1 adds each component's init time
+node scripts/profile-load.mjs [page] [ms]       # V8 CPU profile of a page load: self/total time per function in the NDS bundles
 ```
 
 **Browser checks launch through `scripts/lib/browser.mjs` (Playwright)** — `ENGINE=webkit node scripts/<check>.mjs` runs one as Safari. The root ships `playwright-core` only (no browser download; Chromium is your installed Chrome); WebKit lives in Playwright's per-user cache and downloads itself on the first Safari run. CDP calls (throttling, touch, traces) are Chromium-only.
