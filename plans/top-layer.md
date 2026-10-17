@@ -4,9 +4,9 @@ Owner decisions (2026-10-16): do it before v2.0.0 · speed is not the reason · 
 
 **Verdict (2026-10-16).** Steps 1–3 before v2: Dropmenu and Tooltip; Modal on `<dialog>`; every Panel on `<dialog>`. Steps 4 and on are judged again, each on its own benefit and cost, once 1–3 have shipped.
 
-**Start here (end of 2026-10-16).**
-1. **Step 1 follow-up is committed** (`fix(dropmenu): absolute in the top layer, …`): menus are absolute in the top layer; see "Step 1 follow-up".
-2. **Next: step 3, Panel on `<dialog>`** (owner's pick: it shares Modal's work). Lift the shared core out of `nds-modal.js` (`finish()`, the scroll lock, the outside-click test, `hideMenus`), drop the `data-nds-under` stopgap on `.nds-backdrop`, and give stacked dialogs the under-marking. Findings for it are under Open decisions.
+**Start here (2026-10-16, afternoon).**
+1. **Steps 1–3 are committed** (step 3: `9230e5bd`), plus the FAB tuck fix (`8883ca6c`) and the CSS guards (`0d59cab2`).
+2. **Steps 4 and 5 are closed:** step 4 skipped, step 5 tested and reverted (see "Steps 4–5 judged"). `scripts/check-mainnav.mjs` stays as the nav's check. The playground prototype is removed.
 3. **Test fast** (owner, 2026-10-16: an hour of testing was too long). Read the component's canon first; iterate in Chrome on one case; run `check-menus-in-modal.mjs`, `check-modal-dialog`-style cases, `check-init-destroy.mjs` and `check-frameworks.mjs` in both engines once at the end, in parallel. Minutes, not an hour.
 
 **Owner's goals for the rest (2026-10-16):** simpler code, render perf, framework compatibility. Scored that way, steps 4 (FAB) and 5 (Main Navigation) carry the biggest framework win left: they remove `NDS.relocate`, which moves nodes the app owns and patches DOM methods. Judge them on those goals after step 3; measure perf before claiming it.
@@ -80,9 +80,9 @@ Today a menu stays in place unless an ancestor clips it (a modal, a table's scro
 
 ## Step 1 status (2026-10-16)
 
-Built, not committed: Dropmenu and Tooltip open with `popover="manual"` through `NDS.topLayer(el, on)`; core lost `NDS.portal`, `unportal`, `needsPortal`, `stackingZ`, `closest`, `queryAll` and `querySelector`; every user went to plain DOM calls; Custom Select lost its two back-references; Migration rows, docs, examples, `AGENTS.md` and the JS audit rules (JSA-19 retired) follow.
+Committed (`c4b8a19a`): Dropmenu and Tooltip open with `popover="manual"` through `NDS.topLayer(el, on)`; core lost `NDS.portal`, `unportal`, `needsPortal`, `stackingZ`, `closest`, `queryAll` and `querySelector`; every user went to plain DOM calls; Custom Select lost its two back-references; Migration rows, docs, examples, `AGENTS.md` and the JS audit rules (JSA-19 retired) follow.
 
-- **Sticky nav:** outside a modal (`.nds-modal, dialog:modal`) the menu keeps `respectNav` in its flip math and, while the page scrolls, `_clipUnderNav` clips it with `clip-path` at the nav's bottom edge, so it reads as sliding under the nav.
+- **Sticky nav:** outside a modal (`.nds-modal, dialog:modal`) the menu keeps `respectNav` in its flip math. (The `_clipUnderNav` clip from this step was replaced by the close rule in "Step 1 follow-up".)
 - **Nested menus:** `close()` closes the open menus inside it, or the date picker's month menu stayed in the top layer.
 - **Tooltip:** it now inherits from where it is authored, not from `<body>`: the balloon resets `font-weight` and `text-align`.
 - **Until step 2:** a Modal opened from a menu item sits under the closing menu for its fade (about 250 ms): the old Modal is not in the top layer.
@@ -103,7 +103,7 @@ Step 1 made every open menu `position: fixed` and moved it with JS on every scro
 
 ## Step 2 status (2026-10-16)
 
-Built, not committed: `.nds-modal` is a `<dialog>` opened with `showModal()`. Modal lost `NDS.trapFocus`, its Backdrop use and `aria-hidden`/`hidden` writes; a div logs an error. Markup moved in the doc canons, examples, life-journey templates, `mainnav.html`, Session Timeout and the check fixtures. Migration row: `div.nds-modal` (scope `&div`); the migration CSS scan skips a class row with a bare element scope, so `.nds-modal` in a site's CSS is not flagged.
+Committed (`48117ef7`): `.nds-modal` is a `<dialog>` opened with `showModal()`. Modal lost `NDS.trapFocus`, its Backdrop use and `aria-hidden`/`hidden` writes; a div logs an error. Markup moved in the doc canons, examples, life-journey templates, `mainnav.html`, Session Timeout and the check fixtures. Migration row: `div.nds-modal` (scope `&div`); the migration CSS scan skips a class row with a bare element scope, so `.nds-modal` in a site's CSS is not flagged.
 
 - **Fade:** JS keeps `data-state` open/closing and calls `close()` after the fade, so both engines animate out (no `overlay`).
 - **Escape:** a keydown listener on the dialog (not document) closes it, so a menu inside that stops Escape keeps the modal open; `cancel` is prevented as a backstop, and Dropmenu's Escape now also calls `preventDefault()`. A native close (`<form method="dialog">`, Chrome's repeat Escape) syncs through a capture `close` listener.
@@ -113,7 +113,36 @@ Built, not committed: `.nds-modal` is a `<dialog>` opened with `showModal()`. Mo
 - **Static checks:** `check-css.py`, `check-data-state-tails.py`, `check-docs.py components/modal.md` clean; `js_processor.rb` built.
 - **Safari focus:** WebKit does not focus a clicked button, so Escape after a click on a menu trigger came from the page or the dialog and closed the modal under an open menu. Dropmenu now also hears Escape on `document` (capture) when focus sits outside every open menu, and closes the newest one. With no focused opener, focus is not handed back after close in Safari, as before.
 - **Browser checks, Chrome and WebKit:** `check-dropmenu-placement.mjs` 16/16, `check-init-destroy.mjs` 36/36, `check-frameworks.mjs` all passed, `doc-check.mjs components/modal.md` no findings, and a one-off modal harness (open, fade, Escape, click outside, drag out, static, a menu inside, swap, over a modal Panel, `<form method="dialog">`) all passed. The playground's prototype script now skips `.nds-modal` dialogs: its click-outside closed the row-4 modal natively.
-- **Step 3 note:** the shared Modal/Panel core is not extracted yet: lift `finish()`, the scroll lock and the outside-click test from `nds-modal.js` when Panel moves.
+- **Step 3 note:** done in step 3 (`_js/nds-dialog.js`).
+
+## Step 3 status (2026-10-16)
+
+Committed (`9230e5bd`): `.nds-panel` is a `<dialog>`. A plain or static panel opens with `show()` and keeps `--panel-z` under the main nav; a modal one opens with `showModal()` and runs full height over the nav (`--_panel-top: var(--panel-top, 0px)` on `:modal`). Panel lost its Backdrop use, `NDS.trapFocus`, the `covered` state and every `hidden` write; any other element logs an error. Markup moved in the doc canons (Panels, FAB, Cookies, Accessibility), Student Portal, the playground, `docs_canon.rb` (builder stage and options panels), the cookie and accessibility scripts, the `check-frameworks.mjs` fixture and `mkrelease.py`'s accessibility canon check.
+
+- **Shared core:** `_js/nds-dialog.js` (`NDS.dialog`, internal, delegated bundle before Modal): `show()` / `close()` keep the list of open modal dialogs, the scroll lock from the first to the last, the `data-nds-under` mark on every one under the top (CSS hides its `::backdrop`), and prevent the native `cancel`; `onOutside()` is the down-and-up dim-layer click; `hideMenus()`. Open, the fade or slide, events and the static option stay in each component: Panel's stack, swap and parking share nothing with Modal.
+- **The `.nds-backdrop` stopgap stays, moved into the core:** Main Navigation, Side Menu and the viewer still dim through Backdrop, so a dialog above hides that layer until steps 5–6.
+- **Over a modal:** a panel the user opens while a modal dialog is open opens modal too, or it would sit under the inert page. One the page opens with `{ focus: false }` (the cookie panel at idle) stays plain and under it, as before; the first build promoted it over an open Modal, caught by the new check.
+- **Focus:** `show()` moves focus into the dialog, so a `{ focus: false }` panel hands it back.
+- **Native close:** `<form method="dialog">` or Chrome's repeat Escape fires `close`; Panel syncs its state and stack.
+- **Migration row:** `nds-panel` with scope `&:not(dialog)`; the audit's CSS scan now also skips an `&:not(element)` scope. The nav dimming behind a modal panel is said in that row's fix text: migrations.yml has no behaviour kind, so the release notes must carry it too.
+- **Checked, Chrome and WebKit:** new `scripts/check-dialogs.mjs` (39 cases: plain, static, modal, swap, Escape, outside click, `method="dialog"`, `{ focus: false }`, Modal over a modal panel, panels over a modal, Modal swap, destroy, a non-dialog panel; lazy panels from a `<template>`, plain and modal; the cookie panel at idle; the Accessibility panel built on its first press) all passed; `check-menus-in-modal.mjs`, `check-init-destroy.mjs`, `check-frameworks.mjs` both engines and `check-dropmenu-placement.mjs` passed; `check-css.py`, `check-data-state-tails.py`, `check-docs.py` on the four pages clean; the accessibility canon matches `panelMarkup()`.
+- **Slide on the compositor:** the panel's open rule was `transform: translate(0, 0) !important`, and Chrome runs an animation on an `!important` property on the main thread only (trace `Animation` event, `compositeFailed: 262144` = affects an important property). On a phone at CPU ×6.6 the slide was choppy next to the prototype. Each side's mixin now writes its own open transform with no `!important`; the trace shows no composite failure, longest task 29 ms vs the prototype's 25 ms (was 111 ms). Harness: CDP tracing with `blink.animations`, `devtools.timeline`, `blink.user_timing`; read the `Animation` events' `compositeFailed` and the main thread's `RunTask` durations.
+- **Not run:** `doc-check.mjs` on the four pages (owner's go-ahead), a phone run, older WebKit.
+
+## Steps 4–5 judged (2026-10-16, owner's call pending)
+
+Scored on the owner's goals: simpler code, render perf, framework compatibility.
+
+- **The plan's premise was wrong for step 5.** Main Navigation's `NDS.relocate` moves pinned items into the minimal bar on narrow screens (`managePABPlacement`): a layout move, not a clipping escape. Popover does not touch it, so step 5 removes no `relocate`.
+- **Step 4 (FAB) in the top layer paints over everything opened before it, and z-index cannot lower it.** Today the dock sits at 899: under plain panels (999), the cookie sheet and the main nav (1000). In the top layer a corner FAB would cover a bottom sheet's buttons, the cookie sheet and the phone nav drawer. Keeping FABs in place without the top layer (`position: fixed` where authored) needs new JS for the stacking offsets of several FABs, and breaks under a transformed ancestor. `NDS.relocate` works today: `check-frameworks.mjs` passes in both engines.
+- **Step 5 (Main Navigation) on `popover="auto"`:** would replace the open set, `closeAll()`, `handleDocumentClick` and some of the 14 `!important` / `overflow: unset` overrides, and could drop the nav's Backdrop use. No render gain: the desktop dropdown and the phone drawer already animate on the compositor (traced 2026-10-16). Risk is the highest in the plan: first paint, the timed dropdown swap (`_scheduleDropdownOpen`), phone mode, more, pinned items.
+- **Recommendation:** skip step 4 (keep the dock and `relocate`); defer step 5 past v2.0.0, or do it only as a code-simplification pass with its own plan.
+- **Step 5 tested (2026-10-16, owner asked for a test, not a judgement).** Built in the working copy: every floating nav menu (desktop menus, the phone's pinned-bar and actions menus) opens as `popover="manual"`; the drawer's own list keeps its inline accordion. New `scripts/check-mainnav.mjs` (16 cases, `destroy()` with a menu open among them: placement under the bar, full width, `.nds-fit` under its trigger, on top, dim layer, swap, page scroll, outside click, the search field, phone pinned menu, drawer, drawer accordion) passed before and after, Chrome and WebKit.
+  - **Code:** JS +28 lines net (lift/lower, `--_menu-top` measure, a scroll listener so the menu follows the sticky bar), SCSS −2 net (the menus' z-index ladder entry, `position: fixed !important` ×2 and `position: absolute !important` go; a `[popover]` reset comes in). The open set, `closeAll()`, `handleDocumentClick`, the `[hidden]` dance, the animation system and the Backdrop all stay: `manual` popovers keep NDS's timed swap and Safari's close animation, and the drawer accordion still needs them.
+  - **`data-nav-open` stays:** with the nav always clipped, Chrome sent drawer taps to the dim layer (WebKit was fine).
+  - **Speed:** click cost at CPU ×6.6, 3 runs: desktop menu 120–208 → 144–176 ms, phone pinned menu 104–160 → 144–200 ms, drawer 120–144 → 120–136 ms. No gain.
+  - **Look:** screenshots match, and the menu, its content and its first item measure the same before and after.
+  - **Verdict (reverted 2026-10-16, benefit vs cost):** not worth it as built: more code, no speed, no framework gain. The only path to real deletions is `popover="auto"` (native one-open-at-a-time and outside click), which drops the timed swap and Safari's close animation, while the drawer accordion keeps the JS anyway.
 
 ## Modal and Panel: one core
 
@@ -134,7 +163,7 @@ Two public components with their own uses and options; the markup and API do not
 
 - Safari 17 and Firefox 125 or newer. Older browsers get a menu that can clip; nothing breaks.
 - Close animations: `overlay` is Chrome only, so WebKit drops the element at once. Keep the JS `closing` state, as today.
-- Position: Dropmenu keeps its own JS placement (flip, clamp, cursor anchor, max-height) for every menu, written as `position: fixed` coordinates. CSS anchor positioning (`position-area`, Safari 26 and later) only placed the demo's menus; it cannot clamp a list's height, so it is not the production path.
+- Position: Dropmenu keeps its own JS placement (flip, clamp, cursor anchor, max-height) for every menu, written as `position: absolute` coordinates in the top layer (`NDS.place`). CSS anchor positioning (`position-area`, Safari 26 and later) only placed the demo's menus; it cannot clamp a list's height, so it is not the production path.
 - `.nds-card` overrides the dialog's `position`, `margin` and closed `display`: a reset ships with the dialog.
 - A `<form method="dialog">` inside a card needs `nds-form`, or the card loses its layout.
 

@@ -36,6 +36,11 @@
     backdrop-filter: var(--backdrop-blur, none);
   }
 
+  // Under a newer modal dialog, which dims the page itself.
+  &[data-nds-under]::backdrop {
+    opacity: 0;
+  }
+
   // Extend card component styles
   &.nds-card {
     max-width: 600px;

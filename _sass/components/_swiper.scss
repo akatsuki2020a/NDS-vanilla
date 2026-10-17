@@ -167,15 +167,15 @@
     }
 
     // A lazy image has no source until its slide nears the viewport, so its box
-    // shimmers until then — the same fill and pulse the cards use. The box is
-    // the author's: a sourceless <img> has no size of its own. A sized one
-    // paints the broken-image icon and its alt text; a transparent SVG as its
-    // content paints nothing, so the fill below shows.
+    // shows the skeleton fill until then. The box is the author's: a sourceless
+    // <img> has no size of its own. A sized one paints the broken-image icon and
+    // its alt text; a transparent SVG as its content paints nothing, so the fill
+    // below shows. No pulse: only off-screen slides wait, and each pulsing image held
+    // a compositor layer for good (a swiper-arrow tap: 648 → 216 ms at CPU ×20).
     img:is([data-src], [data-srcset]) {
         content: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'/>");
         background: var(--nds-skeleton-fill);
         border-radius: var(--nds-skeleton-radius);
-        @include skeleton-pulse;
     }
 }
 

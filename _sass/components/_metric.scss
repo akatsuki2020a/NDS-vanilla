@@ -19,15 +19,21 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-2xl);
+  // The metric's own width picks the layout, not its text: every metric of one width
+  // splits alike, and the charts line up across cards.
+  container-type: inline-size;
 
-  // Default split: chart claims ~40% on the inline-end; .nds-card-metric-info fills the rest
-  > .nds-card-metric-chart {
-    flex: 1 0 40%;
-  }
-
-  // Full-width variant: chart wraps below the stat
-  &.nds-full > .nds-card-metric-chart {
+  // Narrow: the chart sits below the stat.
+  > :is(.nds-card-metric-info, .nds-card-metric-chart) {
     flex: 1 0 100%;
+  }
+}
+
+// Wide: the stat and the chart share the row, the chart at 40%.
+@container (min-width: 400px) {
+  .nds-card-metric:not(.nds-full) {
+    > .nds-card-metric-info { flex: 3 1 0; min-width: 0; }
+    > .nds-card-metric-chart { flex: 2 1 0; min-width: 0; }
   }
 }
 
@@ -35,12 +41,13 @@
 // METRIC SUB-ELEMENTS
 // ==============================================
 
+// The trend always sits under the value: a wrap here would follow the text length,
+// so two metrics side by side could lay out differently.
 .nds-card-metric-info {
   display: flex;
-  flex: 1;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--spacing-lg) var(--spacing-3xl);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
 }
 
 .nds-card-metric-value {
@@ -103,7 +110,6 @@
 // CARD-LEVEL TREATMENT (scoped to metric-bearing cards)
 //   - data-status drives metric internals + featured-icon palette in one place
 //   - header uses centered alignment with a smaller card title
-//   - the trailing header button (e.g. 3-dot menu) is pushed to the end
 //   - actions slot gets a divider above
 // ==============================================
 
@@ -128,10 +134,10 @@
 
   > .nds-card-header {
     align-items: center;
+  }
 
-    > .nds-btn:last-child {
-      margin-inline-start: auto;
-    }
+  .nds-card-text {
+    --_card-title-lh: var(--typo-text-sm-LH);
   }
 
   .nds-card-title {

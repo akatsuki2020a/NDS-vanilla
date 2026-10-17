@@ -37,7 +37,7 @@
  */
 // NDS Navigation Controller
 //
-// Mainnav inits in the deferred pass and owns first paint of the nav chrome.
+// Mainnav inits in the critical pass, so its toggle and menus answer from the reveal.
 // init-time work (DOM refs, mode-class sync, PAB placement, toggler
 // visibility, the overflow/show-more measurement + drawer reveal, event wiring)
 // is cold — no forced layout reads. The dropdown/navbar animation + interaction

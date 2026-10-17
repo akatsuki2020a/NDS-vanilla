@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "15/10/2026 - 03:13 PM"
+last_edit: "17/10/2026 - 04:05 AM"
 ---
 
 <section id="date-picker-overview" class="nds-content-section nds-doc-overview">

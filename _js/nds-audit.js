@@ -631,8 +631,8 @@
         // with no class (body, &[data-cooldown]) leaves an nds- or data- name to stand alone; a
         // generic one (.sr-only, .hidden) may be the site's own.
         const scoped = (r, sel) => {
-            // A class that only changed element (div.nds-modal → <dialog>) is still right in CSS.
-            if (r.kind === 'class' && /^&[a-z]+$/.test(r.scope || '')) return false;
+            // A class that only changed element (div.nds-modal, aside.nds-panel → <dialog>) is still right in CSS.
+            if (r.kind === 'class' && /^&(?:[a-z]+|:not\([a-z]+\))$/.test(r.scope || '')) return false;
             const cls = r.scope && r.scope.match(/\.[\w-]+/g);
             return !r.scope || (cls ? cls.some(c => sel.includes(c)) : /^(nds|data)-/.test(r.name));
         };

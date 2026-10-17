@@ -59,6 +59,9 @@
         {
             name: 'Mainnav',
             selector: '.nds-main-nav',
+            // The nav paints with no script, but its toggle and menus need one: idle, they
+            // stayed dead for ~2 s after the reveal on a busy phone (iu.edu.sa, CPU ×6.6).
+            critical: true,
             // Owner hook: the container passed is usually the view INSIDE the chrome, and
             // a plain init() would no-op on the stale guard after a route change.
             refresh: () => NDS.Mainnav?.reinit?.(),

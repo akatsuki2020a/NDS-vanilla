@@ -225,10 +225,8 @@ html:not([data-nds-loaded]) :where(.nds-form-control,
 
    Table rows are display:none like grid items — not visibility:collapse.
    Collapsed rows still lay out, so a 100-row table paid full-table layout
-   on every pre-init pass (six on console-demo). Column sizing from every
-   row survives: pagination stamps data-paged-initialized BEFORE
-   lockTableColumns reads, so the widths come from one forced full-table
-   layout, then showPage hides the off-page rows. */
+   on every pre-init pass (six on console-demo). Pagination pins column
+   widths from the shown page, grow-only (lockTableColumns). */
 .nds-paged-content:not([data-paged-initialized], [data-paged-split]) .nds-page-item:nth-child(n + 7) {
     display: none;
 }

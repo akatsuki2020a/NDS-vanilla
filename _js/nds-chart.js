@@ -244,14 +244,18 @@
 
         // ── ResizeObserver ────────────────────────────────────────
 
+        // The first drawing waits a frame, off the init burst. A later resize draws in the
+        // observer's write phase, before paint: a frame late, the old drawing showed at the
+        // new width (a metric chart flashed when its container query flipped).
         _setupResize() {
-            const renderOnResize = NDS.rafThrottle(() => this.render());
+            const renderLater = NDS.rafThrottle(() => this.render());
             this._offResize = NDS.onElementResize(this.el, () => {
                 const w = this.el.clientWidth;
-                if (w && w !== this._lastW) {
-                    this._lastW = w;
-                    renderOnResize();
-                }
+                if (!w || w === this._lastW) return;
+                const first = !this._lastW;
+                this._lastW = w;
+                if (first) renderLater();
+                else return () => this.render();
             });
         }
 
@@ -291,6 +295,8 @@
         // an explicit labelRotate/labelDecimate overrides the auto decision.
         _xaxisStrategy(catLabels, plotW) {
             const xaxis = this.opts.xaxis || {};
+            // Hidden labels take no room: a tilt reserved for them shrank a sparkline's plot.
+            if (!xaxis.show) return { step: 1, rotate: 0, extraPad: 0, startReach: 0 };
             const isMobile = window.matchMedia(NDS.breakpoints['tablet-max']).matches;
             const fontSize = isMobile ? 11 : 13;
             const charW = fontSize * 0.6;

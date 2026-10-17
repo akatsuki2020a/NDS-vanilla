@@ -90,8 +90,9 @@ def stage(version):
     for f in ('CHANGELOG.md', 'LICENSE', 'NDS-INDEX.md'):
         shutil.copy2(os.path.join(ROOT, f), pkg)
 
-    # README.md is a human signpost only.
-    shutil.copy2(os.path.join(ROOT, 'scripts', 'release-template', 'README.md'), pkg)
+    # README.md is a human signpost only; nds-verify.mjs runs both browser passes (NDS-INDEX.md, Verify).
+    for f in ('README.md', 'nds-verify.mjs'):
+        shutil.copy2(os.path.join(ROOT, 'scripts', 'release-template', f), pkg)
     # The rules file is deliberately NOT shipped. It versions independently of
     # the template, so a copy frozen at the release cut goes stale the moment the
     # next revision lands — and a runner that finds two copies has to work out
@@ -200,7 +201,7 @@ def verify(out, version, rules=None):
                      f'it, and the tag the consumer populates from carries this tree.')
 
     # A missing copy in stage() would silently ship an incomplete zip.
-    for anchor in ('README.md', 'NDS-INDEX.md', '_site/guides/get-started.html',
+    for anchor in ('README.md', 'NDS-INDEX.md', 'nds-verify.mjs', '_site/guides/get-started.html',
                    '_site/guides/integration-quality.html'):
         if root + anchor not in names:
             sys.exit(f'Missing from zip: {anchor}')
@@ -295,7 +296,7 @@ def verify(out, version, rules=None):
     def _canon(cid):
         m = re.search(r'<script type="text/html" id="' + cid + r'"[^>]*>(.*?)</script>', a11y_doc, re.S)
         return _markup(m.group(1)) if m else ''
-    built = re.search(r'return `(<aside.*?</aside>)`', _read('_js/nds-accessibility.js'), re.S).group(1)
+    built = re.search(r'return `(<dialog.*?</dialog>)`', _read('_js/nds-accessibility.js'), re.S).group(1)
     if _canon('a11y-panel') != _markup('<template class="nds-panel-template">' + built.replace('${side}', 'end') + '</template>'):
         sys.exit('Custom Panel in components/accessibility.md has drifted from panelMarkup() in '
                  '_js/nds-accessibility.js. Copy it from there.')

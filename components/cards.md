@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 02:56 AM"
+last_edit: "16/10/2026 - 11:02 PM"
 ---
 
 <section id="card-overview" class="nds-content-section nds-doc-overview">
@@ -18,7 +18,7 @@ last_edit: "16/10/2026 - 02:56 AM"
     </div>
     <div class="nds-section-body nds-prose" markdown="1">
 
-A card holds one unit in a set, such as a service tile, a product, an article preview or a dashboard number. The optional header holds an icon, an image or an avatar. The content holds a title and text, and optional actions go after it. The whole card can be one link. To let the text expand in place, see [Expandable Content](../utilities/expandable-content).
+A card holds one unit in a set, such as a service tile, a product, an article preview or a dashboard number. The optional header holds an icon, an image or an avatar. In a panel card, it holds the title too. The content holds a title and text, and optional actions go after it. The whole card can be one link. To let the text expand in place, see [Expandable Content](../utilities/expandable-content).
 
 Pick another component when:
 
@@ -152,6 +152,51 @@ Pick another component when:
   </div>
 </div>
 </script>
+<script type="text/html" id="card-header-title" data-canon>
+<div class="nds-card nds-stroke">
+  <div class="nds-card-header">
+    <div class="nds-card-featured-icon">
+      <span class="nds-featured-icon nds-circle nds-sm">
+        <i class="hgi hgi-stroke hgi-file-01" aria-hidden="true"></i>
+      </span>
+    </div>
+    <div class="nds-card-text">
+      <span class="nds-card-title">My requests</span>
+      <p class="nds-card-description">Three requests, one needs your action.</p>
+    </div>
+  </div>
+  <div class="nds-card-content">
+    <nav class="nds-drawer nds-divided" aria-label="My requests">
+      <ul class="nds-drawer-list">
+        <li>
+          <a href="#" class="nds-btn nds-subtle">
+            <span class="nds-featured-icon nds-sm">
+              <i class="hgi hgi-stroke hgi-file-validation" aria-hidden="true"></i>
+            </span>
+            <span class="nds-label">Enrollment certificate</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nds-btn nds-subtle">
+            <span class="nds-featured-icon nds-sm">
+              <i class="hgi hgi-stroke hgi-task-edit-01" aria-hidden="true"></i>
+            </span>
+            <span class="nds-label">Course withdrawal</span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="nds-btn nds-subtle">
+            <span class="nds-featured-icon nds-sm">
+              <i class="hgi hgi-stroke hgi-mail-account-01" aria-hidden="true"></i>
+            </span>
+            <span class="nds-label">Change of email</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</div>
+</script>
 <script type="text/html" id="card-tags" data-canon>
 <div class="nds-card-tags">
   <span class="nds-tag nds-blue nds-sm">
@@ -213,28 +258,28 @@ Pick another component when:
   / kg
 </div>
 </script>
-<script type="text/html" id="card-checkbox" data-canon>
-<div class="nds-card-checkbox">
+<script type="text/html" id="card-corner" data-canon>
+<div class="nds-card-corner">
+  <a href="#" class="nds-btn nds-subtle nds-sm">
+    <span class="nds-label">View all</span>
+    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
+  </a>
+</div>
+</script>
+<script type="text/html" id="card-corner-status" data-canon>
+<div class="nds-card-corner">
+  <span class="nds-tag nds-xs" data-status="success">
+    <span class="nds-label">Active</span>
+  </span>
+</div>
+</script>
+<script type="text/html" id="card-corner-checkbox" data-canon>
+<div class="nds-card-corner">
   <div class="nds-form-container nds-check-container">
     <div class="nds-form-control">
       <input type="checkbox" name="cardSelect" value="card-1" class="nds-check" aria-label="Select card">
     </div>
   </div>
-</div>
-</script>
-<script type="text/html" id="card-status" data-canon>
-<div class="nds-card-status">
-  <span class="nds-tag nds-sm" data-status="success">
-    <span class="nds-label">Active</span>
-  </span>
-</div>
-</script>
-<script type="text/html" id="card-header-action" data-canon>
-<div class="nds-card-header-action">
-  <a href="#" class="nds-btn nds-subtle nds-sm">
-    <span class="nds-label">View all</span>
-    <i class="nds-icon nds-hgi-arrow-next-01" aria-hidden="true"></i>
-  </a>
 </div>
 </script>
 <script type="text/html" id="card-actions" data-canon>
@@ -262,28 +307,29 @@ Pick another component when:
 | Group | Option | Markup | On element | Use |
 |---|---|---|---|---|
 | Structure | Icon header (default) | — | — | A featured icon above the text |
-| Structure | Image header | canon `#card-image` | — | A photo above the text. Set the focal point with `--img-pos-x` and `--img-pos-y` |
+| Structure | Image header (id: image) | canon `#card-image` | — | A photo above the text. Set the focal point with `--img-pos-x` and `--img-pos-y` |
 | Structure | Avatar header | canon `#card-avatar` | — | A person or an account |
 | Structure | No header | canon `#card-no-header` | — | Text only |
 | Structure | Link card (hint: The whole card is one link) | canon `#card-link` | — | The whole card is one `<a>` (or `<button>`). Hover and press feedback come from the element. Do not put links or buttons inside it |
 | Structure | Statistic (hint: One headline number) (id: statistic) | canon `#card-statistic` | — | One headline number with a label, in a centered card. The number is `.nds-card-number`, which works in any card. With `data-counter`, it counts up from 0 when it scrolls into view. See [Numbers](../utilities/numbers#counter-animation) |
-| Structure | Progress (hint: A progress ring beside a short title. Turns on Row, Reverse and Middle) (demo: + row) (demo: + reverse) (demo: + middle) | canon `#card-progress` | — | A [progress ring](../components/progress) beside a short title, as on a life journey page. Write Row, Reverse and Middle too: the ring closes the row, and the title sits level with its middle |
+| Structure | Progress (hint: A progress ring beside a short title. Turns on Row, Reverse and Middle) (id: progress) (demo: + row) (demo: + reverse) (demo: + middle) | canon `#card-progress` | — | A [progress ring](../components/progress) beside a short title, as on a life journey page. Write Row, Reverse and Middle too: the ring closes the row, and the title sits level with its middle |
+| Structure | Header title (hint: The title beside a small icon, over a list) (id: header-title) (demo: + text-md) (demo: + breakout) | canon `#card-header-title` | — | A panel card: the title sits in the header beside the icon, and the content holds a list, a table or a chart. Wrap the title in `.nds-card-text`, as in the content. A one-line title centers on the icon. A taller text starts level with the icon's top |
+| Layout | Stacked (default) | — | — | Header above content |
+| Layout | Row (hint: Header beside the content) (id: row) (not: header-title) | `.nds-horizontal` | `.nds-card` | Header beside content. The card stacks again when it is narrower than 324px |
+| Layout | Center (not: statistic, header-title) | `.nds-center` | `.nds-card` | Centers every part. Put it on the card root only: the featured icon reads it there, so on an inner part it centers nothing. It does not move the card: its container places it |
 | Meta | None (default) | — | — | No tags or rating |
 | Meta | Tags | canon `#card-tags` | `.nds-card-content` | Tags alone go straight in the content |
 | Meta | Rating | canon `#card-rating` | `.nds-card-content` | A star rating with a count |
 | Meta | Tags + Rating | canon `#card-meta` | `.nds-card-content` | Both together: `.nds-card-meta` groups the two meta rows. Use it only when both are present |
 | Value | None (default) | — | — | No price line |
-| Value | Price | canon `#card-value-price` | `.nds-card-text` (after) | A price. `data-currency` shows the currency icon. See [Numbers](../utilities/numbers) |
-| Value | Sale price | canon `#card-value-sale` | `.nds-card-text` (after) | A price with the original crossed out in `<s>` |
-| Value | Unit price | canon `#card-value-unit` | `.nds-card-text` (after) | A price with a plain-text unit after it |
+| Value | Price | canon `#card-value-price` | `.nds-card-text:not(.nds-card-header > *)` (after) | A price. `data-currency` shows the currency icon. See [Numbers](../utilities/numbers) |
+| Value | Sale price | canon `#card-value-sale` | `.nds-card-text:not(.nds-card-header > *)` (after) | A price with the original crossed out in `<s>` |
+| Value | Unit price | canon `#card-value-unit` | `.nds-card-text:not(.nds-card-header > *)` (after) | A price with a plain-text unit after it |
 | Corner | None (default) | — | — | Nothing in the top end corner |
-| Corner | Checkbox | canon `#card-checkbox` | `div.nds-card` (start) | Lets the user select the card. Sits in the top end corner. Not on a link card, which holds no controls. |
-| Corner | Status (hint: A status tag at the top end of the card) | canon `#card-status` | `.nds-card-header` | A status tag, such as a person's availability. `data-status` sets its color. It sits at the top end, under the avatar in a row card, and over the corner of an image. It moves clear of a checkbox. |
-| Corner | Status (hint: A status tag at the top end of the card) | `.nds-inverted` | `.nds-card-image ~ * .nds-tag` | Over an image, the tag needs a solid background to stay readable, so give it `.nds-inverted` |
-| Corner | Header action (hint: Buttons at the top end of the header) | canon `#card-header-action` | `.nds-card-header:not(a.nds-card > *)` | One or more small buttons at the end of the header, such as View all. They sit at the top end, like a status tag, and a long title never squeezes them. Not on a link card, which holds no links or buttons. |
-| Corner | Checkbox + Status | canon `#card-checkbox` | `div.nds-card` (start) | Both: the status tag moves clear of the checkbox. Header action takes the whole corner, so it never joins them |
-| Corner | Checkbox + Status | canon `#card-status` | `.nds-card-header` | The same |
-| Corner | Checkbox + Status | `.nds-inverted` | `.nds-card-image ~ * .nds-tag` | The same |
+| Corner | Action (hint: A small button in the top end corner) (not: image) | canon `#card-corner` | `.nds-card-text:not(a.nds-card *)` (start) | A small button, such as View all, in `.nds-card-corner`. Write the corner first in the card text. Below a header, it shows in the card's top end corner. In a row card, a Header title card or a card with no header, it floats at the end of the title's first line, and the title wraps around it. Not on a link card, which holds no links or buttons |
+| Corner | Status (hint: A status tag in the top end corner) | canon `#card-corner-status` | `.nds-card-text:not(a.nds-card *)` (start) | A status tag in `.nds-card-corner`, placed the same way as Action. `data-status` sets its color |
+| Corner | Status (hint: A status tag in the top end corner) | `.nds-inverted` | `.nds-card-header:has(.nds-card-image) ~ * .nds-card-corner .nds-tag` | Over an image, give the tag `.nds-inverted`: its solid background keeps it readable |
+| Corner | Checkbox (hint: A select checkbox in the top end corner) (not: statistic, progress) | canon `#card-corner-checkbox` | `.nds-card-text:not(a.nds-card *)` (start) | A select checkbox in `.nds-card-corner`. Placed the same way as Action. With a status tag, put both in one `.nds-card-corner`, the checkbox last, so it sits in the corner |
 | Actions | None (default) | — | — | No actions |
 | Actions | Start (hint: Aligned to the start of the row) | canon `#card-actions` | `div.nds-card` | Buttons after the content, never inside it. Not on a link card, which holds no links or buttons |
 | Actions | End (hint: Aligned to the end of the row) | canon `#card-actions` | `div.nds-card` | The same, aligned to the end of the row |
@@ -305,16 +351,18 @@ Pick another component when:
 | Color | On color (hint: For a dark or photo background) | `.nds-oncolor` | `.nds-card-actions .nds-btn` | Buttons do not follow the card. Give each action button `.nds-oncolor` too |
 | Color | On color (hint: For a dark or photo background) | `.nds-oncolor` | `.nds-tag:not([data-status])` | Tags do not follow the card either. Give each standard tag `.nds-oncolor`. A status tag keeps its colors |
 | Tinted | Tinted (hint: A light tint of the card color) | `.nds-color` | `.nds-card:not(.nds-oncolor)` | Fills the card with a light tint of its color. With no color class, the tint is the brand primary |
-| Layout | Stacked (default) | — | — | Header above content |
-| Layout | Row (hint: Header beside the content) (id: row) | `.nds-horizontal` | `.nds-card` | Header beside content. The card stacks again when it is narrower than 324px |
-| Layout | Center (not: statistic) | `.nds-center` | `.nds-card` | Centers every part. Put it on the card root only: the featured icon reads it there, so on an inner part it centers nothing. It does not move the card: its container places it |
 | Reverse | Reverse (hint: Header at the end side. Row only) (id: reverse) | `.nds-reverse` | `.nds-card.nds-horizontal` | Puts the header at the end side of the row, after the content. For a figure that closes the row, such as a progress ring. Row only |
 | Middle | Middle (hint: Short content in the middle, top to bottom) (id: middle) | `.nds-middle` | `.nds-card` | Puts short content in the middle of the card's height, instead of at the top. For a row card whose header is taller than its text, or a card stretched to its row in a grid. The text keeps its side: to center it across too, add Center |
 | Full width | Full width | `.nds-full` | `.nds-card` | Fills its container, instead of stopping at 360px. Do not use `.nds-full-width` on a card: inside a section, that class breaks out to the full screen width |
 | Number size | LG (default) | — | `.nds-card-number` | The display size |
 | Number size | MD | `.nds-md` | `.nds-card-number` | A smaller headline number |
 | Number size | SM | `.nds-sm` | `.nds-card-number` | The smallest headline number |
+| Text size | LG (default) | — | `.nds-card-text` | An 18px title, with a 16px subtitle and description |
+| Text size | MD (id: text-md) | `.nds-md` | `.nds-card-text` | A 16px title, with a 14px subtitle and description. For a header title, or for small cards in a dense grid |
+| Text size | SM | `.nds-sm` | `.nds-card-text` | A 14px title, with a 12px subtitle and description |
+| Breakout | Breakout (hint: The part runs to the card's edges) (id: breakout) | `.nds-breakout` | `.nds-drawer` | Runs the part to the card's sides. It also meets the top or bottom edge when it is the first or last thing in the card or in its content. A drawer moves the card padding into its rows, so the hover and the dividers meet the border. A definition list does the same for its items, at the sides only |
 | Disabled | Disabled | `.nds-disabled` | `.nds-card` | Mutes the card and blocks clicks. `[disabled]` works on a `<button>` card |
+| Disabled | Disabled | `[inert]` | `.nds-card` | Write both: `inert` takes the card out of the keyboard order, so Tab skips its links and buttons |
 | Loading | Loading (hint: Skeleton placeholders) | `.nds-loading` | `.nds-card` | Skeleton placeholders while the content loads |
 {: #card-variants-table .nds-table .nds-responsive}
 
@@ -396,8 +444,14 @@ Pick another component when:
 - Do not put a card inside a card. Use `.nds-card-meta` or a [definition list](../components/definition-list) inside the content.
 - Use `data-status` only when the card really has that status. For a color without a status, use the color class.
 - Put a row of cards in a [grid](../layout/grid).
-- Put a button in the card header inside `.nds-card-header-action`. A bare button there shrinks when the title is long, and its label spills out.
-- In a disabled card, add `disabled` to its checkbox and buttons too, or `aria-disabled="true"` to a link button. They then show their own disabled look and the keyboard skips them. Without it, the card only fades them, and the keyboard can still reach them.
+- Put a card's small extras in `.nds-card-corner`, first in `.nds-card-text`: a status tag, a menu or "View all" button, or a select checkbox. A bare button in the header shrinks when the title is long, and its label spills out.
+- Keep the corner to one or two small items: an `nds-xs` tag, an `nds-sm` subtle button, an icon-only button, or a checkbox. A wide corner meets the header icon on a narrow card.
+- Write the tag first and the checkbox last, so the checkbox sits in the corner.
+- A card the user selects holds no buttons in its corner. Picking it and opening it are two different actions.
+- Over an image, give the status tag `.nds-inverted`.
+- Use the Header title structure for a panel card that holds a list, a table or a chart. For a card in a set of tiles, keep the title in the content.
+- Add `nds-breakout` only to a drawer or a definition list. Another part breaks out too, but its content then touches the card border.
+- Give a disabled card `inert` too. Without it, the card only fades its links and buttons, and the keyboard can still reach them.
 
 </div>
   </div>

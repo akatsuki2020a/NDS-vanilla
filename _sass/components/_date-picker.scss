@@ -64,6 +64,10 @@
     background-color: var(--form-field-background-default);
     border: 1px solid var(--form-field-border-default);
     box-shadow: var(--shadow-md);
+    // .nds-btn sets its own 40px, so the menu-level value only reaches non-buttons (weekdays).
+    .nds-btn {
+        --btn-size: 32px;
+    }
     // ==============================================
     // CALENDAR HEADER STYLES
     // ==============================================
@@ -78,20 +82,27 @@
         flex: 1;
         display: flex;
         justify-content: space-between;
+        min-width: 0;
     }
     .nds-month-year-selectors {
         display: flex;
+        min-width: 0;
     }
     .nds-calendar-month-switch {
         display: flex;
+        flex-shrink: 0;
     }
-    // Trigger label — wrapper scoping is fine; trigger never portals.
+    // A long month name (Hijri) shrinks to the menu's width, not the viewport's:
+    // the menu is narrow on any screen. Trigger never portals, so wrapper scoping is fine.
+    .nds-month-year-selectors > .nds-dropmenu,
+    :is(.nds-month-dropmenu, .nds-year-dropmenu) .nds-dropmenu-trigger {
+        min-width: 0;
+    }
     :is(.nds-month-dropmenu, .nds-year-dropmenu) .nds-dropmenu-trigger .nds-label {
-        @include mobile {
-            max-width: 70px;
-            overflow: clip;
-            text-overflow: ellipsis;
-        }
+        min-width: 0;
+        overflow: clip;
+        white-space: nowrap;
+        text-overflow: ellipsis;
     }
     // ==============================================
     // CALENDAR BODY STYLES
@@ -209,10 +220,6 @@
                 &:active {
                     background-color: var(--form-datecell-background-in-range-pressed);
                 }
-            }
-            --btn-size: 40px;
-            @include mobile {
-                --btn-size: 32px;
             }
         }
     }

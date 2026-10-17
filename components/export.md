@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.1.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 08:26 PM"
 ---
 
 <section id="export-overview" class="nds-content-section nds-doc-overview">
@@ -153,15 +153,15 @@ Pick another component when:
 </div>
 <div id="export-services" class="nds-grid" style="--max-col: 3; --mid-col: 2; --min-col: 1;" data-export-rows=".nds-card" data-export-name="services">
   <label class="nds-card nds-stroke">
-    <div class="nds-card-checkbox">
-      <div class="nds-form-container nds-check-container">
-        <div class="nds-form-control">
-          <input type="checkbox" class="nds-check" aria-label="Select Passport Renewal">
-        </div>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <div class="nds-form-container nds-check-container">
+            <div class="nds-form-control">
+              <input type="checkbox" class="nds-check" aria-label="Select Passport Renewal">
+            </div>
+          </div>
+        </div>
         <span class="nds-card-title" data-export-field="service" data-export-label="Service">Passport Renewal</span>
         <p class="nds-card-description" data-export-field="entity" data-export-label="Entity">General Directorate of Passports</p>
       </div>
@@ -173,15 +173,15 @@ Pick another component when:
     </div>
   </label>
   <label class="nds-card nds-stroke">
-    <div class="nds-card-checkbox">
-      <div class="nds-form-container nds-check-container">
-        <div class="nds-form-control">
-          <input type="checkbox" class="nds-check" aria-label="Select Driving Licence">
-        </div>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <div class="nds-form-container nds-check-container">
+            <div class="nds-form-control">
+              <input type="checkbox" class="nds-check" aria-label="Select Driving Licence">
+            </div>
+          </div>
+        </div>
         <span class="nds-card-title" data-export-field="service">Driving Licence</span>
         <p class="nds-card-description" data-export-field="entity">General Department of Traffic</p>
       </div>
@@ -193,15 +193,15 @@ Pick another component when:
     </div>
   </label>
   <label class="nds-card nds-stroke">
-    <div class="nds-card-checkbox">
-      <div class="nds-form-container nds-check-container">
-        <div class="nds-form-control">
-          <input type="checkbox" class="nds-check" aria-label="Select Commercial Registration">
-        </div>
-      </div>
-    </div>
     <div class="nds-card-content">
       <div class="nds-card-text">
+        <div class="nds-card-corner">
+          <div class="nds-form-container nds-check-container">
+            <div class="nds-form-control">
+              <input type="checkbox" class="nds-check" aria-label="Select Commercial Registration">
+            </div>
+          </div>
+        </div>
         <span class="nds-card-title" data-export-field="service">Commercial Registration</span>
         <p class="nds-card-description" data-export-field="entity">Ministry of Commerce</p>
       </div>

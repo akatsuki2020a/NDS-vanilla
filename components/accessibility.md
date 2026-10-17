@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.5"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "16/10/2026 - 02:34 PM"
 ---
 
 <section id="accessibility-overview" class="nds-content-section nds-doc-overview">
@@ -101,13 +101,12 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
 
 <script type="text/html" id="a11y-panel" data-canon data-preview="none">
 <template class="nds-panel-template">
-  <aside id="nds-accessibility-panel"
+  <dialog id="nds-accessibility-panel"
      class="nds-panel nds-accessibility-panel"
      data-panel-side="end"
      aria-label="Accessibility settings"
      data-i18n-aria-label="accessibility.panel_label"
-     data-accessibility-panel
-     hidden>
+     data-accessibility-panel>
 
     <div class="nds-panel-header">
       <span class="nds-featured-icon nds-circle">
@@ -427,7 +426,7 @@ To change the panel, put your own copy in a `<template class="nds-panel-template
         </div>
       </button>
     </div>
-  </aside>
+  </dialog>
 </template>
 </script>
 
@@ -553,7 +552,7 @@ The panel reads its English from the script and its Arabic from the `accessibili
 | Class | Element | Effect |
 |---|---|---|
 | `nds-accessibility-toggle` | the FAB | Names the FAB for your own CSS. NDS gives it no styles, and `nds-fab` docks it |
-| `nds-accessibility-panel` | the panel `<aside>` | Fixes the panel's text sizes, so Font Sizing and the dyslexia font do not change the panel. Pair it with `nds-panel` |
+| `nds-accessibility-panel` | the panel `<dialog>` | Fixes the panel's text sizes, so Font Sizing and the dyslexia font do not change the panel. Pair it with `nds-panel` |
 | `nds-panel-template` | a `<template>` | Holds your own panel. See [Panels](../components/panels) |
 | `nds-accessibility-modes` | the accordion in the panel | Sets the padding of the mode switches |
 | `nds-accessibility-quick` | a row in the panel body | The row of quick buttons, such as the theme button |
@@ -571,8 +570,8 @@ The panel reads its English from the script and its Arabic from the `accessibili
 | `data-panel-side` | every `data-accessibility-toggle` button | The edge the panel slides from: `end` (default), `start`, `left` or `right`. `start` and `end` flip with the text direction. The script copies it from the first button pressed onto the panel it builds |
 | `data-fab-pos` | the FAB | The FAB's edge: `start`, `end`, `left`, `right` or `bottom`. `auto` docks on the FAB's `data-panel-side`. See [FAB](../components/fab) |
 | `data-state~="loading"` | the pressed button | The script sets it while the panel loads, and removes it about one second later |
-| `data-accessibility-panel` | the panel `<aside>` | Marks the panel. A panel already in the page is used instead of a template |
-| `data-armed` | the panel `<aside>` | The script sets it when it builds the panel |
+| `data-accessibility-panel` | the panel `<dialog>` | Marks the panel. A panel already in the page is used instead of a template |
+| `data-armed` | the panel `<dialog>` | The script sets it when it builds the panel |
 | `data-a11y-status` | a screen-reader `role="status"` element in the panel | The script writes each announcement in it |
 | `data-a11y-count` | the count tag in an accordion title | `modes`, `readable` or `visual`. The script writes the group's count in it. It counts inside `#a11y-modes-collapse`, `#a11y-readable-collapse` and `#a11y-visual-collapse`, so keep those ids |
 | `data-a11y-count-sr` | a screen-reader span next to the tag | The same group names. The script writes the count as text for screen readers |

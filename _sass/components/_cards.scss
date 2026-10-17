@@ -57,6 +57,7 @@
   --_card-padding-inline: var(--card-padding-inline, var(--_card-padding-inline-base));
   --_card-gap-base: var(--spacing-3xl);
   --_card-gap: var(--card-gap, var(--_card-gap-base));
+  --_card-corner-inset: 0px; // set here, so a nested card does not inherit an image card's inset
 
   --_card-radius-base: var(--radius-lg);
   --_card-radius: var(--card-radius, var(--_card-radius-base));
@@ -238,11 +239,45 @@
       flex-direction: column;
     }
 
+    // The text is a block: a narrow part (a logo) centers on its margins.
+    .nds-card-text > :not(.nds-card-corner) {
+      margin-inline: auto;
+    }
+
   }
 
   // Short content sits in the middle of a taller card, or beside a taller header in a row card.
   &.nds-middle :is(.nds-card-content, .nds-card-text) {
     justify-content: center;
+  }
+
+  // The text is a block: align-content centers its lines.
+  &.nds-middle .nds-card-text {
+    align-content: center;
+  }
+
+  // A part marked .nds-breakout runs to the nearest card's sides, and to its top or
+  // bottom edge when it sits there. The part re-pads its own content (drawer rows).
+  .nds-breakout {
+    --_breakout-start: initial;
+    --_breakout-end: initial;
+    --_breakout-radius-start: initial;
+    --_breakout-radius-end: initial;
+    width: calc(100% + 2 * var(--_card-padding-inline));
+    margin-inline: calc(-1 * var(--_card-padding-inline));
+    margin-block: calc(-1 * var(--_breakout-start, 0px)) calc(-1 * var(--_breakout-end, 0px));
+  }
+
+  > .nds-breakout:first-child,
+  > .nds-card-content:first-child > .nds-breakout:first-child {
+    --_breakout-start: var(--_card-padding-block);
+    --_breakout-radius-start: calc(var(--_card-radius) - 1px);
+  }
+
+  > .nds-breakout:last-child,
+  > .nds-card-content:last-child > .nds-breakout:last-child {
+    --_breakout-end: var(--_card-padding-block);
+    --_breakout-radius-end: calc(var(--_card-radius) - 1px);
   }
 
 
@@ -261,18 +296,13 @@
       justify-content: space-between;
     }
 
+    // Title in the header (a variant): the text centers on the icon, whatever its size.
     > :is(.nds-card-text, .nds-card-title) {
-      padding-top: var(--spacing-md);
+      align-self: center;
     }
 
-    // Top end, never squeezed by the title. flex-start: the header's stretch would center the buttons.
-    > .nds-card-header-action {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      align-self: flex-start;
-      gap: var(--spacing-xs);
-      margin-inline-start: auto;
+    > .nds-card-text > * + * {
+      margin-block-start: 0;
     }
   }
 
@@ -335,14 +365,30 @@
     flex: 1;
   }
 
+  // A block, not a flex column or a grid: a .nds-card-corner written first floats, and the
+  // title wraps around it, like the section head's float action. Margins space the parts.
   .nds-card-text {
-    display: flex;
-    justify-content: flex-start;
-    flex-direction: column;
-    gap: var(--spacing-md);
+    --_card-title-lh: var(--typo-text-lg-LH);
+    display: flow-root;
     width: 100%;
     white-space: wrap;
     flex: 1;
+
+    // Small items (a status tag, a bare checkbox, small buttons) at the end of the title line.
+    > .nds-card-corner {
+      float: inline-end;
+      margin-inline-start: var(--spacing-md);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      // One title line tall: a taller item (a 32px button) centers on the line and overflows evenly.
+      height: var(--_card-title-lh);
+      --form-width: auto; // a bare checkbox keeps its own size beside a tag
+    }
+
+    > .nds-card-corner + * {
+      margin-block-start: 0;
+    }
   }
 
   // Block beat nds-truncate's zero-specificity -webkit-box and killed its clamp.
@@ -360,6 +406,7 @@
   }
 
   .nds-card-subtitle {
+    display: block;
     font-size: var(--typo-text-md-FS);
     line-height: var(--typo-text-md-LH);
     font-weight: var(--font-weight-semibold);
@@ -376,6 +423,24 @@
     color: var(--_card-text);
     margin: 0;
     width: 100%;
+  }
+
+  // Text sizes, like .nds-card-number's: each step drops title, subtitle and description one rung.
+  .nds-card-text.nds-md {
+    --_card-title-lh: var(--typo-text-md-LH);
+    .nds-card-title { font-size: var(--typo-text-md-FS); line-height: var(--typo-text-md-LH); }
+    :is(.nds-card-subtitle, .nds-card-description) { font-size: var(--typo-text-sm-FS); line-height: var(--typo-text-sm-LH); }
+  }
+
+  .nds-card-text.nds-sm {
+    --_card-title-lh: var(--typo-text-sm-LH);
+    .nds-card-title { font-size: var(--typo-text-sm-FS); line-height: var(--typo-text-sm-LH); }
+    :is(.nds-card-subtitle, .nds-card-description) { font-size: var(--typo-text-xs-FS); line-height: var(--typo-text-xs-LH); }
+  }
+
+  // After the parts' own margin: 0, so it wins on source order.
+  .nds-card-text > * + * {
+    margin-block-start: var(--spacing-md);
   }
 
   // ==============================================
@@ -438,81 +503,34 @@
   }
 
   // ==============================================
-  // CARD CHECKBOX SECTION
+  // CARD CORNER
   // ==============================================
 
-  .nds-card-checkbox {
+  // The corner is always written first in the text. Below a header it leaves the title line
+  // for the card's top end corner, beside the header. A row card keeps it on the title line,
+  // which already sits in that corner, until a narrow one stacks.
+  &:not(.nds-horizontal) > .nds-card-header ~ .nds-card-content > .nds-card-text > .nds-card-corner {
     position: absolute;
-    top: var(--spacing-2xl);
-    inset-inline-end: var(--spacing-2xl);
+    top: calc(var(--_card-padding-block) + var(--_card-corner-inset));
+    inset-inline-end: calc(var(--_card-padding-inline) + var(--_card-corner-inset));
     z-index: 3;
   }
 
-
-  // ==============================================
-  // CARD STATUS SLOT
-  // ==============================================
-  // A status tag in the header: the top end when stacked, under the avatar in a
-  // row card, out of the flow when centred (so the icon stays centred), and over
-  // an image's start corner. The checkbox comes before the header in canonical
-  // markup, so a sibling rule clears it — its inset + width + a gap, minus the
-  // padding the header already sits inside. No :has(). Another part that needs
-  // this spot (a badge, an icon button) joins these rules under its own name.
-
-  .nds-card-checkbox ~ .nds-card-header {
-    --_card-status-shift: calc(var(--spacing-2xl) + var(--nds-input-size, 16px) + var(--spacing-md) - var(--_card-padding-inline));
+  // An image header starts at the padding, so the corner moves inside the image.
+  // ponytail: :has() for a static structure check, read once at first paint; a class on the card if it ever costs.
+  &:has(> .nds-card-header > .nds-card-image) {
+    --_card-corner-inset: var(--spacing-md);
   }
 
-  .nds-card-status {
-    display: flex;
-    align-self: flex-start;
-    margin-inline-start: auto;
-    margin-inline-end: var(--_card-status-shift, 0);
-  }
-
-  &.nds-horizontal .nds-card-status {
-    margin-inline: 0;
-  }
-
-  // A narrow row card stacks again (see .nds-horizontal), so the tag returns to the end.
   &.nds-horizontal {
     @container (width < 324px) {
-      .nds-card-status {
-        margin-inline-start: auto;
-        margin-inline-end: var(--_card-status-shift, 0);
-      }
-    }
-  }
-
-  &.nds-center .nds-card-status {
-    position: absolute;
-    top: 0;
-    inset-inline-end: var(--_card-status-shift, 0);
-    margin: 0;
-  }
-
-  // A row header is only a column around the icon, so the tag stays under it.
-  // Once a narrow row card stacks, the header spans the card again: back out.
-  &.nds-horizontal.nds-center {
-    .nds-card-status {
-      position: static;
-    }
-
-    @container (width < 324px) {
-      .nds-card-status {
+      > .nds-card-content > .nds-card-text > .nds-card-corner {
         position: absolute;
+        top: calc(var(--_card-padding-block) + var(--_card-corner-inset));
+        inset-inline-end: calc(var(--_card-padding-inline) + var(--_card-corner-inset));
+        z-index: 3;
       }
     }
-  }
-
-  // Last, so it wins in every layout.
-  .nds-card-image ~ .nds-card-status {
-    position: absolute;
-    top: var(--spacing-md);
-    inset-inline-start: var(--spacing-md);
-    inset-inline-end: auto;
-    margin: 0;
-    z-index: 3;
   }
 
 
@@ -809,13 +827,13 @@
   box-shadow: none;
   pointer-events: none;
 
-  :is(.nds-card-image, .nds-card-meta, .nds-card-status) {
+  :is(.nds-card-image, .nds-card-meta, .nds-card-tags, .nds-card-corner .nds-tag, .nds-progress-circle) {
     opacity: 0.5;
   }
 
   // A control the page marked disabled shows its own disabled look; the fade only covers one it missed.
-  :is(.nds-card-actions, .nds-card-header-action) .nds-btn:not(:disabled, [aria-disabled="true"], [data-state~="disabled"]),
-  .nds-card-checkbox .nds-check:not(:disabled) {
+  .nds-btn:not(:disabled, [aria-disabled="true"], [data-state~="disabled"]),
+  .nds-card-corner .nds-check:not(:disabled) {
     opacity: 0.5;
   }
 }
@@ -843,7 +861,11 @@
   .nds-paged-content:not([data-paged-initialized])) .nds-card,
 .nds-card.nds-loading,
 html:not([data-nds-loaded]) .nds-card {
-  @include skeleton-pulse;
+  // Shown cards only: restyling a card that carries the pulse costs ~5x, and a
+  // paged list hides ~100 of them before the reveal (~100 ms at CPU ×6.6).
+  &:not([hidden]) {
+    @include skeleton-pulse;
+  }
 
   :is(.nds-card-title, .nds-card-subtitle, .nds-card-description,
     .nds-card-number, .nds-card-rating-text) {

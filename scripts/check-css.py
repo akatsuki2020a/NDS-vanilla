@@ -15,6 +15,8 @@ SCSS source, because the file a declaration came from is gone after compiling.
   3. duplicate  the same property twice in one rule, both plain values (not a fallback pair)
   4. dark       a component file setting a global token inside @include dark — dark
                 lives in the token file's own dark block (AGENTS.md "Invariant")
+  5. important  !important on transform, opacity or filter: Chrome runs an animation on an
+                !important property on the main thread only (the Panel slide, 2026-10-16)
 
 The [data-state] tail check stays in check-data-state-tails.py (mkrelease runs it).
 """
@@ -29,6 +31,12 @@ NESTING = ('media', 'supports', 'container', 'layer', 'scope')
 NAME = r'--[\w-]+'
 # Matched against the path inside the repo: a checkout under C:\tmp\ once skipped every source file.
 SKIP = re.compile(r'(^|[\\/])(dist|tmp|_site|node_modules)[\\/]')
+# The properties the compositor animates; an !important one runs on the main thread.
+COMPOSITED = {'transform', 'translate', 'scale', 'rotate', 'opacity', 'filter', 'backdrop-filter'}
+# Selector substring → why its !important is safe: a fixed value nothing animates.
+IMPORTANT_OK = {
+    '.nds-progress-circle svg': 'a fixed rotation; the ring animates its stroke, never the svg',
+}
 
 
 def rules(css):
@@ -190,6 +198,8 @@ def main():
                     if prop in seen and seen[prop][1] and plain:
                         problems.append(('duplicate', bundle, prelude, f'{prop}: {seen[prop][0]} then {value}'))
                     seen[prop] = (value, plain)
+                    if prop in COMPOSITED and '!important' in value and not any(s in prelude for s in IMPORTANT_OK):
+                        problems.append(('important', bundle, prelude, f'{prop}: {value} — an animation on it runs on the main thread; win on specificity instead'))
 
     js_only, outside = set_outside_css()
     for name, sites in sorted(used.items()):

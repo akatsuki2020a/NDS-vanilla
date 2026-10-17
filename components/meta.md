@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 05:02 AM"
+last_edit: "17/10/2026 - 03:22 AM"
 ---
 
 <section id="meta-overview" class="nds-content-section nds-doc-overview">
@@ -64,7 +64,7 @@ Pick another component when:
             <span class="nds-tag" data-status="warning">
               <span class="nds-label">Now</span>
             </span>
-            <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
+            <span class="nds-label">ACCT 301 · Managerial Accounting</span>
           </span>
           <span class="nds-meta">
             <span class="nds-meta-item">
@@ -93,7 +93,7 @@ Pick another component when:
             <span class="nds-tag" data-status="info">
               <span class="nds-label">Next</span>
             </span>
-            <span class="nds-label nds-truncate">FIN 320 · Corporate Finance</span>
+            <span class="nds-label">FIN 320 · Corporate Finance</span>
           </span>
           <span class="nds-meta">
             <span class="nds-meta-item">

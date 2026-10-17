@@ -13,6 +13,11 @@ pools the same way. The fix is in the CSS, not at the write: state styles its ho
 a descendant on a SMALL host reads an inherited custom property the host sets, and a
 big or often-flipping host keys its descendant rule on a mirrored class.
 
+A flag the JS writes on <html> or <body> (data-fab-tucked, data-nds-scroll-lock) pools the
+same way, under the whole page: a `[data-fab-tucked] .nds-fab-dock > *` tail restyled 1,157
+elements on every flip (2026-10-16). Those flags are found in _js/ and held to the same rules;
+the few that restyle the page on purpose sit in PAGE_WIDE.
+
 Reads _site/assets/css/*.css, so build first. Two rules, nothing to maintain:
   1. no universal, tag or attribute tail — those match under every host;
   2. no tail from SHARED, the classes that appear inside every component.
@@ -27,7 +32,33 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CSS_DIR = os.path.join(ROOT, '_site', 'assets', 'css')
-ATTRS = ('data-state', 'data-status')
+STATE_ATTRS = ('data-state', 'data-status')
+
+# Page flags that restyle the whole page by design: a user's choice or a one-time load step.
+PAGE_WIDE = {
+    'data-theme': 'a theme switch restyles the page',
+    'data-palette': 'a palette switch restyles the page',
+    'data-a11y': 'an accessibility mode restyles the page',
+    'data-nds-i18n': 'written once, when the language pack lands',
+    'data-nds-loaded': 'written once, at the reveal',
+}
+
+
+def page_flags():
+    """data-* names the JS writes on <html> or <body>, directly or through a local alias."""
+    flags = set()
+    for path in glob.glob(os.path.join(ROOT, '_js', '**', '*.js'), recursive=True):
+        if path.endswith('.min.js'):
+            continue
+        src = open(path, encoding='utf-8').read()
+        hosts = {r'document\.documentElement', r'document\.body'} | {
+            re.escape(n) for n in re.findall(r'(?:const|let|var)\s+(\w+)\s*=\s*document\.(?:documentElement|body)\b', src)}
+        for h in hosts:
+            flags.update(re.findall(h + r'\.(?:set|toggle)Attribute\(\s*[\'"](data-[\w-]+)', src))
+    return flags
+
+
+ATTRS = STATE_ATTRS + tuple(sorted(page_flags() - set(PAGE_WIDE)))
 NESTING = ('media', 'supports', 'container', 'layer', 'scope')
 
 # Classes that live inside every component, so a tail on them matches under any host.
@@ -154,6 +185,11 @@ def keys_for(compound):
     return ['universal']
 
 
+def has(text, attr):
+    """[attr], [attr=…], [attr~=…]… — not a longer name that starts the same."""
+    return re.search(r'\[' + re.escape(attr) + r'(?=[\]~|^$*=\s])', text) is not None
+
+
 def tails(attr):
     """{key: [selectors]} for every selector with a compound after its last [attr…] compound."""
     out = {}
@@ -163,13 +199,13 @@ def tails(attr):
             continue
         for prelude in selectors(css):
             for sel in split_top(prelude, ','):
-                if '[' + attr not in sel:
+                if not has(sel, attr):
                     continue
                 # Split into compounds first, then find the LAST one that mentions the
                 # attribute anywhere — plain, or inside :not()/:is(), which feed the same
                 # set. Anything after it is a tail.
                 compounds = split_top(sel, ' >+~')
-                state_at = max((n for n, c in enumerate(compounds) if '[' + attr in c), default=-1)
+                state_at = max((n for n, c in enumerate(compounds) if has(c, attr)), default=-1)
                 if state_at < 0 or state_at == len(compounds) - 1:
                     continue  # the state compound is the subject: self-invalidation only
                 for key in keys_for(compounds[-1]):
