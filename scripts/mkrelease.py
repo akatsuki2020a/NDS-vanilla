@@ -90,8 +90,9 @@ def stage(version):
     for f in ('CHANGELOG.md', 'LICENSE', 'NDS-INDEX.md'):
         shutil.copy2(os.path.join(ROOT, f), pkg)
 
-    # README.md is a human signpost only.
-    shutil.copy2(os.path.join(ROOT, 'scripts', 'release-template', 'README.md'), pkg)
+    # README.md is a human signpost only; nds-verify.mjs runs both browser passes (NDS-INDEX.md, Verify).
+    for f in ('README.md', 'nds-verify.mjs'):
+        shutil.copy2(os.path.join(ROOT, 'scripts', 'release-template', f), pkg)
     # The rules file is deliberately NOT shipped. It versions independently of
     # the template, so a copy frozen at the release cut goes stale the moment the
     # next revision lands — and a runner that finds two copies has to work out
@@ -200,7 +201,7 @@ def verify(out, version, rules=None):
                      f'it, and the tag the consumer populates from carries this tree.')
 
     # A missing copy in stage() would silently ship an incomplete zip.
-    for anchor in ('README.md', 'NDS-INDEX.md', '_site/guides/get-started.html',
+    for anchor in ('README.md', 'NDS-INDEX.md', 'nds-verify.mjs', '_site/guides/get-started.html',
                    '_site/guides/integration-quality.html'):
         if root + anchor not in names:
             sys.exit(f'Missing from zip: {anchor}')

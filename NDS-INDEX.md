@@ -47,6 +47,10 @@ Component, layout, shell, utility and core docs live in `_source/<folder>/<name>
 
 Each doc, example and template has a built page at the same path under `_site/`, such as `_site/components/cards.html`: the visual reference for a page you build. Serve `_site/` with a static HTTP server and open its pages by URL.
 
+## Verify
+
+`nds-verify.mjs`, at this folder's root, runs both browser passes on your pages: `node nds-verify.mjs <config.json>`. Its header gives the config: each page, its built reference page, and each state with its setup (a URL, cookies, a request made to fail, a script to run). It needs Node 18 or later and Chrome or Edge, and installs nothing. For each state, at desktop and mobile width, in light and dark, it checks `window.innerWidth`, runs the audit, collects console errors, and writes a sheet that shows the state under the reference. It exits 1 on any finding. After a fix, re-check only the pages it touched with `--only`. You still inspect every sheet and exercise the behavior. If it cannot run (no Node 18, no Chrome or Edge), run both passes as the rules' Verify section says.
+
 ## Audit
 
 - `NDS.Init.audit()`, in the browser console of a loaded page, runs every check and prints each finding with its fix. `NDS.Audit.run({ group: 'migration' })` runs one group.
