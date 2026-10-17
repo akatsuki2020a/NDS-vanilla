@@ -827,7 +827,7 @@
   box-shadow: none;
   pointer-events: none;
 
-  :is(.nds-card-image, .nds-card-meta, .nds-card-corner .nds-tag, .nds-progress-circle) {
+  :is(.nds-card-image, .nds-card-meta, .nds-card-tags, .nds-card-corner .nds-tag, .nds-progress-circle) {
     opacity: 0.5;
   }
 
