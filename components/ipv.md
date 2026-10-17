@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.0.0"
 updated: "1.12.x"
-last_edit: "13/10/2026 - 12:21 AM"
+last_edit: "17/10/2026 - 04:09 AM"
 ---
 
 <section id="ipv-overview" class="nds-content-section nds-doc-overview">
@@ -193,7 +193,7 @@ The zoom badge goes on every `.nds-ipv-image-card` in the markup.
 
 | Class | Element | Effect |
 |---|---|---|
-| `nds-ipv-thumbnail` | `<img>` | Opens the viewer on a click. A block image 200px tall that fills its width and crops to fit. Required |
+| `nds-ipv-thumbnail` | `<img>` | Opens the viewer on a click. It does not size the image: your own styles stay as written. Required |
 | `nds-ipv-image-card` | the thumbnail's parent | Holds the zoom badge. Optional: a thumbnail without it looks and works the same |
 | `nds-zoom-badge` | `.nds-ipv-image-card` | Shows a magnifier in the bottom start corner |
 | `nds-ipv-image-title` | an element after the card | A caption under the image. Optional |
