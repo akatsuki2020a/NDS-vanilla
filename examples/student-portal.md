@@ -271,7 +271,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="warning">
                                                     <span class="nds-label">Now</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
+                                                <span class="nds-label">ACCT 301 · Managerial Accounting</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>8:00 – 8:50 AM</span>
@@ -291,7 +291,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="info">
                                                     <span class="nds-label">Next</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">FIN 320 · Corporate Finance</span>
+                                                <span class="nds-label">FIN 320 · Corporate Finance</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>10:00 – 11:15 AM</span>
@@ -311,7 +311,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="neutral">
                                                     <span class="nds-label">Later</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">MGT 310 · Organizational Behavior</span>
+                                                <span class="nds-label">MGT 310 · Organizational Behavior</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>1:00 – 2:15 PM</span>
@@ -356,7 +356,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="warning">
                                                     <span class="nds-label">In review</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">Exam absence excuse</span>
+                                                <span class="nds-label">Exam absence excuse</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-file-01" aria-hidden="true"></i>REQ-2026-0412</span>
@@ -375,7 +375,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="info">
                                                     <span class="nds-label">Action needed</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">Change of section</span>
+                                                <span class="nds-label">Change of section</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-file-01" aria-hidden="true"></i>REQ-2026-0398</span>
@@ -394,7 +394,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="success">
                                                     <span class="nds-label">Done</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">Enrollment letter</span>
+                                                <span class="nds-label">Enrollment letter</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-file-01" aria-hidden="true"></i>REQ-2026-0371</span>
@@ -413,7 +413,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="error">
                                                     <span class="nds-label">Rejected</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">Course withdrawal</span>
+                                                <span class="nds-label">Course withdrawal</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-file-01" aria-hidden="true"></i>REQ-2026-0355</span>
@@ -478,7 +478,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="warning">
                                                     <span class="nds-label">First</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
+                                                <span class="nds-label">ACCT 301 · Managerial Accounting</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>9:00 – 11:00 AM</span>
@@ -497,7 +497,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-label nds-truncate">FIN 320 · Corporate Finance</span>
+                                                <span class="nds-label">FIN 320 · Corporate Finance</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>1:00 – 3:00 PM</span>
@@ -519,7 +519,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="info">
                                                     <span class="nds-label">Online</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">MGT 310 · Organizational Behavior</span>
+                                                <span class="nds-label">MGT 310 · Organizational Behavior</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>9:00 – 10:30 AM</span>
@@ -537,7 +537,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-label nds-truncate">STAT 201 · Business Statistics</span>
+                                                <span class="nds-label">STAT 201 · Business Statistics</span>
                                             </span>
                                             <span class="nds-meta">
                                                 <span class="nds-meta-item"><i class="hgi hgi-stroke hgi-clock-01" aria-hidden="true"></i>9:00 – 11:00 AM</span>
@@ -583,7 +583,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="neutral">
                                                     <span class="nds-label">Past</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">Classes start</span>
+                                                <span class="nds-label">Classes start</span>
                                             </span>
                                             <span class="nds-description">First day of the first term.</span>
                                         </span>
@@ -601,7 +601,7 @@ hideFeedback: true
                                                 <span class="nds-tag" data-status="warning">
                                                     <span class="nds-label">Next week</span>
                                                 </span>
-                                                <span class="nds-label nds-truncate">Last day to withdraw from a course</span>
+                                                <span class="nds-label">Last day to withdraw from a course</span>
                                             </span>
                                             <span class="nds-description">After this day, a withdrawal counts as a fail.</span>
                                         </span>
@@ -616,7 +616,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-label nds-truncate">Registration opens for the second term</span>
+                                                <span class="nds-label">Registration opens for the second term</span>
                                             </span>
                                             <span class="nds-description">Pick your courses for the second term in the registration system.</span>
                                         </span>
@@ -631,7 +631,7 @@ hideFeedback: true
                                         </time>
                                         <span class="nds-drawer-item">
                                             <span class="nds-drawer-item-head">
-                                                <span class="nds-label nds-truncate">Final exams start</span>
+                                                <span class="nds-label">Final exams start</span>
                                             </span>
                                             <span class="nds-description">The final exam period runs for one week.</span>
                                         </span>

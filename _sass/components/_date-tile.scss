@@ -32,12 +32,7 @@
     white-space: nowrap;
 
     &.nds-sm {
-        --_date-tile-width: var(--date-tile-width, 48px);
-        --_date-tile-day-FS: var(--typo-text-lg-FS);
-        --_date-tile-day-LH: var(--typo-text-lg-LH);
-        --_date-tile-text-FS: var(--typo-text-2xs-FS);
-        --_date-tile-text-LH: var(--typo-text-2xs-LH);
-        --_date-tile-padding: var(--spacing-xs) var(--spacing-sm);
+        @include date-tile-sm;
     }
 
     &.nds-lg {

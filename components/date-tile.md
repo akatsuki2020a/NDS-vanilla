@@ -8,7 +8,7 @@ lang: en
 direction: ltr
 since: "1.12.x"
 updated: "1.12.x"
-last_edit: "16/10/2026 - 05:02 AM"
+last_edit: "17/10/2026 - 03:22 AM"
 ---
 
 <section id="date-tile-overview" class="nds-content-section nds-doc-overview">
@@ -58,7 +58,7 @@ Pick another component when:
             <span class="nds-tag" data-status="warning">
               <span class="nds-label">First</span>
             </span>
-            <span class="nds-label nds-truncate">ACCT 301 · Managerial Accounting</span>
+            <span class="nds-label">ACCT 301 · Managerial Accounting</span>
           </span>
           <span class="nds-description">9:00 – 11:00 AM, Exam Hall A-12</span>
         </span>
@@ -73,7 +73,7 @@ Pick another component when:
         </time>
         <span class="nds-drawer-item">
           <span class="nds-drawer-item-head">
-            <span class="nds-label nds-truncate">FIN 320 · Corporate Finance</span>
+            <span class="nds-label">FIN 320 · Corporate Finance</span>
           </span>
           <span class="nds-description">1:00 – 3:00 PM, Exam Hall B-04</span>
         </span>
@@ -173,6 +173,7 @@ The Drawer row structure shows the tile at the start of a [Drawer](../components
 - Write the full date in `datetime`, in the `YYYY-MM-DD` form.
 - Use short names for the weekday and the month, such as "Sun" and "Dec". The tile is narrow.
 - Write the time and the place in the row's text, not in the tile.
+- Leave the size class off a tile in a drawer row. Below 400px of row width the drawer steps it down to SM. A size class keeps the size you wrote.
 - Put the tile and the item's title in one link or button. A screen reader then reads the date and the title together.
 - In a list, give every row a tile, or give none. A list with tiles on some rows does not line up.
 - Set a wider `--date-tile-width` when the text does not fit, such as a range or a long Hijri month like جمادى الآخرة. Set it on the list, so every tile in the list keeps the same width.
